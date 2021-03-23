@@ -1,0 +1,12 @@
+
+!/.gitignore
+*.js
+*.ui
+*.json
+*.xml
+/USR_*
+
+#
+!/PS_*.js
+script-icons/*
+!/script-icons/PS_*
