@@ -30,8 +30,8 @@ function PS_AlignNodesVertically(){
 	if(selectedNodes.length<2){
 		MessageBox.warning(
 			"Please select at least two nodes to align them vertically.\n\n"+
-			"Nodes are aligned to the lowest node by default.\n\n"+
-			"Options:\n"+
+			"Nodes are aligned to the lowest node by default.\n"+
+			"\nOptions:\n"+
 			"- Hold Control key to align to the topmost selected node.\n"+
 			"- Hold Shift key to align to the middle position of all the nodes.\n"+
 			"- Hold Alt key to distribute nodes."
@@ -114,7 +114,7 @@ function PS_AlignNodesVertically(){
  	function align( x, y, distribute, verticalOffset ){
  		
  		if(!y) y = 0;
- 		x = Math.floor(x);
+ 		// x = Math.floor(x);
 
  		nodeObjects.forEach(function(nodeData){
  			
