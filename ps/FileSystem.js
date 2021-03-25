@@ -36,7 +36,7 @@ function openFolder( path, selectFile ){
   }
   _process = new Process2(command);
   var result = _process.launchAndDetach();
-  MessageLog.trace('openFolder >> ('+selectFile+') '+_process.commandLine()+' |||| '+ command );
+  // MessageLog.trace('openFolder >> ('+selectFile+') '+_process.commandLine()+' |||| '+ command );
 }
 // = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 
