@@ -27,7 +27,11 @@ function PS_FitBackdrop(){
 	var selectedNodes = selection.selectedNodes();
 	
 	if(!selectedNodes.length){
-		MessageBox.warning("Please select nodes to fit the nearest backdrop.\n\nOptions:\n- Hold Control key to create a Backdrop around selected nodes.\n- Hold Shift key to remove the nearest backdrop.",0,0,0,"Error");
+		MessageBox.warning("Please select nodes to fit the nearest backdrop.\n"+
+			"\nOptions:\n"+
+			"- Hold Control key to create a Backdrop around selected nodes.\n"+
+			"- Hold Shift key to remove the nearest backdrop."
+		,0,0,0,"Error");
  		return;
  	}
 
