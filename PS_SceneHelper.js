@@ -56,7 +56,13 @@ function PS_BackupScene(){
     var procFinished = proc.waitForFinished(10000);
 
 	MessageLog.trace('PS_BackupScene: '+command+', procFinished:'+procFinished);
-	
+
 	MessageBox.information("Scene is archived to: "+backupPath);
 
 }
+
+//
+exports = {
+	PS_OpenSceneFolder: PS_OpenSceneFolder,
+	PS_BackupScene: PS_BackupScene,
+};

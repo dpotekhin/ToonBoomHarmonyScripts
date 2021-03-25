@@ -9,5 +9,10 @@
 #
 !/ps/*
 !/PS_*.js
+
 script-icons/*
-!/script-icons/PS_*
+!/script-icons/PS_**
+
+packages/*
+!/packages/PS_**
+!/packages/PS_**.js
