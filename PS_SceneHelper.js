@@ -14,14 +14,8 @@ Open Scene folder
 (windows only)
 */
 function PS_OpenSceneFolder(){
-	
 	var projectPath = scene.currentProjectPathRemapped();
-
-	// Process2
-	var _process = new Process2('explorer "'+projectPath+'"');
-	var result = _process.launchAndDetach();
-	MessageLog.trace('>>'+_process.commandLine());
-	
+	FileSystem.openFolder( projectPath );	
 }
 
 
@@ -29,8 +23,12 @@ function PS_OpenSceneFolder(){
 
 
 /*
+Saves the Scene folder as Zip archive
+
+Options:
+- Hold Control key to open folder on zipping success
+
 ToDo:
-- Check archiving success
 - Add save options
 */
 function PS_BackupScene(){
@@ -39,25 +37,31 @@ function PS_BackupScene(){
 	
 	var sceneName = scene.currentScene();
 
-	var backupPath = projectPath.split('\\');
-	backupPath.pop();
-	backupPath = backupPath.join('\\')+'\\_backup\\'+sceneName+'_'+Utils.getTimestamp()+'.zip';
+	// Windows
+	var projectParentDir = projectPath.split('\\');
+	var diskName = projectParentDir[0];
+	var projectFolder = projectParentDir.pop();
+	projectParentDir = projectParentDir.join('\\');
+	var backupRelativePath = '_backup\\'+sceneName+'_'+Utils.getTimestamp()+'.zip';
+	var backupFullPath = projectParentDir+'\\'+backupRelativePath;
+	var fileDirCheck = FileSystem.checkFileDir( backupFullPath, true );
+	
+	var command = 'cmd /K ' + diskName+' && cd "'+projectParentDir+'" && zip -r "'+backupFullPath+'" "'+projectFolder+'"';
+	var proc = new Process2( command );
+	var result = proc.launchAndDetach();
 
-	// MessageLog.trace('PS_BackupScene: '+backupPath );
-	var fileDirCheck = FileSystem.checkFileDir( backupPath, true );
-	// MessageLog.trace('fileCheck: '+fileDirCheck );
+    if( result != 0 ){
+    	MessageLog.trace('Backup Error: '+result+': '+proc.errorMessage()+', '+command );
+    	return;
+    }
 
-	var command = 'zip -r "'+backupPath+'" "'+projectPath+'"';
+    MessageLog.trace( 'PS_BackupScene: '+command );
 
-	var proc = new QProcess();
-    //proc.start('start',[projectPath]);
-    proc.start(command);
-    // var procStarted = proc.waitForStarted(1500);
-    var procFinished = proc.waitForFinished(10000);
-
-	MessageLog.trace('PS_BackupScene: '+command+', procFinished:'+procFinished);
-
-	MessageBox.information("Scene is archived to: "+backupPath);
+	if(KeyModifiers.IsControlPressed()){
+		FileSystem.openFolder( backupFullPath, true );
+	}else{
+		MessageBox.information("Scene is archived to: "+backupFullPath);
+	}
 
 }
 
