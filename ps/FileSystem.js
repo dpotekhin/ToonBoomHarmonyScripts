@@ -12,8 +12,37 @@ The helper to load and save data to the Filesystem.
 */
 
 
+// = = = = = = = = = = = = = = = = = = = = = = = = = = = 
+function getFileNameFromPath(path){
+  path = path.split('\\');
+  var fileName = path.pop();
+  path = path.join('\\');
+  return {path:path, fileName:fileName};
+}
+// = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 
-//
+
+
+// = = = = = = = = = = = = = = = = = = = = = = = = = = = 
+function openFolder( path, selectFile ){
+  // Process2
+  var _process;
+  if(selectFile){
+    var fileFolder = getFileNameFromPath(path).path;
+    // var command = 'explorer /root,"'+fileFolder+'",select,"'+path+'"';
+    var command = 'explorer /root,"'+fileFolder+'"';
+  }else{
+    var command = 'explorer "'+path+'"';
+  }
+  _process = new Process2(command);
+  var result = _process.launchAndDetach();
+  // MessageLog.trace('openFolder >> ('+selectFile+') '+_process.commandLine()+' |||| '+ command );
+}
+// = = = = = = = = = = = = = = = = = = = = = = = = = = = 
+
+
+
+// = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 function checkDir( path, createDirIfNotExists ){
 
   //path = fileMapper.toNativePath(path);
@@ -32,20 +61,23 @@ function checkDir( path, createDirIfNotExists ){
   // MessageLog.trace('checkFileDir: File dir exists');
   return true;
 }
+// = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 
 
 
-//
+// = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 function checkFileDir( path, createDirIfNotExists ){
-  var path = path.split('\\');
-  path.pop();
-  path = path.join('\\');
+  path = getFileNameFromPath(path).path;
   // MessageLog.trace('checkFileDir: '+path);
   return checkDir( path, createDirIfNotExists );
 }
+// = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 
 
-//
+
+
+
+// = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 function JSONFile( fileName, filePathConst ){
 
   //
@@ -155,12 +187,18 @@ function JSONFile( fileName, filePathConst ){
 
 }
 
+
 JSONFile.PROJECT_PATH = 1;
 JSONFile.USER_PATH = 2;
+// = = = = = = = = = = = = = = = = = = = = = = = = = = = 
+
+
 
 
 //
 exports = {
+  getFileNameFromPath: getFileNameFromPath,
+  openFolder: openFolder,
   JSONFile: JSONFile,
   checkDir: checkDir,
   checkFileDir: checkFileDir
