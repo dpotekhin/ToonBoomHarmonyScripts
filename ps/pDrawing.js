@@ -1,3 +1,12 @@
+/*
+Author: D.Potekhin (d@peppers-studio.ru)
+Version: 0.1
+
+ToDo:
+- 
+
+*/
+
 var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
 
 
@@ -69,7 +78,7 @@ pDrawing.prototype.getSelectedStrokesLayers = function(){
   };
 
   var selectedStrokesLayers = [];
-
+  var selectedStrokeLayerCount = 0;
   // for(var art=0; art<4; art++){
   this.iterateArts(function(art){
     
@@ -78,13 +87,21 @@ pDrawing.prototype.getSelectedStrokesLayers = function(){
     //
     var selectedStrokes = Drawing.selection.get(config);
     var selectedLayers = selectedStrokes.selectedLayers;
-    // MessageLog.trace('pDrawing.getSelectedStrokesLayers: '+JSON.stringify(selectedStrokes, true, '  ') );
+    if( !selectedStrokes.selectedStrokes.length ){
+      selectedStrokesLayers.push([]);
+      return;
+    }
+    MessageLog.trace('pDrawing.getSelectedStrokesLayers: '+JSON.stringify(selectedStrokes, true, '  ') );
 
     //
     var strokes = Drawing.query.getStrokes(config);
-    selectedStrokesLayers.push( strokes.layers.filter(function(_layer){ return selectedLayers.indexOf(_layer.index) !== -1; }) );
+    var strokeLayers = strokes.layers.filter(function(_layer){ return selectedLayers.indexOf(_layer.index) !== -1; });
+    selectedStrokesLayers.push( strokeLayers );
+    selectedStrokeLayerCount += strokeLayers.length;
     // MessageLog.trace('pDrawing.getSelectedStrokesLayers: '+JSON.stringify(selectedStrokesLayers, true, '  ') );
   });
+
+  if( !selectedStrokeLayerCount ) return;
 
   this.selectedStrokesLayers = selectedStrokesLayers;
 
@@ -173,6 +190,9 @@ pDrawing.prototype.clearArt = function( _art, _frame ){
 
 /*
 Uses temporary layer to get geometry box.
+
+ToDo:
+- remove the Temp Drawing after calculation?
 
 */
 pDrawing.prototype.getStrokesBox = function( _strokesLayers, _frame ){
