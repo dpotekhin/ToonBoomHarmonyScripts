@@ -15,6 +15,12 @@ function pDrawing( _node ){
 
   //
   this.TEMP_ENTRY_NAME = '___temp___';
+  this.tempDrawingId = undefined;
+
+  this.node = undefined;
+  this.columnId = undefined;
+  this.elementId = undefined;
+  this.currentDrawing = undefined;
 
   //
   this.setNode( _node );
@@ -53,13 +59,16 @@ pDrawing.prototype.iterateArts = function( callback ){
 ///
 pDrawing.prototype.getSelectedToolSettings = function(){
   
-  if( !this.node ) return;
+  // if( !this.node ) return;
 
   var settings = Tools.getToolSettings();
   if (!settings.currentDrawing) return;
   
   this.selectedToolSettings = settings;
-  // MessageLog.trace('pDrawing.getSelectedToolSettings: '+JSON.stringify(settings,true,'  '));
+  this.currentDrawing = settings.currentDrawing;
+  this.elementId = settings.currentDrawing.elementId;
+  this.drawingId = settings.currentDrawing.drawingId;
+  
   return settings;
 
 }
@@ -68,14 +77,16 @@ pDrawing.prototype.getSelectedToolSettings = function(){
 //
 pDrawing.prototype.getSelectedStrokesLayers = function(){
 
-  var settings = this.getSelectedToolSettings();
-  if(!settings) return;
+  this.getSelectedToolSettings();
+  if(!this.currentDrawing) return;
 
   var config = {
-    node: this.node,
-    drawing  : settings.currentDrawing,
+    // node: this.node,
+    drawing  : this.currentDrawing,
     // art : settings.activeArt
   };
+
+  // MessageLog.trace('pDrawing.getSelectedStrokesLayers: config: '+JSON.stringify(config, true, '  ') );
 
   var selectedStrokesLayers = [];
   var selectedStrokeLayerCount = 0;
@@ -91,7 +102,7 @@ pDrawing.prototype.getSelectedStrokesLayers = function(){
       selectedStrokesLayers.push([]);
       return;
     }
-    MessageLog.trace('pDrawing.getSelectedStrokesLayers: '+JSON.stringify(selectedStrokes, true, '  ') );
+    // MessageLog.trace('pDrawing.getSelectedStrokesLayers: '+JSON.stringify(selectedStrokes, true, '  ') );
 
     //
     var strokes = Drawing.query.getStrokes(config);
@@ -134,20 +145,18 @@ pDrawing.prototype.setEntry = function( entryName, _frame ){
 
 
 //
-pDrawing.prototype.toggleTempEntry = function( _toggle, _frame ){
+pDrawing.prototype.createTempDrawing = function(){
 
-  if( _toggle ){
+  if(!this.elementId) return;
 
-    this.originalEntry = this.getEntry( _frame );
-    this.setEntry( this.TEMP_ENTRY_NAME, _frame );
+  var drawingKey = Drawing.Key({ elementId : this.elementId, exposure : this.TEMP_ENTRY_NAME });
+  if(!drawingKey){
+    Drawing.create( this.elementId, this.TEMP_ENTRY_NAME, true);
+  }
+  drawingKey = Drawing.Key({ elementId : this.elementId, exposure : this.TEMP_ENTRY_NAME });
+  if(drawingKey){
+    this.tempDrawingId = drawingKey.drawingId;
     return true;
-
-  }else if(this.originalEntry){
-
-    this.setEntry( this.originalEntry, _frame );
-    this.originalEntry = undefined;
-    return true;
-
   }
 
 }
@@ -160,14 +169,29 @@ pDrawing.prototype.deleteTempEntry = function(){
 
 
 //
-pDrawing.prototype.clearArt = function( _art, _frame ){
-   
-  if( !this.node ) return;
+pDrawing.prototype.clearArtByDrawingId = function( _art, _drawingId ){
+  
+  if( _drawingId === undefined || this.elementId === undefined  ) return;
+  this._clearArt( _art, { elementId: this.elementId, drawingId: _drawingId } );
+
+};
+
+
+//
+pDrawing.prototype.clearArtByFrame = function( _art, _frame ){
+
+  if( !_frame || !this.node ) return;
+  this._clearArt( _art, {node: this.node, frame: this.validateFrame(_frame) } );
+
+}
+
+
+//
+pDrawing.prototype._clearArt = function( _art, _drawingDescriptor ){
 
   var toolConfig = {
-    drawing : {node: this.node, frame: this.validateFrame(_frame) },
-    art: _art,
-    // label: '---'
+    drawing : _drawingDescriptor,
+    art: _art
   };
 
   if(_art === true ){
@@ -182,32 +206,33 @@ pDrawing.prototype.clearArt = function( _art, _frame ){
   }
 
   DrawingTools.clearArt(toolConfig);
-  
 
-};
-
+}
 
 
 /*
 Uses temporary layer to get geometry box.
 
 ToDo:
+- ! for some reason, after the first creation of a temporary sub, the Box2d is calculated only when switching to a temporary sub and back
 - remove the Temp Drawing after calculation?
 
 */
-pDrawing.prototype.getStrokesBox = function( _strokesLayers, _frame ){
+pDrawing.prototype.getStrokesBox = function( _strokesLayers ){
   
   // MessageLog.trace('pDrawing.getBox: '+JSON.stringify(_strokesLayers, true, '  ')+', '+JSON.stringify(_art, true, '  ')+', '+_frame );
 
-  if( !this.node ) return;
+  // if( !this.node ) return;
 
   var _strokesLayers;
 
-  this.toggleTempEntry( true ); // Switch the current Entry to temporary  
-  this.clearArt( true, _frame ); // Clear the temp Entry
+  this.createTempDrawing(); // Switch the current Entry to temporary  
+  this.clearArtByDrawingId( true, this.tempDrawingId ); // Clear the temp Entry
 
   var toolSettings = {
-    drawing : {node: this.node, frame: this.validateFrame( _frame )}
+    // drawing : {node: this.node, frame: this.validateFrame( _frame )}
+    // drawing  : this.selectedToolSettings.currentDrawing,
+    drawing: { elementId: this.elementId, drawingId: this.tempDrawingId }
   };
 
   var resultBox;
@@ -223,9 +248,8 @@ pDrawing.prototype.getStrokesBox = function( _strokesLayers, _frame ){
     resultBox = Utils.joinBoxes( resultBox, box );
 
   });
-  
-  this.clearArt( true, _frame ); // // Clear the temp Entry
-  this.toggleTempEntry( false ); // Switch the current Entry back to the origin
+
+  this.clearArtByDrawingId( true, this.tempDrawingId ); // // Clear the temp Entry
 
   return resultBox;
 
@@ -236,7 +260,8 @@ pDrawing.prototype.getStrokesBox = function( _strokesLayers, _frame ){
 //
 pDrawing.prototype.modifyArtStrokes = function( _art, _strokesLayers, _modifyAction, _frame ){
 
-  if( !this.node || _art === undefined || !_strokesLayers ) return;
+  // if( !this.node || _art === undefined || !_strokesLayers ) return;
+  if( !this.selectedToolSettings.currentDrawing || _art === undefined || !_strokesLayers ) return;
 
   var modifiedStrokes = [];
 
@@ -263,7 +288,8 @@ pDrawing.prototype.modifyArtStrokes = function( _art, _strokesLayers, _modifyAct
   if( !modifiedStrokes.length ) return;
 
   var modifyStrokesSettings = {
-    drawing : {node: this.node, frame: this.validateFrame(_frame) },
+    // drawing : {node: this.node, frame: this.validateFrame(_frame) },
+    drawing  : this.selectedToolSettings.currentDrawing,
     art: _art,
     label: 'Modify strokes',
     strokes : modifiedStrokes

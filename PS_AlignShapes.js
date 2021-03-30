@@ -79,7 +79,10 @@ function PS_AlignShapes( mode, notRelativeToCanvas ){
 
   var selectedDrawing = new pDrawing( true );
   var selectedStrokesLayers = selectedDrawing.getSelectedStrokesLayers();
-  if( !selectedStrokesLayers ) return;
+  if( !selectedStrokesLayers ) {
+    MessageLog.trace('No stroks selected.');
+    return;
+  }
 
   // MessageLog.trace('selectedStrokesLayers >> 0:'+selectedStrokesLayers[0].length+', 1:'+selectedStrokesLayers[1].length+', 2:'+selectedStrokesLayers[2].length+', 3:'+selectedStrokesLayers[3].length);
   // return;
@@ -90,6 +93,12 @@ function PS_AlignShapes( mode, notRelativeToCanvas ){
   var selectedArt = selectedDrawing.selectedToolSettings.activeArt;
 
   var box = selectedDrawing.getStrokesBox( selectedStrokesLayers );
+  if( !box ) {
+    MessageLog.trace('!!! box is empty: '+ box );
+    scene.endUndoRedoAccum();
+    return;
+  }
+
   var boxWidth = box.x1-box.x0;
   var boxHeight = box.y1-box.y0;
 
