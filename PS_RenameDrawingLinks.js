@@ -20,6 +20,8 @@ function PS_RenameDrawingLinks(){
 		'PointConstraint2': '{{NAME}}-TPC', // Two-Points-Constraint
 		'StaticConstraint': '{{NAME}}-ST', // Static-Transformation
 		'KinematicOutputModule': '{{NAME}}-KO', // KinematicOutput
+		'OffsetModule': '{{NAME}}-OFS', // OffsetModule
+		'CurveModule': '{{NAME}}-CRV', // CurveModule
 		'DeformTransformOut': '{{NAME}}-KOP', // Point-Kinematic-Output
 		'TransformLimit': '{{NAME}}-TL', // Transformation-Limit 
 		'PEG_APPLY3': '{{NAME}}-AIT', // Apply Image Transformation
