@@ -5,7 +5,7 @@ Version 0.1
 
 /*
 TODO:
-- 
+- to copy all connections from one node to another
 */
 
 function PS_SwapNodes(){
@@ -22,13 +22,8 @@ function PS_SwapNodes(){
 	var nodeDataA = getNodeData( selectedNodes[0] );
 	var nodeDataB = getNodeData( selectedNodes[1] );
 
-	
-	// nodeDataA.unlink( dstNode, inPort  );
-
-	// node.link( srcNode, srcPort, dstNode, dstPort  );
-
-	linkNodes( nodeDataA.node, nodeDataB );
-	linkNodes( nodeDataB.node, nodeDataA );
+	setNodeLinks( nodeDataA.node, nodeDataB );
+	setNodeLinks( nodeDataB.node, nodeDataA );
 
 	// Swap positions
 	node.setCoord( nodeDataA.node, nodeDataB.x, nodeDataB.y );
@@ -75,7 +70,7 @@ function PS_SwapNodes(){
 
 			for( var i=0; i<portCount; i++){
 				portData = node.srcNodeInfo( outputData.node, i );
-				MessageLog.trace('--->'+JSON.stringify(portData,true,'  '));
+				// MessageLog.trace('--->'+JSON.stringify(portData,true,'  '));
 				if( !portData || portData.node !== _node ) continue;
 
 				portData.destNode = outputData.node;
@@ -99,7 +94,7 @@ function PS_SwapNodes(){
 
 
 	//
-	function linkNodes( _node, nodeData ){
+	function setNodeLinks( _node, nodeData ){
 
 		// Link inputs
 		nodeData.inputNodesInfo.forEach(function( inputData, portIndex ){
