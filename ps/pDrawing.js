@@ -244,7 +244,7 @@ pDrawing.prototype.getStrokesBox = function( _strokesLayers ){
 
         stroke.path.forEach(function(point,point_i){
           
-          MessageLog.trace( art+' ) '+artStroke_i+' > '+JSON.stringify(point,true,'  ') );
+          // MessageLog.trace( art+' ) '+artStroke_i+' > '+JSON.stringify(point,true,'  ') );
           
           if( point.onCurve ){ // Start or End point
 
