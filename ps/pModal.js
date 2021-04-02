@@ -1,16 +1,42 @@
-function pModal( title, width, height ){
+function pModal( title, width, height, unique ){
 
-  this.create(title, width, height);
+  this.create(title, width, height, unique);
 	
 }
 
 
 //
-pModal.prototype.create = function( title, width, height  ){
+pModal.prototype.create = function( title, width, height, unique ){
 
-    // var imagePath = specialFolders.userScripts + "/script-icons";
 
-    var ui = this.ui = new QWidget( this.getParentWidget() );  
+    if( unique ){
+      var modalIsCreated = false;
+      
+      (QApplication.allWidgets()).every(function(w,i){
+        if(!w.windowTitle || w.windowTitle.indexOf(title) === -1 ) return true;
+        // MessageLog.trace( i+' : '+w.windowTitle+' > '+(w.windowTitle === title) );
+        if( w.windowTitle === title ){
+          // MessageLog.trace( i+' : '+w.windowTitle );
+          MessageLog.trace('Modal "'+title+'" is already created.');
+          modalIsCreated = true;
+          return false;
+        }
+        return true;
+      });
+
+      if(modalIsCreated) return;
+
+    }
+
+    // title += ~~(Math.random()*10000); // !!!
+
+    var parentWidget = this.getParentWidget();
+
+    // MessageLog.trace(parentWidget.toString());
+    // MessageLog.trace( JSON.stringify(parentWidget.childrenRegion,true,'  '));
+
+    var ui = this.ui = new QWidget( parentWidget );
+    ui.setAttribute( Qt.WA_DeleteOnClose, true );
     ui.setWindowTitle( title ); 
     ui.setWindowFlags( Qt.Tool );
     ui.setMinimumSize( width, height );
@@ -41,14 +67,15 @@ pModal.prototype.show = function(){
 
 //
 pModal.prototype.addGroup = function( title, parent, horizontalLayout, style ){
-  var listBox = new QGroupBox(title );
-  var listLayout = listBox.mainLayout = horizontalLayout ? new QHBoxLayout( parent ) : new QVBoxLayout( parent );
-  listBox.setLayout( listLayout );   
+  var groupBox = new QGroupBox( title );
+  // groupBox.setFlat(true);
+  var groupBoxLayout = groupBox.mainLayout = horizontalLayout ? new QHBoxLayout( parent ) : new QVBoxLayout( parent );
+  groupBox.setLayout( groupBoxLayout );   
   if( style) {
-    listBox.setStyleSheet( 'QGroupBox{'+style+'}' );
+    groupBox.setStyleSheet( style );
   }
-  parent.addWidget( listBox, 0, 0 );
-  return listBox;
+  parent.addWidget( groupBox, 0, 0 );
+  return groupBox;
 }
 
 
@@ -90,9 +117,11 @@ pModal.prototype.addLineEdit = function( text, parent, width, height ){
 pModal.prototype.getParentWidget = function()
 {
   var topWidgets = QApplication.topLevelWidgets();
-  for( var i in topWidgets )
-    if( topWidgets[i] instanceof QMainWindow && !topWidgets[i].parentWidget() )
-      return topWidgets[i];
+  for( var i in topWidgets ){
+    var widget = topWidgets[i];
+    if( widget instanceof QMainWindow && !widget.parentWidget() )
+      return widget;
+  }
   return "";
 };
 

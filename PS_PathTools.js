@@ -30,14 +30,18 @@ function PS_PathTools(){
   var iconPath = fileMapper.toNativePath(specialFolders.userScripts+"/script-icons/");
 
   //
-  var modal = new pModal( scriptName + " v" + scriptVer, 240, 200 );
+  var modal = new pModal( scriptName + " v" + scriptVer, 240, 200, true );  
+  if( !modal.ui ){
+    return;
+  }
   var ui = modal.ui;
 
-  var alignGroup = modal.addGroup( 'Align', ui.mainLayout, true);//, "padding: 0; margin: 0;" );
-  
-  var btnAlignRight = modal.addButton( '', alignGroup.mainLayout, btnHeight, btnHeight, iconPath+'PS_AlignRight.png', PS_AlignPaths.PS_AlignRight );
-  var btnAlignHCenter = modal.addButton( '', alignGroup.mainLayout, btnHeight, btnHeight, iconPath+'PS_AlignHCenter.png', PS_AlignPaths.PS_AlignHCenter );
+  var alignGroup = modal.addGroup( 'Align:', ui.mainLayout, true, 'QGroupBox{ position: relative; border: none; margin: 5px 0; }');//, "padding: 0; " );
+  alignGroup.setStyleSheet( alignGroup.styleSheet +' QPushButton{  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }' );
+
   var btnAlignLeft = modal.addButton( '', alignGroup.mainLayout, btnHeight, btnHeight, iconPath+'PS_AlignLeft.png', PS_AlignPaths.PS_AlignLeft );
+  var btnAlignHCenter = modal.addButton( '', alignGroup.mainLayout, btnHeight, btnHeight, iconPath+'PS_AlignHCenter.png', PS_AlignPaths.PS_AlignHCenter );
+  var btnAlignRight = modal.addButton( '', alignGroup.mainLayout, btnHeight, btnHeight, iconPath+'PS_AlignRight.png', PS_AlignPaths.PS_AlignRight );
 
   var btnAlignTop = modal.addButton( '', alignGroup.mainLayout, btnHeight, btnHeight, iconPath+'PS_AlignTop.png', PS_AlignPaths.PS_AlignTop );
   var btnAlignVCenter = modal.addButton( '', alignGroup.mainLayout, btnHeight, btnHeight, iconPath+'PS_AlignVCenter.png', PS_AlignPaths.PS_AlignVCenter );
