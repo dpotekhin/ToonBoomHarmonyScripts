@@ -43,8 +43,10 @@ pModal.prototype.create = function( title, width, height, unique ){
     ui.setMaximumSize( width, height );
     ui.setFocus( true );
     ui.mouseTracking = true;
+    ui.setStyleSheet( 'QWidget{ position: absolute; margin: 0; padding: 0; }' );
 
     ui.mainLayout = new QVBoxLayout( ui );
+
     //ui.mainLayout.setAlignment( ui, Qt.AlignTop );
 
     /*

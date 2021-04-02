@@ -12,11 +12,11 @@ ToDo:
 */
 
 //
-var PS_AlignPaths = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_AlignPaths.js"));
+var AlignPaths = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_PathTools-Resources/AlignPaths.js"));
 var pModal = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/pModal.js"));
 
 //
-function PS_PathTools(){
+function PS_ShowPathToolsModal(){
 
    //
   MessageLog.clearLog();
@@ -26,26 +26,28 @@ function PS_PathTools(){
   var scriptVer = '0.1';
   //
 
-  var btnHeight = 25;
-  var iconPath = fileMapper.toNativePath(specialFolders.userScripts+"/script-icons/");
+  var btnHeight = 30;
+  var iconPath = fileMapper.toNativePath(specialFolders.userScripts+"/PS_PathTools-Resources/icons/");
 
   //
-  var modal = new pModal( scriptName + " v" + scriptVer, 240, 200, true );  
+  var modal = new pModal( scriptName + " v" + scriptVer, 290, 200, true );  
   if( !modal.ui ){
     return;
   }
   var ui = modal.ui;
 
-  var alignGroup = modal.addGroup( 'Align:', ui.mainLayout, true, 'QGroupBox{ position: relative; border: none; margin: 5px 0; }');//, "padding: 0; " );
+  var alignGroup = modal.addGroup( 'Align:', ui.mainLayout, true, 'QGroupBox{ position: relative; border: none; margin: 5px 0; padding: 5px 0;}');//, "padding: 0; " );
   alignGroup.setStyleSheet( alignGroup.styleSheet +' QPushButton{  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }' );
 
-  var btnAlignLeft = modal.addButton( '', alignGroup.mainLayout, btnHeight, btnHeight, iconPath+'PS_AlignLeft.png', PS_AlignPaths.PS_AlignLeft );
-  var btnAlignHCenter = modal.addButton( '', alignGroup.mainLayout, btnHeight, btnHeight, iconPath+'PS_AlignHCenter.png', PS_AlignPaths.PS_AlignHCenter );
-  var btnAlignRight = modal.addButton( '', alignGroup.mainLayout, btnHeight, btnHeight, iconPath+'PS_AlignRight.png', PS_AlignPaths.PS_AlignRight );
+  var btnAlignLeft = modal.addButton( '', alignGroup.mainLayout, btnHeight, btnHeight, iconPath+'align-left.png', AlignPaths.AlignLeft );
+  var btnAlignHCenter = modal.addButton( '', alignGroup.mainLayout, btnHeight, btnHeight, iconPath+'align-h-center.png', AlignPaths.AlignHCenter );
+  var btnAlignRight = modal.addButton( '', alignGroup.mainLayout, btnHeight, btnHeight, iconPath+'align-right.png', AlignPaths.AlignRight );
 
-  var btnAlignTop = modal.addButton( '', alignGroup.mainLayout, btnHeight, btnHeight, iconPath+'PS_AlignTop.png', PS_AlignPaths.PS_AlignTop );
-  var btnAlignVCenter = modal.addButton( '', alignGroup.mainLayout, btnHeight, btnHeight, iconPath+'PS_AlignVCenter.png', PS_AlignPaths.PS_AlignVCenter );
-  var btnAlignBottom = modal.addButton( '', alignGroup.mainLayout, btnHeight, btnHeight, iconPath+'PS_AlignBottom.png', PS_AlignPaths.PS_AlignBottom );
+  var btnAlignCenter = modal.addButton( '', alignGroup.mainLayout, btnHeight, btnHeight, iconPath+'align-center.png', AlignPaths.AlignCenter );
+
+  var btnAlignTop = modal.addButton( '', alignGroup.mainLayout, btnHeight, btnHeight, iconPath+'align-top.png', AlignPaths.AlignTop );
+  var btnAlignVCenter = modal.addButton( '', alignGroup.mainLayout, btnHeight, btnHeight, iconPath+'align-v-center.png', AlignPaths.AlignVCenter );
+  var btnAlignBottom = modal.addButton( '', alignGroup.mainLayout, btnHeight, btnHeight, iconPath+'align-bottom.png', AlignPaths.AlignBottom );
 
   ui.mainLayout.addStretch();
 
