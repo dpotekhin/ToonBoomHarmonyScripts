@@ -40,6 +40,7 @@ function PS_RenameDrawingLinks(){
 		
 		'COMPOSITE': '{{NAME}}-CMP',
 		'ImageSwitch': '{{NAME}}-IS', // Image Switch
+		'MATTE_RESIZE': '{{NAME}}-MTR',
 
 		'GROUP': [
 			['Deformation|-DFM', '{{NAME}}-DFM']
