@@ -30,7 +30,7 @@ function PS_ShowPathToolsModal(){
   var iconPath = fileMapper.toNativePath(specialFolders.userScripts+"/PS_PathTools-Resources/icons/");
 
   //
-  var modal = new pModal( scriptName + " v" + scriptVer, 290, 200, false );  
+  var modal = new pModal( scriptName + " v" + scriptVer, 290, 200, true );  
   if( !modal.ui ){
     return;
   }
@@ -48,7 +48,7 @@ function PS_ShowPathToolsModal(){
   var btnAlignCenter = modal.addButton( '', alignGroup.mainLayout, btnHeight, btnHeight, iconPath+'align-center.png', AlignPaths.AlignCenter );
 
   modal.addVLine( btnHeight, alignGroup.mainLayout );
-  
+
   var btnAlignTop = modal.addButton( '', alignGroup.mainLayout, btnHeight, btnHeight, iconPath+'align-top.png', AlignPaths.AlignTop );
   var btnAlignVCenter = modal.addButton( '', alignGroup.mainLayout, btnHeight, btnHeight, iconPath+'align-v-center.png', AlignPaths.AlignVCenter );
   var btnAlignBottom = modal.addButton( '', alignGroup.mainLayout, btnHeight, btnHeight, iconPath+'align-bottom.png', AlignPaths.AlignBottom );
