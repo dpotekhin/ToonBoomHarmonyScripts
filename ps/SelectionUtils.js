@@ -38,7 +38,7 @@ function filterNodesByType( nodes, typeList, useGroups ){
 	if( nodes === true ){
 		nodes = selection.selectedNodes();
 	}
-	MessageLog.trace("filterNodesByType "+nodes);
+	// MessageLog.trace("filterNodesByType "+nodes);
 	if( !nodes || !nodes.length ) return false;
 	var filtered = [];
 	eachNode( nodes, function(_node){ filtered.push(_node); }, useGroups, typeList );
