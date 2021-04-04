@@ -19,7 +19,7 @@ TODO:
 var SelectionUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/SelectionUtils.js"));
 
 //
-function PS_RenameDrawingLinks(){
+function PS_RenameNodes(){
 
 	MessageLog.clearLog(); // !!!
 
