@@ -30,21 +30,25 @@ function PS_ShowPathToolsModal(){
   var iconPath = fileMapper.toNativePath(specialFolders.userScripts+"/PS_PathTools-Resources/icons/");
 
   //
-  var modal = new pModal( scriptName + " v" + scriptVer, 290, 200, true );  
+  var modal = new pModal( scriptName + " v" + scriptVer, 290, 200, false );  
   if( !modal.ui ){
     return;
   }
   var ui = modal.ui;
 
   var alignGroup = modal.addGroup( 'Align:', ui.mainLayout, true, 'QGroupBox{ position: relative; border: none; margin: 5px 0; padding: 5px 0;}');//, "padding: 0; " );
-  alignGroup.setStyleSheet( alignGroup.styleSheet +' QPushButton{  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }' );
+  alignGroup.setStyleSheet( alignGroup.styleSheet +' QPushButton{ border: none; }' );
 
   var btnAlignLeft = modal.addButton( '', alignGroup.mainLayout, btnHeight, btnHeight, iconPath+'align-left.png', AlignPaths.AlignLeft );
   var btnAlignHCenter = modal.addButton( '', alignGroup.mainLayout, btnHeight, btnHeight, iconPath+'align-h-center.png', AlignPaths.AlignHCenter );
   var btnAlignRight = modal.addButton( '', alignGroup.mainLayout, btnHeight, btnHeight, iconPath+'align-right.png', AlignPaths.AlignRight );
 
+  modal.addVLine( btnHeight, alignGroup.mainLayout );
+
   var btnAlignCenter = modal.addButton( '', alignGroup.mainLayout, btnHeight, btnHeight, iconPath+'align-center.png', AlignPaths.AlignCenter );
 
+  modal.addVLine( btnHeight, alignGroup.mainLayout );
+  
   var btnAlignTop = modal.addButton( '', alignGroup.mainLayout, btnHeight, btnHeight, iconPath+'align-top.png', AlignPaths.AlignTop );
   var btnAlignVCenter = modal.addButton( '', alignGroup.mainLayout, btnHeight, btnHeight, iconPath+'align-v-center.png', AlignPaths.AlignVCenter );
   var btnAlignBottom = modal.addButton( '', alignGroup.mainLayout, btnHeight, btnHeight, iconPath+'align-bottom.png', AlignPaths.AlignBottom );
