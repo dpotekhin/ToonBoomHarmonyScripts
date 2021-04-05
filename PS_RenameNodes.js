@@ -33,6 +33,8 @@ function PS_RenameNodes(){
 		],
 		'PEG': '{{NAME}}-P',
 
+		'MasterController': '{{NAME}}-MC',
+		
 		'PointConstraint2': '{{NAME}}-TPC', // Two-Points-Constraint
 		'StaticConstraint': '{{NAME}}-ST', // Static-Transformation
 		'KinematicOutputModule': '{{NAME}}-KO', // KinematicOutput
@@ -44,7 +46,7 @@ function PS_RenameNodes(){
 		'TransformGate': '{{NAME}}-TG', // Transform Gate
 		'FoldModule': '{{NAME}}-FLD', // Deformation-Fold
 		'AutoFoldModule': '{{NAME}}-AFD', // Auto-Fold
-		
+
 		'LAYER_SELECTOR': '{{NAME}}-LS',
 		'OVERLAY': '{{NAME}}-OL',
 		'UNDERLAY': '{{NAME}}-UL',
