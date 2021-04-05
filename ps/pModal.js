@@ -105,6 +105,7 @@ pModal.prototype.addButton = function( title, parent, width, height, icon, onRel
 }
 
 
+
 //
 pModal.prototype.addLineEdit = function( text, parent, width, height ){
   var line = new QLineEdit();
@@ -115,9 +116,9 @@ pModal.prototype.addLineEdit = function( text, parent, width, height ){
 }
 
 
+
 //
-pModal.prototype.getParentWidget = function()
-{
+pModal.prototype.getParentWidget = function(){
   var topWidgets = QApplication.topLevelWidgets();
   for( var i in topWidgets ){
     var widget = topWidgets[i];
@@ -126,6 +127,17 @@ pModal.prototype.getParentWidget = function()
   }
   return "";
 };
+
+
+
+//
+pModal.prototype.addVLine = function( height, parent ){
+  var line = new QWidget;
+  line.setMinimumSize(2,height);
+  line.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed);
+  line.setStyleSheet("background-color: #303030; border-left: 1px solid #303030; border-right: 1px solid #505050;");
+  parent.addWidget(line,0,0);
+}
 
 
 ///
