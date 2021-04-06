@@ -3,20 +3,21 @@ Author: D.Potekhin (d@peppers-studio.ru)
 Version: 0.1
 
 ToDo:
-- 
-
+- to implement creation of the brand new expression
+- to implement deletion of the selected expression
+- to implement renaming of the selected expression
+- add menu item of Expression Editor
+- add icon for Tool Shelf
 */
 
 var pModal = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/pModal.js"));
 
-
-
 //
-function PS_ExpressionEditor( _node ){
+function PS_ExpressionEditorModal( _node ){
 
     //
   MessageLog.clearLog();
-
+  MessageLog.trace('!!!'+JSON.stringify(pModal,true, '  '));
   //
   var scriptName = 'Expression Editor';
   var scriptVer = '0.1';
@@ -143,8 +144,7 @@ function _refreshExpressionList( modal ){
 function _getExpressionColumns(){
   var expressions = [];
   var n = column.numberOf();
-  for (i = 0; i < n; ++i)
-  {
+  for (i = 0; i < n; ++i){
     var name = column.getName(i);
     var type = column.type(name);
     if( type !== 'EXPR' ) continue;
@@ -154,6 +154,10 @@ function _getExpressionColumns(){
       name: name,
       displayName: displayName,
     });
-  }
+  };
   return expressions;
 }
+
+
+///
+exports = PS_ExpressionEditorModal;
