@@ -43,7 +43,7 @@ pModal.prototype.create = function( title, width, height, unique ){
     ui.setMaximumSize( width, height );
     ui.setFocus( true );
     ui.mouseTracking = true;
-    ui.setStyleSheet( 'QWidget{ position: absolute; margin: 0; padding: 0; }' );
+    // ui.setStyleSheet( 'QWidget{ position: absolute; margin: 0; padding: 0; }' );
 
     ui.mainLayout = new QVBoxLayout( ui );
 
@@ -76,7 +76,7 @@ pModal.prototype.addGroup = function( title, parent, horizontalLayout, style ){
   if( style) {
     groupBox.setStyleSheet( style );
   }
-  parent.addWidget( groupBox, 0, 0 );
+  parent.mainLayout.addWidget( groupBox, 0, 0 );
   return groupBox;
 }
 
@@ -98,7 +98,7 @@ pModal.prototype.addButton = function( title, parent, width, height, icon, onRel
     btn.released.connect( this, onReleased );
   }
   
-  parent.addWidget( btn, 0, 0 );
+  parent.mainLayout.addWidget( btn, 0, 0 );
 
   return btn;
 
@@ -111,7 +111,7 @@ pModal.prototype.addLineEdit = function( text, parent, width, height ){
   var line = new QLineEdit();
   line.text = text;
   line.setMaximumSize( width, height );
-  parent.addWidget( line, 0, 0 );
+  parent.mainLayout.mainLayout.addWidget( line, 0, 0 );
   return line;
 }
 
@@ -136,7 +136,7 @@ pModal.prototype.addVLine = function( height, parent ){
   line.setMinimumSize(2,height);
   line.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed);
   line.setStyleSheet("background-color: #303030; border-left: 1px solid #303030; border-right: 1px solid #505050;");
-  parent.addWidget(line,0,0);
+  parent.mainLayout.addWidget(line,0,0);
 }
 
 
