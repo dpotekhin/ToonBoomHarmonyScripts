@@ -73,8 +73,8 @@ pModal.prototype.addGroup = function( title, parent, horizontalLayout, style ){
   // groupBox.setFlat(true);
   var groupBoxLayout = groupBox.mainLayout = horizontalLayout ? new QHBoxLayout( parent ) : new QVBoxLayout( parent );
   groupBox.setLayout( groupBoxLayout );   
-  if( style) {
-    groupBox.setStyleSheet( style );
+  if( style ) {
+    groupBox.setStyleSheet( style === true ? 'QGroupBox{ border:none; margin: 0; padding: 0; }' : style );
   }
   parent.mainLayout.addWidget( groupBox, 0, 0 );
   return groupBox;
@@ -111,10 +111,35 @@ pModal.prototype.addLineEdit = function( text, parent, width, height ){
   var line = new QLineEdit();
   line.text = text;
   line.setMaximumSize( width, height );
-  parent.mainLayout.mainLayout.addWidget( line, 0, 0 );
+  parent.mainLayout.addWidget( line, 0, 0 );
   return line;
 }
 
+
+//
+pModal.prototype.addLabel = function( text, parent, width, height, align ){
+  var label = new QLabel();
+  label.setText( text );
+  if(width){
+    label.setMinimumSize(width,10);
+    label.setMaximumSize(width,height);
+  }
+  // if( width ) label.setFixedWidth( width );
+  // if( height ) label.setFixedWidth( height );
+  if( align ) label.alignment = align;
+  parent.mainLayout.addWidget( label, 0, 0 );
+  return label;
+}
+
+
+//
+pModal.prototype.addVLine = function( height, parent ){
+  var line = new QWidget;
+  line.setMinimumSize(2,height);
+  line.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed);
+  line.setStyleSheet("background-color: #303030; border-left: 1px solid #303030; border-right: 1px solid #505050;");
+  parent.mainLayout.addWidget(line,0,0);
+}
 
 
 //
@@ -128,16 +153,6 @@ pModal.prototype.getParentWidget = function(){
   return "";
 };
 
-
-
-//
-pModal.prototype.addVLine = function( height, parent ){
-  var line = new QWidget;
-  line.setMinimumSize(2,height);
-  line.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed);
-  line.setStyleSheet("background-color: #303030; border-left: 1px solid #303030; border-right: 1px solid #505050;");
-  parent.mainLayout.addWidget(line,0,0);
-}
 
 
 ///
