@@ -1,13 +1,10 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version: 0.1
+Version: 0.2
 
 ToDo:
-- to implement creation of the brand new expression
 - to implement deletion of the selected expression
 - to implement renaming of the selected expression
-- add menu item of Expression Editor
-- add icon for Tool Shelf
 */
 
 var pModal = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/pModal.js"));
@@ -15,15 +12,18 @@ var pModal = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/pMo
 //
 function PS_ExpressionEditorModal( _node ){
 
-    //
-  MessageLog.clearLog();
-  MessageLog.trace('!!!'+JSON.stringify(pModal,true, '  '));
+  //
+  // MessageLog.clearLog();
+  // MessageLog.trace('!!!'+Object.getOwnPropertyNames(column).join('\n'));
+  // MessageLog.trace('!!!'+Action.getResponderList().join('\n'));
+  // MessageLog.trace('\n\n!!!'+Action.getActionList('xsheetView').join('\n'));
   //
   var scriptName = 'Expression Editor';
-  var scriptVer = '0.1';
+  var scriptVer = '0.2';
   //
 
   var btnHeight = 50;
+  var listJustUpdated = true;
   // var iconPath = fileMapper.toNativePath(specialFolders.userScripts+"/PS_PathTools-Resources/icons/");
 
   //
@@ -33,18 +33,35 @@ function PS_ExpressionEditorModal( _node ){
   }
   var ui = modal.ui;
 
-  var nameGroup = modal.addGroup( 'Expression Name:', ui, false );//'QGroupBox{ position: relative; border: none; margin: 5px 0; padding: 5px 0;}');//, "padding: 0; " );
+  var nameGroup = modal.addGroup( 'Select Expression:', ui, false );//'QGroupBox{ position: relative; border: none; margin: 5px 0; padding: 5px 0;}');//, "padding: 0; " );
   // alignGroup.setStyleSheet( alignGroup.styleSheet +' QPushButton{ border: none; }' );
 
   // var btnAlignLeft = modal.addButton( '', alignGroup.mainLayout, btnHeight, btnHeight, iconPath+'align-left.png', AlignPaths.AlignLeft );
   // var btnAlignHCenter = modal.addButton( '', alignGroup.mainLayout, btnHeight, btnHeight, iconPath+'align-h-center.png', AlignPaths.AlignHCenter );
 
+  /// SEARCH / CREATE GROUP
+
+  var searhGroup = modal.addGroup( '', nameGroup, true, true );
+
+  var searcLabel = modal.addLabel( 'Search:', searhGroup, 65, btnHeight, Qt.AlignRight | Qt.AlignVCenter );
+
   // Search Field
-  var searchField = new QLineEdit(nameGroup); // TODO: to implement the Expression list filter
-  nameGroup.mainLayout.addWidget( searchField, 0, 0 );
+  var searchField = modal.searchField = new QLineEdit(searhGroup); // TODO: to implement the Expression list filter
+  searhGroup.mainLayout.addWidget( searchField, 0, 0 );
 
-  var listWidget = modal.listWidget = new QComboBox(nameGroup);
+  // CREATE BUTTON
+  var createButton = modal.addButton('Create New', searhGroup, 70, btnHeight, undefined, _createExpression );
+  // createButton.setEnabled(false); // TODO: to implement creation
+  // createButton.setStyleSheet("background-color: #41414e;");
 
+  /// LIST GROUP
+
+  var listWidgetGroup = modal.addGroup( '', nameGroup, true, true );
+  
+  var listWidgetLabel = modal.addLabel( 'Expressions:', listWidgetGroup, 65, btnHeight, Qt.AlignRight | Qt.AlignVCenter );
+
+  var listWidget = modal.listWidget = new QComboBox(listWidgetGroup);
+  listWidgetGroup.mainLayout.addWidget( listWidget, 0, 0 );
 /*  
   // listWidget.setLineEdit(searchField);
   listWidget.editable = true;
@@ -61,54 +78,69 @@ function PS_ExpressionEditorModal( _node ){
 
   // var listView = new QListView(listWidget);
   // listWidget.setView(listView);
-  nameGroup.mainLayout.addWidget( listWidget, 0, 0 );
+  
   //
   listWidget["currentIndexChanged(int)"].connect(function(i){
+    if( listJustUpdated ){
+      listJustUpdated = false;
+      return;
+    }
     var exprName = modal.expressions[i].name;
-    var displayName = modal.expressions[i].displayName;
+    // var displayName = modal.expressions[i].displayName;
     MessageLog.trace('Selected: '+ i+' : '+exprName );
     modal.curentExpressionindex = i;
     modal.curentExpressionName = exprName;
     var exprText = column.getTextOfExpr(exprName);
     modal.textEdit.setText( exprText );
-    searchField.setText( displayName );
+    // searchField.setText( exprName );
+    bodyGroup.title = exprName;
+    _refreshCurrentExpressionValue();
   });
+  
+  // REFRESH BUTTON
+  var refreshButton = modal.addButton('Refresh', listWidgetGroup, 70, btnHeight, undefined, function(){
+    _refreshExpressionList( modal );
+  });
+  
 
-  /// Body
-  var bodyGroup = modal.addGroup( 'Expression Body:', ui, false );
+  /// BODY
+  var bodyGroup = modal.addGroup( '', ui, false );
 
   //
-  var textEdit = modal.textEdit = new QTextEdit(nameGroup);
+  var textEdit = modal.textEdit = new QTextEdit(bodyGroup);
   bodyGroup.mainLayout.addWidget( textEdit, 0, 0 );
 
+  var expressionOutput = modal.addLabel( '', bodyGroup );
 
   /// Buttons
   var buttonsGroup = modal.addGroup( '', ui, true, 'QGroupBox{border: none; padding: 0; margin: 0;}' );
 
-  //
+
+  // DELETE BUTTON
   var deleteButton = modal.addButton('Delete Expression', buttonsGroup, 120, btnHeight, undefined, function(){
-   
-  });
-  deleteButton.setEnabled(false); // TODO: to implement deleting
-  deleteButton.setStyleSheet("background-color: #880000;");
+    if(!modal.curentExpressionName) return;
+    // var result = column.removeUnlinkedFunctionColumn( modal.curentExpressionName );
+    // var result = column.deleteLater()( modal.curentExpressionName );
 
-  //
-  var createButton = modal.addButton('Create Expression', buttonsGroup, 120, btnHeight, undefined, function(){
-    
-  });
-  createButton.setEnabled(false); // TODO: to implement creation
-  createButton.setStyleSheet("background-color: #000088;");
+    // ! As an idea of implementation: create an node link, expression to it's attribute and delete node with all coonected columns
+    // https://docs.toonboom.com/help/harmony-20/scripting/script/classnode.html#a32c2e9a3b2d1468ec1c1ab38c8091cc3
 
-  //
+    MessageLog.trace('_createExpression: SUCCESS ' + result );
+  });
+  // deleteButton.setEnabled(false); // TODO: to implement deleting
+  deleteButton.setStyleSheet("background-color: #4e4141;");
+
+
+  // SAVE BUTTON
   var saveButton = modal.addButton('Save Expression', buttonsGroup, 120, btnHeight, undefined, function(){
     
     if( !modal.curentExpressionName ) return;
     // modal.curentExpressionindex;
     var result = column.setTextOfExpr( modal.curentExpressionName, modal.textEdit.plainText );
-    MessageLog.trace('!!!'+modal.curentExpressionName+' > '+result );
+    // MessageLog.trace('!!!'+modal.curentExpressionName+' > '+result );
     // MessageLog.trace('!!!'+modal.curentExpressionName+' > '+modal.textEdit.plainText );
   });
-  saveButton.setStyleSheet("background-color: #008800;");
+  saveButton.setStyleSheet("background-color: #414e41;");
 
   //
   var expressions = _getExpressionColumns();
@@ -121,41 +153,87 @@ function PS_ExpressionEditorModal( _node ){
   //
   _refreshExpressionList( modal );
 
-}
 
 
-//
-function _fillListWidget( modal, v ){
-  MessageLog.trace('_fillListWidget: '+modal+' >>> '+JSON.stringify(v, true, '  '));
-  modal.listWidget.clear();
-  v.forEach(function( exprData, i ){
-    modal.listWidget.addItem(exprData.displayName);
-  })
-}
+  // Notifier
+  var myNotifier = new SceneChangeNotifier(ui);
+  myNotifier.currentFrameChanged.connect( _refreshCurrentExpressionValue );
 
 
-//
-function _refreshExpressionList( modal ){
-  var expressions = modal.expressions = _getExpressionColumns();
-  _fillListWidget( modal, expressions );
-}
 
-//
-function _getExpressionColumns(){
-  var expressions = [];
-  var n = column.numberOf();
-  for (i = 0; i < n; ++i){
-    var name = column.getName(i);
-    var type = column.type(name);
-    if( type !== 'EXPR' ) continue;
-    var displayName = column.getDisplayName(name);
-    // MessageLog.trace(i+' : "'+name+'", "'+displayName+'", '+type);
-    expressions.push({
-      name: name,
-      displayName: displayName,
+  // - - - -
+  //
+  function _fillListWidget( modal, v ){
+    // MessageLog.trace('_fillListWidget: '+modal+' >>> '+JSON.stringify(v, true, '  '));
+    
+    listJustUpdated = true;
+
+    modal.listWidget.clear();
+
+    var items = v.map(function(exprData){return exprData.name;});
+
+    modal.listWidget.addItems(items);
+  }
+
+
+  //
+  function _refreshExpressionList( modal ){
+    column.update();
+    var expressions = modal.expressions = _getExpressionColumns();
+    // MessageLog.trace('_refreshExpressionList: '+JSON.stringify(expressions,true,'  '));
+    _fillListWidget( modal, expressions );
+  }
+
+
+  //
+  function _getExpressionColumns(){
+    var expressions = column.getColumnListOfType('EXPR');
+    expressions.unshift('');
+    // MessageLog.trace('_getExpressionColumns '+JSON.stringify(expressions,true,'  '));
+    expressions = expressions.map( function(v){
+      return { name: v };
     });
-  };
-  return expressions;
+    return expressions;
+  }
+
+  //
+  function _createExpression(){
+    
+    var columnName = (modal.searchField.text || '').trim();
+    MessageLog.trace('_createExpression: '+columnName+', '+modal.textEdit.plainText );
+
+    if( !columnName ){
+      MessageLog.trace('Expression name required');
+      return;
+    }
+    
+    var existingColumn = column.type(columnName);
+    if( existingColumn ){
+      MessageLog.trace('Expression name required');
+      return;
+    }
+
+    var result = column.add( columnName, 'EXPR' );
+    if( !result ) return;
+
+    if( modal.textEdit.plainText ) column.setTextOfExpr(columnName, modal.textEdit.plainText);
+
+    _refreshExpressionList( modal );
+
+    MessageLog.trace('_createExpression: SUCCESS');
+
+  }
+
+  //
+  function _refreshCurrentExpressionValue(){
+    var str = 'Frame '+frame.current();
+    if( modal.curentExpressionName ) {
+      var val = column.getEntry( modal.curentExpressionName, 1, frame.current() );
+      str += ' : ' + val;
+    };
+    expressionOutput.text = str;
+  }
+
 }
 
 
