@@ -81,25 +81,21 @@ function AlignShapes( mode, notRelativeToCanvas ){
   
   if( notRelativeToCanvas === undefined && KeyModifiers.IsControlPressed() ) notRelativeToCanvas = true;
 
-  var _frame = frame.current();
-
   var selectedDrawing = new pDrawing( true );
   var selectedStrokesLayers = selectedDrawing.getSelectedStrokesLayers();
   if( !selectedStrokesLayers ) {
-    MessageLog.trace('No stroks selected.');
+    MessageLog.trace('No strokes selected.');
     return;
   }
 
   // MessageLog.trace('selectedStrokesLayers >> 0:'+selectedStrokesLayers[0].length+', 1:'+selectedStrokesLayers[1].length+', 2:'+selectedStrokesLayers[2].length+', 3:'+selectedStrokesLayers[3].length);
   // return;
 
-  //
+  ///
   scene.beginUndoRedoAccum("Align shape");
 
-  var selectedArt = selectedDrawing.selectedToolSettings.activeArt;
-
   var box = selectedDrawing.getStrokesBox( selectedStrokesLayers );
-  if( !box ) {
+  if( box.width === undefined ) {
     MessageLog.trace('!!! box is empty: '+ box );
     scene.endUndoRedoAccum();
     return;
@@ -147,7 +143,6 @@ function AlignShapes( mode, notRelativeToCanvas ){
   }
   // MessageLog.trace('box: '+JSON.stringify(box, true, '  ')+', offsetX: '+offsetX+', '+offsetY );
 
-
   selectedDrawing.iterateArts(function(art){
 
     selectedDrawing.modifyArtStrokes( art, selectedStrokesLayers[art], function(_stroke){
@@ -164,7 +159,7 @@ function AlignShapes( mode, notRelativeToCanvas ){
       // MessageLog.trace('bounds: '+ JSON.stringify(bounds, true, ' ') );
       return true;
     });
-    
+
   });
 
   // TODO: make originally selected strokes selected
