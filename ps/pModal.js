@@ -1,3 +1,8 @@
+/*
+Author: D.Potekhin (d@peppers-studio.ru)
+Version: 0.5
+*/
+
 function pModal( title, width, height, unique ){
 
   this.create(title, width, height, unique);

@@ -1,11 +1,9 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version: 0.1
+Version: 0.3
 
 ToDo:
-- make panel with options
 - add aligment options (like in Adobe animate)
-  - 
   - distribute, justify
   - aligning strokes relative to each other
     - how to detect a stroke group?
@@ -31,12 +29,12 @@ function PS_ShowPathToolsModal(){
 
   //
   var scriptName = 'Path Tools';
-  var scriptVer = '0.1';
+  var scriptVer = '0.3';
   //
 
   var btnHeight = 30;
   var iconPath = fileMapper.toNativePath(specialFolders.userScripts+"/PS_PathTools-Resources/icons/");
-  var hGroupStyle = 'QGroupBox{ position: relative; border: none; margin: 5px 0; padding: 5px 0;}';
+  var hGroupStyle = 'QGroupBox{ position: relative; border: none; margin: 4px 0; padding: 4px 0;}';
   //
   var modal = new pModal( scriptName + " v" + scriptVer, 290, 200, true );  
   if( !modal.ui ){
@@ -64,6 +62,16 @@ function PS_ShowPathToolsModal(){
   var btnAlignBottom = modal.addButton( '', alignGroup, btnHeight, btnHeight, iconPath+'align-bottom.png', AlignPaths.AlignBottom, 'Align bottom edges' );
 
   alignGroup.mainLayout.addStretch();
+
+  
+  // Flip
+  var flipGroup = modal.addGroup( 'Flip:', ui, true, hGroupStyle );
+
+  var btnFlipHCenter = modal.addButton( '', flipGroup, btnHeight, btnHeight, iconPath+'flip-h.png', AlignPaths.FlipHCenter, 'Flip horizontally around the center of the Drawing' );
+  var btnFlipVCenter = modal.addButton( '', flipGroup, btnHeight, btnHeight, iconPath+'flip-v.png', AlignPaths.FlipVCenter, 'Flip vertically around the center of the Drawing' );
+  
+  flipGroup.mainLayout.addStretch();
+
 
   // Modify
   var modifyGroup = modal.addGroup( 'Modify:', ui, true, hGroupStyle );

@@ -1,6 +1,6 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version: 0.1
+Version: 0.5
 */
 
 function pBox2D( x0, y0, x1, y1 ){

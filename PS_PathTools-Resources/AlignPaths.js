@@ -1,14 +1,6 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version: 0.1
-
-ToDo:
-- make panel with options
-- add aligment options (like in Adobe animate)
-  - 
-  - distribute, justify
-  - aligning strokes relative to each other
-    - how to detect a stroke group?
+Version: 0.3
 */
 
 //
@@ -31,6 +23,8 @@ var _exports = {
   AlignTop: AlignTop,
   AlignVCenter: AlignVCenter,
   AlignBottom: AlignBottom,
+  FlipHCenter: FlipHCenter,
+  FlipVCenter: FlipVCenter,
   Merge: Merge,
 }
 
@@ -187,6 +181,54 @@ function AlignShapes( mode, notRelativeToCanvas ){
   scene.endUndoRedoAccum();
 
 }
+
+
+
+//
+function FlipCenter( horizontally ){
+
+  var selectionData = getSelectionData();
+  if( !getSelectionData ) return;
+
+  var selectedDrawing = selectionData.selectedDrawing;
+  var selectedStrokesLayers = selectionData.selectedStrokesLayers;
+  var box = selectionData.box;
+  // var boxCenter = box.center;
+
+  selectedDrawing.iterateArts(function(art){
+
+    selectedDrawing.modifyArtStrokes( art, selectedStrokesLayers[art], function(_stroke){
+      
+      var hasSelectedAnchors = !!_stroke.selectedAnchors;
+
+      _stroke.path.forEach(function(pathPoint){
+
+        if( hasSelectedAnchors && !pathPoint.isSelected && !pathPoint.isSelectedControl ) return;
+
+        if( horizontally ) pathPoint.x = -pathPoint.x;
+        else pathPoint.y = -pathPoint.y;
+
+      });
+
+      return true;
+
+    });
+
+  });
+
+  //
+  scene.endUndoRedoAccum();
+}
+
+function FlipHCenter(){
+  FlipCenter(true);
+}
+
+//
+function FlipVCenter(){
+  FlipCenter(false);
+}
+
 
 
 //
