@@ -102,19 +102,71 @@ pDrawing.prototype.getSelectedStrokesLayers = function(){
       selectedStrokesLayers.push([]);
       return;
     }
-    // MessageLog.trace('pDrawing.getSelectedStrokesLayers: '+JSON.stringify(selectedStrokes, true, '  ') );
+    
+    var hasSelectedAnchors = !!selectedStrokes.selectedAnchors;
 
     //
     var strokes = Drawing.query.getStrokes(config);
-    var strokeLayers = strokes.layers.filter(function(_layer){ return selectedLayers.indexOf(_layer.index) !== -1; });
+
+    //
+    // MessageLog.trace('\n\n pDrawing.getSelectedStrokesLayers: selectedStrokes: '+JSON.stringify(selectedStrokes, true, '  ') );
+    // MessageLog.trace('\n\n pDrawing.getSelectedStrokesLayers: strokes: '+JSON.stringify(strokes, true, '  ') );
+    //
+    
+    var strokeLayers = strokes.layers.filter(function(_layer,i){
+
+      if( selectedLayers.indexOf(_layer.index) === -1 ) return false; // skip the current layer if it is not in the selection list
+
+      // Check that layers's vertices are selected
+      selectedStrokes.selectedStrokes.forEach(function(__layer){
+
+        if( __layer.layer !== _layer.index || !__layer.selectedAnchors || !__layer.selectedAnchors.length ) return;
+        // _layer.selectedAnchors = __layer.selectedAnchors;
+
+        if( hasSelectedAnchors ) _layer.strokes.forEach(function(_stroke){
+          _stroke.selectedAnchors = [];
+        });
+
+        __layer.selectedAnchors.forEach(function(_anchor){
+
+          var _strokes = _layer.strokes[__layer.strokeIndex];
+          var selectedAnchors = _strokes.selectedAnchors;
+          // MessageLog.trace('\n\n >>> '+__layer.strokeIndex+' >>> '+JSON.stringify(_layer.strokes, true, '  ') );
+          selectedAnchors.push(_anchor);
+          
+          var vertexData = _strokes.path[_anchor.vertexIndex];
+          vertexData.isSelected = true;
+
+          // mark the Control vertices
+          var prevControl = _strokes.path[_anchor.vertexIndex-1];
+          if( prevControl && !prevControl.onCurve ){
+            prevControl.isSelectedControl = true;
+            vertexData.prevControl = _anchor.vertexIndex-1;
+          }
+          
+          var nextControl = _strokes.path[_anchor.vertexIndex+1];
+          if( nextControl && !nextControl.onCurve ){
+            nextControl.isSelectedControl = true;
+            vertexData.nextControl = _anchor.vertexIndex+1;
+          }
+
+        });
+        
+
+      });
+
+      return true;
+    });
+
     selectedStrokesLayers.push( strokeLayers );
     selectedStrokeLayerCount += strokeLayers.length;
-    // MessageLog.trace('pDrawing.getSelectedStrokesLayers: '+JSON.stringify(selectedStrokesLayers, true, '  ') );
+
   });
 
   if( !selectedStrokeLayerCount ) return;
 
   this.selectedStrokesLayers = selectedStrokesLayers;
+  // MessageLog.trace('\n\n pDrawing.getSelectedStrokesLayers: selectedStrokesLayers: '+JSON.stringify(selectedStrokesLayers, true, '  ') );
 
   return selectedStrokesLayers;
 
@@ -242,33 +294,44 @@ pDrawing.prototype.getStrokesBox = function( _strokesLayers ){
         
         var currentPoint;
 
-        stroke.path.forEach(function(point,point_i){
+        if( stroke.selectedAnchors ){ // Some vertex is selected
+
+          stroke.selectedAnchors.forEach(function(selectedPoint){
+            
+            resultBox = Utils.addPointToBox( resultBox, selectedPoint.x, selectedPoint.y );
+
+          });          
+
+        }else{ // Whole stroke is selected
           
-          // MessageLog.trace( art+' ) '+artStroke_i+' > '+JSON.stringify(point,true,'  ') );
-          
-          if( point.onCurve ){ // Start or End point
+          stroke.path.forEach(function(point,point_i){
+            
+            // MessageLog.trace( art+' ) '+artStroke_i+' > '+JSON.stringify(point,true,'  ') );
+            
+            if( point.onCurve ){ // Start or End point
 
-            if( currentPoint ){ // The Point is not the very first
+              if( currentPoint ){ // The Point is not the very first
 
-              if( currentPoint.length == 1 ){ // a stright line
-                // MessageLog.trace('Line!!!');
-                resultBox = Utils.joinBoxes( resultBox, _this.getLineBox( currentPoint[0], point ) );
+                if( currentPoint.length == 1 ){ // a stright line
+                  // MessageLog.trace('Line!!!');
+                  resultBox = Utils.joinBoxes( resultBox, _this.getLineBox( currentPoint[0], point ) );
 
-              }else{ // a Bezier curve
-                var box = _this.getBezierBox( currentPoint[0], currentPoint[1], currentPoint[2], point );
-                // MessageLog.trace('Bezier: '+ JSON.stringify(box, true, '  ') );
-                resultBox = Utils.joinBoxes( resultBox, box );
+                }else{ // a Bezier curve
+                  var box = _this.getBezierBox( currentPoint[0], currentPoint[1], currentPoint[2], point );
+                  // MessageLog.trace('Bezier: '+ JSON.stringify(box, true, '  ') );
+                  resultBox = Utils.joinBoxes( resultBox, box );
+                }
+                
               }
-              
+
+              currentPoint = [point];
+
+            }else{
+              currentPoint.push(point);
             }
 
-            currentPoint = [point];
-
-          }else{
-            currentPoint.push(point);
-          }
-
-        });
+          });
+        }
 
       });
 
