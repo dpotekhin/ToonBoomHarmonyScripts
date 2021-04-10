@@ -29,12 +29,29 @@ function joinBoxes(b1,b2){
   if( b2Empty ) return b1;
 
   return {
-    x0: b1.x0 < b2.x0 ? b1.x0 : b2.x0,
-    x1: b1.x1 > b2.x1 ? b1.x1 : b2.x1,
-    y0: b1.y0 < b2.y0 ? b1.y0 : b2.y0,
-    y1: b1.y1 > b2.y1 ? b1.y1 : b2.y1
+    x0: Math.min( b1.x0, b2.x0 ),
+    y0: Math.min( b1.y0, b2.y0 ),
+    x1: Math.max( b1.x1, b2.x1 ),
+    y1: Math.max( b1.y1, b2.y1 )
   }
 
+}
+
+
+//
+function addPointToBox( box, x, y ){
+  if( !box ){
+    return {
+      x0: x, y0: y,
+      x1: x, y1: y
+    }
+  }
+  return {
+    x0: Math.min( box.x0, x ),
+    y0: Math.min( box.y0, y ),
+    x1: Math.max( box.x1, x ),
+    y1: Math.max( box.y1, y )
+  }
 }
 
 
@@ -86,4 +103,5 @@ exports = {
   getZeroLeadingString: getZeroLeadingString,
   // Bounds: Bounds,
   joinBoxes: joinBoxes,
+  addPointToBox: addPointToBox,
 };
