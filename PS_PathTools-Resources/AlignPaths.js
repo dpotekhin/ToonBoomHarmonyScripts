@@ -31,6 +31,7 @@ var _exports = {
   AlignTop: AlignTop,
   AlignVCenter: AlignVCenter,
   AlignBottom: AlignBottom,
+  Merge: Merge,
 }
 
 
@@ -72,14 +73,7 @@ function AlignBottom( notRelativeToCanvas ){
 
 
 //
-function AlignShapes( mode, notRelativeToCanvas ){
-
-
-  // !!!
-  MessageLog.clearLog(); // !!!
-  // MessageLog.trace('Drawing/geometry: '+ Object.getOwnPropertyNames(Tools).join('\n') );
-  
-  if( notRelativeToCanvas === undefined && KeyModifiers.IsControlPressed() ) notRelativeToCanvas = true;
+function getSelectionData(){
 
   var selectedDrawing = new pDrawing( true );
   var selectedStrokesLayers = selectedDrawing.getSelectedStrokesLayers();
@@ -101,43 +95,66 @@ function AlignShapes( mode, notRelativeToCanvas ){
     return;
   }
 
-  var boxWidth = box.x1-box.x0;
-  var boxHeight = box.y1-box.y0;
+  return {
+    selectedDrawing: selectedDrawing,
+    selectedStrokesLayers: selectedStrokesLayers,
+    box: box
+  };
+
+}
+
+
+//
+function AlignShapes( mode, notRelativeToCanvas ){
+
+
+  // !!!
+  // MessageLog.clearLog(); // !!!
+  // MessageLog.trace('Drawing/geometry: '+ Object.getOwnPropertyNames(Tools).join('\n') );
+  
+  if( notRelativeToCanvas === undefined && KeyModifiers.IsControlPressed() ) notRelativeToCanvas = true;
+
+
+  var selectionData = getSelectionData();
+  if( !getSelectionData ) return;
+
+  var selectedDrawing = selectionData.selectedDrawing;
+  var selectedStrokesLayers = selectionData.selectedStrokesLayers;
+  var box = selectionData.box;
 
   var offsetX = 0;
-  var offsetY = 0
-  var centerOffsetX = box.x0 + boxWidth/2;
-  var centerOffsetY = box.y0 + boxHeight/2;
+  var offsetY = 0;
+  var boxCenter = box.center;
 
   switch( mode ){
 
     case _exports.MODE_ALIGN_LEFT:
-      offsetX = centerOffsetX - boxWidth/2;
+      offsetX = boxCenter.x - box.width/2;
       break;
 
     case _exports.MODE_ALIGN_H_CENTER:
-      offsetX = centerOffsetX;
+      offsetX = boxCenter.x;
       break;
 
     case _exports.MODE_ALIGN_RIGHT:
-      offsetX = centerOffsetX + boxWidth/2;
+      offsetX = boxCenter.x + box.width/2;
       break;
 
     case _exports.MODE_ALIGN_CENTER:
-      offsetX = centerOffsetX;
-      offsetY = centerOffsetY;
+      offsetX = boxCenter.x;
+      offsetY = boxCenter.y;
       break;
 
     case _exports.MODE_ALIGN_TOP:
-      offsetY = centerOffsetY + boxHeight/2;
+      offsetY = boxCenter.y + box.height/2;
       break;
 
     case _exports.MODE_ALIGN_V_CENTER:
-      offsetY = centerOffsetY;
+      offsetY = boxCenter.y;
       break;
 
     case _exports.MODE_ALIGN_BOTTOM:
-      offsetY = centerOffsetY - boxHeight/2;
+      offsetY = boxCenter.y - box.height/2;
       break;
 
   }
@@ -152,8 +169,10 @@ function AlignShapes( mode, notRelativeToCanvas ){
       _stroke.path.forEach(function(pathPoint){
         // MessageLog.trace('>>'+pathPoint.x+', '+pathPoint.y);
         if( hasSelectedAnchors && !pathPoint.isSelected && !pathPoint.isSelectedControl ) return;
-          pathPoint.x -= offsetX;
-          pathPoint.y -= offsetY;
+
+        pathPoint.x -= offsetX;
+        pathPoint.y -= offsetY;
+
       });
 
       // MessageLog.trace('bounds: '+ JSON.stringify(bounds, true, ' ') );
@@ -164,6 +183,43 @@ function AlignShapes( mode, notRelativeToCanvas ){
 
   // TODO: make originally selected strokes selected
   
+  //
+  scene.endUndoRedoAccum();
+
+}
+
+
+//
+function Merge(){
+
+  var selectionData = getSelectionData();
+  if( !getSelectionData ) return;
+
+  var selectedDrawing = selectionData.selectedDrawing;
+  var selectedStrokesLayers = selectionData.selectedStrokesLayers;
+  var box = selectionData.box;
+  var boxCenter = box.center;
+
+  selectedDrawing.iterateArts(function(art){
+
+    selectedDrawing.modifyArtStrokes( art, selectedStrokesLayers[art], function(_stroke){
+      
+      if( !_stroke.selectedAnchors ) return;
+
+      _stroke.path.forEach(function(pathPoint){
+
+        if( !pathPoint.isSelected ) return;
+        
+        pathPoint.x = boxCenter.x;
+        pathPoint.y = boxCenter.y;
+
+      });
+
+      return true;
+    });
+
+  });
+
   //
   scene.endUndoRedoAccum();
 
