@@ -149,17 +149,22 @@ function AlignShapes( mode, notRelativeToCanvas ){
 
 
   selectedDrawing.iterateArts(function(art){
+
     selectedDrawing.modifyArtStrokes( art, selectedStrokesLayers[art], function(_stroke){
-       _stroke.path.forEach(function(pathPoint){
-        // MessageLog.trace('>>'+pathPoint.x+', '+pathPoint.y);      
-        pathPoint.x -= offsetX;
-        pathPoint.y -= offsetY;
-        
+       
+      var hasSelectedAnchors = !!_stroke.selectedAnchors;
+
+      _stroke.path.forEach(function(pathPoint){
+        // MessageLog.trace('>>'+pathPoint.x+', '+pathPoint.y);
+        if( hasSelectedAnchors && !pathPoint.isSelected && !pathPoint.isSelectedControl ) return;
+          pathPoint.x -= offsetX;
+          pathPoint.y -= offsetY;
       });
 
       // MessageLog.trace('bounds: '+ JSON.stringify(bounds, true, ' ') );
       return true;
     });
+    
   });
 
   // TODO: make originally selected strokes selected
