@@ -9,6 +9,14 @@ var FileSystem = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps
 var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
 //
 
+//
+exports = {
+	PS_OpenSceneFolder: PS_OpenSceneFolder,
+	PS_BackupScene: PS_BackupScene,
+	MODE_OPEN_ONLY: 'mode-open-only',
+	MODE_SHOW_FOLDER_ON_COMPLETE: 'mode-show-folder-on-complete',
+};
+
 /*
 Open Scene folder
 (windows only)
@@ -31,7 +39,7 @@ Options:
 ToDo:
 - Add save options
 */
-function PS_BackupScene(){
+function PS_BackupScene( mode ){
 
 	var projectPath = scene.currentProjectPathRemapped();
 	
@@ -46,6 +54,11 @@ function PS_BackupScene(){
 	var backupFullPath = projectParentDir+'\\'+backupRelativePath;
 	var fileDirCheck = FileSystem.checkFileDir( backupFullPath, true );
 	
+	if( KeyModifiers.IsShiftPressed() || mode == exports.MODE_OPEN_ONLY ){
+		FileSystem.openFolder( backupFullPath, true );
+		return;
+	}
+
 	var command = 'cmd /K ' + diskName+' && cd "'+projectParentDir+'" && zip -r "'+backupFullPath+'" "'+projectFolder+'"';
 	var proc = new Process2( command );
 	var result = proc.launchAndDetach();
@@ -57,16 +70,10 @@ function PS_BackupScene(){
 
     MessageLog.trace( 'PS_BackupScene: '+command );
 
-	if(KeyModifiers.IsControlPressed()){
+	if(KeyModifiers.IsControlPressed() || mode == exports.MODE_SHOW_FOLDER_ON_COMPLETE ){
 		FileSystem.openFolder( backupFullPath, true );
 	}else{
 		MessageBox.information("Scene is archived to: "+backupFullPath);
 	}
 
 }
-
-//
-exports = {
-	PS_OpenSceneFolder: PS_OpenSceneFolder,
-	PS_BackupScene: PS_BackupScene,
-};

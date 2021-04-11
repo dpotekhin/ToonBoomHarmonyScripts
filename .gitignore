@@ -8,7 +8,7 @@
 
 #
 !/ps/*
-!/PS_*.js
+!/PS_**
 
 script-icons/*
 !/script-icons/PS_**

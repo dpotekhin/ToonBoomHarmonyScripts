@@ -65,6 +65,10 @@ function PS_UpdateMasterController(){
 		}
 	}
 
+	//
+	scene.beginUndoRedoAccum('Update Master Controller');
+
+	//
 	selectedNodes.forEach(function(_node,i){
 
  		var nodeType = node.type(_node);
@@ -138,4 +142,8 @@ function PS_UpdateMasterController(){
  		node.showControls(_node, true);
 
 	});	
+
+	//
+	scene.endUndoRedoAccum();
+	
 }

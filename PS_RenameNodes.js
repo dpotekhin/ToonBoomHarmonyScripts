@@ -1,32 +1,52 @@
 /*
 Author: D.Potekhin (https://peppers-studio.ru)
-Version 0.1
-*/
+Version 0.2
 
-/*
+If in selection:
+- there is only one drawing element, then the script takes its name as the base name.
+- there is not a single drawing element or there are more than one of them, but there is only one group - it takes its name as the base name.
+- otherwise shows a dialog box for entering the base name.
+
+Options:
+- if you hold down the Control key, then the script forcibly displays a dialog box for entering the base name.
+
 TODO:
-- Use group as the name source if no drawing selected.
+- Option: rename nodes inside selected groups
 */
 
-function PS_RenameDrawingLinks(){
+
+//
+var SelectionUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/SelectionUtils.js"));
+
+//
+function PS_RenameNodes(){
 
 	MessageLog.clearLog(); // !!!
 
 	///
 	var namePaterns = {
 		
+		'READ': [
+			['-HND','{{NAME}}-HND'],
+			['-CTRL','{{NAME}}-CTRL'],
+			['','{{NAME}}'],
+		],
 		'PEG': '{{NAME}}-P',
 
+		'MasterController': '{{NAME}}-MC',
+		
 		'PointConstraint2': '{{NAME}}-TPC', // Two-Points-Constraint
 		'StaticConstraint': '{{NAME}}-ST', // Static-Transformation
 		'KinematicOutputModule': '{{NAME}}-KO', // KinematicOutput
+		'OffsetModule': '{{NAME}}-OFS', // OffsetModule
+		'CurveModule': '{{NAME}}-CRV', // CurveModule
 		'DeformTransformOut': '{{NAME}}-KOP', // Point-Kinematic-Output
 		'TransformLimit': '{{NAME}}-TL', // Transformation-Limit 
 		'PEG_APPLY3': '{{NAME}}-AIT', // Apply Image Transformation
 		'TransformGate': '{{NAME}}-TG', // Transform Gate
 		'FoldModule': '{{NAME}}-FLD', // Deformation-Fold
 		'AutoFoldModule': '{{NAME}}-AFD', // Auto-Fold
-		
+
 		'LAYER_SELECTOR': '{{NAME}}-LS',
 		'OVERLAY': '{{NAME}}-OL',
 		'UNDERLAY': '{{NAME}}-UL',
@@ -38,6 +58,7 @@ function PS_RenameDrawingLinks(){
 		
 		'COMPOSITE': '{{NAME}}-CMP',
 		'ImageSwitch': '{{NAME}}-IS', // Image Switch
+		'MATTE_RESIZE': '{{NAME}}-MTR',
 
 		'GROUP': [
 			['Deformation|-DFM', '{{NAME}}-DFM']
@@ -48,38 +69,45 @@ function PS_RenameDrawingLinks(){
 
 
 	//
-	var n = selection.numberOfNodesSelected();
+	var mainNode, mainName;
 
-	var selectedDrawings = [];
-	var selectedNodes = [];	
+ 	if( !KeyModifiers.IsControlPressed() ){ // If the Control key is not pressed get the Main Name from the Selection
 
-	// Get Drawning nodes
-	for (i = 0; i < n; ++i)
-	{
- 		var selNode = selection.selectedNode(i);
- 		MessageLog.trace(i+' => '+node.getName(selNode)+' ['+node.type(selNode)+']' );
- 		if( node.type(selNode) == 'READ' ) selectedDrawings.push(selNode);
- 		else{
- 			selectedNodes.push(selNode);
- 		}
+	 	var selectedDrawings = SelectionUtils.filterNodesByType( true, 'READ', false );
+	 	// MessageLog.trace("selectedDrawings "+selectedDrawings);
+
+	 	if(selectedDrawings.length!==1){ // No Single Drawing selected
+			// MessageBox.warning("Please select ONLY ONE Drawing node.",0,0,0,"Error");
+			var selectedGroups = SelectionUtils.filterNodesByType( true, 'GROUP', false );
+			// MessageLog.trace("selectedGroups "+selectedGroups);
+			
+			if(selectedGroups.length===1){ // No Single Group selected
+				mainNode = selectedGroups[0];
+			}
+	 		
+	 	}else{
+	 		mainNode = selectedDrawings[0];
+	 	}
+
+	 	if( mainNode ) mainName = node.getName(mainNode);
  	}
 
- 	if(selectedDrawings.length!==1){
-		MessageBox.warning("Please select ONLY ONE Drawing node.",0,0,0,"Error");
- 		return;
- 	}
+ 	
+ 	if( !mainName ) mainName = Input.getText('Enter name');
+
+	if( !mainName ) return;
+
+	MessageLog.trace('Name: '+mainName );
+
 
 	scene.beginUndoRedoAccum('Rename Drawing Links');
 
-	// 
- 	var drawingNode = selectedDrawings[0];
- 	var drawingName = node.getName(drawingNode);
-
  	// Links are ignored - so select only nodes to be renamed
- 	selectedNodes.forEach(function( _node ){
- 		renameNode( _node, drawingName );
+ 	SelectionUtils.eachSelectedNode(function( _node, name ){
+ 		if( name === mainName ) return;
+ 		MessageLog.trace(name);
+ 		renameNode( _node, mainName );
  	});
-
  	
 
  	/*
@@ -95,27 +123,27 @@ function PS_RenameDrawingLinks(){
  	
  	// Collect nodes by a drawning
  	selectedDrawings.forEach(function(drawingData,i){
- 		var drawingNode = drawingData.drawingNode;
- 		var drawingName = node.getName(drawingNode);
- 		MessageLog.trace('==> '+i+': Drawing: '+drawingName );
+ 		var mainNode = drawingData.mainNode;
+ 		var mainName = node.getName(mainNode);
+ 		MessageLog.trace('==> '+i+': Drawing: '+mainName );
 
  		// Go throught parents
- 		var inputNodes = getAllInputNodes( drawingNode, isNodeInSelectionList );
+ 		var inputNodes = getAllInputNodes( mainNode, isNodeInSelectionList );
  		//drawingData.inputs = inputNodes;
  		MessageLog.trace( 'Input Nodes: '+inputNodes.join('\n') );
 
  		inputNodes.forEach(function(inputNode){
- 			renameNode( inputNode, drawingName );
+ 			renameNode( inputNode, mainName );
  		});
 
 
  		// Go through the output nodes
- 		var outputNodes = getAllOutputNodes( drawingNode, isNodeInSelectionList );
+ 		var outputNodes = getAllOutputNodes( mainNode, isNodeInSelectionList );
  		//drawingData.outputs = outputNodes;
  		MessageLog.trace( 'Output Nodes: '+outputNodes.join('\n') );
 
  		outputNodes.forEach(function(outputNode){
- 			renameNode( outputNode, drawingName );
+ 			renameNode( outputNode, mainName );
  		});
  		// var parent = node.parentNode(exNode); // Parent Node
  	});
@@ -153,11 +181,16 @@ function PS_RenameDrawingLinks(){
 			var namePatternExpressions = namePattern;
 			namePattern = undefined;
 
-			namePatternExpressions.forEach(function(namePatternExpression){
+			namePatternExpressions.every(function(namePatternExpression){ // Find very first matched pattern
+				if( !namePatternExpression[0] ) namePatternExpression[0] = '.*';
 				var regexp = new RegExp(namePatternExpression[0],'gi');
 				var match = nodeName.match( regexp );
 				MessageLog.trace( nodeName+' => '+ match );
-				if( match ) namePattern = namePatternExpression[1];
+				if( match ) {
+					namePattern = namePatternExpression[1];
+					return false;
+				}
+				return true;
 			});
 
 			if( !namePattern ){
