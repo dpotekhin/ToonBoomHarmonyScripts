@@ -10,15 +10,8 @@ ToDo:
 */
 
 //
-var AlignPaths = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_PathTools-Resources/AlignPaths.js"));
+var _AlignPaths = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_PathTools-Resources/AlignPaths.js"));
 var pModal = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/pModal.js"));
-
-
-
-function PS_test(){
-  AlignPaths.AlignLeft();
-}
-
 
 
 //
@@ -32,6 +25,8 @@ function PS_ShowPathToolsModal(){
   var scriptVer = '0.3';
   //
 
+  var AlignPaths = _AlignPaths;
+  MessageLog.trace('AlignPaths'+AlignPaths );
   var btnHeight = 30;
   var iconPath = fileMapper.toNativePath(specialFolders.userScripts+"/PS_PathTools-Resources/icons/");
   var hGroupStyle = 'QGroupBox{ position: relative; border: none; margin: 4px 0; padding: 4px 0;}';
@@ -79,7 +74,7 @@ function PS_ShowPathToolsModal(){
   var modifyGroup = modal.addGroup( 'Modify:', ui, true, hGroupStyle );
 
   var btnCollapse = modal.addButton( '', modifyGroup, btnHeight, btnHeight, iconPath+'merge.png',
-    function(){
+    function (){
       AlignPaths.Merge( KeyModifiers.IsControlPressed() );
     },
     'Merge curve points'
