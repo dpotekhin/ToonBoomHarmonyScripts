@@ -78,7 +78,13 @@ function PS_ShowPathToolsModal(){
   // Modify
   var modifyGroup = modal.addGroup( 'Modify:', ui, true, hGroupStyle );
 
-  var btnCollapse = modal.addButton( '', modifyGroup, btnHeight, btnHeight, iconPath+'merge.png', AlignPaths.Merge, 'Merge curve points' );
+  var btnCollapse = modal.addButton( '', modifyGroup, btnHeight, btnHeight, iconPath+'merge.png',
+    function(){
+      AlignPaths.Merge( KeyModifiers.IsControlPressed() );
+    },
+    'Merge curve points'
+    +'\nHold down the Control key to also merge the Control points.'
+  );
   
   modifyGroup.mainLayout.addStretch();
 

@@ -232,7 +232,7 @@ function FlipVCenter(){
 
 
 //
-function Merge(){
+function Merge( mergeControlPoints ){
 
   var selectionData = getSelectionData();
   if( !getSelectionData ) return;
@@ -250,7 +250,7 @@ function Merge(){
 
       _stroke.path.forEach(function(pathPoint){
 
-        if( !pathPoint.isSelected ) return;
+        if( !(pathPoint.isSelected || (mergeControlPoints && pathPoint.isSelectedControl) ) ) return;
         
         pathPoint.x = boxCenter.x;
         pathPoint.y = boxCenter.y;
