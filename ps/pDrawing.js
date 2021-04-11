@@ -127,7 +127,7 @@ pDrawing.prototype.getSelectedStrokesLayers = function(){
         _layer.strokes[__stroke.strokeIndex].isSelected = true; // mark stroke as Selected
         // MessageLog.trace('!!! '+__stroke.strokeIndex+', '+JSON.stringify(_layer.strokes[__stroke.strokeIndex],true,'  ') );
 
-        if( hasSelectedAnchors ) _layer.strokes.forEach(function(_stroke){
+        if( hasSelectedAnchors && !_layer.strokes[0].selectedAnchors ) _layer.strokes.forEach(function(_stroke){
           _stroke.selectedAnchors = [];
         });
 
