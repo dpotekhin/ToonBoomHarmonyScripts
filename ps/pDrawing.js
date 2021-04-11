@@ -332,7 +332,8 @@ pDrawing.prototype.getStrokesBox = function( _strokesLayers ){
               currentPoint = [point];
 
             }else{
-              currentPoint.push(point);
+              if( currentPoint ) currentPoint.push(point);
+              else currentPoint = [point];
             }
 
           });

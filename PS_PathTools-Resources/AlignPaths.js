@@ -79,13 +79,9 @@ function getSelectionData(){
   // MessageLog.trace('selectedStrokesLayers >> 0:'+selectedStrokesLayers[0].length+', 1:'+selectedStrokesLayers[1].length+', 2:'+selectedStrokesLayers[2].length+', 3:'+selectedStrokesLayers[3].length);
   // return;
 
-  ///
-  scene.beginUndoRedoAccum("Align shape");
-
   var box = selectedDrawing.getStrokesBox( selectedStrokesLayers );
   if( box.width === undefined ) {
     MessageLog.trace('!!! box is empty: '+ box );
-    scene.endUndoRedoAccum();
     return;
   }
 
@@ -108,9 +104,13 @@ function AlignShapes( mode, notRelativeToCanvas ){
   
   if( notRelativeToCanvas === undefined && KeyModifiers.IsControlPressed() ) notRelativeToCanvas = true;
 
+  scene.beginUndoRedoAccum("Align shape");
 
   var selectionData = getSelectionData();
-  if( !getSelectionData ) return;
+  if( !getSelectionData ) {
+    scene.endUndoRedoAccum();
+    return;
+  }
 
   var selectedDrawing = selectionData.selectedDrawing;
   var selectedStrokesLayers = selectionData.selectedStrokesLayers;
@@ -187,8 +187,12 @@ function AlignShapes( mode, notRelativeToCanvas ){
 //
 function FlipCenter( horizontally ){
 
+  scene.beginUndoRedoAccum("Flip shape");
   var selectionData = getSelectionData();
-  if( !getSelectionData ) return;
+  if( !getSelectionData ) {
+    scene.endUndoRedoAccum();
+    return;
+  }
 
   var selectedDrawing = selectionData.selectedDrawing;
   var selectedStrokesLayers = selectionData.selectedStrokesLayers;
@@ -234,8 +238,13 @@ function FlipVCenter(){
 //
 function Merge( mergeControlPoints ){
 
+  scene.beginUndoRedoAccum("Merge");
+
   var selectionData = getSelectionData();
-  if( !getSelectionData ) return;
+  if( !getSelectionData ) {
+    scene.endUndoRedoAccum();
+    return;
+  }
 
   var selectedDrawing = selectionData.selectedDrawing;
   var selectedStrokesLayers = selectionData.selectedStrokesLayers;
