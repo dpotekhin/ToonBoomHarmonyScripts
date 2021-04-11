@@ -157,7 +157,9 @@ function AlignShapes( mode, notRelativeToCanvas ){
   selectedDrawing.iterateArts(function(art){
 
     selectedDrawing.modifyArtStrokes( art, selectedStrokesLayers[art], function(_stroke){
-       
+            
+      if( !_stroke.isSelected ) return;
+
       var hasSelectedAnchors = !!_stroke.selectedAnchors;
 
       _stroke.path.forEach(function(pathPoint){
@@ -203,6 +205,8 @@ function FlipCenter( horizontally ){
 
     selectedDrawing.modifyArtStrokes( art, selectedStrokesLayers[art], function(_stroke){
       
+      if( !_stroke.isSelected ) return;
+
       var hasSelectedAnchors = !!_stroke.selectedAnchors;
 
       _stroke.path.forEach(function(pathPoint){

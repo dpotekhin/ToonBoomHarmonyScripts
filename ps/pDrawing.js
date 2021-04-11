@@ -97,20 +97,20 @@ pDrawing.prototype.getSelectedStrokesLayers = function(){
     config.art = art;
 
     //
-    var selectedStrokes = Drawing.selection.get(config);
-    var selectedLayers = selectedStrokes.selectedLayers;
-    if( !selectedStrokes.selectedStrokes.length ){
+    var selectionData = Drawing.selection.get(config);
+    var selectedLayers = selectionData.selectedLayers;
+    if( !selectionData.selectedStrokes.length ){
       selectedStrokesLayers.push([]);
       return;
     }
     
-    var hasSelectedAnchors = !!selectedStrokes.selectedAnchors;
+    var hasSelectedAnchors = !!selectionData.selectedAnchors;
 
     //
     var strokes = Drawing.query.getStrokes(config);
 
     //
-    // MessageLog.trace('\n\n pDrawing.getSelectedStrokesLayers: selectedStrokes: '+JSON.stringify(selectedStrokes, true, '  ') );
+    // MessageLog.trace('\n\n pDrawing.getSelectedStrokesLayers: selectionData: '+JSON.stringify(selectionData, true, '  ') );
     // MessageLog.trace('\n\n pDrawing.getSelectedStrokesLayers: strokes: '+JSON.stringify(strokes, true, '  ') );
     //
     
@@ -119,20 +119,23 @@ pDrawing.prototype.getSelectedStrokesLayers = function(){
       if( selectedLayers.indexOf(_layer.index) === -1 ) return false; // skip the current layer if it is not in the selection list
 
       // Check that layers's vertices are selected
-      selectedStrokes.selectedStrokes.forEach(function(__layer){
+      selectionData.selectedStrokes.forEach(function(__stroke){
 
-        if( __layer.layer !== _layer.index || !__layer.selectedAnchors || !__layer.selectedAnchors.length ) return;
-        // _layer.selectedAnchors = __layer.selectedAnchors;
+        if( __stroke.layer !== _layer.index ) return;
+        if( __stroke.selectedAnchors && !__stroke.selectedAnchors.length ) return;
+
+        _layer.strokes[__stroke.strokeIndex].isSelected = true; // mark stroke as Selected
+        // MessageLog.trace('!!! '+__stroke.strokeIndex+', '+JSON.stringify(_layer.strokes[__stroke.strokeIndex],true,'  ') );
 
         if( hasSelectedAnchors ) _layer.strokes.forEach(function(_stroke){
           _stroke.selectedAnchors = [];
         });
 
-        __layer.selectedAnchors.forEach(function(_anchor){
+        if( __stroke.selectedAnchors ) __stroke.selectedAnchors.forEach(function(_anchor){
 
-          var _strokes = _layer.strokes[__layer.strokeIndex];
+          var _strokes = _layer.strokes[__stroke.strokeIndex];
           var selectedAnchors = _strokes.selectedAnchors;
-          // MessageLog.trace('\n\n >>> '+__layer.strokeIndex+' >>> '+JSON.stringify(_layer.strokes, true, '  ') );
+          // MessageLog.trace('\n\n >>> '+__stroke.strokeIndex+' >>> '+JSON.stringify(_layer.strokes, true, '  ') );
           selectedAnchors.push(_anchor);
           
           var vertexData = _strokes.path[_anchor.vertexIndex];
@@ -157,6 +160,7 @@ pDrawing.prototype.getSelectedStrokesLayers = function(){
       });
 
       return true;
+
     });
 
     selectedStrokesLayers.push( strokeLayers );
