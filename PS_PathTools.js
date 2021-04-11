@@ -35,8 +35,10 @@ function PS_ShowPathToolsModal(){
   var btnHeight = 30;
   var iconPath = fileMapper.toNativePath(specialFolders.userScripts+"/PS_PathTools-Resources/icons/");
   var hGroupStyle = 'QGroupBox{ position: relative; border: none; margin: 4px 0; padding: 4px 0;}';
+  var forceWindowInstances = KeyModifiers.IsControlPressed();
+
   //
-  var modal = new pModal( scriptName + " v" + scriptVer, 290, 200, true );  
+  var modal = new pModal( scriptName + " v" + scriptVer, 290, 200, forceWindowInstances ? false : true );  
   if( !modal.ui ){
     return;
   }
