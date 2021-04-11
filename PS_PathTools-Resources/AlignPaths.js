@@ -79,7 +79,7 @@ function getSelectionData(){
   // MessageLog.trace('selectedStrokesLayers >> 0:'+selectedStrokesLayers[0].length+', 1:'+selectedStrokesLayers[1].length+', 2:'+selectedStrokesLayers[2].length+', 3:'+selectedStrokesLayers[3].length);
   // return;
 
-  var box = selectedDrawing.getStrokesBox( selectedStrokesLayers );
+  var box = selectedDrawing.getStrokesBox( selectedStrokesLayers, true );
   if( box.width === undefined ) {
     MessageLog.trace('!!! box is empty: '+ box );
     return;

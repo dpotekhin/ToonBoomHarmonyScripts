@@ -275,7 +275,7 @@ ToDo:
 - remove the Temp Drawing after calculation?
 
 */
-pDrawing.prototype.getStrokesBox = function( _strokesLayers ){
+pDrawing.prototype.getStrokesBox = function( _strokesLayers, useOnlySelectedStrokes ){
   
   var _this = this;
 
@@ -297,6 +297,8 @@ pDrawing.prototype.getStrokesBox = function( _strokesLayers ){
       artStroke.strokes.forEach(function(stroke,stroke_i){
         //MessageLog.trace( art+' ) '+artStroke_i+' > '+stroke.path.length );
         
+        if( useOnlySelectedStrokes && !stroke.isSelected ) return;
+
         var currentPoint;
 
         if( stroke.selectedAnchors ){ // Some vertex is selected
