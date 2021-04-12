@@ -1,3 +1,8 @@
+/*
+Author: D.Potekhin (d@peppers-studio.ru)
+Version: 0.5
+*/
+
 function pModal( title, width, height, unique ){
 
   this.create(title, width, height, unique);
@@ -82,11 +87,12 @@ pModal.prototype.addGroup = function( title, parent, horizontalLayout, style ){
 
 
 //
-pModal.prototype.addButton = function( title, parent, width, height, icon, onReleased ){
+pModal.prototype.addButton = function( title, parent, width, height, icon, onReleased, toolTip ){
   
   var btn = new QPushButton( title );
 
   btn.setMaximumSize( width, height );
+  if( toolTip ) btn.toolTip = toolTip;
 
   //
   if( icon ){
