@@ -43,7 +43,7 @@ function PS_ExpressionEditorModal( _node ){
 
   var searhGroup = modal.addGroup( '', nameGroup, true, true );
 
-  var searcLabel = modal.addLabel( 'Name:', searhGroup, 65, btnHeight, Qt.AlignRight | Qt.AlignVCenter );
+  var searchLabel = modal.addLabel( 'Name:', searhGroup, 65, btnHeight, Qt.AlignRight | Qt.AlignVCenter );
 
   // Search Field
   var searchField = modal.searchField = new QLineEdit(searhGroup); // TODO: to implement the Expression list filter
