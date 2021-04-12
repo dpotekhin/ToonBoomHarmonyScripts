@@ -43,6 +43,7 @@ function PS_RenameNodes(){
 		'DeformTransformOut': '{{NAME}}-KOP', // Point-Kinematic-Output
 		'TransformLimit': '{{NAME}}-TL', // Transformation-Limit 
 		'PEG_APPLY3': '{{NAME}}-AIT', // Apply Image Transformation
+		'PEG_APPLY3_V2': '{{NAME}}-APT', // Apply Peg Transformation
 		'TransformGate': '{{NAME}}-TG', // Transform Gate
 		'FoldModule': '{{NAME}}-FLD', // Deformation-Fold
 		'AutoFoldModule': '{{NAME}}-AFD', // Auto-Fold

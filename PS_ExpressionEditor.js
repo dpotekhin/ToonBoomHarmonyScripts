@@ -3,7 +3,6 @@ Author: D.Potekhin (d@peppers-studio.ru)
 Version: 0.2
 
 ToDo:
-- to implement deletion of the selected expression
 - to implement renaming of the selected expression
 */
 
