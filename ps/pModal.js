@@ -91,7 +91,12 @@ pModal.prototype.addButton = function( title, parent, width, height, icon, onRel
   
   var btn = new QPushButton( title );
 
-  btn.setMaximumSize( width, height );
+  if( width ){
+    btn.setFixedSize( width, height );
+  }else{
+    btn.setMaximumSize( width, height );
+  }
+
   if( toolTip ) btn.toolTip = toolTip;
 
   //
