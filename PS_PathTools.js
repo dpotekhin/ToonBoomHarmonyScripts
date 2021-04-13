@@ -26,7 +26,6 @@ function PS_ShowPathToolsModal(){
   //
 
   var AlignPaths = _AlignPaths;
-  MessageLog.trace('AlignPaths'+AlignPaths );
   var btnHeight = 30;
   var iconPath = fileMapper.toNativePath(specialFolders.userScripts+"/PS_PathTools-Resources/icons/");
   var hGroupStyle = 'QGroupBox{ position: relative; border: none; margin: 4px 0; padding: 4px 0;}';

@@ -106,79 +106,84 @@ function AlignShapes( mode, notRelativeToCanvas ){
 
   scene.beginUndoRedoAccum("Align shape");
 
-  var selectionData = getSelectionData();
-  if( !getSelectionData ) {
-    scene.endUndoRedoAccum();
-    return;
-  }
+  // try{
+    var selectionData = getSelectionData();
+    if( !selectionData ) {
+      scene.endUndoRedoAccum();
+      return;
+    }
 
-  var selectedDrawing = selectionData.selectedDrawing;
-  var selectedStrokesLayers = selectionData.selectedStrokesLayers;
-  var box = selectionData.box;
+    var selectedDrawing = selectionData.selectedDrawing;
+    var selectedStrokesLayers = selectionData.selectedStrokesLayers;
+    var box = selectionData.box;
 
-  var offsetX = 0;
-  var offsetY = 0;
-  var boxCenter = box.center;
+    var offsetX = 0;
+    var offsetY = 0;
+    var boxCenter = box.center;
 
-  switch( mode ){
+    switch( mode ){
 
-    case _exports.MODE_ALIGN_LEFT:
-      offsetX = boxCenter.x - box.width/2;
-      break;
+      case _exports.MODE_ALIGN_LEFT:
+        offsetX = boxCenter.x - box.width/2;
+        break;
 
-    case _exports.MODE_ALIGN_H_CENTER:
-      offsetX = boxCenter.x;
-      break;
+      case _exports.MODE_ALIGN_H_CENTER:
+        offsetX = boxCenter.x;
+        break;
 
-    case _exports.MODE_ALIGN_RIGHT:
-      offsetX = boxCenter.x + box.width/2;
-      break;
+      case _exports.MODE_ALIGN_RIGHT:
+        offsetX = boxCenter.x + box.width/2;
+        break;
 
-    case _exports.MODE_ALIGN_CENTER:
-      offsetX = boxCenter.x;
-      offsetY = boxCenter.y;
-      break;
+      case _exports.MODE_ALIGN_CENTER:
+        offsetX = boxCenter.x;
+        offsetY = boxCenter.y;
+        break;
 
-    case _exports.MODE_ALIGN_TOP:
-      offsetY = boxCenter.y + box.height/2;
-      break;
+      case _exports.MODE_ALIGN_TOP:
+        offsetY = boxCenter.y + box.height/2;
+        break;
 
-    case _exports.MODE_ALIGN_V_CENTER:
-      offsetY = boxCenter.y;
-      break;
+      case _exports.MODE_ALIGN_V_CENTER:
+        offsetY = boxCenter.y;
+        break;
 
-    case _exports.MODE_ALIGN_BOTTOM:
-      offsetY = boxCenter.y - box.height/2;
-      break;
+      case _exports.MODE_ALIGN_BOTTOM:
+        offsetY = boxCenter.y - box.height/2;
+        break;
 
-  }
-  // MessageLog.trace('box: '+JSON.stringify(box, true, '  ')+', offsetX: '+offsetX+', '+offsetY );
+    }
+    // MessageLog.trace('box: '+JSON.stringify(box, true, '  ')+', offsetX: '+offsetX+', '+offsetY );
 
-  selectedDrawing.iterateArts(function(art){
+    selectedDrawing.iterateArts(function(art){
 
-    selectedDrawing.modifyArtStrokes( art, selectedStrokesLayers[art], function(_stroke){
-            
-      if( !_stroke.isSelected ) return;
+      selectedDrawing.modifyArtStrokes( art, selectedStrokesLayers[art], function(_stroke){
+              
+        if( !_stroke.isSelected ) return;
 
-      var hasSelectedAnchors = !!_stroke.selectedAnchors;
+        var hasSelectedAnchors = !!_stroke.selectedAnchors;
 
-      _stroke.path.forEach(function(pathPoint){
-        // MessageLog.trace('>>'+pathPoint.x+', '+pathPoint.y);
-        if( hasSelectedAnchors && !pathPoint.isSelected && !pathPoint.isSelectedControl ) return;
+        _stroke.path.forEach(function(pathPoint){
+          // MessageLog.trace('>>'+pathPoint.x+', '+pathPoint.y);
+          if( hasSelectedAnchors && !pathPoint.isSelected && !pathPoint.isSelectedControl ) return;
 
-        pathPoint.x -= offsetX;
-        pathPoint.y -= offsetY;
+          pathPoint.x -= offsetX;
+          pathPoint.y -= offsetY;
 
+        });
+
+        // MessageLog.trace('bounds: '+ JSON.stringify(bounds, true, ' ') );
+        return true;
       });
 
-      // MessageLog.trace('bounds: '+ JSON.stringify(bounds, true, ' ') );
-      return true;
     });
 
-  });
+  // } catch(err){
+  //   MessageLog.trace('Error: '+err );
+  // }
 
   // TODO: make originally selected strokes selected
-  
+
   //
   scene.endUndoRedoAccum();
 
@@ -190,42 +195,49 @@ function AlignShapes( mode, notRelativeToCanvas ){
 function FlipCenter( horizontally ){
 
   scene.beginUndoRedoAccum("Flip shape");
-  var selectionData = getSelectionData();
-  if( !getSelectionData ) {
-    scene.endUndoRedoAccum();
-    return;
-  }
 
-  var selectedDrawing = selectionData.selectedDrawing;
-  var selectedStrokesLayers = selectionData.selectedStrokesLayers;
-  var box = selectionData.box;
-  // var boxCenter = box.center;
+  // try{
+    var selectionData = getSelectionData();
+    if( !selectionData ) {
+      scene.endUndoRedoAccum();
+      return;
+    }
 
-  selectedDrawing.iterateArts(function(art){
+    var selectedDrawing = selectionData.selectedDrawing;
+    var selectedStrokesLayers = selectionData.selectedStrokesLayers;
+    var box = selectionData.box;
+    // var boxCenter = box.center;
 
-    selectedDrawing.modifyArtStrokes( art, selectedStrokesLayers[art], function(_stroke){
-      
-      if( !_stroke.isSelected ) return;
+    selectedDrawing.iterateArts(function(art){
 
-      var hasSelectedAnchors = !!_stroke.selectedAnchors;
+      selectedDrawing.modifyArtStrokes( art, selectedStrokesLayers[art], function(_stroke){
+        
+        if( !_stroke.isSelected ) return;
 
-      _stroke.path.forEach(function(pathPoint){
+        var hasSelectedAnchors = !!_stroke.selectedAnchors;
 
-        if( hasSelectedAnchors && !pathPoint.isSelected && !pathPoint.isSelectedControl ) return;
+        _stroke.path.forEach(function(pathPoint){
 
-        if( horizontally ) pathPoint.x = -pathPoint.x;
-        else pathPoint.y = -pathPoint.y;
+          if( hasSelectedAnchors && !pathPoint.isSelected && !pathPoint.isSelectedControl ) return;
+
+          if( horizontally ) pathPoint.x = -pathPoint.x;
+          else pathPoint.y = -pathPoint.y;
+
+        });
+
+        return true;
 
       });
 
-      return true;
-
     });
 
-  });
+  // } catch(err){
+  //   MessageLog.trace('Error: '+err );
+  // }
 
-  //
+
   scene.endUndoRedoAccum();
+
 }
 
 function FlipHCenter(){
@@ -244,36 +256,42 @@ function Merge( mergeControlPoints ){
 
   scene.beginUndoRedoAccum("Merge");
 
-  var selectionData = getSelectionData();
-  if( !getSelectionData ) {
-    scene.endUndoRedoAccum();
-    return;
-  }
+  // try{
 
-  var selectedDrawing = selectionData.selectedDrawing;
-  var selectedStrokesLayers = selectionData.selectedStrokesLayers;
-  var box = selectionData.box;
-  var boxCenter = box.center;
+    var selectionData = getSelectionData();
+    if( !selectionData ) {
+      scene.endUndoRedoAccum();
+      return;
+    }
 
-  selectedDrawing.iterateArts(function(art){
+    var selectedDrawing = selectionData.selectedDrawing;
+    var selectedStrokesLayers = selectionData.selectedStrokesLayers;
+    var box = selectionData.box;
+    var boxCenter = box.center;
 
-    selectedDrawing.modifyArtStrokes( art, selectedStrokesLayers[art], function(_stroke){
-      
-      if( !_stroke.selectedAnchors ) return;
+    selectedDrawing.iterateArts(function(art){
 
-      _stroke.path.forEach(function(pathPoint){
-
-        if( !(pathPoint.isSelected || (mergeControlPoints && pathPoint.isSelectedControl) ) ) return;
+      selectedDrawing.modifyArtStrokes( art, selectedStrokesLayers[art], function(_stroke){
         
-        pathPoint.x = boxCenter.x;
-        pathPoint.y = boxCenter.y;
+        if( !_stroke.selectedAnchors ) return;
 
+        _stroke.path.forEach(function(pathPoint){
+
+          if( !(pathPoint.isSelected || (mergeControlPoints && pathPoint.isSelectedControl) ) ) return;
+          
+          pathPoint.x = boxCenter.x;
+          pathPoint.y = boxCenter.y;
+
+        });
+
+        return true;
       });
 
-      return true;
     });
 
-  });
+  // } catch(err){
+  //   MessageLog.trace('Error: '+err );
+  // }
 
   //
   scene.endUndoRedoAccum();
