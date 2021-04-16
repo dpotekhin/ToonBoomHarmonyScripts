@@ -53,6 +53,7 @@ function PS_RenameNodes(){
 		'UNDERLAY': '{{NAME}}-UL',
 		'LINE_ART': '{{NAME}}-LA',
 		'COLOR_ART': '{{NAME}}-CA',
+		'TbdColorSelector': '{{NAME}}-CS',
 		'CUTTER': '{{NAME}}-CUT',
 		'AutoPatchModule': '{{NAME}}-AP',
 		'VISIBILITY': '{{NAME}}-VIS',
@@ -60,6 +61,8 @@ function PS_RenameNodes(){
 		'COMPOSITE': '{{NAME}}-CMP',
 		'ImageSwitch': '{{NAME}}-IS', // Image Switch
 		'MATTE_RESIZE': '{{NAME}}-MTR',
+		'BLEND_MODE_MODULE': '{{NAME}}-BLD',
+		'FADE': '{{NAME}}-TRS',
 
 		'GROUP': [
 			['Deformation|-DFM', '{{NAME}}-DFM']
