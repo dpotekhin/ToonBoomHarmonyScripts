@@ -3,7 +3,7 @@ Author: D.Potekhin (d@peppers-studio.ru)
 Version: 0.1
 
 ToDo:
-- 
+- to filter out not Latin letters from the entered name
 */
 
 
@@ -40,9 +40,17 @@ function PS_CreateDrawingNode(){
 		return;
 	}
 
-	var name = Input.getText('Drawing Name', 'Drawing');
-	if( !name ) {
-		MessageBox.information('Drawing name required.',0,0,0);
+	var name;
+	var _name = Input.getText('Drawing Name', 'Drawing');
+	if(_name) {
+		_name = _name.trim();
+		name = _name.replace(/[\u0250-\ue007]/g, '');
+	}
+	
+	// MessageLog.trace("Name: ["+_name+'] => ['+name+']');
+
+	if( !name || _name.length !== name.length ) {
+		MessageBox.information('Invalid Drawing name: "'+_name+'"',0,0,0,'Error');
 		return;
 	}
 	
@@ -53,7 +61,13 @@ function PS_CreateDrawingNode(){
 	if( !_node ){
 		scene.cancelUndoRedoAccum();
 		return;
-	}
+	}	
+	
+	// Switch off the Animate Using Animation Tools flag
+	node.getAttr(_node,1,'CAN_ANIMATE').setValue( false );
+	// Set up the Separate flags
+	node.getAttr(_node,1,'OFFSET.SEPARATE').setValue( true );
+	node.getAttr(_node,1,'SCALE.SEPARATE').setValue( true );
 
 	var columnName = _getAvailableColumnName( _node.split('/').pop() );
 	if( !columnName ){
@@ -74,7 +88,7 @@ function PS_CreateDrawingNode(){
 	var exposure = 'Default';
 	Drawing.create(elementId, exposure, true);
 	column.setEntry(columnName, 1, 1, exposure);
-	column.fillEmptyCels(columnName, 1, frame.numberOf() );
+	column.fillEmptyCels(columnName, 1, frame.numberOf()+1 );
 	
 	column.update();
 
