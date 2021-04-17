@@ -87,6 +87,51 @@ pModal.prototype.addGroup = function( title, parent, horizontalLayout, style ){
 
 
 //
+pModal.prototype.addNumberInput = function( labelText, parent, width, height, defaultValue, onChange ){
+
+  if( labelText ){
+    var label = new QLabel();
+    parent.mainLayout.addWidget( label, 0, 0 );
+    label.text = labelText;
+  }
+
+  var _input = new QLineEdit();
+  parent.mainLayout.addWidget( _input, 0, 0 );
+  _input.setFixedSize( width, height );
+  _input.text = defaultValue || 0;
+  _input.setValidator( new QDoubleValidator(_input) );
+  _input.label = label;
+
+  if( onChange ){
+    _input.textChanged.connect( _input, onChange );
+  }
+
+  return _input;
+
+}
+
+
+//
+pModal.prototype.addCheckBox = function( labelText, parent, defaultValue, onChange ){
+  //
+  var checkBox = new QCheckBox();
+  checkBox.setChecked( defaultValue );
+  parent.mainLayout.addWidget( checkBox, 0, 0 );
+  if( onChange ) checkBox.stateChanged.connect( checkBox, onChange );
+
+  if( labelText ){
+    var _label = new QLabel();
+    parent.mainLayout.addWidget( _label, 0, 0 );
+    _label.text = labelText;
+    checkBox.label = _label;
+  }
+
+  return checkBox;
+
+}
+
+
+//
 pModal.prototype.addButton = function( title, parent, width, height, icon, onReleased, toolTip ){
   
   var btn = new QPushButton( title );
@@ -149,6 +194,16 @@ pModal.prototype.addVLine = function( height, parent ){
   line.setMinimumSize(2,height);
   line.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed);
   line.setStyleSheet("background-color: #303030; border-left: 1px solid #303030; border-right: 1px solid #505050;");
+  parent.mainLayout.addWidget(line,0,0);
+}
+
+
+//
+pModal.prototype.addHLine = function( width, parent ){
+  var line = new QWidget;
+  line.setMinimumSize(width,1);
+  line.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed);
+  line.setStyleSheet("background-color: #303030; border-top: 1px solid #303030; border-bottom: 1px solid #505050;");
   parent.mainLayout.addWidget(line,0,0);
 }
 
