@@ -14,6 +14,12 @@ var _AlignPaths = require(fileMapper.toNativePath(specialFolders.userScripts+"/P
 var pModal = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/pModal.js"));
 
 
+/*
+function PS_test(){
+  _AlignPaths.AlignLeft();
+}
+*/
+
 //
 function PS_ShowPathToolsModal(){
 
@@ -22,7 +28,7 @@ function PS_ShowPathToolsModal(){
 
   //
   var scriptName = 'Path Tools';
-  var scriptVer = '0.3';
+  var scriptVer = '0.31';
   //
 
   var AlignPaths = _AlignPaths;

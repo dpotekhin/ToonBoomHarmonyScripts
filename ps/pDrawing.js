@@ -1,6 +1,6 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version: 0.1
+Version: 0.2
 
 ToDo:
 - 
@@ -91,6 +91,8 @@ pDrawing.prototype.getSelectedStrokesLayers = function(){
 
   var selectedStrokesLayers = [];
   var selectedStrokeLayerCount = 0;
+  var currentSelectionData = [];
+
   // for(var art=0; art<4; art++){
   this.iterateArts(function(art){
     
@@ -105,12 +107,13 @@ pDrawing.prototype.getSelectedStrokesLayers = function(){
     }
     
     var hasSelectedAnchors = !!selectionData.selectedAnchors;
+    currentSelectionData.push(selectionData);
 
     //
     var strokes = Drawing.query.getStrokes(config);
 
     //
-    // MessageLog.trace('\n\n pDrawing.getSelectedStrokesLayers: selectionData: '+JSON.stringify(selectionData, true, '  ') );
+    MessageLog.trace('\n\n pDrawing.getSelectedStrokesLayers: selectionData: '+JSON.stringify(selectionData, true, '  ') );
     // MessageLog.trace('\n\n pDrawing.getSelectedStrokesLayers: strokes: '+JSON.stringify(strokes, true, '  ') );
     //
     
@@ -171,12 +174,28 @@ pDrawing.prototype.getSelectedStrokesLayers = function(){
   if( !selectedStrokeLayerCount ) return;
 
   this.selectedStrokesLayers = selectedStrokesLayers;
+  this.currentSelectionData = currentSelectionData;
   // MessageLog.trace('\n\n pDrawing.getSelectedStrokesLayers: selectedStrokesLayers: '+JSON.stringify(selectedStrokesLayers, true, '  ') );
 
   return selectedStrokesLayers;
 
 }
 
+
+//
+pDrawing.prototype.restoreSelection = function(){
+
+  var _this = this;
+
+  if( !this.currentSelectionData ) return;
+
+  this.iterateArts(function(art){
+
+    Drawing.selection.set(_this.currentSelectionData[art]);
+
+  });
+
+}
 
 
 //

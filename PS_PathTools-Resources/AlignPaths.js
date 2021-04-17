@@ -1,6 +1,6 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version: 0.3
+Version: 0.31
 */
 
 //
@@ -185,6 +185,8 @@ function AlignShapes( mode, notRelativeToCanvas ){
   // TODO: make originally selected strokes selected
 
   //
+  selectedDrawing.restoreSelection();
+
   scene.endUndoRedoAccum();
 
 }
@@ -235,6 +237,7 @@ function FlipCenter( horizontally ){
   //   MessageLog.trace('Error: '+err );
   // }
 
+  selectedDrawing.restoreSelection();
 
   scene.endUndoRedoAccum();
 
@@ -294,6 +297,8 @@ function Merge( mergeControlPoints ){
   // }
 
   //
+  selectedDrawing.restoreSelection();
+
   scene.endUndoRedoAccum();
 
 }
