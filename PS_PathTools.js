@@ -42,6 +42,7 @@ function PS_ShowPathToolsModal(){
   
   // Tool Settings
   var toolSettings = preferences.getString(SETTINGS_NAME, '');
+
   toolSettings = toolSettings ? JSON.parse(toolSettings) : {
     centerX: 1,
     centerY: 0,
@@ -51,7 +52,29 @@ function PS_ShowPathToolsModal(){
   function saveToolSettings(){
     preferences.setString(SETTINGS_NAME, JSON.stringify( toolSettings ) );
   }
-  MessageLog.trace('!!!'+JSON.stringify( toolSettings, true, '  ' ));
+
+  //
+  var currentSettings = {};
+
+  function updateCurrentSettings(){
+    // MessageLog.trace('updateCurrentSettings '+scene.numberOfUnitsX() +', '+scene.currentResolutionX()+' = '+(scene.currentResolutionX()/scene.numberOfUnitsX() )+' ; '+scene.unitsAspectRatioX()+'; '+scene.coordAtCenterX() );
+    // MessageLog.trace('updateCurrentSettings Y '+scene.numberOfUnitsY() +', '+scene.currentResolutionY()+' = '+(scene.currentResolutionY()/scene.numberOfUnitsY() )+' ; '+scene.unitsAspectRatioY()+'; '+scene.coordAtCenterY() );
+
+    // TODO: I Did not find yet how to convert Drawing Grid coordinates to pixels.
+    var gridStepX = scene.currentResolutionX() / scene.numberOfUnitsX() * 2 * 1.302; // 15.625
+    var gridStepY = scene.currentResolutionY() / scene.numberOfUnitsY() * 2 * 1.7358; // 20.83
+    currentSettings.centerX = toolSettings.relativeToPoint ? toolSettings.centerX * gridStepX : undefined;
+    currentSettings.centerY = toolSettings.relativeToPoint ? toolSettings.centerY * gridStepY : undefined;
+  }
+
+  updateCurrentSettings();
+  // MessageLog.trace('!!!'+JSON.stringify( toolSettings, true, '  ' ));
+  
+  //
+  function getCenterParam(){
+    return toolSettings.relativeToPoint ? { x:toolSettings.centerX, y: toolSettings.centerY } : { x: undefined, y: undefined };
+  };
+
 
   //
   var modal = new pModal( scriptName + " v" + scriptVer, modalWidth, 260, forceWindowInstances ? false : true );  
@@ -65,19 +88,52 @@ function PS_ShowPathToolsModal(){
   // Align
   var alignGroup = modal.addGroup( 'Align:', ui, true, hGroupStyle);
 
-  var btnAlignLeft = modal.addButton( '', alignGroup, btnHeight, btnHeight, iconPath+'align-left.png', AlignPaths.AlignLeft, 'Align left edges' );
-  var btnAlignHCenter = modal.addButton( '', alignGroup, btnHeight, btnHeight, iconPath+'align-h-center.png', AlignPaths.AlignHCenter, 'Align horizontal centers' );
-  var btnAlignRight = modal.addButton( '', alignGroup, btnHeight, btnHeight, iconPath+'align-right.png', AlignPaths.AlignRight, 'Align right edges' );
+  var btnAlignLeft = modal.addButton( '', alignGroup, btnHeight, btnHeight, iconPath+'align-left.png',
+    function(){
+      AlignPaths.AlignLeft( currentSettings.centerX );
+    },
+    'Align left edges' );
+
+  var btnAlignHCenter = modal.addButton( '', alignGroup, btnHeight, btnHeight, iconPath+'align-h-center.png',
+    function(){
+      AlignPaths.AlignHCenter( currentSettings.centerX );
+    },
+    'Align horizontal centers' );
+
+  var btnAlignRight = modal.addButton( '', alignGroup, btnHeight, btnHeight, iconPath+'align-right.png',
+    function(){
+      AlignPaths.AlignRight( currentSettings.centerX );
+    },
+    'Align right edges' );
 
   modal.addVLine( btnHeight, alignGroup );
 
-  var btnAlignCenter = modal.addButton( '', alignGroup, btnHeight, btnHeight, iconPath+'align-center.png', AlignPaths.AlignCenter, 'Align center' );
+  var btnAlignCenter = modal.addButton( '', alignGroup, btnHeight, btnHeight, iconPath+'align-center.png',
+    function(){
+      AlignPaths.AlignCenter( currentSettings.centerX, currentSettings.centerY );
+    },
+    'Align center' );
 
   modal.addVLine( btnHeight, alignGroup );
 
-  var btnAlignTop = modal.addButton( '', alignGroup, btnHeight, btnHeight, iconPath+'align-top.png', AlignPaths.AlignTop, 'Align top edges' );
-  var btnAlignVCenter = modal.addButton( '', alignGroup, btnHeight, btnHeight, iconPath+'align-v-center.png', AlignPaths.AlignVCenter, 'Align vertical centers' );
-  var btnAlignBottom = modal.addButton( '', alignGroup, btnHeight, btnHeight, iconPath+'align-bottom.png', AlignPaths.AlignBottom, 'Align bottom edges' );
+  var btnAlignTop = modal.addButton( '', alignGroup, btnHeight, btnHeight, iconPath+'align-top.png',
+    function(){
+      AlignPaths.AlignTop( currentSettings.centerY );
+    },
+    'Align top edges' );
+
+  var btnAlignVCenter = modal.addButton( '', alignGroup, btnHeight, btnHeight, iconPath+'align-v-center.png',
+    function(){
+      AlignPaths.AlignVCenter( currentSettings.centerY );
+    },
+    'Align vertical centers' );
+
+  var btnAlignBottom = modal.addButton( '', alignGroup, btnHeight, btnHeight, iconPath+'align-bottom.png',
+    function(){
+      AlignPaths.AlignBottom( currentSettings.centerY );
+    },
+    'Align bottom edges' );
+
 
   alignGroup.mainLayout.addStretch();
 
@@ -85,8 +141,10 @@ function PS_ShowPathToolsModal(){
   /// Flip
   var flipGroup = modal.addGroup( 'Flip:', ui, true, hGroupStyle );
 
-  var btnFlipHCenter = modal.addButton( '', flipGroup, btnHeight, btnHeight, iconPath+'flip-h.png', AlignPaths.FlipHCenter, 'Flip horizontally around the center of the Drawing' );
-  var btnFlipVCenter = modal.addButton( '', flipGroup, btnHeight, btnHeight, iconPath+'flip-v.png', AlignPaths.FlipVCenter, 'Flip vertically around the center of the Drawing' );
+  var btnFlipHCenter = modal.addButton( '', flipGroup, btnHeight, btnHeight, iconPath+'flip-h.png',
+    function(){ AlignPaths.FlipHCenter( currentSettings.centerX ) }, 'Flip horizontally around the center of the Drawing' );
+  var btnFlipVCenter = modal.addButton( '', flipGroup, btnHeight, btnHeight, iconPath+'flip-v.png',
+    function(){ AlignPaths.FlipVCenter( currentSettings.centerY ) }, 'Flip vertically around the center of the Drawing' );
   
   flipGroup.mainLayout.addStretch();
 
@@ -109,6 +167,7 @@ function PS_ShowPathToolsModal(){
     toolSettings.relativeToPoint = relativeToPointCheckBox.checkState() === Qt.Checked;
     // MessageLog.trace('checkCenterPos: '+relativeToPointCheckBox.checkState() + ' => ' + JSON.stringify( toolSettings, true, '  ' ) );
     saveToolSettings();
+    updateCurrentSettings();
   }
 
   relativeGroup.mainLayout.addStretch();  

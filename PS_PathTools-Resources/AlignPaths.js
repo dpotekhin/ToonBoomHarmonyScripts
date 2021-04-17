@@ -30,38 +30,38 @@ var _exports = {
 
 
 // Horizontal Align
-function AlignLeft( notRelativeToCanvas ){
-  AlignShapes( _exports.MODE_ALIGN_LEFT, notRelativeToCanvas );
+function AlignLeft( centerX ){
+  AlignShapes( _exports.MODE_ALIGN_LEFT, centerX );
 }
 
 //
-function AlignHCenter( notRelativeToCanvas ){
-  AlignShapes( _exports.MODE_ALIGN_H_CENTER, notRelativeToCanvas );
+function AlignHCenter( centerX ){
+  AlignShapes( _exports.MODE_ALIGN_H_CENTER, centerX );
 }
 
 //
-function AlignRight( notRelativeToCanvas ){
-  AlignShapes( _exports.MODE_ALIGN_RIGHT, notRelativeToCanvas );
+function AlignRight( centerX ){
+  AlignShapes( _exports.MODE_ALIGN_RIGHT, centerX );
 }
 
 //
-function AlignCenter( notRelativeToCanvas ){
-  AlignShapes( _exports.MODE_ALIGN_CENTER, notRelativeToCanvas );
+function AlignCenter( centerX, centerY ){
+  AlignShapes( _exports.MODE_ALIGN_CENTER, centerX, centerY );
 }
 
 // Vertical Align
-function AlignTop( notRelativeToCanvas ){
-  AlignShapes( _exports.MODE_ALIGN_TOP, notRelativeToCanvas );
+function AlignTop( centerY ){
+  AlignShapes( _exports.MODE_ALIGN_TOP, undefined, centerY );
 }
 
 //
-function AlignVCenter( notRelativeToCanvas ){
-  AlignShapes( _exports.MODE_ALIGN_V_CENTER, notRelativeToCanvas );
+function AlignVCenter( centerY ){
+  AlignShapes( _exports.MODE_ALIGN_V_CENTER, undefined, centerY );
 }
 
 //
-function AlignBottom( notRelativeToCanvas ){
-  AlignShapes( _exports.MODE_ALIGN_BOTTOM, notRelativeToCanvas );
+function AlignBottom( centerY ){
+  AlignShapes( _exports.MODE_ALIGN_BOTTOM, undefined, centerY );
 }
 
 
@@ -95,14 +95,13 @@ function getSelectionData(){
 
 
 //
-function AlignShapes( mode, notRelativeToCanvas ){
+function AlignShapes( mode, centerX, centerY ){
 
 
   // !!!
   // MessageLog.clearLog(); // !!!
   // MessageLog.trace('Drawing/geometry: '+ Object.getOwnPropertyNames(Tools).join('\n') );
-  
-  if( notRelativeToCanvas === undefined && KeyModifiers.IsControlPressed() ) notRelativeToCanvas = true;
+  // MessageLog.trace('AlignShapes: X:'+ centerX +' Y:'+centerY );
 
   scene.beginUndoRedoAccum("Align shape");
 
@@ -153,6 +152,11 @@ function AlignShapes( mode, notRelativeToCanvas ){
         break;
 
     }
+
+    // MessageLog.trace('Offset(0) '+offsetX+', '+offsetY);
+    if( centerX !== undefined ) offsetX -= centerX;
+    if( centerY !== undefined ) offsetY -= centerY;
+    // MessageLog.trace('Offset(1) '+offsetX+', '+offsetY);
     // MessageLog.trace('box: '+JSON.stringify(box, true, '  ')+', offsetX: '+offsetX+', '+offsetY );
 
     selectedDrawing.iterateArts(function(art){
@@ -194,7 +198,7 @@ function AlignShapes( mode, notRelativeToCanvas ){
 
 
 //
-function FlipCenter( horizontally ){
+function FlipCenter( horizontally, centerX, centerY ){
 
   scene.beginUndoRedoAccum("Flip shape");
 
@@ -204,6 +208,9 @@ function FlipCenter( horizontally ){
       scene.endUndoRedoAccum();
       return;
     }
+
+    centerX = (centerX || 0) * 2;
+    centerY = (centerY || 0) * 2;
 
     var selectedDrawing = selectionData.selectedDrawing;
     var selectedStrokesLayers = selectionData.selectedStrokesLayers;
@@ -222,8 +229,8 @@ function FlipCenter( horizontally ){
 
           if( hasSelectedAnchors && !pathPoint.isSelected && !pathPoint.isSelectedControl ) return;
 
-          if( horizontally ) pathPoint.x = -pathPoint.x;
-          else pathPoint.y = -pathPoint.y;
+          if( horizontally ) pathPoint.x = -pathPoint.x + centerX;
+          else pathPoint.y = -pathPoint.y + centerY;
 
         });
 
@@ -243,13 +250,13 @@ function FlipCenter( horizontally ){
 
 }
 
-function FlipHCenter(){
-  FlipCenter(true);
+function FlipHCenter( centerX ){
+  FlipCenter( true, centerX );
 }
 
 //
-function FlipVCenter(){
-  FlipCenter(false);
+function FlipVCenter( centerY ){
+  FlipCenter( false, undefined, centerY );
 }
 
 
