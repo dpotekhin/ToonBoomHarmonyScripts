@@ -113,7 +113,7 @@ pDrawing.prototype.getSelectedStrokesLayers = function(){
     var strokes = Drawing.query.getStrokes(config);
 
     //
-    MessageLog.trace('\n\n pDrawing.getSelectedStrokesLayers: selectionData: '+JSON.stringify(selectionData, true, '  ') );
+    // MessageLog.trace('\n\n pDrawing.getSelectedStrokesLayers: selectionData: '+JSON.stringify(selectionData, true, '  ') );
     // MessageLog.trace('\n\n pDrawing.getSelectedStrokesLayers: strokes: '+JSON.stringify(strokes, true, '  ') );
     //
     
@@ -185,14 +185,10 @@ pDrawing.prototype.getSelectedStrokesLayers = function(){
 //
 pDrawing.prototype.restoreSelection = function(){
 
-  var _this = this;
-
   if( !this.currentSelectionData ) return;
 
-  this.iterateArts(function(art){
-
-    Drawing.selection.set(_this.currentSelectionData[art]);
-
+  this.currentSelectionData.forEach(function(_currentSelectionData){
+    Drawing.selection.set(_currentSelectionData);
   });
 
 }
