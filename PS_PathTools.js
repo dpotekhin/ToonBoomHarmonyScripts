@@ -31,14 +31,30 @@ function PS_ShowPathToolsModal(){
   var scriptVer = '0.31';
   //
 
+  var SETTINGS_NAME = 'PS_PATH_TOOLS_SETTINGS';
+
   var AlignPaths = _AlignPaths;
   var btnHeight = 30;
+  var modalWidth = 290;
   var iconPath = fileMapper.toNativePath(specialFolders.userScripts+"/PS_PathTools-Resources/icons/");
-  var hGroupStyle = 'QGroupBox{ position: relative; border: none; margin: 4px 0; padding: 4px 0;}';
-  var forceWindowInstances = KeyModifiers.IsControlPressed();
+  var hGroupStyle = 'QGroupBox{ position: relative; border: none; padding-top:0; padding-bottom: 0; border-radius: 0;}';
+  var forceWindowInstances = true;//KeyModifiers.IsControlPressed();
+  
+  // Tool Settings
+  var toolSettings = preferences.getString(SETTINGS_NAME, '');
+  toolSettings = toolSettings ? JSON.parse(toolSettings) : {
+    centerX: 1,
+    centerY: 0,
+    relativeToPoint: false
+  };
+
+  function saveToolSettings(){
+    preferences.setString(SETTINGS_NAME, JSON.stringify( toolSettings ) );
+  }
+  MessageLog.trace('!!!'+JSON.stringify( toolSettings, true, '  ' ));
 
   //
-  var modal = new pModal( scriptName + " v" + scriptVer, 290, 200, forceWindowInstances ? false : true );  
+  var modal = new pModal( scriptName + " v" + scriptVer, modalWidth, 260, forceWindowInstances ? false : true );  
   if( !modal.ui ){
     return;
   }
@@ -66,7 +82,7 @@ function PS_ShowPathToolsModal(){
   alignGroup.mainLayout.addStretch();
 
   
-  // Flip
+  /// Flip
   var flipGroup = modal.addGroup( 'Flip:', ui, true, hGroupStyle );
 
   var btnFlipHCenter = modal.addButton( '', flipGroup, btnHeight, btnHeight, iconPath+'flip-h.png', AlignPaths.FlipHCenter, 'Flip horizontally around the center of the Drawing' );
@@ -74,6 +90,32 @@ function PS_ShowPathToolsModal(){
   
   flipGroup.mainLayout.addStretch();
 
+  /// Relative to point
+  var relativeGroup = modal.addGroup( '', ui, true, hGroupStyle);
+
+  var relativeToPointCheckBox = modal.addCheckBox( 'Relative to', relativeGroup, toolSettings.relativeToPoint, checkCenterPos );
+  
+  // relativeGroup.mainLayout.addSpacing(20);
+  // relativeGroup.mainLayout.addStretch();
+
+  //
+  
+  var centerXInput = modal.addNumberInput( 'X:', relativeGroup, btnHeight*1.5, btnHeight, toolSettings.centerX, checkCenterPos );
+  var centerYInput = modal.addNumberInput( 'Y:', relativeGroup, btnHeight*1.5, btnHeight, toolSettings.centerY, checkCenterPos );
+
+  function checkCenterPos(){
+    toolSettings.centerX = parseFloat( centerXInput.text );
+    toolSettings.centerY = parseFloat( centerYInput.text );
+    toolSettings.relativeToPoint = relativeToPointCheckBox.checkState() === Qt.Checked;
+    // MessageLog.trace('checkCenterPos: '+relativeToPointCheckBox.checkState() + ' => ' + JSON.stringify( toolSettings, true, '  ' ) );
+    saveToolSettings();
+  }
+
+  relativeGroup.mainLayout.addStretch();  
+  
+
+  //
+  modal.addHLine( modalWidth, ui );
 
   // Modify
   var modifyGroup = modal.addGroup( 'Modify:', ui, true, hGroupStyle );
