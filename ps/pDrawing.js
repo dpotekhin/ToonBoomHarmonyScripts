@@ -299,6 +299,9 @@ pDrawing.prototype.getStrokesBox = function( _strokesLayers, useOnlySelectedStro
   // if( !this.node ) return;
 
   var resultBox = new pBox2D();
+  var maxWidthBox;
+  var maxHeightBox;
+  var maxBox;
 
   this.iterateArts(function(art){
 
@@ -362,6 +365,10 @@ pDrawing.prototype.getStrokesBox = function( _strokesLayers, useOnlySelectedStro
           stroke.strokeBox = strokeBox;
           resultBox.addBox( strokeBox );
 
+          if( !maxWidthBox || maxWidthBox.width < strokeBox.width ) maxWidthBox = strokeBox;
+          if( !maxHeightBox || maxHeightBox.height < strokeBox.height ) maxHeightBox = strokeBox;
+          if( !maxBox || ( maxWidthBox.width + maxBox.height < strokeBox.width + strokeBox.height ) ) maxBox = strokeBox;
+
         }
 
       });
@@ -370,6 +377,9 @@ pDrawing.prototype.getStrokesBox = function( _strokesLayers, useOnlySelectedStro
     
   });
 
+  resultBox.maxWidthBox = maxWidthBox;
+  resultBox.maxHeightBox = maxHeightBox;
+  resultBox.maxBox = maxBox;
   return resultBox;
 
 }

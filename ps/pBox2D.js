@@ -139,9 +139,9 @@ pBox2D.getBezierBox = function(p0, p1, p2, p3) {
 ///
 pBox2D.prototype.set = function( x0, y0, x1, y1 ){
   
-  if( x0 === undefined ) return;
+  if( x0 === undefined && y0 === undefined ) return;
 
-  if( typeof x0 == 'number' ){
+  if( typeof x0 === 'number' || typeof y0 === 'number' ){
     
     this.x0 = x0 || 0;
     this.y0 = y0 || 0;

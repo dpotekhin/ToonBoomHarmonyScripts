@@ -5,6 +5,7 @@ Version: 0.31
 
 //
 var pDrawing = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/pDrawing.js"));
+var pBox2D = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/pBox2D.js"));
 
 //
 var _exports = {
@@ -114,50 +115,72 @@ function AlignShapes( mode, centerX, centerY ){
 
     var selectedDrawing = selectionData.selectedDrawing;
     var selectedStrokesLayers = selectionData.selectedStrokesLayers;
-    var box = selectionData.box;
+    var totalBox = selectionData.box;
+    var boxCenter = totalBox.center;
+    
+    var targetBox = totalBox.maxBox;
 
-    var offsetX = 0;
-    var offsetY = 0;
-    var boxCenter = box.center;
+    if( centerX !== undefined || centerY !== undefined ){ // relative to a point
+      
+      targetBox = new pBox2D( centerX, centerY );
 
-    switch( mode ){
-
-      case _exports.MODE_ALIGN_LEFT:
-        offsetX = boxCenter.x - box.width/2;
-        break;
-
-      case _exports.MODE_ALIGN_H_CENTER:
-        offsetX = boxCenter.x;
-        break;
-
-      case _exports.MODE_ALIGN_RIGHT:
-        offsetX = boxCenter.x + box.width/2;
-        break;
-
-      case _exports.MODE_ALIGN_CENTER:
-        offsetX = boxCenter.x;
-        offsetY = boxCenter.y;
-        break;
-
-      case _exports.MODE_ALIGN_TOP:
-        offsetY = boxCenter.y + box.height/2;
-        break;
-
-      case _exports.MODE_ALIGN_V_CENTER:
-        offsetY = boxCenter.y;
-        break;
-
-      case _exports.MODE_ALIGN_BOTTOM:
-        offsetY = boxCenter.y - box.height/2;
-        break;
-
+    }else{
+      if( mode === _exports.MODE_ALIGN_LEFT || mode === _exports.MODE_ALIGN_H_CENTER || mode === _exports.MODE_ALIGN_RIGHT )
+        targetBox = totalBox.maxWidthBox;
+      else if( mode === _exports.MODE_ALIGN_TOP || mode === _exports.MODE_ALIGN_V_CENTER || mode === _exports.MODE_ALIGN_BOTTOM )
+        targetBox = totalBox.maxHeightBox;
     }
 
-    // MessageLog.trace('Offset(0) '+offsetX+', '+offsetY);
-    if( centerX !== undefined ) offsetX -= centerX;
-    if( centerY !== undefined ) offsetY -= centerY;
-    // MessageLog.trace('Offset(1) '+offsetX+', '+offsetY);
-    // MessageLog.trace('box: '+JSON.stringify(box, true, '  ')+', offsetX: '+offsetX+', '+offsetY );
+    // MessageLog.trace('AlignShapes: '+ JSON.stringify(totalBox, true, '  ')+' targetBox:'+JSON.stringify(targetBox,true,'  ') );
+
+    function _getXOffset( box ){
+
+      switch( mode ){
+
+        case _exports.MODE_ALIGN_LEFT:
+          return box.x0 - targetBox.x0;
+          // MessageLog.trace('MODE_ALIGN_LEFT '+ box.x0 +' - '+ totalBox.maxWidthBox.x0 +" = "+offsetX );
+
+        case _exports.MODE_ALIGN_CENTER:
+          return box.x0 + box.width / 2 - (targetBox.x0 + targetBox.width / 2);
+
+        case _exports.MODE_ALIGN_H_CENTER:
+          return box.x0 + box.width / 2 - (targetBox.x0 + targetBox.width / 2);
+
+        case _exports.MODE_ALIGN_RIGHT:
+          return box.x0 - targetBox.x1 + box.width;
+      }
+
+      return 0;
+
+    };
+
+    function _getYOffset( box ){
+
+      switch( mode ){
+
+        case _exports.MODE_ALIGN_TOP:
+          return box.y0 - targetBox.y1 + box.height;
+
+        case _exports.MODE_ALIGN_CENTER:
+          return box.y0 + box.height / 2 - (targetBox.y0 + targetBox.height / 2);
+
+        case _exports.MODE_ALIGN_V_CENTER:
+          return box.y0 + box.height / 2 - (targetBox.y0 + targetBox.height / 2);
+
+        case _exports.MODE_ALIGN_BOTTOM:
+          return box.y0 - targetBox.y0;
+      }
+
+      return 0;
+
+    };
+
+    // var boxCenter = box.center;
+    var offsetX = _getXOffset(totalBox);
+    // if( centerX !== undefined ) offsetX -= centerX;
+    var offsetY = _getYOffset(totalBox);
+    // if( centerY !== undefined ) offsetY -= centerY;
 
     selectedDrawing.iterateArts(function(art){
 
@@ -166,6 +189,11 @@ function AlignShapes( mode, centerX, centerY ){
         if( !_stroke.isSelected ) return;
 
         var hasSelectedAnchors = !!_stroke.selectedAnchors;
+
+        if( centerX === undefined && centerY === undefined ){
+          offsetX = _getXOffset( _stroke.strokeBox );
+          offsetY = _getYOffset( _stroke.strokeBox );
+        }
 
         _stroke.path.forEach(function(pathPoint){
           // MessageLog.trace('>>'+pathPoint.x+', '+pathPoint.y);
@@ -177,6 +205,7 @@ function AlignShapes( mode, centerX, centerY ){
         });
 
         // MessageLog.trace('bounds: '+ JSON.stringify(bounds, true, ' ') );
+        // MessageLog.trace('_stroke: '+ JSON.stringify(_stroke, true, ' ') );
         return true;
       });
 
