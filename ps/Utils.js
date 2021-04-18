@@ -20,12 +20,21 @@ function getZeroLeadingString(v){
 var gridWidth = 1875;
 
 function gridToPixelsX(x){
-    return x / (scene.numberOfUnitsX() / 2) * (scene.unitsAspectRatioX()/scene.unitsAspectRatioY()) * gridWidth;
+    return x / (scene.numberOfUnitsX()/2) * ( gridWidth * (scene.unitsAspectRatioX()/scene.unitsAspectRatioY()) );
 }
 
 function gridToPixelsY(y){
     return y / (scene.numberOfUnitsY()/2) * gridWidth;
 }
+
+function pixelsToGridX(x){
+    return x / ( gridWidth * (scene.unitsAspectRatioX()/scene.unitsAspectRatioY()) ) * (scene.numberOfUnitsX()/2);
+}
+
+function pixelsToGridY(y){
+    return y / gridWidth * (scene.numberOfUnitsY()/2);
+}
+
 
 //
 function listAllActions( _responder ){
@@ -49,5 +58,7 @@ exports = {
     getTimestamp: getTimestamp,
     getZeroLeadingString: getZeroLeadingString,
     gridToPixelsX: gridToPixelsX,
-    gridToPixelsY: gridToPixelsY
+    gridToPixelsY: gridToPixelsY,
+    pixelsToGridX: pixelsToGridX,
+    pixelsToGridY: pixelsToGridY,
 };
