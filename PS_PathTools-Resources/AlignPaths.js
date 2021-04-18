@@ -122,7 +122,7 @@ function AlignShapes( mode, centerX, centerY ){
 
     if( centerX !== undefined || centerY !== undefined ){ // relative to a point
       
-      targetBox = new pBox2D( centerX, centerY );
+      targetBox = new pBox2D( centerX || 0, centerY || 0 );
 
     }else{
       if( mode === _exports.MODE_ALIGN_LEFT || mode === _exports.MODE_ALIGN_H_CENTER || mode === _exports.MODE_ALIGN_RIGHT )

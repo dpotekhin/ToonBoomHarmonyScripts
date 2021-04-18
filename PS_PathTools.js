@@ -11,6 +11,7 @@ ToDo:
 
 //
 var _AlignPaths = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_PathTools-Resources/AlignPaths.js"));
+var _Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
 var pModal = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/pModal.js"));
 
 
@@ -34,6 +35,8 @@ function PS_ShowPathToolsModal(){
   var SETTINGS_NAME = 'PS_PATH_TOOLS_SETTINGS';
 
   var AlignPaths = _AlignPaths;
+  var Utils = _Utils;
+
   var btnHeight = 30;
   var modalWidth = 290;
   var iconPath = fileMapper.toNativePath(specialFolders.userScripts+"/PS_PathTools-Resources/icons/");
@@ -59,21 +62,16 @@ function PS_ShowPathToolsModal(){
   function updateCurrentSettings(){
     // MessageLog.trace('updateCurrentSettings '+scene.numberOfUnitsX() +', '+scene.currentResolutionX()+' = '+(scene.currentResolutionX()/scene.numberOfUnitsX() )+' ; '+scene.unitsAspectRatioX()+'; '+scene.coordAtCenterX() );
     // MessageLog.trace('updateCurrentSettings Y '+scene.numberOfUnitsY() +', '+scene.currentResolutionY()+' = '+(scene.currentResolutionY()/scene.numberOfUnitsY() )+' ; '+scene.unitsAspectRatioY()+'; '+scene.coordAtCenterY() );
-
-    // TODO: I Did not find yet how to convert Drawing Grid coordinates to pixels.
-    var gridStepX = scene.currentResolutionX() / scene.numberOfUnitsX() * 2 * 1.302; // 15.625
-    var gridStepY = scene.currentResolutionY() / scene.numberOfUnitsY() * 2 * 1.7358; // 20.83
-    currentSettings.centerX = toolSettings.relativeToPoint ? toolSettings.centerX * gridStepX : undefined;
-    currentSettings.centerY = toolSettings.relativeToPoint ? toolSettings.centerY * gridStepY : undefined;
+    // MessageLog.trace('updateCurrentSettings '+toolSettings.centerX+', '+toolSettings.centerY);
+    
+    currentSettings.centerX = toolSettings.relativeToPoint ? toolSettings.centerX * Utils.getGridStepX() : undefined;
+    currentSettings.centerY = toolSettings.relativeToPoint ? toolSettings.centerY * Utils.getGridStepY() : undefined;
+    // MessageLog.trace('updateCurrentSettings '+toolSettings.centerX+', '+toolSettings.centerY +', '+currentSettings.centerX+', '+currentSettings.centerY );
+    
   }
 
   updateCurrentSettings();
   // MessageLog.trace('!!!'+JSON.stringify( toolSettings, true, '  ' ));
-  
-  //
-  function getCenterParam(){
-    return toolSettings.relativeToPoint ? { x:toolSettings.centerX, y: toolSettings.centerY } : { x: undefined, y: undefined };
-  };
 
 
   //
