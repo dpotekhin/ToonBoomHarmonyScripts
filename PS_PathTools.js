@@ -64,8 +64,8 @@ function PS_ShowPathToolsModal(){
     // MessageLog.trace('updateCurrentSettings Y '+scene.numberOfUnitsY() +', '+scene.currentResolutionY()+' = '+(scene.currentResolutionY()/scene.numberOfUnitsY() )+' ; '+scene.unitsAspectRatioY()+'; '+scene.coordAtCenterY() );
     // MessageLog.trace('updateCurrentSettings '+toolSettings.centerX+', '+toolSettings.centerY);
     
-    currentSettings.centerX = toolSettings.relativeToPoint ? toolSettings.centerX * Utils.getGridStepX() : undefined;
-    currentSettings.centerY = toolSettings.relativeToPoint ? toolSettings.centerY * Utils.getGridStepY() : undefined;
+    currentSettings.centerX = toolSettings.relativeToPoint ? Utils.gridToPixelsX(toolSettings.centerX) : undefined;
+    currentSettings.centerY = toolSettings.relativeToPoint ? Utils.gridToPixelsY(toolSettings.centerY) : undefined;
     // MessageLog.trace('updateCurrentSettings '+toolSettings.centerX+', '+toolSettings.centerY +', '+currentSettings.centerX+', '+currentSettings.centerY );
     
   }

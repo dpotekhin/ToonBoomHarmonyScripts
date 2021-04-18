@@ -5,8 +5,8 @@ Version: 0.1
 
 //
 function getTimestamp(){
-  var date = new Date();
-  return date.getFullYear() + getZeroLeadingString(date.getMonth()+1) + getZeroLeadingString(date.getDate())+'_'+getZeroLeadingString(date.getHours())+getZeroLeadingString(date.getMinutes());
+    var date = new Date();
+    return date.getFullYear() + getZeroLeadingString(date.getMonth()+1) + getZeroLeadingString(date.getDate())+'_'+getZeroLeadingString(date.getHours())+getZeroLeadingString(date.getMinutes());
 };
 
 
@@ -17,34 +17,37 @@ function getZeroLeadingString(v){
 
 //
 // TODO: I Did not find yet how to convert Drawing Grid coordinates to pixels.
-function getGridStepX(){
-	return scene.currentResolutionX() / scene.numberOfUnitsX() * 2 * 1.302; // 15.625
+var gridWidth = 1875;
+
+function gridToPixelsX(x){
+    return x / (scene.numberOfUnitsX() / 2) * (scene.unitsAspectRatioX()/scene.unitsAspectRatioY()) * gridWidth;
 }
 
-function getGridStepY( y ){
-	return scene.currentResolutionY() / scene.numberOfUnitsY() * 2 * 1.7358; // 20.83
+function gridToPixelsY(y){
+    return y / (scene.numberOfUnitsY()/2) * gridWidth;
 }
 
 //
 function listAllActions( _responder ){
-	Action.getResponderList().forEach(listActions);
+    Action.getResponderList().forEach(listActions);
 }
 
 //
 function listActions( _responder, _responder_i ){
-	if( !_responder_i ) _responder_i = 0;
-	MessageLog.trace( '\n\nRESPONDER ('+(_responder_i+1)+'): "'+_responder+'"'  );
-	Action.getActionList( _responder ).forEach(function( _action, _action_i ){
-		MessageLog.trace( (_action_i+1)+'): "'+_action+'"'  );
-	});
+    if( !_responder_i ) _responder_i = 0;
+    MessageLog.trace( '\n\nRESPONDER ('+(_responder_i+1)+'): "'+_responder+'"'  );
+    Action.getActionList( _responder ).forEach(function( _action, _action_i ){
+        MessageLog.trace( (_action_i+1)+'): "'+_action+'"'  );
+    });
 }
 
 //
 exports = {
-  listAllActions: listAllActions,
-  listActions: listActions,
-  getTimestamp: getTimestamp,
-  getZeroLeadingString: getZeroLeadingString,
-  getGridStepX: getGridStepX,
-  getGridStepY: getGridStepY
+    gridWidth: gridWidth,
+    listAllActions: listAllActions,
+    listActions: listActions,
+    getTimestamp: getTimestamp,
+    getZeroLeadingString: getZeroLeadingString,
+    gridToPixelsX: gridToPixelsX,
+    gridToPixelsY: gridToPixelsY
 };
