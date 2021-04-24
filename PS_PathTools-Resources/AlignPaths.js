@@ -351,8 +351,7 @@ function SetPivot( ){
 
     var selectionData = getSelectionData();
     if( !selectionData ) {
-      scene.endUndoRedoAccum();
-      return;
+      throw 'Valid Selection required.';
     }
 
     var selectedDrawing = selectionData.selectedDrawing;
@@ -360,26 +359,49 @@ function SetPivot( ){
     var box = selectionData.box;
     var boxCenter = box.center;
     
-    var _node  = selectedDrawing.node[0];
+    var drawingNode  = selectedDrawing.node[0];
+    var pivotNode = drawingNode;
     var _frame = frame.current();
 
     // MessageLog.trace('SetPivot:'+ JSON.stringify( boxCenter, true, '  ') );
     var x = Utils.pixelsToGridX( boxCenter.x );
     var y = Utils.pixelsToGridY( boxCenter.y );
     
-    var positionXA = node.getAttr( _node, _frame, 'OFFSET.X' );
-    var positionYA = node.getAttr( _node, _frame, 'OFFSET.Y' );
-    var pivotXA = node.getAttr( _node, _frame, 'PIVOT.X' );
-    var pivotYA = node.getAttr( _node, _frame, 'PIVOT.Y' );
+    var animatable = node.getAttr( drawingNode, 1, "canAnimate").boolValue();
+    var embeddedPivotOption = node.getTextAttr ( drawingNode, 1, "useDrawingPivot" );
+
+    // MessageLog.trace('Drawing Options:'+ animatable+', '+embeddedPivotOption );
+    if( !animatable || ( animatable && embeddedPivotOption == "Apply Embedded Pivot on Parent Peg" ) )
+    {
+      pivotNode = node.srcNode( drawingNode, 0 );
+      if( pivotNode == "" )
+      {
+        throw drawingNode + " is not animatable, and it does not have a parent peg to set its pivot position.";
+      }
+      else if( node.type(pivotNode) !== "PEG" )
+      {
+        pivotNode = Utils.findParentPeg( pivotNode );
+        if( pivotNode == "" )
+        {
+          throw drawingNode + " is not animatable, and it does not have a parent peg to set its pivot position.";
+        }
+      }
+    }
+    MessageLog.trace( 'Apply pivot to: '+pivotNode );
+
+    var positionXA = node.getAttr( pivotNode, _frame, 'OFFSET.X' );
+    var positionYA = node.getAttr( pivotNode, _frame, 'OFFSET.Y' );
+    var pivotXA = node.getAttr( pivotNode, _frame, 'PIVOT.X' );
+    var pivotYA = node.getAttr( pivotNode, _frame, 'PIVOT.Y' );
     
 
-    var oldPivot = node.getPivot( _node, _frame );
-    var oldPivotPositionA = Utils.getPointGlobalPosition( _node, oldPivot, _frame );
+    var oldPivot = node.getPivot( pivotNode, _frame );
+    var oldPivotPositionA = Utils.getPointGlobalPosition( pivotNode, oldPivot, _frame );
 
     pivotXA.setValue( x );
     pivotYA.setValue( y );
 
-    var oldPivotPositionB = Utils.getPointGlobalPosition( _node, oldPivot, _frame );
+    var oldPivotPositionB = Utils.getPointGlobalPosition( pivotNode, oldPivot, _frame );
 
     var oldPivotPositionDiff = {
       x: oldPivotPositionB.x - oldPivotPositionA.x,
@@ -390,8 +412,9 @@ function SetPivot( ){
     // MessageLog.trace( 'PIVOT B: '+oldPivotPositionB.x+', '+oldPivotPositionB.y );
     // MessageLog.trace( 'PIVOT DIF: '+oldPivotPositionDiff.x+', '+oldPivotPositionDiff.y );
     
-    positionXA.setValue( positionXA.doubleValue() - oldPivotPositionDiff.x );
-    positionYA.setValue( positionYA.doubleValue() - oldPivotPositionDiff.y );
+    // ToDo: need to apply this offset to each key frame
+    positionXA.setValueAt( positionXA.doubleValue() - oldPivotPositionDiff.x, _frame );
+    positionYA.setValueAt( positionYA.doubleValue() - oldPivotPositionDiff.y, _frame );
 
 
   } catch(err){

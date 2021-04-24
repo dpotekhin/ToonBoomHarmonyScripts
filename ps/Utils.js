@@ -45,6 +45,23 @@ function getPointGlobalPosition( _node, _point, _frame ){
   return pos;
 }
 
+function findParentPeg( _node )
+{
+    var numSubNodes = node.numberOfSubNodes( _node );    
+    var src = node.srcNode( _node, 0 );      
+    for ( var nd = 0; nd < numSubNodes; nd++ )
+    {
+        if( src == "" )
+            return "";
+
+        else if( node.type( src ) == "PEG" )
+            return src;
+
+        src = node.srcNode( src, 0 );
+    }
+    return "";
+}
+
 //
 function listAllActions( _responder ){
     Action.getResponderList().forEach(listActions);
@@ -70,5 +87,6 @@ exports = {
     gridToPixelsY: gridToPixelsY,
     pixelsToGridX: pixelsToGridX,
     pixelsToGridY: pixelsToGridY,
-    getPointGlobalPosition: getPointGlobalPosition
+    getPointGlobalPosition: getPointGlobalPosition,
+    findParentPeg: findParentPeg
 };
