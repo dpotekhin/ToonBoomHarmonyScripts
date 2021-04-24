@@ -35,6 +35,15 @@ function pixelsToGridY(y){
     return y / gridWidth * (scene.numberOfUnitsY()/2);
 }
 
+//
+function getPointGlobalPosition( _node, _point, _frame ){
+  if( !_frame ) _frame = frame.current();
+  if( !_point ) _point = node.getPivot( _node, _frame );
+  var nodeMatrix = node.getMatrix( _node, _frame );
+  var pos = nodeMatrix.multiply(_point);
+  pos = scene.fromOGL( pos );
+  return pos;
+}
 
 //
 function listAllActions( _responder ){
@@ -61,4 +70,5 @@ exports = {
     gridToPixelsY: gridToPixelsY,
     pixelsToGridX: pixelsToGridX,
     pixelsToGridY: pixelsToGridY,
+    getPointGlobalPosition: getPointGlobalPosition
 };

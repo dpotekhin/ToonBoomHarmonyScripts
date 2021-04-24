@@ -4,6 +4,7 @@ Version: 0.31
 */
 
 //
+var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
 var pDrawing = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/pDrawing.js"));
 var pBox2D = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/pBox2D.js"));
 
@@ -27,6 +28,7 @@ var _exports = {
   FlipHCenter: FlipHCenter,
   FlipVCenter: FlipVCenter,
   Merge: Merge,
+  SetPivot: SetPivot
 }
 
 
@@ -82,7 +84,7 @@ function getSelectionData(){
 
   var box = selectedDrawing.getStrokesBox( selectedStrokesLayers, true );
   if( box.width === undefined ) {
-    MessageLog.trace('!!! box is empty: '+ box );
+    MessageLog.trace('!!! box is empty: '+ JSON.stringify(box, true, '  ') );
     return;
   }
 
@@ -131,7 +133,7 @@ function AlignShapes( mode, centerX, centerY ){
         targetBox = totalBox.maxHeightBox;
     }
 
-    // MessageLog.trace('AlignShapes: '+ JSON.stringify(totalBox, true, '  ')+' targetBox:'+JSON.stringify(targetBox,true,'  ') );
+    MessageLog.trace('AlignShapes: '+ JSON.stringify(totalBox, true, '  ')+' targetBox:'+JSON.stringify(targetBox,true,'  ') );
 
     function _getXOffset( box ){
 
@@ -214,8 +216,6 @@ function AlignShapes( mode, centerX, centerY ){
   // } catch(err){
   //   MessageLog.trace('Error: '+err );
   // }
-
-  // TODO: make originally selected strokes selected
 
   //
   selectedDrawing.restoreSelection();
@@ -338,6 +338,75 @@ function Merge( mergeControlPoints ){
   scene.endUndoRedoAccum();
 
 }
+
+
+//
+function SetPivot( ){
+
+  MessageLog.clearLog(); // !!!
+
+  scene.beginUndoRedoAccum("Set Pivot");
+
+  try{
+
+    var selectionData = getSelectionData();
+    if( !selectionData ) {
+      scene.endUndoRedoAccum();
+      return;
+    }
+
+    var selectedDrawing = selectionData.selectedDrawing;
+    var selectedStrokesLayers = selectionData.selectedStrokesLayers;
+    var box = selectionData.box;
+    var boxCenter = box.center;
+    
+    var _node  = selectedDrawing.node[0];
+    var _frame = frame.current();
+
+    // MessageLog.trace('SetPivot:'+ JSON.stringify( boxCenter, true, '  ') );
+    var x = Utils.pixelsToGridX( boxCenter.x );
+    var y = Utils.pixelsToGridY( boxCenter.y );
+    
+    var positionXA = node.getAttr( _node, _frame, 'OFFSET.X' );
+    var positionYA = node.getAttr( _node, _frame, 'OFFSET.Y' );
+    var pivotXA = node.getAttr( _node, _frame, 'PIVOT.X' );
+    var pivotYA = node.getAttr( _node, _frame, 'PIVOT.Y' );
+    
+
+    var oldPivot = node.getPivot( _node, _frame );
+    var oldPivotPositionA = Utils.getPointGlobalPosition( _node, oldPivot, _frame );
+
+    pivotXA.setValue( x );
+    pivotYA.setValue( y );
+
+    var oldPivotPositionB = Utils.getPointGlobalPosition( _node, oldPivot, _frame );
+
+    var oldPivotPositionDiff = {
+      x: oldPivotPositionB.x - oldPivotPositionA.x,
+      y: oldPivotPositionB.y - oldPivotPositionA.y,
+    };
+
+    // MessageLog.trace( 'PIVOT A: '+oldPivotPositionA.x+', '+oldPivotPositionA.y );
+    // MessageLog.trace( 'PIVOT B: '+oldPivotPositionB.x+', '+oldPivotPositionB.y );
+    // MessageLog.trace( 'PIVOT DIF: '+oldPivotPositionDiff.x+', '+oldPivotPositionDiff.y );
+    
+    positionXA.setValue( positionXA.doubleValue() - oldPivotPositionDiff.x );
+    positionYA.setValue( positionYA.doubleValue() - oldPivotPositionDiff.y );
+
+
+  } catch(err){
+    MessageLog.trace('Error: '+err );
+    scene.endUndoRedoAccum();
+    return;
+  }
+
+
+  ///
+  selectedDrawing.restoreSelection();
+
+  scene.endUndoRedoAccum();
+
+};
 
 
 ///

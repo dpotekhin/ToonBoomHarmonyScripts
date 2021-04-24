@@ -1,6 +1,6 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version: 0.3
+Version: 0.5
 
 ToDo:
 - add aligment options (like in Adobe animate)
@@ -29,7 +29,7 @@ function PS_ShowPathToolsModal(){
 
   //
   var scriptName = 'Path Tools';
-  var scriptVer = '0.31';
+  var scriptVer = '0.5';
   //
 
   var SETTINGS_NAME = 'PS_PATH_TOOLS_SETTINGS';
@@ -140,9 +140,9 @@ function PS_ShowPathToolsModal(){
   var flipGroup = modal.addGroup( 'Flip:', ui, true, hGroupStyle );
 
   var btnFlipHCenter = modal.addButton( '', flipGroup, btnHeight, btnHeight, iconPath+'flip-h.png',
-    function(){ AlignPaths.FlipHCenter( currentSettings.centerX ) }, 'Flip horizontally around the center of the Drawing' );
+    function(){ AlignPaths.FlipHCenter( currentSettings.centerX ) }, 'Horizontal Flip' );
   var btnFlipVCenter = modal.addButton( '', flipGroup, btnHeight, btnHeight, iconPath+'flip-v.png',
-    function(){ AlignPaths.FlipVCenter( currentSettings.centerY ) }, 'Flip vertically around the center of the Drawing' );
+    function(){ AlignPaths.FlipVCenter( currentSettings.centerY ) }, 'Vertical Flip' );
   
   flipGroup.mainLayout.addStretch();
 
@@ -182,7 +182,16 @@ function PS_ShowPathToolsModal(){
       AlignPaths.Merge( KeyModifiers.IsControlPressed() );
     },
     'Merge curve points'
-    +'\nHold down the Control key to also merge the Control points.'
+    +'\nHold down the Control key to also merge the Control points'
+  );
+
+  var btnSetPivot = modal.addButton( '', modifyGroup, btnHeight, btnHeight, iconPath+'pivot-to-selection.png',
+    function (){
+      AlignPaths.SetPivot();
+      Action.perform( 'onActionChooseSpRotateTool()', 'sceneUI');
+    }
+    ,
+    'Move pivot to the center of the selection'
   );
   
   modifyGroup.mainLayout.addStretch();
@@ -191,5 +200,19 @@ function PS_ShowPathToolsModal(){
   ui.mainLayout.addStretch();
 
   modal.show();
+
+
+
+
+}
+
+
+function setPivot(){
+
+  MessageLog.clearLog();
+  // _Utils.listAllActions();
+
+  _AlignPaths.SetPivot();
+  Action.perform( 'onActionChooseSpRotateTool()', 'sceneUI');
 
 }
