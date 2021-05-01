@@ -27,7 +27,7 @@ function getFullAttributeList(nodePath)
 
 
 //
-function unlinkFunctions( _node, _columnTypes, _invertColumnTypes, leaveCurrentValues ){
+function unlinkFunctions( _node, _columnTypes, _invertColumnTypes, keepCurrentValues ){
   
   var nodeNamePath= _node.split("/");
   var nodeName = nodeNamePath[nodeNamePath.length - 1];
@@ -66,7 +66,7 @@ function unlinkFunctions( _node, _columnTypes, _invertColumnTypes, leaveCurrentV
 
     node.unlinkAttr(_node, attrFullName);
 
-    if( leaveCurrentValues ){
+    if( keepCurrentValues ){
       var currentValue = column.getEntry( linkedColumn, 0, frame.current() );
       if( numberTypes.indexOf( typeof attr.typeName() ) === -1 ) currentValue = parseFloat(currentValue);
       MessageLog.trace('Apply Column Value: '+currentValue+' > '+typeof currentValue );
