@@ -19,8 +19,8 @@ pFile.getFileNameFromPath = function(path){
 pFile.checkDir = function( path, createDirIfNotExists ){
 
   //path = fileMapper.toNativePath(path);
-  // MessageLog.trace('checkDir: '+path);
-
+  MessageLog.trace('checkDir: '+path);
+ 
   var dir = new Dir;
   if( !dir.fileExists( path ) ){
     if( createDirIfNotExists ) {
@@ -33,6 +33,7 @@ pFile.checkDir = function( path, createDirIfNotExists ){
   }
   // MessageLog.trace('checkFileDir: File dir exists');
   return true;
+
 };
 
 
@@ -74,12 +75,12 @@ pFile.load = function( filePath ){
 
 pFile.save = function( path, data ){
 
-  // MessageLog.trace("save JSON (1): ");
+  // MessageLog.trace("save (1): "+path);
 
-  pFile.checkFileDir( true );
+  pFile.checkFileDir( path, true );
+  // MessageLog.trace('save (2)');
 
-  var file = new File( path );
-  // MessageLog.trace('save JSON (3): '+this.getFullPath()+'.\n'+data);
+  var file = new File( path );  
 
   try
   { 
@@ -87,10 +88,10 @@ pFile.save = function( path, data ){
     file.write( data );
     file.close();
     
-    // MessageLog.trace('JSON saved.');
+    // MessageLog.trace('Saved.');
   }
   catch(err){
-    // MessageLog.trace('JSON save failed.');
+    // MessageLog.trace('Save failed: '+err);
   }
 }
 
@@ -102,24 +103,28 @@ pFile.loadJSON = function( path, defaultData ){
 }
 
 //
-pFile.saveJson = function( path, data ){
-
+pFile.saveJSON = function( path, data ){
+  // MessageLog.trace('saveJSON: '+path+'\n'+JSON.stringify(data));
   var jsonData;
   try{
-    jsonData = JSON.stringify(data);
+    jsonData = typeof data !== 'string' ? JSON.stringify(data) : data;
   }catch(err){
-    // MessageLog.trace('JSON stringify failed');
+    // MessageLog.trace('JSON stringify failed: '+ err);
   }
   data = jsonData || data;
-  pFile.save( data );
-
+  pFile.save( path, data );
+  // MessageLog.trace('saveJSON COMPLETE');
 }
 
 //
 pFile.checkPath = function( path, relativePath ){
-  if( path.charAt(0)==='~') return scene.currentProjectPath() + path.substr(1,path.length);
-  else if( path.charAt(0)==='.') return ( relativePath || specialFolders.userScripts) + path.substr(1,path.length);
-  return path;
+  try{ 
+    if( path.charAt(0)==='~') return scene.currentProjectPath() + path.substr(1,path.length);
+    else if( path.charAt(0)==='.') return ( relativePath || specialFolders.userScripts) + path.substr(1,path.length);
+    return path;
+  }catch(err){
+    // MessageLog.trace('checkPath failed: '+ err);
+  }
 }
 
 
