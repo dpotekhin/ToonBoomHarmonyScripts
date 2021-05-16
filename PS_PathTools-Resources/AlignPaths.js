@@ -374,19 +374,26 @@ function SetPivot( ){
     if( !animatable || ( animatable && embeddedPivotOption == "Apply Embedded Pivot on Parent Peg" ) )
     {
       pivotNode = node.srcNode( drawingNode, 0 );
-      if( pivotNode == "" )
+      if( !pivotNode )
       {
-        throw drawingNode + " is not animatable, and it does not have a parent peg to set its pivot position.";
+        // throw drawingNode + " is not animatable, and it does not have a parent peg to set its pivot position.";
+        MessageLog.trace(drawingNode + " is not animatable, and it does not have a parent peg to set its pivot position.");
+        pivotNode = drawingNode;
       }
       else if( node.type(pivotNode) !== "PEG" )
       {
         pivotNode = Utils.findParentPeg( pivotNode );
-        if( pivotNode == "" )
-        {
-          throw drawingNode + " is not animatable, and it does not have a parent peg to set its pivot position.";
+        if( !pivotNode ){
+          // throw drawingNode + " is not animatable, and it does not have a parent peg to set its pivot position.";
+          MessageLog.trace(drawingNode + " is not animatable, and it does not have a parent peg to set its pivot position.");
+          pivotNode = drawingNode;
         }
       }
+
+      // Reset Drawing transforms
+      
     }
+
     MessageLog.trace( 'Apply pivot to: '+pivotNode );
 
     var positionXA = node.getAttr( pivotNode, _frame, 'OFFSET.X' );
