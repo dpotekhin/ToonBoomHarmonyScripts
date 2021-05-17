@@ -73,10 +73,29 @@ pModal.prototype.show = function(){
 
 
 //
-pModal.prototype.addGroup = function( title, parent, horizontalLayout, style ){
+pModal.prototype.addGroup = function( title, parent, layoutType, style ){
   var groupBox = new QGroupBox( title );
   // groupBox.setFlat(true);
-  var groupBoxLayout = groupBox.mainLayout = horizontalLayout ? new QHBoxLayout( parent ) : new QVBoxLayout( parent );
+  var groupBoxLayout;
+  switch( layoutType ){
+    
+    // Horizontal
+    case 1:
+    case true:
+    case 'horizontal':
+      groupBoxLayout = new QHBoxLayout( parent );
+      break;
+
+    case 2:
+    case 'grid':
+      groupBoxLayout = new QGridLayout( parent );
+      break;
+
+    default:
+      groupBoxLayout = new QVBoxLayout( parent );
+  }
+  groupBox.mainLayout = groupBoxLayout;
+
   groupBox.setLayout( groupBoxLayout );   
   if( style ) {
     groupBox.setStyleSheet( style === true ? 'QGroupBox{ border:none; margin: 0; padding: 0; }' : style );
