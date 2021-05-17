@@ -2,6 +2,7 @@
 :: =============================================================================================================================================================
 :: Options: render-main.bat [Start Frame | 0] [End Frame | 0] [Write Node Name | 0] [Relative Movie Path | 1 (Just Force Video Fromat)] [WidthxHeight | 0]
 :: =============================================================================================================================================================
+:: ToDo: to fix line weight when resolution is less than original
 
 @echo off
 
@@ -12,7 +13,7 @@ if "%~1"=="help" (
 	echo 2: End Frame ^| 0
 	echo 3: Write Node Name ^| 0 ^(Default: "Main-Write"^)
 	echo 4: Relative Movie Path ^(The target folder must exist!^) ^| 1 ^(Just Force Video Fromat^)
-	echo 5: WidthxHeight ^| 0
+	echo 5: WIDTHxHEIGHTxFOV ^| 0
 	goto end
 )
 
@@ -44,12 +45,13 @@ if %filename%==0 (
 ::set resolution=-resolution 640 360
 set resolution=
 set width=
-set height=1
-FOR /f "tokens=1,2,3,4 delims=x" %%a IN ("%~5") do set width=%%a& set height=%%b
+set height=
+set fov=
+FOR /f "tokens=1,2,3,4 delims=x" %%a IN ("%~5") do set width=%%a& set height=%%b& set fov=%%c
 ::echo width=%width% height=%height%
-if not "%~5"=="" if not "%~5"=="0" if not "%height%"=="" (
+if not "%~5"=="" if not "%~5"=="0" if not "%fov%"=="" (
 	:: *1.777777777777778
-	set resolution=-resolution %width% %height%
+	set resolution=-resolution %width% %height% %fov%
 ) else (echo Default resolution.)
 echo Resolution: %resolution%
 
