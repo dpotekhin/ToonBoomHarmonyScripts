@@ -1,7 +1,10 @@
 //
 function eachNode( nodes, callback, useGroups, nodeTypeFilter ){
 	
+	if( !nodes ) return;
 	if( nodeTypeFilter && typeof nodeTypeFilter == 'string' ) nodeTypeFilter = [nodeTypeFilter];
+	if( typeof nodes == 'string' ) nodes = [nodes];
+
 	nodes.forEach(function(_node){
 		
 		if( nodeTypeFilter ){
@@ -28,6 +31,7 @@ function eachNode( nodes, callback, useGroups, nodeTypeFilter ){
 function eachSelectedNode( callback, useGroups, nodeTypeFilter ){
 	var nodes = selection.selectedNodes();
 	if( !nodes || !nodes.length ) return false;
+	// MessageLog.trace('eachSelectedNode: '+nodes);
 	eachNode( nodes, callback, useGroups, nodeTypeFilter );
 	return true;
 }

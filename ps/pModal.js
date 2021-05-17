@@ -110,12 +110,12 @@ pModal.prototype.addNumberInput = function( labelText, parent, width, height, de
 
   if( labelText ){
     var label = new QLabel();
-    parent.mainLayout.addWidget( label, 0, 0 );
+    if( parent ) parent.mainLayout.addWidget( label, 0, 0 );
     label.text = labelText;
   }
 
   var _input = new QLineEdit();
-  parent.mainLayout.addWidget( _input, 0, 0 );
+  if( parent ) parent.mainLayout.addWidget( _input, 0, 0 );
   _input.setFixedSize( width, height );
   _input.text = defaultValue || 0;
   _input.setValidator( new QDoubleValidator(_input) );
