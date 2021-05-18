@@ -25,7 +25,9 @@ function PS_DrawingAttributesModal(){
   var btnHeight = 30;
   var listJustUpdated = true;
   var modalWidth = 400;
+  var modelHeight = 460;
   var border = 20;
+  var tableColumns = 4;
 
   var curentItemName;
   var curentItemindex;
@@ -33,7 +35,7 @@ function PS_DrawingAttributesModal(){
   // var iconPath = fileMapper.toNativePath(specialFolders.userScripts+"/PS_PathTools-Resources/icons/");
 
   //
-  var modal = new pModal( scriptName + " v" + scriptVer, modalWidth, 400, false );  
+  var modal = new pModal( scriptName + " v" + scriptVer, modalWidth, modelHeight, false );  
   if( !modal.ui ){
     return;
   }
@@ -48,6 +50,29 @@ function PS_DrawingAttributesModal(){
   var attrsGroup = modal.addGroup( 'Drawing Attributes', ui, 'grid' );
 
 	var attributes = [
+		{
+			// separator: true,
+			isUsedToolTip: 'Toggle applying all attributes bellow to the selection',
+			onIsUsedChange: function(v){
+				// MessageLog.trace('onIsUsedChange: '+v);
+				attributes.forEach(function(attrData){
+					var isUsedCheckbox = attrData.isUsedCheckbox;
+					if( !isUsedCheckbox || !attrData.name ) return;
+					isUsedCheckbox.setCheckState( v ? Qt.Checked : Qt.Unchecked );
+				});
+			},
+			
+			useLinkToolTip: 'Toggle using connected columns instead of a values for all attributes below',
+			onUseLinkChanged: function(v){
+				// MessageLog.trace('onUseLinkChanged: '+v);
+				attributes.forEach(function(attrData){
+					var useLinkCheckbox = attrData.useLinkCheckbox;
+					if( !useLinkCheckbox || !attrData.name ) return;
+					useLinkCheckbox.setCheckState( v ? Qt.Checked : Qt.Unchecked );
+				});
+			}
+
+		},
 		// ADJUST_PENCIL_THICKNESS						// <BOOL>
 		{
 			separator: 'Line Thickness',
@@ -98,11 +123,24 @@ function PS_DrawingAttributesModal(){
 			separator: 'Deformation',
 			keyword: 'PENCIL_LINE_DEFORMATION_PRESERVE_THICKNESS',
 			name: 'Preserve Line Thickness',
-			type: 'bool'
+			type: 'bool',
+			isUsedDefault: false
 		},
 		// PENCIL_LINE_DEFORMATION_QUALITY				// <ENUM>
 		// PENCIL_LINE_DEFORMATION_SMOOTH				// <INT>
+		{
+			keyword: 'PENCIL_LINE_DEFORMATION_SMOOTH',
+			name: 'Pencil Lines Smoothing',
+			type: 'number',
+			isUsedDefault: false
+		},
 		// PENCIL_LINE_DEFORMATION_FIT_ERROR			// <FLOAT>
+		{
+			keyword: 'PENCIL_LINE_DEFORMATION_FIT_ERROR',
+			name: 'Fit Error',
+			type: 'number',
+			isUsedDefault: false
+		},
 	];
 	_generateAttributes( attrsGroup, attributes );
 
@@ -229,35 +267,42 @@ function PS_DrawingAttributesModal(){
 			
 			//
 			if( attr.separator ){
-				// var line = new QWidget;
-			 //  line.setMinimumSize(50,1);
-			 //  line.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed);
-			 //  line.setStyleSheet("background-color: #303030; border-top: 1px solid #ffffff; border-bottom: 1px solid #505050;");
-			 //  groupWidget.mainLayout.addWidget(line,index,0,1,1);
-
-			  var label = new QLabel();
-		  	groupWidget.mainLayout.addWidget( label, index, 0, 1, 4, Qt.AlignCenter );
-		  	label.text = '--------------------&nbsp;&nbsp;&nbsp;&nbsp; <i><b>'+attr.separator+'</b></i> &nbsp;&nbsp;&nbsp;&nbsp;--------------------';
-
-			  // var line = new QWidget;
-			  // line.setMinimumSize(50,1);
-			  // line.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed);
-			  // line.setStyleSheet("background-color: #303030; border-top: 1px solid #ffffff; border-bottom: 1px solid #505050;");
-			  // groupWidget.mainLayout.addWidget(line,index,4,1,1);
+				if( attr.separator === true ){
+					var line = new QWidget;
+				  line.setMinimumSize(modalWidth-50,1);
+				  line.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed);
+				  line.setStyleSheet("background-color: #303030; border-top: 1px solid #ffffff; border-bottom: 1px solid #505050;");
+				  groupWidget.mainLayout.addWidget( line, index, 0, 1, tableColumns, Qt.AlignCenter);
+			 	}else{
+				  var label = new QLabel();
+			  	groupWidget.mainLayout.addWidget( label, index, 0, 1, tableColumns, Qt.AlignCenter );
+			  	label.text = '--------------------&nbsp;&nbsp;&nbsp;&nbsp; <i><b>'+attr.separator+'</b></i> &nbsp;&nbsp;&nbsp;&nbsp;--------------------';
+				}
 
 			  index++;
 			}
 
-			//
+			// Is Used Checkbox
 			var isUsedCheckbox = attr.isUsedCheckbox = new QCheckBox();
 			groupWidget.mainLayout.addWidget( isUsedCheckbox, index, 0 );
-			isUsedCheckbox.setCheckState( Qt.Checked );
-			isUsedCheckbox.toolTip = 'Check here to apply this attribute value to the selection';
+			isUsedCheckbox.toolTip = attr.isUsedToolTip || 'Check here to apply this attribute value to the selection';
 
-			var label = new QLabel();
-		  groupWidget.mainLayout.addWidget( label, index, 1 );
-		  label.text = attr.name;
+			if( attr.isUsedDefault !== undefined ) isUsedCheckbox.setCheckState( attr.isUsedDefault ? Qt.Checked : Qt.Unchecked );
+			else isUsedCheckbox.setCheckState( Qt.Checked );
 
+			if( attr.onIsUsedChange ){
+				isUsedCheckbox.stateChanged.connect( isUsedCheckbox, attr.onIsUsedChange );
+			}
+
+
+			// Attribute Label
+			if( attr.name ){
+				var label = new QLabel();
+			  groupWidget.mainLayout.addWidget( label, index, 1 );
+			  label.text = attr.name;
+			}
+		  
+		  // Attribute input field
 		  var inputField;
 
 		  switch( attr.type ){
@@ -280,13 +325,18 @@ function PS_DrawingAttributesModal(){
 
 				attr.inputWidget = inputField;
 
-				//
-				if( attr.type == 'number' ){
+			}
+
+			if( (inputField && attr.type == 'number') || attr.onUseLinkChanged ){
 					var useLinkCheckbox = attr.useLinkCheckbox = new QCheckBox();
 					groupWidget.mainLayout.addWidget( useLinkCheckbox, index, 3 );
 					useLinkCheckbox.setCheckState( Qt.Checked );
-					useLinkCheckbox.toolTip = 'Check here to use link instead of value';
-				}
+					useLinkCheckbox.toolTip = attr.useLinkToolTip || 'Check here to use link instead of value';
+
+					if( attr.onUseLinkChanged ){
+						useLinkCheckbox.attrData = attr;
+						useLinkCheckbox.stateChanged.connect( isUsedCheckbox, attr.onUseLinkChanged );
+					}
 
 			}
 
