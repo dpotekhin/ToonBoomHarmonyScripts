@@ -7,7 +7,7 @@ function eachNode( nodes, callback, useGroups, nodeTypeFilter ){
 
 	nodes.forEach(function(_node){
 		
-		if( nodeTypeFilter ){
+		if( nodeTypeFilter && ( node.isGroup(_node) && !useGroups ) ){
 			var type = node.type(_node);
 			if( nodeTypeFilter.indexOf(type) == -1 ) return;
 		}
