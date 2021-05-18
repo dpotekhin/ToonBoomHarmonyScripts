@@ -232,12 +232,14 @@ function PS_DrawingAttributesModal(){
 				// MessageLog.trace('>> "'+ _node +'", "'+nodeName );
 				activeAttributes.forEach(function(attr){
 					
+					if( !attr.getValue ) return;
 					var _attr = node.getAttr( _node, currentFrame, attr.keyword );
 
 					if( attr.linkedColumn && attr.useLinkCheckbox.checkState() === Qt.Checked ){ // Link attribute
 						
-						node.linkAttr( _node, attr.keyword, attr.linkedColumn );
+						node.unlinkAttr( _node, attr.keyword );
 						if( _attr ) _attr.setValue( attr.getValue() );
+						node.linkAttr( _node, attr.keyword, attr.linkedColumn );
 
 					}else{ // Copy value
 
