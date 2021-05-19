@@ -59,7 +59,7 @@ function PS_BackupScene( mode ){
 		return;
 	}
 
-	var command = 'cmd /K ' + diskName+' && cd "'+projectParentDir+'" && zip -r "'+backupFullPath+'" "'+projectFolder+'" -x ./frames/** "*.*~" ';
+	var command = 'cmd /K ' + diskName+' && cd "'+projectParentDir+'" && zip -r "'+backupFullPath+'" "'+projectFolder+'" -x "*.*~" "./*/frames/**"';
 	var proc = new Process2( command );
 	var result = proc.launchAndDetach();
 
