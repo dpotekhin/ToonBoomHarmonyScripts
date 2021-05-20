@@ -1,6 +1,6 @@
 /*
 Author: D.Potekhin (https://peppers-studio.ru)
-Version 0.1
+Version 0.2
 
 This script requires FFMPEG installed!
 
@@ -11,7 +11,10 @@ function PS_RemoveCelDuplicates(){
 	MessageLog.clearLog();
 
 	var selectedNode = selection.selectedNode(0);
-	if( !selectedNode || node.type(selectedNode) !== 'READ' ) return;
+	if( !selectedNode || node.type(selectedNode) !== 'READ' ) {
+		MessageBox.information('Please select one Drawing layer.', 0, 0, 0, 'Error' );
+		return;
+	}
 
 	MessageLog.trace('selectedNode: '+selectedNode );
 	// MessageLog.trace(''+node.getAllAttrKeywords( selectedNode).join('\n') );
@@ -125,18 +128,14 @@ function PS_RemoveCelDuplicates(){
     ffmpegProc.start(command);
     */
 
-	
-	var currentImageIndex = -1;
-	var imageData = [];
-	var imagesByHash ={};
-	var currentImageData;
-
-	checkNextImage();
 
 	//
 	function checkNextImage(){
 		
 		currentImageIndex++;
+
+		progressProportion.getHash[0] = currentImageIndex / imageFiles.length;
+		updateProgressBar();
 
 		// !!! DEBUG >>> 
 		// if( currentImageIndex > 40 ) {
@@ -225,8 +224,13 @@ function PS_RemoveCelDuplicates(){
 					column.setEntry( columnId, 1, _frame, originalImage.name );
 				}
 				prevEntry = oldEntry;
+
+				// progressProportion.restoreTimeline[0] = _frame / timelineEntries.length;
+				// updateProgressBar();
 			});
 
+			// Complete
+			closeProgressBar();
 					
 
 		}catch(err){ MessageLog.trace('Error: '+err); }
@@ -234,6 +238,68 @@ function PS_RemoveCelDuplicates(){
 		scene.endUndoRedoAccum(); 
 	
 	}
+
+	// =====================================================
+	// Progress Bar
+	var progressBarUI;
+	var progressProportion = {
+		getHash: [0, .9],
+		restoreTimeline: [0, .1]
+	};
+
+	function createProgressBar(){
+		progressBarUI = new QProgressDialog(
+            "\nProcessing cels...",
+            "Cancel",
+            0,
+            1,
+            this,
+            Qt.FramelessWindowHint
+        );
+
+        progressBarUI.modal = true;
+        progressBarUI.value = 0;
+        progressBarUI.maximum = 100;
+        progressBarUI.minimumDuration = 0;
+
+        // ToDo: To implement canceling
+        progressBarUI.canceled.connect(this, function () {
+            // Exit active event loop, which allows
+            // wasCanceled handling to occur in the current running function.
+            MessageLog.trace('Cancel pressed');
+        });
+
+        progressBarUI.show();
+	}
+
+	function updateProgressBar(){
+		var total = 0;
+		Object.keys(progressProportion).forEach(function(v){
+			var obj = progressProportion[v];
+			total += obj[0] * obj[1];
+		});
+		progressBarUI.value = total * 100;
+		MessageLog.trace('updateProgressBar: '+total+', '+total*100 );
+	}
+
+	function closeProgressBar(){
+		progressBarUI.close();
+	}
+	// =====================================================
+
+
+
+	
+	var currentImageIndex = -1;
+	var imageData = [];
+	var imagesByHash ={};
+	var currentImageData;
+
+
+
+	// Start
+	createProgressBar();
+	checkNextImage();
 
 
 }
