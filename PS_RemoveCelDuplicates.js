@@ -4,6 +4,9 @@ Version 0.2
 
 This script requires FFMPEG installed!
 
+
+ToDo:
+- for some reason the last frame of the animation always removed
 */
 
 function PS_RemoveCelDuplicates(){
@@ -20,6 +23,8 @@ function PS_RemoveCelDuplicates(){
 	// MessageLog.trace(''+node.getAllAttrKeywords( selectedNode).join('\n') );
 	
 	var isCanceled;
+	var imageFiles = [];
+	var imagesByName = {};
 
 	var columnId = node.linkedColumn(selectedNode,"DRAWING.ELEMENT");
    	var elementId = column.getElementIdOfDrawing(columnId);
@@ -39,31 +44,38 @@ function PS_RemoveCelDuplicates(){
 	imageFiles = imageFiles.filter( function(s){ return s.match(/\.tga$/i); });
 	*/
 	
-	MessageLog.trace( 'Drawings: '+ Drawing.numberOf( elementId ) );
-	var imageFiles = [];
-	var imagesByName = {};
+	// Get all Drawings of the Layer
+	
+	// MessageLog.trace( 'Drawings: '+ Drawing.numberOf( elementId ) );
 
 	var n = Drawing.numberOf( elementId );
+
 	for( var i=0; i<n; i++ ){
+
 		var drawingName = Drawing.name( elementId, i );
 		var path = Drawing.filename( elementId, drawingName );
 		// MessageLog.trace(i+') '+drawingName+'; '+path );
+		var splitedPath = path.split('/');
+		var fileName = splitedPath.pop();
 		
+		var	previewPath = fileName.split('.');
+		var fileExtension = previewPath.pop();
+		previewPath = splitedPath.join('/')+'/'+previewPath.join('.')+'-small.'+fileExtension;
+
 		var imageData = {
 			columnId: columnId,
 			elementId: elementId,
 			index: i,
 			name: drawingName,
 			path: path,
-			fileName: path.split('/').pop()
+			fileName: fileName,
+			previewPath: previewPath
 		};
 
 		imageFiles.push(imageData);
 		imagesByName[drawingName] = imageData;
 
 	}
-
-
 	
 	var lastFrame = frame.numberOf();
 
@@ -78,7 +90,7 @@ function PS_RemoveCelDuplicates(){
 		// MessageLog.trace(currentFrame+' ) '+entry );
 		timelineEntries[currentFrame] = entry;
 		currentFrame++;
-	}while( !(currentFrame > lastFrame && cooldown > 10) )
+	}while( !(currentFrame >= lastFrame && cooldown > 10) )
 
 	// return; // !!! DEBUG
 
@@ -190,68 +202,83 @@ function PS_RemoveCelDuplicates(){
 
 		scene.beginUndoRedoAccum( "Remove Duplicate Cels" );
 
-		try{
+		
 
-			// Remove all dups
+		// Remove all duplicates
+		
+		var lastCel = column.getEntry( columnId, 1, lastFrame );
+
+		Object.keys( imagesByHash ).forEach(function(hash,i){
 			
-			var lastCel = column.getEntry( columnId, 1, lastFrame );
+			MessageLog.trace( i+') '+hash +' => '+imagesByHash[hash].length);
+			
+			var original, file;
 
-			Object.keys( imagesByHash ).forEach(function(hash,i){
+			imagesByHash[hash].forEach(function( imageData, i ){
 				
-				MessageLog.trace( i+') '+hash +' => '+imagesByHash[hash].length);
-				
-				var original;
+				if( i=== 0 ) {
+					original = imageData;
+					return;
+				}
 
-				imagesByHash[hash].forEach(function( imageData, i ){
-					
-					if( i=== 0 ) {
-						original = imageData;
-						return;
-					}
+				try{
 
 					column.setEntry( columnId, 1, lastFrame, imageData.name );
 					column.deleteDrawingAt( columnId, lastFrame );
 					imageData.original = original;
-				})
+
+					// file = new File( imageData.path );
+					// if( file.exists ) file.remove();
+
+					// Remove previews
+					file = new File( imageData.previewPath );
+					// MessageLog.trace( 'remove: '+file.exists+' => '+imageData.previewPath );
+					if( file.exists ) file.remove();
+
+				}catch(err){ MessageLog.trace('Error: '+err); }
 
 			});
 
-			column.setEntry( columnId, 1, lastFrame, lastCel );
+		});
+
+		column.setEntry( columnId, 1, lastFrame, lastCel );
 
 
-			// Restore Timeline
-			var prevEntry;
+		// Restore Timeline
 
-			timelineEntries.forEach( function( oldEntry, _frame ){
-				var currentEntry = column.getEntry( columnId, 1, _frame );
-				// MessageLog.trace( _frame+' ) '+ currentEntry+' <= '+oldEntry );
-				if( currentEntry !== oldEntry ){
-					var imageData = imagesByName[oldEntry];
-					var originalImage = imageData.original;
-					column.setEntry( columnId, 1, _frame, originalImage.name );
-				}
-				prevEntry = oldEntry;
+		timelineEntries.forEach( function( oldEntry, _frame ){
+			
+			var currentEntry = column.getEntry( columnId, 1, _frame );
+			// MessageLog.trace( _frame+' ) '+ currentEntry+' <= '+oldEntry );
+			
+			if( currentEntry !== oldEntry ){
+				var imageData = imagesByName[oldEntry];
+				var originalImage = imageData.original;
+				column.setEntry( columnId, 1, _frame, originalImage.name );
+			}
 
-				// progressProportion.restoreTimeline[0] = _frame / timelineEntries.length;
-				// updateProgressBar();
-			});
+			progressProportion.restoreTimeline[0] = _frame / timelineEntries.length;
+			updateProgressBar();
 
-			// Complete
-			closeProgressBar();
+		});
+
+		// Complete
+		closeProgressBar();
 					
 
-		}catch(err){ MessageLog.trace('Error: '+err); }
 
 		scene.endUndoRedoAccum(); 
 	
 	}
 
+
+
 	// =====================================================
 	// Progress Bar
 	var progressBarUI;
 	var progressProportion = {
-		getHash: [0, .9],
-		restoreTimeline: [0, .1]
+		getHash: [0, .95],
+		restoreTimeline: [0, .05]
 	};
 
 	function createProgressBar(){
@@ -268,7 +295,7 @@ function PS_RemoveCelDuplicates(){
         progressBarUI.value = 0;
         progressBarUI.maximum = 100;
         progressBarUI.minimumDuration = 0;
-        
+
         progressBarUI.canceled.connect(this, function () {
             MessageLog.trace('Cancel pressed');
             isCanceled = true;
