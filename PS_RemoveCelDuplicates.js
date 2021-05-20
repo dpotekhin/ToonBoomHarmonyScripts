@@ -19,6 +19,7 @@ function PS_RemoveCelDuplicates(){
 	MessageLog.trace('selectedNode: '+selectedNode );
 	// MessageLog.trace(''+node.getAllAttrKeywords( selectedNode).join('\n') );
 	
+	var isCanceled;
 
 	var columnId = node.linkedColumn(selectedNode,"DRAWING.ELEMENT");
    	var elementId = column.getElementIdOfDrawing(columnId);
@@ -133,6 +134,12 @@ function PS_RemoveCelDuplicates(){
 	function checkNextImage(){
 		
 		currentImageIndex++;
+
+		if( isCanceled ) {
+			closeProgressBar();
+			MessageLog.trace('Canceling');
+			return;
+		}
 
 		progressProportion.getHash[0] = currentImageIndex / imageFiles.length;
 		updateProgressBar();
@@ -261,12 +268,10 @@ function PS_RemoveCelDuplicates(){
         progressBarUI.value = 0;
         progressBarUI.maximum = 100;
         progressBarUI.minimumDuration = 0;
-
-        // ToDo: To implement canceling
+        
         progressBarUI.canceled.connect(this, function () {
-            // Exit active event loop, which allows
-            // wasCanceled handling to occur in the current running function.
             MessageLog.trace('Cancel pressed');
+            isCanceled = true;
         });
 
         progressBarUI.show();
@@ -279,7 +284,7 @@ function PS_RemoveCelDuplicates(){
 			total += obj[0] * obj[1];
 		});
 		progressBarUI.value = total * 100;
-		MessageLog.trace('updateProgressBar: '+total+', '+total*100 );
+		// MessageLog.trace('updateProgressBar: '+total+', '+total*100 );
 	}
 
 	function closeProgressBar(){
