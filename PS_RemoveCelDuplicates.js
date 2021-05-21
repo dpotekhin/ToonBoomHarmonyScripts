@@ -19,6 +19,7 @@ Requirements:
 	- Or just download from a direct link: https://github.com/GyanD/codexffmpeg/releases/download/2021-05-19-git-2261cc6d8a/ffmpeg-2021-05-19-git-2261cc6d8a-essentials_build.zip
 	and unzip it to drive C.
 	- Make sure the System Variables on your PC include the FFMPEG path
+	https://video.stackexchange.com/questions/20495/how-do-i-set-up-and-use-ffmpeg-in-windows
 
 
 Direction:
