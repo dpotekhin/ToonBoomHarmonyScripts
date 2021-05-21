@@ -55,7 +55,7 @@ function PS_RemoveCelDuplicates(){
 
 	var columnId = node.linkedColumn(selectedNode,"DRAWING.ELEMENT");
    	var elementId = column.getElementIdOfDrawing(columnId);
-	MessageLog.trace('columnId: '+columnId );
+	// MessageLog.trace('columnId: '+columnId );
 	// MessageLog.trace('getDrawingColumnList (): '+column.getDrawingColumnList() );
 	// MessageLog.trace('getDrawingTimings: '+column.getDrawingTimings(columnId) );
 	// MessageLog.trace('elementKey: '+elementKey );
@@ -149,7 +149,8 @@ function PS_RemoveCelDuplicates(){
     });
 
     ffmpegProc.readyReadStandardError.connect( this, function(){
-    	MessageLog.trace('readyReadStandardOutput: '+ new QTextStream( ffmpegProc.readAllStandardError() ).readAll() );
+    	var error = new QTextStream( ffmpegProc.readAllStandardError() ).readAll();
+    	if( error ) MessageLog.trace('readyReadStandardError: '+ error );
     });
 
     /*
@@ -176,7 +177,7 @@ function PS_RemoveCelDuplicates(){
 
 		if( isCanceled ) {
 			closeProgressBar();
-			MessageLog.trace('Canceling');
+			MessageLog.trace('The process was canceled by the user.');
 			return;
 		}
 
@@ -191,7 +192,7 @@ function PS_RemoveCelDuplicates(){
 		// !!! <<<
 
 		if( currentImageIndex >= imageFiles.length ){
-			MessageLog.trace('Checking complete');
+			MessageLog.trace('Image data collection completed.');
 			removeDuplicates();
 			return;
 		}
@@ -213,11 +214,11 @@ function PS_RemoveCelDuplicates(){
 
 	    	var procStarted = ffmpegProc.waitForStarted(1500);
 	    	if (!procStarted) {
-	            MessageLog.trace('Process not started');
+	            MessageLog.trace('The process did not start.');
 	            return false;
 	        }
 
-	    }catch(err){MessageLog.trace('Error '+err)}
+	    }catch(err){MessageLog.trace('Error: '+err)}
 	}
 
 	
@@ -225,11 +226,10 @@ function PS_RemoveCelDuplicates(){
 	function removeDuplicates(){
 
 		MessageLog.trace('********************');
-		MessageLog.trace('removeDuplicates');
+		MessageLog.trace('Remove duplicates');
 
 		scene.beginUndoRedoAccum( "Remove Duplicate Cels" );
 
-		
 
 		// Remove all duplicates
 		
