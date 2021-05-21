@@ -9,19 +9,21 @@ var FileSystem = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps
 var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
 //
 
+//
+exports = {
+	PS_OpenSceneFolder: PS_OpenSceneFolder,
+	PS_BackupScene: PS_BackupScene,
+	MODE_OPEN_ONLY: 'mode-open-only',
+	MODE_SHOW_FOLDER_ON_COMPLETE: 'mode-show-folder-on-complete',
+};
+
 /*
 Open Scene folder
 (windows only)
 */
 function PS_OpenSceneFolder(){
-	
 	var projectPath = scene.currentProjectPathRemapped();
-
-	// Process2
-	var _process = new Process2('explorer "'+projectPath+'"');
-	var result = _process.launchAndDetach();
-	MessageLog.trace('>>'+_process.commandLine());
-	
+	FileSystem.openFolder( projectPath );	
 }
 
 
@@ -29,40 +31,49 @@ function PS_OpenSceneFolder(){
 
 
 /*
+Saves the Scene folder as Zip archive
+
+Options:
+- Hold Control key to open folder on zipping success
+
 ToDo:
-- Check archiving success
 - Add save options
 */
-function PS_BackupScene(){
+function PS_BackupScene( mode ){
 
 	var projectPath = scene.currentProjectPathRemapped();
 	
 	var sceneName = scene.currentScene();
 
-	var backupPath = projectPath.split('\\');
-	backupPath.pop();
-	backupPath = backupPath.join('\\')+'\\_backup\\'+sceneName+'_'+Utils.getTimestamp()+'.zip';
+	// Windows
+	var projectParentDir = projectPath.split('\\');
+	var diskName = projectParentDir[0];
+	var projectFolder = projectParentDir.pop();
+	projectParentDir = projectParentDir.join('\\');
+	var backupRelativePath = '_backup\\'+sceneName+'_'+Utils.getTimestamp()+'.zip';
+	var backupFullPath = projectParentDir+'\\'+backupRelativePath;
+	var fileDirCheck = FileSystem.checkFileDir( backupFullPath, true );
+	
+	if( KeyModifiers.IsShiftPressed() || mode == exports.MODE_OPEN_ONLY ){
+		FileSystem.openFolder( backupFullPath, true );
+		return;
+	}
 
-	// MessageLog.trace('PS_BackupScene: '+backupPath );
-	var fileDirCheck = FileSystem.checkFileDir( backupPath, true );
-	// MessageLog.trace('fileCheck: '+fileDirCheck );
+	var command = 'cmd /K ' + diskName+' && cd "'+projectParentDir+'" && zip -r "'+backupFullPath+'" "'+projectFolder+'" -x "*.*~" "./*/frames/**"';
+	var proc = new Process2( command );
+	var result = proc.launchAndDetach();
 
-	var command = 'zip -r "'+backupPath+'" "'+projectPath+'"';
+    if( result != 0 ){
+    	MessageLog.trace('Backup Error: '+result+': '+proc.errorMessage()+', '+command );
+    	return;
+    }
 
-	var proc = new QProcess();
-    //proc.start('start',[projectPath]);
-    proc.start(command);
-    // var procStarted = proc.waitForStarted(1500);
-    var procFinished = proc.waitForFinished(10000);
+    MessageLog.trace( 'PS_BackupScene: '+command );
 
-	MessageLog.trace('PS_BackupScene: '+command+', procFinished:'+procFinished);
-
-	MessageBox.information("Scene is archived to: "+backupPath);
+	if(KeyModifiers.IsControlPressed() || mode == exports.MODE_SHOW_FOLDER_ON_COMPLETE ){
+		FileSystem.openFolder( backupFullPath, true );
+	}else{
+		MessageBox.information("Scene is archived to: "+backupFullPath);
+	}
 
 }
-
-//
-exports = {
-	PS_OpenSceneFolder: PS_OpenSceneFolder,
-	PS_BackupScene: PS_BackupScene,
-};

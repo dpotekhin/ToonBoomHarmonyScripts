@@ -5,8 +5,8 @@ Version: 0.1
 
 //
 function getTimestamp(){
-  var date = new Date();
-  return date.getFullYear() + getZeroLeadingString(date.getMonth()+1) + getZeroLeadingString(date.getDate())+'_'+getZeroLeadingString(date.getHours())+getZeroLeadingString(date.getMinutes());
+    var date = new Date();
+    return date.getFullYear() + getZeroLeadingString(date.getMonth()+1) + getZeroLeadingString(date.getDate())+'_'+getZeroLeadingString(date.getHours())+getZeroLeadingString(date.getMinutes());
 };
 
 
@@ -16,7 +16,78 @@ function getZeroLeadingString(v){
 }
 
 //
+// TODO: I Did not find yet how to convert Drawing Grid coordinates to pixels.
+var gridWidth = 1875;
+
+function gridToPixelsX(x){
+    return x / (scene.numberOfUnitsX()/2) * ( gridWidth * (scene.unitsAspectRatioX()/scene.unitsAspectRatioY()) );
+}
+
+function gridToPixelsY(y){
+    return y / (scene.numberOfUnitsY()/2) * gridWidth;
+}
+
+function pixelsToGridX(x){
+    return x / ( gridWidth * (scene.unitsAspectRatioX()/scene.unitsAspectRatioY()) ) * (scene.numberOfUnitsX()/2);
+}
+
+function pixelsToGridY(y){
+    return y / gridWidth * (scene.numberOfUnitsY()/2);
+}
+
+//
+function getPointGlobalPosition( _node, _point, _frame ){
+  if( !_frame ) _frame = frame.current();
+  if( !_point ) _point = node.getPivot( _node, _frame );
+  var nodeMatrix = node.getMatrix( _node, _frame );
+  var pos = nodeMatrix.multiply(_point);
+  pos = scene.fromOGL( pos );
+  return pos;
+}
+
+function findParentPeg( _node )
+{
+    var numSubNodes = node.numberOfSubNodes( _node );    
+    var src = node.srcNode( _node, 0 );      
+    for ( var nd = 0; nd < numSubNodes; nd++ )
+    {
+        if( src == "" )
+            return "";
+
+        else if( node.type( src ) == "PEG" )
+            return src;
+
+        src = node.srcNode( src, 0 );
+    }
+    return "";
+}
+
+//
+function listAllActions( _responder ){
+    Action.getResponderList().forEach(listActions);
+}
+
+//
+function listActions( _responder, _responder_i ){
+    if( !_responder_i ) _responder_i = 0;
+    MessageLog.trace( '\n\nRESPONDER ('+(_responder_i+1)+'): "'+_responder+'"'  );
+    Action.getActionList( _responder ).forEach(function( _action, _action_i ){
+        MessageLog.trace( (_action_i+1)+'): "'+_action+'"'  );
+    });
+}
+
+
+//
 exports = {
-  getTimestamp: getTimestamp,
-  getZeroLeadingString: getZeroLeadingString,
+    gridWidth: gridWidth,
+    listAllActions: listAllActions,
+    listActions: listActions,
+    getTimestamp: getTimestamp,
+    getZeroLeadingString: getZeroLeadingString,
+    gridToPixelsX: gridToPixelsX,
+    gridToPixelsY: gridToPixelsY,
+    pixelsToGridX: pixelsToGridX,
+    pixelsToGridY: pixelsToGridY,
+    getPointGlobalPosition: getPointGlobalPosition,
+    findParentPeg: findParentPeg
 };

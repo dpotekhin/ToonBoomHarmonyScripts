@@ -1,0 +1,1 @@
+call render.bat 0 0 0 frames/all_640x360 640x360x41.112

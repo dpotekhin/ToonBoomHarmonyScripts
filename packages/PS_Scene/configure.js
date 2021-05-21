@@ -33,8 +33,17 @@ function configure(packageFolder, packageName)
 
 
 
+
+
+
+  ScriptManager.addMenu({
+    targetMenuId: "File",
+    id: 'Backup',
+    text: 'Backup'
+  });
+
   // = = = = = = = = = = = = = = = = = = = = = = = = = = =
-  // Open Scene Folder
+  // Backup Scene
   // - - - - - - - - - - - - - - - - - - - - - - - - - - -
     var backupSceneAction = {
         id: "ru.peppers-studio.backupSceneDisplay",
@@ -50,7 +59,7 @@ function configure(packageFolder, packageName)
     ScriptManager.addAction(backupSceneAction);
 
     ScriptManager.addMenuItem({
-        targetMenuId: "File",
+        targetMenuId: "File/Backup",
         id: backupSceneAction.id,
         text: backupSceneAction.text,
         action: backupSceneAction.id
@@ -60,5 +69,36 @@ function configure(packageFolder, packageName)
 
 
 
+
+    // = = = = = = = = = = = = = = = = = = = = = = = = = = =
+    // Open Backup Folder
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    var openBackupFolderAction = {
+        id: "ru.peppers-studio.openBackupFolderDisplay",
+        text: "Open Backup Folder",
+        icon: "PS_BackupScene.png",
+        checkable: false,
+        isEnabled: true,
+        onTrigger: function(){
+          SceneHelper.PS_BackupScene( SceneHelper.MODE_OPEN_ONLY );
+        }
+    };
+
+
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ScriptManager.addAction(openBackupFolderAction);
+
+    ScriptManager.addMenuItem({
+        targetMenuId: "File/Backup",
+        id: openBackupFolderAction.id,
+        text: openBackupFolderAction.text,
+        action: openBackupFolderAction.id
+        //action: 'openBackupFolderAction.onTrigger in ./configure.js'
+    });
+    // = = = = = = = = = = = = = = = = = = = = = = = = = = =
+
+
 }
+
+///
 exports.configure = configure;
