@@ -1,12 +1,34 @@
 /*
-Author: D.Potekhin (https://peppers-studio.ru)
+Author: D.Potekhin (d@peppers-studio.ru)
 Version 0.2
 
-This script requires FFMPEG installed!
+A Harmony script to remove duplicate cels of the selected layer.
+
+
+Installation:
+
+1) Place this script to the Harmony custom script folder accordingly this manual:
+https://docs.toonboom.com/help/harmony-20/premium/scripting/import-script.html
+2) Place its icon https://github.com/dpotekhin/ToonBoomHarmonyScripts/raw/dev/script-icons/PS_RemoveCelDuplicates.png in the script-icons folder.
+
+
+Requirements:
+
+1) This script requires FFMPEG installed
+	- Download it from the official FFMPEG project page: https://www.ffmpeg.org/download.html
+	- Or just download from a direct link: https://github.com/GyanD/codexffmpeg/releases/download/2021-05-19-git-2261cc6d8a/ffmpeg-2021-05-19-git-2261cc6d8a-essentials_build.zip
+	and unzip it to drive C.
+	- Make sure the System Variables on your PC include the FFMPEG path
+
+
+Direction:
+
+Select a drawing layer. Run PS_RemoveCelDuplicates.
 
 
 ToDo:
-- for some reason the last frame of the animation always removed
+- bug: for some reason the last frame of the layer always removed
+
 */
 
 function PS_RemoveCelDuplicates(){
@@ -25,6 +47,10 @@ function PS_RemoveCelDuplicates(){
 	var isCanceled;
 	var imageFiles = [];
 	var imagesByName = {};
+	var currentImageIndex = -1;
+	var imageData = [];
+	var imagesByHash ={};
+	var currentImageData;
 
 	var columnId = node.linkedColumn(selectedNode,"DRAWING.ELEMENT");
    	var elementId = column.getElementIdOfDrawing(columnId);
@@ -318,14 +344,6 @@ function PS_RemoveCelDuplicates(){
 		progressBarUI.close();
 	}
 	// =====================================================
-
-
-
-	
-	var currentImageIndex = -1;
-	var imageData = [];
-	var imagesByHash ={};
-	var currentImageData;
 
 
 
