@@ -26,11 +26,6 @@ function PS_RenameNodes(){
 	///
 	var namePaterns = {
 		
-		'READ': [
-			['-HND','{{NAME}}-HND'],
-			['-CTRL','{{NAME}}-CTRL'],
-			['','{{NAME}}'],
-		],
 		'PEG': '{{NAME}}-P',
 
 		'MasterController': '{{NAME}}-MC',
@@ -63,11 +58,20 @@ function PS_RenameNodes(){
 		'MATTE_RESIZE': '{{NAME}}-MTR',
 		'BLEND_MODE_MODULE': '{{NAME}}-BLD',
 		'FADE': '{{NAME}}-TRS',
+		'WRITE': 'Write-{{NAME}}',
+		'DISPLAY': '{{NAME}}-DSP',
+		'COLOR_CARD': '{{NAME}}-CC',
 
 		'GROUP': [
-			['Deformation|-DFM', '{{NAME}}-DFM']
+			['Deformation|-DFM', '{{NAME}}-DFM'], // the naming pattern for standard deformation groups
+			['', '{{NAME}}-G']
 		],
-		// 'READ' is ignored
+
+		'READ': [
+			['-HND','{{NAME}}-HND'],
+			['-CTRL','{{NAME}}-CTRL'],
+			['','{{NAME}}']
+		]
 
 	};
 
