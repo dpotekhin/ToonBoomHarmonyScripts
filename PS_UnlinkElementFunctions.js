@@ -1,5 +1,5 @@
 /*
-Author: D.Potekhin (https://peppers-studio.ru)
+Author: D.Potekhin (d@peppers-studio.ru)
 */
 // https://docs.toonboom.com/help/harmony-20/scripting/script/index.html
 

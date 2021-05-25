@@ -1,5 +1,5 @@
 /*
-Author: D.Potekhin (https://peppers-studio.ru)
+Author: D.Potekhin (d@peppers-studio.ru)
 Version 0.1
 */
 
