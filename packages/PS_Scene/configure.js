@@ -2,35 +2,64 @@
 function configure(packageFolder, packageName)
 {
   
-    // MessageLog.trace("!!! Package " + this.packageName + " configure was called in folder: " + packageFolder);
+  // MessageLog.trace("!!! Package " + this.packageName + " configure was called in folder: " + packageFolder);
 
-    var SceneHelper = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_SceneHelper.js"));
+  var SceneHelper = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_SceneHelper.js"));
 
-    // = = = = = = = = = = = = = = = = = = = = = = = = = = =
-    // Open Scene Folder
-    // - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    var openSceneFolderAction = {
-        id: "ru.peppers-studio.openSceneFolderDisplay",
-        text: "Open Scene Folder",
-        icon: "PS_BackupScene.png",
-        checkable: false,
-        isEnabled: true,
-        onTrigger: SceneHelper.PS_OpenSceneFolder
-    };
+  // = = = = = = = = = = = = = = = = = = = = = = = = = = =
+  // Open Scene Folder
+  // - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  var openSceneFolderAction = {
+      id: "ru.peppers-studio.openSceneFolderDisplay",
+      text: "Open Scene Folder",
+      icon: "PS_BackupScene.png",
+      checkable: false,
+      isEnabled: true,
+      onTrigger: SceneHelper.PS_OpenSceneFolder
+  };
 
 
-    // - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ScriptManager.addAction(openSceneFolderAction);
+  // - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ScriptManager.addAction(openSceneFolderAction);
 
-    ScriptManager.addMenuItem({
-        targetMenuId: "File",
-        id: openSceneFolderAction.id,
-        text: openSceneFolderAction.text,
-        action: openSceneFolderAction.id
-        //action: 'openSceneFolderAction.onTrigger in ./configure.js'
-    });
+  ScriptManager.addMenuItem({
+      targetMenuId: "File",
+      id: openSceneFolderAction.id,
+      text: openSceneFolderAction.text,
+      action: openSceneFolderAction.id
+      //action: 'openSceneFolderAction.onTrigger in ./configure.js'
+  });
   // = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
+
+
+
+
+
+  // = = = = = = = = = = = = = = = = = = = = = = = = = = =
+  // Open Scripts Folder
+  // - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  var openScriptsFolderAction = {
+      id: "ru.peppers-studio.openScriptsFolderDisplay",
+      text: "Open User Scripts Folder",
+      icon: "PS_BackupScene.png",
+      checkable: false,
+      isEnabled: true,
+      onTrigger: SceneHelper.PS_OpenScriptsFolder
+  };
+
+
+  // - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ScriptManager.addAction(openScriptsFolderAction);
+
+  ScriptManager.addMenuItem({
+      targetMenuId: "File",
+      id: openScriptsFolderAction.id,
+      text: openScriptsFolderAction.text,
+      action: openScriptsFolderAction.id
+      //action: 'openSceneFolderAction.onTrigger in ./configure.js'
+  });
+  // = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 
 
