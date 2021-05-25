@@ -10,12 +10,15 @@ var Utils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/Ut
 //
 
 //
+var MODE_OPEN_ONLY = 'mode-open-only';
+
 exports = {
     PS_OpenSceneFolder: PS_OpenSceneFolder,
     PS_BackupScene: PS_BackupScene,
+    PS_OpenBackupFolder: PS_OpenBackupFolder,
     PS_OpenTemplateFolder: PS_OpenTemplateFolder,
     PS_OpenScriptsFolder: PS_OpenScriptsFolder,
-    MODE_OPEN_ONLY: 'mode-open-only',
+    MODE_OPEN_ONLY: MODE_OPEN_ONLY,
     MODE_SHOW_FOLDER_ON_COMPLETE: 'mode-show-folder-on-complete',
 };
 
@@ -89,16 +92,20 @@ function PS_BackupScene(mode) {
     var diskName = projectParentDir[0];
     var projectFolder = projectParentDir.pop();
     projectParentDir = projectParentDir.join('\\');
-    var backupRelativePath = '_backup\\' + sceneName + '_' + Utils.getTimestamp() + '.zip';
-    var backupFullPath = projectParentDir + '\\' + backupRelativePath;
+    var backupFolderName = '_backup';
+    var backupFolderPath = projectParentDir+ '\\' + backupFolderName;
+    var backupFileName = sceneName + '_' + Utils.getTimestamp() + '.zip';
+    var backupFullPath =  backupFolderPath +'\\'+ backupFileName;
     var fileDirCheck = FileSystem.checkFileDir(backupFullPath, true);
 
     if (KeyModifiers.IsShiftPressed() || mode == exports.MODE_OPEN_ONLY) {
-        FileSystem.openFolder(backupFullPath, true);
+        // MessageLog.trace('command: '+backupFolderPath);
+        FileSystem.openFolder(backupFolderPath);
         return;
     }
 
     var command = 'cmd /K ' + diskName + ' && cd "' + projectParentDir + '" && zip -r "' + backupFullPath + '" "' + projectFolder + '" -x "*.*~" "./*/frames/**"';
+
     var proc = new Process2(command);
     var result = proc.launchAndDetach();
 
@@ -110,9 +117,14 @@ function PS_BackupScene(mode) {
     MessageLog.trace('PS_BackupScene: ' + command);
 
     if (KeyModifiers.IsControlPressed() || mode == exports.MODE_SHOW_FOLDER_ON_COMPLETE) {
-        FileSystem.openFolder(backupFullPath, true);
+        FileSystem.openFolder(backupFolderPath);
     } else {
         MessageBox.information("Scene is archived to: " + backupFullPath);
     }
 
+}
+
+
+function PS_OpenBackupFolder(){
+	PS_BackupScene( MODE_OPEN_ONLY );
 }

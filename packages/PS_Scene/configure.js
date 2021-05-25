@@ -108,9 +108,7 @@ function configure(packageFolder, packageName)
         icon: "PS_BackupScene.png",
         checkable: false,
         isEnabled: true,
-        onTrigger: function(){
-          SceneHelper.PS_BackupScene( SceneHelper.MODE_OPEN_ONLY );
-        }
+        onTrigger: SceneHelper.PS_OpenBackupFolder
     };
 
 
