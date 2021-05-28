@@ -1,15 +1,25 @@
 //
 function eachNode( nodes, callback, useGroups, nodeTypeFilter ){
 	
+	// MessageLog.trace('eachNode: '+nodes +'; '+ callback +'; '+ useGroups +'; '+ nodeTypeFilter);
+
 	if( !nodes ) return;
 	if( nodeTypeFilter && typeof nodeTypeFilter == 'string' ) nodeTypeFilter = [nodeTypeFilter];
 	if( typeof nodes == 'string' ) nodes = [nodes];
 
 	nodes.forEach(function(_node){
 		
-		if( nodeTypeFilter && ( node.isGroup(_node) && !useGroups ) ){
-			var type = node.type(_node);
-			if( nodeTypeFilter.indexOf(type) == -1 ) return;
+		// MessageLog.trace('forEach: '+_node+'; '+nodeTypeFilter +'; '+ node.isGroup(_node) +'; '+ useGroups  );
+
+		if( nodeTypeFilter ){ //
+
+			if( !(node.isGroup(_node) && useGroups) ){ // If we search through the groups and this Node is a GROUP
+
+				var type = node.type(_node);
+				// MessageLog.trace('filter: '+_node+'; '+type  );
+				if( nodeTypeFilter.indexOf(type) == -1 ) return;
+			}
+			
 		}
 
 		if(callback) {
@@ -24,6 +34,7 @@ function eachNode( nodes, callback, useGroups, nodeTypeFilter ){
 
 		}
 	});
+
 }
 
 
@@ -42,7 +53,7 @@ function filterNodesByType( nodes, typeList, useGroups ){
 	if( nodes === true ){
 		nodes = selection.selectedNodes();
 	}
-	// MessageLog.trace("filterNodesByType "+nodes);
+	// MessageLog.trace("filterNodesByType "+nodes+' ; '+typeList );
 	if( !nodes || !nodes.length ) return false;
 	var filtered = [];
 	eachNode( nodes, function(_node){ filtered.push(_node); }, useGroups, typeList );

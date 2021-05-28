@@ -75,6 +75,20 @@ function PS_RenameNodes(){
 
 	};
 
+	if( !selection.numberOfNodesSelected() ){
+
+		MessageBox.warning(
+			"Please select nodes to rename.\n\n"
+			+"How it works:\n"
+			+"If there is only one DRAWING in the selection, its name will be used as the base name.\n"
+			+"- Otherwise, if there is only one GROUP in the selection, its name will be used as the base name.\n"
+			+"- Otherwise, if there is only one COMPOSITE in the selection, its name will be used as the base name.\n"
+			+"- Otherwise, the base name input field will be displayed (hold the Control key to force it)\n"
+		,0,0,0,"Error");
+
+		return;
+
+	}
 
 	//
 	var mainNode, mainName;
@@ -82,19 +96,33 @@ function PS_RenameNodes(){
  	if( !KeyModifiers.IsControlPressed() ){ // If the Control key is not pressed get the Main Name from the Selection
 
 	 	var selectedDrawings = SelectionUtils.filterNodesByType( true, 'READ', false );
-	 	// MessageLog.trace("selectedDrawings "+selectedDrawings);
+	 	MessageLog.trace("selectedDrawings "+selectedDrawings);
 
-	 	if(selectedDrawings.length!==1){ // No Single Drawing selected
-			// MessageBox.warning("Please select ONLY ONE Drawing node.",0,0,0,"Error");
+	 	if(selectedDrawings.length===1){ // a Single Drawing selected
+	 		
+	 		mainNode = selectedDrawings[0];
+
+	 	}else{
+
 			var selectedGroups = SelectionUtils.filterNodesByType( true, 'GROUP', false );
 			// MessageLog.trace("selectedGroups "+selectedGroups);
 			
-			if(selectedGroups.length===1){ // No Single Group selected
+			if(selectedGroups.length===1){ // a Single Group is selected
+				
 				mainNode = selectedGroups[0];
+
+			}else{
+
+				var selectedComps = SelectionUtils.filterNodesByType( true, 'COMPOSITE', false );
+
+				if(selectedComps.length===1){ // a Single Composite is selected
+				
+					mainNode = selectedComps[0];
+
+				}
+
 			}
 	 		
-	 	}else{
-	 		mainNode = selectedDrawings[0];
 	 	}
 
 	 	if( mainNode ) mainName = node.getName(mainNode);
@@ -107,6 +135,7 @@ function PS_RenameNodes(){
 
 	MessageLog.trace('Name: '+mainName );
 
+	// return; 
 
 	scene.beginUndoRedoAccum('Rename Drawing Links');
 
@@ -231,7 +260,7 @@ function PS_RenameNodes(){
 
 			renameTries++;
 
-		}while( !renameSuccess && renameTries<20 )
+		}while( !renameSuccess && renameTries<200 )
 
 		// MessageLog.trace('Node renamed from:"'+nodeName+'" to:"'+_newName);
 
