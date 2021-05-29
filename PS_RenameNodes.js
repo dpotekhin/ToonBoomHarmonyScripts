@@ -65,25 +65,7 @@ function PS_RenameNodes(){
 
 	};
 
-	if( KeyModifiers.IsAlternatePressed() ){
-
-		var shortPaterns = {
-			'LAYER_SELECTOR': 'LS',
-			'OVERLAY': 'OL',
-			'UNDERLAY': 'UL',
-			'LINE_ART': 'LA',
-			'COLOR_ART': 'CA',
-			'TbdColorSelector': 'CS',
-			'CUTTER': 'CUT',
-			'AutoPatchModule': 'AP',
-		}
-
-		Object.keys(shortPaterns).forEach(function( n ){
-			namePaterns[n] = shortPaterns[n];
-		});
-	}
-
-
+	var useShortPatterns = KeyModifiers.IsAlternatePressed();
 
 	if( !selection.numberOfNodesSelected() ){
 
@@ -93,7 +75,7 @@ function PS_RenameNodes(){
 			+"If there is only one DRAWING in the selection, its name will be used as the base name.\n"
 			+"- Otherwise, if there is only one GROUP in the selection, its name will be used as the base name.\n"
 			+"- Otherwise, if there is only one COMPOSITE in the selection, its name will be used as the base name.\n"
-			+"- Otherwise, the base name input field will be displayed (hold the Control key to force it)\n"
+			+"- Otherwise, the base name input field will be displayed (hold the Control key to force it)\n\n"
 			+"Hold the Alt key to use short name patterns."
 		,0,0,0,"Error");
 
@@ -139,10 +121,34 @@ function PS_RenameNodes(){
 	 	if( mainNode ) mainName = node.getName(mainNode);
  	}
 
- 	
- 	if( !mainName ) mainName = Input.getText('Enter name');
+ 	if( !useShortPatterns ){
 
-	if( !mainName ) return;
+	 	if( !mainName) mainName = Input.getText('Enter name');
+		
+		if( !mainName ) return;
+
+	}else{
+
+		var shortPaterns = {
+			'LAYER_SELECTOR': 'LS',
+			'OVERLAY': 'OL',
+			'UNDERLAY': 'UL',
+			'LINE_ART': 'LA',
+			'COLOR_ART': 'CA',
+			'TbdColorSelector': 'CS',
+			'CUTTER': 'CUT',
+			'AutoPatchModule': 'AP',
+		}
+
+		Object.keys(shortPaterns).forEach(function( n ){
+			namePaterns[n] = shortPaterns[n];
+		});
+
+		if( !mainName ) mainName = '';
+
+	}
+
+
 
 	MessageLog.trace('Name: '+mainName );
 
