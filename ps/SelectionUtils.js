@@ -19,7 +19,7 @@ function eachNode( nodes, callback, useGroups, nodeTypeFilter ){
 				// MessageLog.trace('filter: '+_node+'; '+type  );
 				if( nodeTypeFilter.indexOf(type) == -1 ) return;
 			}
-			
+
 		}
 
 		if(callback) {
@@ -60,10 +60,15 @@ function filterNodesByType( nodes, typeList, useGroups ){
 	return filtered;
 }
 
+//
+function hasSelectedNodes(){
+	return selection.numberOfNodesSelected();
+}
 
 //
 exports = {
 	eachNode: eachNode,
 	eachSelectedNode: eachSelectedNode,
-	filterNodesByType: filterNodesByType
+	filterNodesByType: filterNodesByType,
+	hasSelectedNodes: hasSelectedNodes
 }
