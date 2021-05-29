@@ -1,17 +1,7 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version 0.2
+Version 0.3
 
-If in selection:
-- there is only one drawing element, then the script takes its name as the base name.
-- there is not a single drawing element or there are more than one of them, but there is only one group - it takes its name as the base name.
-- otherwise shows a dialog box for entering the base name.
-
-Options:
-- if you hold down the Control key, then the script forcibly displays a dialog box for entering the base name.
-
-TODO:
-- Option: rename nodes inside selected groups
 */
 
 
@@ -75,6 +65,26 @@ function PS_RenameNodes(){
 
 	};
 
+	if( KeyModifiers.IsAlternatePressed() ){
+
+		var shortPaterns = {
+			'LAYER_SELECTOR': 'LS',
+			'OVERLAY': 'OL',
+			'UNDERLAY': 'UL',
+			'LINE_ART': 'LA',
+			'COLOR_ART': 'CA',
+			'TbdColorSelector': 'CS',
+			'CUTTER': 'CUT',
+			'AutoPatchModule': 'AP',
+		}
+
+		Object.keys(shortPaterns).forEach(function( n ){
+			namePaterns[n] = shortPaterns[n];
+		});
+	}
+
+
+
 	if( !selection.numberOfNodesSelected() ){
 
 		MessageBox.warning(
@@ -84,6 +94,7 @@ function PS_RenameNodes(){
 			+"- Otherwise, if there is only one GROUP in the selection, its name will be used as the base name.\n"
 			+"- Otherwise, if there is only one COMPOSITE in the selection, its name will be used as the base name.\n"
 			+"- Otherwise, the base name input field will be displayed (hold the Control key to force it)\n"
+			+"Hold the Alt key to use short name patterns."
 		,0,0,0,"Error");
 
 		return;
