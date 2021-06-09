@@ -9,7 +9,7 @@ TODO:
 */
 
 (function(){
-var taskItems = document.querySelectorAll('.grouped_list_item');
+var taskItems;
 var currentTask;
 var currentTaskData;
 var assetsItem;
@@ -28,6 +28,7 @@ var sgp = window.sgp = {
 			}
 		}
 
+		taskItems = document.querySelectorAll('.grouped_list_item');
 		onParsingComplete = _onParsingComplete;
 		tasksData = {};
 		currentTask = -1;
@@ -38,7 +39,7 @@ var sgp = window.sgp = {
 	checkNextTask: function(){
 		
 		currentTask++;
-		if( currentTask >= taskItems.length){// || currentTask > 2 ){
+		if( currentTask >= taskItems.length){ // || currentTask > 1 ){
 			sgp.parsingCompleted();
 			return;
 		}
@@ -47,10 +48,11 @@ var sgp = window.sgp = {
 		taskItem.click();
 		var taskName = taskItem.querySelectorAll('.link_entity_name')[0].innerText;
 		tasksData[taskName] = currentTaskData = {
+			shotgunTaskId: (taskItem.getAttribute('item_id') || '_').split('_')[1],
 			name: taskName,
 			assets: {}
 		};
-		console.log('task:',currentTask,taskName);
+		console.log('task:',currentTask, taskName, currentTaskData);
 		sgp.checkTask();
 	},
 
@@ -188,6 +190,7 @@ var sgp = window.sgp = {
 			Object.keys(tasksData).forEach(function(shotName, i){
 				var ad = tasksData[shotName];
 				output += ad.name+'\t';// shot name
+				output += 'https://smf.shotgunstudio.com/my_tasks?task_id='+ad.shotgunTaskId+'\t';// Shotgun task url
 				output += 'X:\\210611\\'+ad.sequenceName+'\\'+ad.name+'\t';// shot local path
 				output += '\t';
 				output += '\t'; // redmine task
@@ -206,9 +209,3 @@ var sgp = window.sgp = {
 
 }
 })();
-// start
-//sgp.parse();
-// sgp.generateBatAddShots( 1 );
-
-// document.querySelectorAll('.entity_name .entity_display_name')
-// document.querySelectorAll('.entity_display_name')
