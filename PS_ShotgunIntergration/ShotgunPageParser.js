@@ -1,4 +1,6 @@
 /*
+ShotgunPageParser
+
 Author: D.Potekhin (d@peppers-studio.ru)
 Version 0.1
 */
@@ -11,6 +13,7 @@ TODO:
 (function(){
 var taskItems;
 var currentTask;
+var tasksData;
 var currentTaskData;
 var assetsItem;
 var onParsingComplete;
@@ -104,7 +107,7 @@ var sgp = window.sgp = {
 		// console.log('sgp.getAssets: listGroups', listGroups );
 
 		if( !listGroups || !listGroups.length ){
-			console.log('sgp.getAssets: not assets found');
+			// console.log('sgp.getAssets: not assets found');
 			setTimeout( sgp.getAssets, 40 );
 			return;
 		}
@@ -173,8 +176,10 @@ var sgp = window.sgp = {
 				
 				// assets
 				var assetsParams=[];
-				Object.keys(ad.assets).forEach(function(assetGroup){
-
+				Object.keys(ad.assets).forEach(function(assetGroupName){
+					Object.keys(ad.assets[assetGroupName]).forEach(function(assetName){
+						assetsParams.push( assetGroupName+'\\'+assetName );
+					});
 				});
 				if( assetsParams.length ) output+=' "'+assetsParams.join(';')+'"'
 			});
@@ -192,7 +197,6 @@ var sgp = window.sgp = {
 				output += ad.name+'\t';// shot name
 				output += 'https://smf.shotgunstudio.com/my_tasks?task_id='+ad.shotgunTaskId+'\t';// Shotgun task url
 				output += 'X:\\210611\\'+ad.sequenceName+'\\'+ad.name+'\t';// shot local path
-				output += '\t';
 				output += '\t'; // redmine task
 				output += (ad.end-ad.start+1)+'\t'; // duration
 				output += 'LO\t'; // task type
