@@ -26,6 +26,7 @@ function PS_RenameNodes(){
 		'OffsetModule': '{{NAME}}-OFS', // OffsetModule
 		'CurveModule': '{{NAME}}-CRV', // CurveModule
 		'DeformTransformOut': '{{NAME}}-KOP', // Point-Kinematic-Output
+		'WeightedDeform': '{{NAME}}-WD', // Weighted Deform
 		'TransformLimit': '{{NAME}}-TL', // Transformation-Limit 
 		'PEG_APPLY3': '{{NAME}}-AIT', // Apply Image Transformation
 		'PEG_APPLY3_V2': '{{NAME}}-APT', // Apply Peg Transformation
