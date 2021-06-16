@@ -1,8 +1,4 @@
-:: Version 210520
-::									1				2					3								4										5
-:: =============================================================================================================================================================
-:: Options: render-main.bat [Start Frame | 0] [End Frame | 0] [Write Node Name | 0] [Relative Movie Path | 1 (Just Force Video Fromat)] [WidthxHeight | 0]
-:: =============================================================================================================================================================
+:: Version 210616
 :: ToDo: to fix line weight when resolution is less than original
 
 @echo off
@@ -16,6 +12,7 @@ if "%~1"=="help" (
 	echo 3: Write Node Name ^| 0 ^(Default: "Main-Write"^)
 	echo 4: Relative Movie Path ^(The target folder must exist!^) ^| 1 ^(Just Force Video Fromat^)
 	echo 5: WIDTHxHEIGHTxFOV ^| 0
+	echo 6: Add Color Card ^| 0
 	
 	goto end
 )
@@ -26,8 +23,8 @@ set startTime=%time%
 echo RENDER STARTED: %startTime%
 
 :: the name of the Write Node to be rendered
-:: Also it may be obtained as parameters of the bat file, like: render-main.bat 0 0 Main-Write
-set writeNode=Write
+:: Also it may be obtained as parameters of the bat file, like: render.bat 0 0 Write
+set writeNode=Main-Write
 if not "%~3"=="" if not "%~3"=="0" set writeNode=%3
 
 :: Time range
@@ -67,13 +64,13 @@ set preRenderScript=
 set preRenderScript=node.getNodes(['WRITE']).forEach(function(n){node.setEnable(n,false)}); var nodeName='Top/%writeNode%'; node.setEnable(nodeName,true);
 
 :: Force Video format
-if not "%~1"=="" (
-	set "preRenderScript=%preRenderScript% node.getAttr(nodeName,1,'MOVIE_FORMAT').setValue( 'com.toonboom.mp4.1.0' ); node.getAttr(nodeName,1,'EXPORT_TO_MOVIE').setValue('Output Movie');"	
+if not "%~4"=="0" if not "%~4"=="" (
+	set "preRenderScript=%preRenderScript% node.getAttr(nodeName,1,'EXPORT_TO_MOVIE').setValue('Output Movie');node.getAttr(nodeName,1,'SCRIPT_MOVIE').setValue(false);node.getAttr(nodeName,1,'MOVIE_FORMAT').setValue('com.toonboom.mp4.1.0');"	
 )
-if not "%~1"==1 set "preRenderScript=%preRenderScript% node.getAttr(nodeName,1,'MOVIE_PATH').setValue('%4');"
+if not "%~4"=="0" if not "%~4"==1 set "preRenderScript=%preRenderScript% node.getAttr(nodeName,1,'MOVIE_PATH').setValue('%4');"
 
 :: Add a Colour Card
-set "preRenderScript=%preRenderScript% var comp=node.srcNode(nodeName,0); if(node.type(comp)=='COMPOSITE'){var cc=node.add(node.parentNode(nodeName),'__TEMPCC__','COLOR_CARD', 100,100,0); node.link(cc,0,comp,0,false,true);}
+if "%~6"=="1" set "preRenderScript=%preRenderScript% var comp=node.srcNode(nodeName,0); if(node.type(comp)=='COMPOSITE'){var cc=node.add(node.parentNode(nodeName),'__TEMPCC__','COLOR_CARD', 100,100,0); node.link(cc,0,comp,0,false,true);}"
 
 
 :: Start render
