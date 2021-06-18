@@ -9,7 +9,7 @@
 ::echo %~nx1
 
 :: FRAME RATE
-set frameRate=-r 25
+set frameRate=25
 
 :: VIDEO BITRATE
 set videoBitrate=-b:v 15000k
@@ -27,7 +27,8 @@ set startTime=%time%
 
 
 :: CONVERSION
-ffmpeg -y %frameRate% -i %imageName% %videoBitrate% -vcodec libx264 -pix_fmt yuv420p %outPutName%
+:: ffmpeg -y -r %frameRate% -i %imageName% %videoBitrate% -vcodec libx264 -x264opts keyint=%frameRate% -pix_fmt yuv420p %outPutName%
+ffmpeg -i %imageName% -c:v libx264 -c:a aac -pix_fmt yuv420p -profile baseline -refs 2 -crf 21 -r %frameRate% -shortest -y %outPutName%
 
 
 
