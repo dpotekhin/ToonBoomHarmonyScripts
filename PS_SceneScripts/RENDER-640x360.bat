@@ -10,4 +10,4 @@ if not "%~1"=="" if not "%~2"=="" (
 
 if not "%~3"=="" set fileName=%~3
 
-call render.bat %startFrame% %endFrame% 0 frames/%fileName% 640x360x41.112 1
+call render.bat %startFrame% %endFrame% 0 frames/%fileName% 1 640x360x41.112 1
