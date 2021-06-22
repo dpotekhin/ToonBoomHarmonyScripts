@@ -110,11 +110,6 @@ function PS_HexPaletteColor(){
 	if( isNaN(value.a) && !ignoreAlpha ) value.a = colorData.a;
 	MessageLog.trace('New Color value: '+JSON.stringify(value,true,'  '));
 
-	var palletteId = PaletteManager.getCurrentPaletteId();
-	var colorId = PaletteManager.getCurrentColorId();
-	var palette = PaletteObjectManager.getPalette(palletteId);
-	var colorObject = palette.getColorById(colorId);
-
 	colorObject.setColorData( value );
 
 }
