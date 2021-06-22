@@ -1,6 +1,6 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version 0.1
+Version 0.210622
 
 This script allows to copy and paste a hexademal value of a selected Palette Color.
 
@@ -16,6 +16,11 @@ TODO:
 
 function PS_HexPaletteColor(){
 
+	// MessageLog.clearLog();
+
+	var paletteList = PaletteObjectManager.getScenePaletteList(); // In some reason without this new color vakues does not applied.
+	if(paletteList.numPalettes < 1) return;
+
 	function componentToHex(c) {
 	  var hex = c.toString(16);
 	  return hex.length == 1 ? "0" + hex : hex;
@@ -24,20 +29,19 @@ function PS_HexPaletteColor(){
 	function rgbToHex(r, g, b, a) {
 	  // return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 	  var result = componentToHex(r) + componentToHex(g) + componentToHex(b);
-	  if( a !== undefined && !ignoreAlpha ) result = componentToHex(a);
+	  if( a !== undefined && !ignoreAlpha ) result += componentToHex(a);
 	  return result;
 	}
 
 	function hexToRgb(hex) {
 	  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})?$/i.exec(hex);
 	  if( !result ) return null;
-	  result = {
+	  return {
 	    r: parseInt(result[1], 16),
 	    g: parseInt(result[2], 16),
-	    b: parseInt(result[3], 16)
+	    b: parseInt(result[3], 16),
+	    a: parseInt(result[4], 16)
 	  };
-	  if( !ignoreAlpha ) result.a = parseInt(result[4], 16);
-	  return result;
 	}
 
 	var ignoreAlpha = KeyModifiers.IsAlternatePressed();
@@ -58,8 +62,14 @@ function PS_HexPaletteColor(){
 	var colorObject = palette.getColorById(colorId);
 	var colorData = colorObject.colorData;
 
+	// MessageLog.trace( 'colorData.colorType: '+colorObject.colorType);
+	if( colorObject.colorType !== 0 ){
+		MessageLog.trace( 'This script works with solid colors only.' );
+		return;
+	}
+
 	var currentHexColor = rgbToHex( colorData.r, colorData.g, colorData.b, colorData.a );
-	MessageLog.trace( 'currentHexColor: '+ currentHexColor+' ('+colorObject.colorType+') '+paletteName+'/'+colorName );
+	MessageLog.trace( 'The current Color of "'+paletteName+'/'+colorName+'": '+ currentHexColor+' ('+JSON.stringify(colorData,true,'  ')+') ' );
 
 	// Copy a hex color to the Clipboard
 	if( KeyModifiers.IsShiftPressed() ){
@@ -78,7 +88,7 @@ function PS_HexPaletteColor(){
 
 	}else{ // Input hex color
 		
-		value = Input.getText(paletteName+'/'+colorName, currentHexColor, 'Hex Color value' );
+		value = Input.getText(paletteName+'/'+colorName, currentHexColor, 'Hex Color value'+( ignoreAlpha ? ' (Alpha values ignored)': '') );
 
 	}
 
@@ -88,13 +98,22 @@ function PS_HexPaletteColor(){
 		return;
 	}
 
+	// MessageLog.trace('value @1: '+value);
 	value = hexToRgb( value );
+
 	if( !value ) {
 		MessageLog.trace('Error: Hex string parsing failed.');
 		return;
 	}
 
-	if( isNaN(value.a) ) value.a = colorData.a;
+	// MessageLog.trace('value @2: '+JSON.stringify(value,true,'  '));
+	if( isNaN(value.a) && !ignoreAlpha ) value.a = colorData.a;
+	MessageLog.trace('New Color value: '+JSON.stringify(value,true,'  '));
+
+	var palletteId = PaletteManager.getCurrentPaletteId();
+	var colorId = PaletteManager.getCurrentColorId();
+	var palette = PaletteObjectManager.getPalette(palletteId);
+	var colorObject = palette.getColorById(colorId);
 
 	colorObject.setColorData( value );
 
