@@ -21,7 +21,7 @@ if "%~1"=="help" (
 echo ................................................
 
 set startTime=%time%
-echo RENDER STARTED: %startTime%
+echo [93m RENDER STARTED: %startTime% [0m
 
 :: the name of the Write Node to be rendered
 :: Also it may be obtained as parameters of the bat file, like: render.bat 0 0 Write
@@ -109,7 +109,7 @@ if %DURATIONS% LSS 10 set DURATIONS=0%DURATIONS%
 if %DURATIONHS% LSS 10 set DURATIONHS=0%DURATIONHS%
 ::
 
-echo RENDER COMPLETE: %time% ^( %DURATIONH%:%DURATIONM%:%DURATIONS%,%DURATIONHS% ^)
+echo [93m RENDER COMPLETE: %time% ^( %DURATIONH%:%DURATIONM%:%DURATIONS%,%DURATIONHS% ^) [0m
 echo ...
 
 :end
