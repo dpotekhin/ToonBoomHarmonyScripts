@@ -94,7 +94,7 @@ function PS_BackupScene(mode) {
     projectParentDir = projectParentDir.join('\\');
     var backupFolderName = '_backup';
     var backupFolderPath = projectParentDir+ '\\' + backupFolderName;
-    var backupFileName = sceneName + '_' + Utils.getTimestamp() + '.zip';
+    var backupFileName = sceneName + '_' + Utils.getTimestamp() +'_'+ about.getUserName() + '.zip';
     var backupFullPath =  backupFolderPath +'\\'+ backupFileName;
     var fileDirCheck = FileSystem.checkFileDir(backupFullPath, true);
 
