@@ -1,3 +1,5 @@
+set hideList=Main-BI
+
 set pathName=0
 set pathName=frames/final
 
@@ -10,4 +12,11 @@ set forceVideo=1
 set size=0
 ::set size=1920x1080x41.112
 
-call render.bat 0 0 %writeNode% %pathName% %forceVideo% %size%
+set startFrame=0
+set endFrame=0
+if not "%~1"=="" if not "%~2"=="" (
+	set startFrame=%~1
+	set endFrame=%~2
+)
+
+call render.bat %startFrame% %endFrame% %writeNode% %pathName% %forceVideo% %size%

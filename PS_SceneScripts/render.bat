@@ -64,6 +64,9 @@ set preRenderScript=
 :: set preRenderScript=node.getNodes(['WRITE']).forEach(function(n){node.setEnable(n,false)});node.setEnable('Top/%writeNode%', true)
 set preRenderScript=node.getNodes(['WRITE']).forEach(function(n){node.setEnable(n,false)}); var nodeName='Top/%writeNode%'; node.setEnable(nodeName,true);
 
+:: Elements to hide
+if defined hideList set "preRenderScript=%preRenderScript% '%hideList%'.split(',').forEach(function(el){node.setEnable('Top/'+el,false);});"
+
 :: Force Video format
 if not "%~5"=="0" if not "%~5"=="" (
 	set "preRenderScript=%preRenderScript% node.getAttr(nodeName,1,'EXPORT_TO_MOVIE').setValue('Output Movie');node.getAttr(nodeName,1,'SCRIPT_MOVIE').setValue(false);node.getAttr(nodeName,1,'MOVIE_FORMAT').setValue('com.toonboom.mp4.1.0');"	
