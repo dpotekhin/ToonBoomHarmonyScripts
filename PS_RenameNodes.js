@@ -33,6 +33,7 @@ function PS_RenameNodes(){
 		'TransformGate': '{{NAME}}-TG', // Transform Gate
 		'FoldModule': '{{NAME}}-FLD', // Deformation-Fold
 		'AutoFoldModule': '{{NAME}}-AFD', // Auto-Fold
+		'DynamicSpring': '{{NAME}}-DS',
 
 		'LAYER_SELECTOR': '{{NAME}}-LS',
 		'OVERLAY': '{{NAME}}-OL',
