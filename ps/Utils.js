@@ -76,6 +76,33 @@ function listActions( _responder, _responder_i ){
     });
 }
 
+//
+function getAttributes(attribute, attributeList)
+{
+  attributeList.push(attribute);
+  var subAttrList = attribute.getSubAttributes();
+  for (var j = 0; j < subAttrList.length; ++j)
+  {
+    if(typeof(subAttrList[j].keyword()) === 'undefined' || subAttrList[j].keyword().length == 0)
+      continue;
+    getAttributes(subAttrList[j], attributeList);
+  }
+}
+function getFullAttributeList( nodePath, frame, onlyNames )
+{
+  var attributeList = [];
+  var topAttributeList = node.getAttrList(nodePath, frame);
+  for (var i = 0; i < topAttributeList.length; ++i)
+  {
+    getAttributes(topAttributeList[i], attributeList);
+  }
+  if( onlyNames ){
+    attributeList = attributeList.map(function(attr){
+        return attr.fullKeyword();
+    });
+  }
+  return attributeList;
+}
 
 //
 exports = {
@@ -89,5 +116,6 @@ exports = {
     pixelsToGridX: pixelsToGridX,
     pixelsToGridY: pixelsToGridY,
     getPointGlobalPosition: getPointGlobalPosition,
-    findParentPeg: findParentPeg
+    findParentPeg: findParentPeg,
+    getFullAttributeList: getFullAttributeList
 };
