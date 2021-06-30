@@ -44,7 +44,8 @@ function PS_HexPaletteColor(){
 	  };
 	}
 
-	var ignoreAlpha = KeyModifiers.IsAlternatePressed();
+	var ignoreAlpha = !KeyModifiers.IsAlternatePressed();
+	// MessageLog.trace('ignoreAlpha: '+ignoreAlpha);
 
 	var palletteId = PaletteManager.getCurrentPaletteId();
 	var colorId = PaletteManager.getCurrentColorId();
@@ -106,9 +107,9 @@ function PS_HexPaletteColor(){
 		return;
 	}
 
-	// MessageLog.trace('value @2: '+JSON.stringify(value,true,'  '));
-	if( isNaN(value.a) && !ignoreAlpha ) value.a = colorData.a;
-	MessageLog.trace('New Color value: '+JSON.stringify(value,true,'  '));
+	// MessageLog.trace('value @2: '+isNaN(value.a)+' > '+colorData.a+'\n'+JSON.stringify(value,true,'  '));
+	if( isNaN(value.a) || ignoreAlpha ) value.a = colorData.a;
+	// MessageLog.trace('New Color value: '+JSON.stringify(value,true,'  '));
 
 	colorObject.setColorData( value );
 
