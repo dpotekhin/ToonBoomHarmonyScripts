@@ -6,6 +6,7 @@ function configure(packageFolder, packageName)
 
   var SceneHelper = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_SceneHelper.js"));
 
+
   // = = = = = = = = = = = = = = = = = = = = = = = = = = =
   // Open Scene Folder
   // - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -33,6 +34,13 @@ function configure(packageFolder, packageName)
 
 
 
+  // RESOURCES
+
+  ScriptManager.addMenu({
+    targetMenuId: "File",
+    id: 'Resources',
+    text: 'Resources'
+  });
 
 
 
@@ -53,7 +61,7 @@ function configure(packageFolder, packageName)
   ScriptManager.addAction(openScriptsFolderAction);
 
   ScriptManager.addMenuItem({
-      targetMenuId: "File",
+      targetMenuId: "File/Resources",
       id: openScriptsFolderAction.id,
       text: openScriptsFolderAction.text,
       action: openScriptsFolderAction.id
@@ -63,6 +71,63 @@ function configure(packageFolder, packageName)
 
 
 
+
+  // = = = = = = = = = = = = = = = = = = = = = = = = = = =
+  // Open Selected Library Template Folder
+  // - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  var openSelectedLibraryTemplateFolderAction = {
+      id: "ru.peppers-studio.openSelectedLibraryTemplateFolderDisplay",
+      text: "Open Selected Library Template Folder",
+      icon: "PS_BackupScene.png",
+      checkable: false,
+      isEnabled: true,
+      onTrigger: SceneHelper.PS_OpenTemplateFolder
+  };
+
+
+  // - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ScriptManager.addAction(openSelectedLibraryTemplateFolderAction);
+
+  ScriptManager.addMenuItem({
+      targetMenuId: "File/Resources",
+      id: openSelectedLibraryTemplateFolderAction.id,
+      text: openSelectedLibraryTemplateFolderAction.text,
+      action: openSelectedLibraryTemplateFolderAction.id
+      //action: 'openSceneFolderAction.onTrigger in ./configure.js'
+  });
+  // = = = = = = = = = = = = = = = = = = = = = = = = = = =
+
+
+
+
+  // = = = = = = = = = = = = = = = = = = = = = = = = = = =
+  // Open Pencil Texture Folder
+  // - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  var openPencilTextureFolderAction = {
+      id: "ru.peppers-studio.openPencilTextureFolderDisplay",
+      text: "Open Pencil Texture Folder",
+      icon: "PS_BackupScene.png",
+      checkable: false,
+      isEnabled: true,
+      onTrigger: SceneHelper.PS_OpenPencilTextureFolder
+  };
+
+
+  // - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ScriptManager.addAction(openPencilTextureFolderAction);
+
+  ScriptManager.addMenuItem({
+      targetMenuId: "File/Resources",
+      id: openPencilTextureFolderAction.id,
+      text: openPencilTextureFolderAction.text,
+      action: openPencilTextureFolderAction.id
+      //action: 'openSceneFolderAction.onTrigger in ./configure.js'
+  });
+  // = = = = = = = = = = = = = = = = = = = = = = = = = = =
+
+
+
+  // BACKUP
 
 
   ScriptManager.addMenu({

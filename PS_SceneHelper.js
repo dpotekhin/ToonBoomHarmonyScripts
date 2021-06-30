@@ -15,6 +15,7 @@ var MODE_OPEN_ONLY = 'mode-open-only';
 exports = {
     PS_OpenSceneFolder: PS_OpenSceneFolder,
     PS_BackupScene: PS_BackupScene,
+    PS_OpenPencilTextureFolder: PS_OpenPencilTextureFolder,
     PS_OpenBackupFolder: PS_OpenBackupFolder,
     PS_OpenTemplateFolder: PS_OpenTemplateFolder,
     PS_OpenScriptsFolder: PS_OpenScriptsFolder,
@@ -65,6 +66,20 @@ function PS_OpenScriptsFolder(){
 	
 	var path = fileMapper.toNativePath( specialFolders.userScripts );
 	// MessageLog.trace( 'scripts path: '+path );
+
+  	FileSystem.openFolder(path);
+
+}
+
+
+/*
+Open Scripts folder
+(Windows only)
+*/
+function PS_OpenPencilTextureFolder(){
+	
+	var path = fileMapper.toNativePath( specialFolders.etc+'\\pencil_texture_textures' );
+	MessageLog.trace( 'Pencil Texture path: '+path );
 
   	FileSystem.openFolder(path);
 
