@@ -1,6 +1,6 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version 0.210629
+Version 0.210630
 
 1) PS_ResetTransformation
 
@@ -155,7 +155,7 @@ function _getCommonData(){
 
 	//
 	function getCustomAttrName( attrName ){
-		return '_SVD_TRF_' + attrName;
+		return '_PS_OST_' + attrName; // an original attribute name with the state prefix
 	}
 
 	//
@@ -188,7 +188,7 @@ function _getCommonData(){
 //
 function PS_ResetTransformation(){
 
-	MessageLog.clearLog();
+	// MessageLog.clearLog();
 
 	var _commonData = _getCommonData();
 	if( !_commonData ) return;
@@ -263,7 +263,7 @@ function PS_ResetTransformation(){
 //
 function PS_SaveTransformation(){
 
-	MessageLog.clearLog();
+	// MessageLog.clearLog();
 
 	var _commonData = _getCommonData();
 	if( !_commonData ) return;
@@ -324,7 +324,7 @@ function PS_SaveTransformation(){
 //
 function PS_ClearSavedTransformation(){
 
-	MessageLog.clearLog();
+	// MessageLog.clearLog();
 
 	var _commonData = _getCommonData();
 	if( !_commonData ) return;
