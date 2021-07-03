@@ -33,14 +33,16 @@ function PS_SwapNodes(){
 
 	var linksByNode = {};
 
-	// try{
+	try{
 		
 		collectLinks( nodeA );
 		collectLinks( nodeB );
 
 		// Sort outputs of both swapping nodes by a port index in ascending order
 		var linksByNodeNames = Object.keys(linksByNode);
+
 		linksByNodeNames.forEach(function(nodeName){
+
 			linksByNode[nodeName] = linksByNode[nodeName].sort(function( a, b ) {
 			  if ( a.dest.port < b.dest.port ){
 			    return -1;
@@ -50,22 +52,28 @@ function PS_SwapNodes(){
 			  }
 			  return 0;
 			});
+
 		});
 
 		// MessageLog.trace('linksByNode: \n'+ JSON.stringify(linksByNode,true,'  '));
 
 		// Unlinking nodes from the list of input ports starting from its end to avoid disorder of other connections
 		linksByNodeNames.forEach(function(nodeName){
+
 			var nodeLinks = linksByNode[nodeName];
+
 			for( var i=nodeLinks.length-1; i>=0; i-- ){
 				var linkData = nodeLinks[i];
 				node.unlink( linkData.dest.node, linkData.dest.port );
 			}
+
 		});
 
 		// Linking swapped connections
 		linksByNodeNames.forEach(function(nodeName){
+
 			var nodeLinks = linksByNode[nodeName];
+
 			nodeLinks.forEach(function(linkData){
 				
 				if( linkData.isInput ){
@@ -81,22 +89,25 @@ function PS_SwapNodes(){
 				}
 
 			});
+
 		});
 
 		// Swap positions
 		if( !KeyModifiers.IsShiftPressed() ){
+
 			var nodeAx = node.coordX(nodeA);
 			var nodeAy = node.coordY(nodeA);
 	     	node.setCoord( nodeA, node.coordX(nodeB), node.coordY(nodeB) );
 	     	node.setCoord( nodeB, nodeAx, nodeAy );
+
 	    }
 
      	// Swap names of the nodes if needed
      	if( KeyModifiers.IsControlPressed() ){
+
      		var pathA = getNodePathAndName( nodeA );
-     		var nodeATempName = pathA[1]+'__';
+     		var nodeATempName = pathA[1]+'__TMP__';
      		var pathB = getNodePathAndName( nodeB );
-     		
      		
      		node.rename( nodeA, nodeATempName );
      		node.rename( nodeB, pathA[1] );
@@ -104,7 +115,7 @@ function PS_SwapNodes(){
      		
      	}
 
-	// }catch( err ){ MessageLog.trace('Catch Error: '+err); }
+	}catch( err ){ MessageLog.trace('Catch Error: '+err); }
 
 	///
 	scene.endUndoRedoAccum();
@@ -136,23 +147,31 @@ function PS_SwapNodes(){
 	    var linksByNodeItem = getlinksByNodeItem(_node);
 
 	    for( var i=0; i<inputPortCount; i++){
+
+	      var inputNodeData = node.srcNodeInfo( _node, i );
+	      if( !inputNodeData ) continue;
+
 	      linksByNodeItem.push({
 	      	node: _node,
 	      	isInput: true,
-	        src: node.srcNodeInfo( _node, i ),
+	        src: inputNodeData,
 	        dest: {
 	        	node: _node,
 	        	port: i
 	        }
 	      });
+	      
 	    }
 
 	    // Get output connections
-	    var outputPortCount = node.numberOfOutputPorts( _node ),
+	    var outputPortCount = node.numberOfOutputPorts( _node );
+
 	    for( var opi=0; opi<outputPortCount; opi++){
 	      for(var opli = 0; opli < node.numberOfOutputLinks(_node, opi); opli++){
-	        // node.dstNode(_node, opi, opli);
+	        
 	        var outputNodeData = node.dstNodeInfo( _node, opi, opli );
+	        if( !outputNodeData ) continue;
+
 	        getlinksByNodeItem(outputNodeData.node).push({
 	          node: _node,
 	          isOutput: true,
@@ -165,6 +184,7 @@ function PS_SwapNodes(){
 	        });
 	      }
 	    }
+
 	}
 
 }
