@@ -1,6 +1,6 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version 0.210703
+Version 0.210704
 
 This script allows to swap two nodes keeping their connections.
 Swapping nodes between different groups is supported.
@@ -10,7 +10,6 @@ Options:
 - Hold Shift key to disable swapping position of the nodes
 
 TODO:
-- There's a bug when swap nodes connected directly to Multiports - somehow new ports are created
 - Also swap animation functions and expressions of the swapping nodes on a key modifier
 */
 
@@ -95,14 +94,16 @@ function PS_SwapNodes(){
 			        	// getSwapedNodeName( linkData.dest.node )+', '+linkData.dest.port);
 					node.link(
 			        	linkData.src.node, linkData.src.port, // src
-			        	getSwapedNodeName( linkData.dest.node ), linkData.dest.port // dest - swapped node
+			        	getSwapedNodeName( linkData.dest.node ), linkData.dest.port, // dest - swapped node
+			        	false, false // Not allow to create ports in groups
 			      	);
 
 				}else{
 					
 					node.link(
 			        	getSwapedNodeName( linkData.src.node ), linkData.src.port, // src - swapped node
-			        	linkData.dest.node, linkData.dest.port // dest
+			        	linkData.dest.node, linkData.dest.port, // dest
+			        	false, false // Not allow to create ports in groups
 			      	);
 			      	
 				}
