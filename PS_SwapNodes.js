@@ -3,13 +3,15 @@ Author: D.Potekhin (d@peppers-studio.ru)
 Version 0.210703
 
 This script allows to swap two nodes keeping their connections.
+Swapping nodes between different groups is supported.
 
 Options:
 - Hold Control key to swap names of the nodes
 - Hold Shift key to disable swapping position of the nodes
 
 TODO:
--  
+- There's a bug when swap nodes connected directly to Multiports - somehow new ports are created
+- Also swap animation functions and expressions of the swapping nodes on a key modifier
 */
 
 function PS_SwapNodes(){
@@ -24,19 +26,22 @@ function PS_SwapNodes(){
 		return;
 	}
 
-	MessageLog.clearLog();
+	// MessageLog.clearLog();
 	
 	scene.beginUndoRedoAccum('Swap Nodes');
 
-	var nodeA = selectedNodes[0];
-	var nodeB = selectedNodes[1];
+	var nodeA = getNodeData( selectedNodes[0], 'A' );
+    var nodeB = getNodeData( selectedNodes[1], 'B' );
 
+    // MessageLog.trace('A:'+JSON.stringify(nodeA,true,'  '));
+    // MessageLog.trace('B:'+JSON.stringify(nodeB,true,'  '));
+	
 	var linksByNode = {};
 
 	try{
 		
-		collectLinks( nodeA );
-		collectLinks( nodeB );
+		collectLinks( nodeA.tempPath, function(){ return nodeA.tempPath; });
+		collectLinks( nodeB.tempPath, function(){ return nodeB.tempPath; });
 
 		// Sort outputs of both swapping nodes by a port index in ascending order
 		var linksByNodeNames = Object.keys(linksByNode);
@@ -69,6 +74,14 @@ function PS_SwapNodes(){
 
 		});
 
+
+		// Move nodes between groups
+		moveToGroup( nodeA, nodeB );
+		moveToGroup( nodeB, nodeA );
+		
+		// throw "Error";
+
+
 		// Linking swapped connections
 		linksByNodeNames.forEach(function(nodeName){
 
@@ -77,15 +90,21 @@ function PS_SwapNodes(){
 			nodeLinks.forEach(function(linkData){
 				
 				if( linkData.isInput ){
+
+					// MessageLog.trace( '=> '+linkData.src.node+', '+linkData.src.port +'\n;'+ // src
+			        	// getSwapedNodeName( linkData.dest.node )+', '+linkData.dest.port);
 					node.link(
 			        	linkData.src.node, linkData.src.port, // src
 			        	getSwapedNodeName( linkData.dest.node ), linkData.dest.port // dest - swapped node
 			      	);
+
 				}else{
+					
 					node.link(
 			        	getSwapedNodeName( linkData.src.node ), linkData.src.port, // src - swapped node
 			        	linkData.dest.node, linkData.dest.port // dest
 			      	);
+			      	
 				}
 
 			});
@@ -95,25 +114,24 @@ function PS_SwapNodes(){
 		// Swap positions
 		if( !KeyModifiers.IsShiftPressed() ){
 
-			var nodeAx = node.coordX(nodeA);
-			var nodeAy = node.coordY(nodeA);
-	     	node.setCoord( nodeA, node.coordX(nodeB), node.coordY(nodeB) );
-	     	node.setCoord( nodeB, nodeAx, nodeAy );
+			placeNode( nodeA.tempPath, nodeB.x, nodeB.y );
+	     	placeNode( nodeB.tempPath, nodeA.x, nodeA.y );
 
 	    }
 
      	// Swap names of the nodes if needed
      	if( KeyModifiers.IsControlPressed() ){
 
-     		var pathA = getNodePathAndName( nodeA );
-     		var nodeATempName = pathA[1]+'__TMP__';
-     		var pathB = getNodePathAndName( nodeB );
+     		node.rename( nodeA.tempPath, nodeB.name );
+     		node.rename( nodeB.tempPath, nodeA.name );
      		
-     		node.rename( nodeA, nodeATempName );
-     		node.rename( nodeB, pathA[1] );
-     		node.rename( pathA[0]+nodeATempName, pathB[1] );
-     		
+     	}else{
+
+     		node.rename( nodeA.tempPath, nodeA.name );
+     		node.rename( nodeB.tempPath, nodeB.name );
+
      	}
+
 
 	}catch( err ){ MessageLog.trace('Catch Error: '+err); }
 
@@ -122,15 +140,35 @@ function PS_SwapNodes(){
 
 
 	//
-	function getNodePathAndName( _node ){
+	function placeNode( _node, x, y ){
+		node.setCoord( _node, x - node.width(_node)/2, y - node.height(_node)/2 );
+	}
+
+
+	//
+	function getNodeData( _node, suffix ){
 		var nodePath = _node.split('/');
      	var nodeName = nodePath.pop();
-     	return [ nodePath.join('/')+'/', nodeName ];
+     	var groupPath = nodePath.join('/')+'/';
+     	var nodeTempName = nodeName+'__TMP'+(suffix || '')+'__';
+     	var tempPath = groupPath+nodeTempName;
+     	var x = node.coordX(_node) + node.width(_node)/2;
+     	var y = node.coordY(_node) + node.height(_node)/2;
+     	node.rename( _node, nodeTempName );
+     	return {
+     		groupPath: groupPath,
+     		name: nodeName,
+     		path: groupPath+nodeName,
+     		tempName: nodeTempName,
+     		tempPath: tempPath,
+     		x: x,
+     		y: y
+     	};
 	}
 
 	//
 	function getSwapedNodeName( _node ){
-		return _node === nodeA ? nodeB : nodeA;
+		return _node === nodeA.tempPath ? nodeB.tempPath : nodeA.tempPath;
 	}
 
 	//
@@ -138,9 +176,34 @@ function PS_SwapNodes(){
 		if( !linksByNode[_node] ) linksByNode[_node] = [];
 		return linksByNode[_node];
 	}
+	
+	//
+	function moveToGroup( _nodeA, _nodeB ){
+
+		var subnodeCount = node.numberOfSubNodes(_nodeB.groupPath);
+		// MessageLog.trace('before: '+ node.subNodes(_nodeB.groupPath).join('\n') );
+
+		node.moveToGroup( _nodeA.tempPath, _nodeB.groupPath );
+		_nodeA.tempPath = _nodeB.groupPath + _nodeA.tempName;
+
+		// Remove automaticaly created Composite
+		if( subnodeCount+1 < node.numberOfSubNodes(_nodeB.groupPath) ){ 
+			var lastSubnode = node.subNodes(_nodeB.groupPath).pop();
+			// MessageLog.trace('after: '+ node.subNodes(_nodeB.groupPath).join('\n') );
+			if( node.type(lastSubnode) === 'COMPOSITE' ) node.deleteNode(lastSubnode,false,false);
+		}
+
+		// Unlink an autoconnected transform
+		node.unlink(_nodeA.tempPath, 0);
+
+		// Unlink an autoconnected output
+		var dest = node.dstNodeInfo(_nodeA.tempPath, 0, 0);
+		if( dest ) node.unlink( dest.node, dest.port );
+
+	}
 
 	//
-	function collectLinks( _node ){
+	function collectLinks( _node, getNodeName ){
 
 		// Get input connections
 	    var inputPortCount = node.numberOfInputPorts( _node );
@@ -151,38 +214,49 @@ function PS_SwapNodes(){
 	      var inputNodeData = node.srcNodeInfo( _node, i );
 	      if( !inputNodeData ) continue;
 
-	      linksByNodeItem.push({
-	      	node: _node,
+	      var obj = {
+	      	// node: _node,
 	      	isInput: true,
 	        src: inputNodeData,
 	        dest: {
-	        	node: _node,
+	        	// node: _node,
 	        	port: i
 	        }
-	      });
-	      
+	      };
+	      Object.defineProperty(obj, 'node', { get: getNodeName });
+	      Object.defineProperty(obj.dest, 'node', { get: getNodeName });
+	      // MessageLog.trace('OBJ: '+_node+'; '+obj.dest.node );
+	      linksByNodeItem.push(obj);
+
 	    }
 
 	    // Get output connections
 	    var outputPortCount = node.numberOfOutputPorts( _node );
 
 	    for( var opi=0; opi<outputPortCount; opi++){
+
 	      for(var opli = 0; opli < node.numberOfOutputLinks(_node, opi); opli++){
 	        
 	        var outputNodeData = node.dstNodeInfo( _node, opi, opli );
 	        if( !outputNodeData ) continue;
 
-	        getlinksByNodeItem(outputNodeData.node).push({
-	          node: _node,
+	        var obj = {
+	          // node: _node,
 	          isOutput: true,
 	          src: {
-	          	node: _node,
+	          	// node: _node,
 	          	port: opi,
 	          	link: opli
 	          },
 	          dest: outputNodeData
-	        });
+	        };
+
+	        Object.defineProperty(obj, 'node', { get: getNodeName });
+	      	Object.defineProperty(obj.src, 'node', { get: getNodeName });
+	      	getlinksByNodeItem(outputNodeData.node).push(obj);
+
 	      }
+
 	    }
 
 	}
