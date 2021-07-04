@@ -77,8 +77,6 @@ function PS_SwapNodes(){
 		// Move nodes between groups
 		moveToGroup( nodeA, nodeB );
 		moveToGroup( nodeB, nodeA );
-		
-		// throw "Error";
 
 
 		// Linking swapped connections
@@ -90,20 +88,20 @@ function PS_SwapNodes(){
 				
 				if( linkData.isInput ){
 
-					// MessageLog.trace( '=> '+linkData.src.node+', '+linkData.src.port +'\n;'+ // src
-			        	// getSwapedNodeName( linkData.dest.node )+', '+linkData.dest.port);
-					node.link(
+					//node.link(
+					linkNode(
 			        	linkData.src.node, linkData.src.port, // src
-			        	getSwapedNodeName( linkData.dest.node ), linkData.dest.port, // dest - swapped node
-			        	false, false // Not allow to create ports in groups
+			        	getSwapedNodeName( linkData.dest.node ), linkData.dest.port // dest - swapped node
+			        	// ,false, false // Not allow to create ports in groups
 			      	);
 
 				}else{
 					
-					node.link(
+					// node.link(
+					linkNode(
 			        	getSwapedNodeName( linkData.src.node ), linkData.src.port, // src - swapped node
-			        	linkData.dest.node, linkData.dest.port, // dest
-			        	false, false // Not allow to create ports in groups
+			        	linkData.dest.node, linkData.dest.port // dest
+			        	// ,false, false // Not allow to create ports in groups
 			      	);
 			      	
 				}
@@ -143,6 +141,22 @@ function PS_SwapNodes(){
 	//
 	function placeNode( _node, x, y ){
 		node.setCoord( _node, x - node.width(_node)/2, y - node.height(_node)/2 );
+	}
+
+
+	//
+	function linkNode( srcNode, srcPort, destNode, destPort ){
+		
+		// MessageLog.trace('>>> linkNode');
+		// MessageLog.trace('srcNode: '+srcNode+'('+node.type(srcNode)+')' );
+		// MessageLog.trace('destNode: '+destNode+'('+node.type(destNode)+')' );
+
+		if( node.type(srcNode) === 'MULTIPORT_IN' || node.type(destNode) === 'MULTIPORT_OUT' ){
+			node.link( srcNode, srcPort, destNode, destPort, false, false );
+		}else{
+			node.link( srcNode, srcPort, destNode, destPort );
+		}
+		
 	}
 
 
