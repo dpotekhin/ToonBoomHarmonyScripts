@@ -6,9 +6,9 @@ This script allows to swap two nodes keeping their connections.
 Swapping nodes between different groups is also supported.
 
 Options:
-- Hold Control key to swap names of the nodes
+- Hold Control key ONLY to swap names of the nodes
 - Hold Shift key to disable swapping position of the nodes
-- Hold Alt key to swap animation functions and expressions of the nodes (not for child nodes of the swaped groups)
+- Hold Alt key to ONLY swap animation functions and expressions of the nodes (not for child nodes of the swaped groups)
 
 TODO:
 - 
@@ -20,9 +20,9 @@ function PS_SwapNodes(){
 	if( selectedNodes.length != 2 ){
 		MessageBox.warning('Please select two nodes to swap them.\n\n'
 			+'Options:\n'
-			+'- Hold Control key to swap names of the nodes\n'
+			+'- Hold Control key to ONLY swap names of the nodes\n'
 			+'- Hold Shift key to disable swapping position of the nodes\n'
-			+'- Hold Alt key to swap animation functions and expressions of the nodes'
+			+'- Hold Alt key to ONLY swap animation functions and expressions of the nodes'
 		,0,0,0,'Error');
 		return;
 	}
@@ -39,94 +39,100 @@ function PS_SwapNodes(){
 	
 	var linksByNode = {};
 
+	var swapAnimationMode = KeyModifiers.IsAlternatePressed();
+	var swapNamesMode = KeyModifiers.IsControlPressed();
+
 	try{
 		
-		collectLinks( nodeA.tempPath, function(){ return nodeA.tempPath; });
-		collectLinks( nodeB.tempPath, function(){ return nodeB.tempPath; });
+		if( !swapAnimationMode && !swapNamesMode ){ // Swap nodes only if there's no mode modifiers
 
-		// Sort outputs of both swapping nodes by a port index in ascending order
-		var linksByNodeNames = Object.keys(linksByNode);
+			collectLinks( nodeA.tempPath, function(){ return nodeA.tempPath; });
+			collectLinks( nodeB.tempPath, function(){ return nodeB.tempPath; });
 
-		linksByNodeNames.forEach(function(nodeName){
+			// Sort outputs of both swapping nodes by a port index in ascending order
+			var linksByNodeNames = Object.keys(linksByNode);
 
-			linksByNode[nodeName] = linksByNode[nodeName].sort(function( a, b ) {
-			  if ( a.dest.port < b.dest.port ){
-			    return -1;
-			  }
-			  if ( a.dest.port > b.dest.port ){
-			    return 1;
-			  }
-			  return 0;
+			linksByNodeNames.forEach(function(nodeName){
+
+				linksByNode[nodeName] = linksByNode[nodeName].sort(function( a, b ) {
+				  if ( a.dest.port < b.dest.port ){
+				    return -1;
+				  }
+				  if ( a.dest.port > b.dest.port ){
+				    return 1;
+				  }
+				  return 0;
+				});
+
 			});
 
-		});
+			// MessageLog.trace('linksByNode: \n'+ JSON.stringify(linksByNode,true,'  '));
 
-		// MessageLog.trace('linksByNode: \n'+ JSON.stringify(linksByNode,true,'  '));
+			// Unlinking nodes from the list of input ports starting from its end to avoid disorder of other connections
+			linksByNodeNames.forEach(function(nodeName){
 
-		// Unlinking nodes from the list of input ports starting from its end to avoid disorder of other connections
-		linksByNodeNames.forEach(function(nodeName){
+				var nodeLinks = linksByNode[nodeName];
 
-			var nodeLinks = linksByNode[nodeName];
-
-			for( var i=nodeLinks.length-1; i>=0; i-- ){
-				var linkData = nodeLinks[i];
-				node.unlink( linkData.dest.node, linkData.dest.port );
-			}
-
-		});
-
-
-		// Move nodes between groups
-		moveToGroup( nodeA, nodeB );
-		moveToGroup( nodeB, nodeA );
-
-
-		// Linking swapped connections
-		linksByNodeNames.forEach(function(nodeName){
-
-			var nodeLinks = linksByNode[nodeName];
-
-			nodeLinks.forEach(function(linkData){
-				
-				if( linkData.isInput ){
-
-					//node.link(
-					linkNode(
-			        	linkData.src.node, linkData.src.port, // src
-			        	getSwapedNodeName( linkData.dest.node ), linkData.dest.port // dest - swapped node
-			        	// ,false, false // Not allow to create ports in groups
-			      	);
-
-				}else{
-					
-					// node.link(
-					linkNode(
-			        	getSwapedNodeName( linkData.src.node ), linkData.src.port, // src - swapped node
-			        	linkData.dest.node, linkData.dest.port // dest
-			        	// ,false, false // Not allow to create ports in groups
-			      	);
-			      	
+				for( var i=nodeLinks.length-1; i>=0; i-- ){
+					var linkData = nodeLinks[i];
+					node.unlink( linkData.dest.node, linkData.dest.port );
 				}
 
 			});
 
-		});
 
-		// Swap positions
-		if( !KeyModifiers.IsShiftPressed() ){
+			// Move nodes between groups
+			moveToGroup( nodeA, nodeB );
+			moveToGroup( nodeB, nodeA );
 
-			placeNode( nodeA.tempPath, nodeB.x, nodeB.y );
-	     	placeNode( nodeB.tempPath, nodeA.x, nodeA.y );
+			// Linking swapped connections
+			linksByNodeNames.forEach(function(nodeName){
 
-	    }
+				var nodeLinks = linksByNode[nodeName];
+
+				nodeLinks.forEach(function(linkData){
+					
+					if( linkData.isInput ){
+
+						//node.link(
+						linkNode(
+				        	linkData.src.node, linkData.src.port, // src
+				        	getSwapedNodeName( linkData.dest.node ), linkData.dest.port // dest - swapped node
+				        	// ,false, false // Not allow to create ports in groups
+				      	);
+
+					}else{
+						
+						// node.link(
+						linkNode(
+				        	getSwapedNodeName( linkData.src.node ), linkData.src.port, // src - swapped node
+				        	linkData.dest.node, linkData.dest.port // dest
+				        	// ,false, false // Not allow to create ports in groups
+				      	);
+				      	
+					}
+
+				});
+
+			});
+
+			// Swap positions
+			if( !KeyModifiers.IsShiftPressed() ){
+
+				placeNode( nodeA.tempPath, nodeB.x, nodeB.y );
+		     	placeNode( nodeB.tempPath, nodeA.x, nodeA.y );
+
+		    }
+
+		}
 
 	    // Swap animated functions and expressions
-	    if( KeyModifiers.IsAlternatePressed() ){
+	    if( swapAnimationMode ){
 	    	swapLinkedAttributes( nodeA.tempPath, nodeB.tempPath );
 	    }
 
      	// Swap names of the nodes if needed
-     	if( KeyModifiers.IsControlPressed() ){
+     	if( swapNamesMode ){
 
      		node.rename( nodeA.tempPath, nodeB.name );
      		node.rename( nodeB.tempPath, nodeA.name );
