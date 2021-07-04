@@ -3,14 +3,15 @@ Author: D.Potekhin (d@peppers-studio.ru)
 Version 0.210704
 
 This script allows to swap two nodes keeping their connections.
-Swapping nodes between different groups is supported.
+Swapping nodes between different groups is also supported.
 
 Options:
 - Hold Control key to swap names of the nodes
 - Hold Shift key to disable swapping position of the nodes
+- Hold Alt key to swap animation functions and expressions of the nodes (not for child nodes of the swaped groups)
 
 TODO:
-- Also swap animation functions and expressions of the swapping nodes on a key modifier
+- 
 */
 
 function PS_SwapNodes(){
@@ -20,12 +21,13 @@ function PS_SwapNodes(){
 		MessageBox.warning('Please select two nodes to swap them.\n\n'
 			+'Options:\n'
 			+'- Hold Control key to swap names of the nodes\n'
-			+'- Hold Shift key to disable swapping position of the nodes'
+			+'- Hold Shift key to disable swapping position of the nodes\n'
+			+'- Hold Alt key to swap animation functions and expressions of the nodes'
 		,0,0,0,'Error');
 		return;
 	}
 
-	// MessageLog.clearLog();
+	// MessageLog.clearLog(); // !!!
 	
 	scene.beginUndoRedoAccum('Swap Nodes');
 
@@ -118,6 +120,11 @@ function PS_SwapNodes(){
 
 	    }
 
+	    // Swap animated functions and expressions
+	    if( KeyModifiers.IsAlternatePressed() ){
+	    	swapLinkedAttributes( nodeA.tempPath, nodeB.tempPath );
+	    }
+
      	// Swap names of the nodes if needed
      	if( KeyModifiers.IsControlPressed() ){
 
@@ -156,7 +163,7 @@ function PS_SwapNodes(){
 		}else{
 			node.link( srcNode, srcPort, destNode, destPort );
 		}
-		
+
 	}
 
 
@@ -274,6 +281,81 @@ function PS_SwapNodes(){
 
 	    }
 
+	}
+
+
+	// SWAPPING NODES ANIMATION FUNCTIONS AND EXPRESSIONS
+	// 
+	function swapLinkedAttributes( nodeA, nodeB ){
+		
+		var linkedAttributesA = getNodeLinkedAttributes( nodeA );
+		var linkedAttributesB = getNodeLinkedAttributes( nodeB );
+
+		linkNodeAttributes( nodeA, linkedAttributesB );
+		linkNodeAttributes( nodeB, linkedAttributesA );
+	}
+
+
+	//
+	function linkNodeAttributes( _node, attributeData ){
+
+		attributeData.forEach(function( attrData ){
+			node.linkAttr( _node, attrData[0], attrData[1] );
+		});
+
+	}
+
+
+	//
+	function getNodeLinkedAttributes( _node ){
+
+		// MessageLog.trace('getNodeLinkedAttributes: '+_node); //+' :\n'+getFullAttributeNames(_node).join('\n') );
+		
+		var linkedAttributes = [];
+		getNodeAttributesNames( _node ).forEach(function(attrName,i){
+
+			var linkedColumn = node.linkedColumn(_node,attrName);
+			var linkedColumnType = column.type(linkedColumn);
+			
+			if( linkedColumn && linkedColumnType !== 'DRAWING' ) {
+				linkedAttributes.push([attrName, linkedColumn ]);
+				node.unlinkAttr( _node, attrName );
+				// MessageLog.trace(i+') '+ attrName+' : '+linkedColumnType );
+			}
+
+		});
+
+		// MessageLog.trace('linkedAttributes: '+JSON.stringify(linkedAttributes,true,'  '));
+		return linkedAttributes;
+		
+	}
+
+
+	//
+	function getAttributes(attribute, attributeList, keyword )
+	{
+	
+	  var subAttrList = attribute.getSubAttributes();
+	  for (var j = 0; j < subAttrList.length; ++j)
+	  {
+	    if(typeof(subAttrList[j].keyword()) === 'undefined' || subAttrList[j].keyword().length == 0)
+	      continue;
+	    getAttributes(subAttrList[j], attributeList, keyword+'.'+subAttrList[j].keyword() );
+	  }
+
+	  attributeList.push( keyword );
+
+	}
+
+	function getNodeAttributesNames(nodePath)
+	{
+	  var attributeList = [];
+	  var topAttributeList = node.getAttrList(nodePath, 1);
+	  for (var i = 0; i < topAttributeList.length; ++i)
+	  {
+	    getAttributes(topAttributeList[i], attributeList, topAttributeList[i].keyword() );
+	  }
+	  return attributeList;
 	}
 
 }
