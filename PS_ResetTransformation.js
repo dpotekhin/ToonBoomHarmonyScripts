@@ -155,6 +155,7 @@ function _getCommonData(){
 
 	//
 	function getCustomAttrName( attrName ){
+		attrName = attrName.replace('>','');
 		return '_PS_OST_' + attrName; // an original attribute name with the state prefix
 	}
 
