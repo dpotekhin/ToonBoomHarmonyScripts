@@ -62,19 +62,6 @@ function findParentPeg( _node )
     return "";
 }
 
-//
-function listAllActions( _responder ){
-    Action.getResponderList().forEach(listActions);
-}
-
-//
-function listActions( _responder, _responder_i ){
-    if( !_responder_i ) _responder_i = 0;
-    MessageLog.trace( '\n\nRESPONDER ('+(_responder_i+1)+'): "'+_responder+'"'  );
-    Action.getActionList( _responder ).forEach(function( _action, _action_i ){
-        MessageLog.trace( (_action_i+1)+'): "'+_action+'"'  );
-    });
-}
 
 //
 function getAttributes(attribute, attributeList)
@@ -107,8 +94,6 @@ function getFullAttributeList( nodePath, frame, onlyNames )
 //
 exports = {
     gridWidth: gridWidth,
-    listAllActions: listAllActions,
-    listActions: listActions,
     getTimestamp: getTimestamp,
     getZeroLeadingString: getZeroLeadingString,
     gridToPixelsX: gridToPixelsX,
