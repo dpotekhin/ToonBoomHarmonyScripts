@@ -71,13 +71,13 @@ function PS_ExpressionEditor( _node ){
   // REFRESH BUTTON
   var refreshButton = modal.addButton('', topGroup, smallBtnHeight, smallBtnHeight, iconPath+'refresh.png',
     _refreshExpressionList,
-    'Refresh expression list'
+    'Refresh expression list.'
   );
 
   // RENAME BUTTON
   var renameButton = modal.addButton('', topGroup, smallBtnHeight, smallBtnHeight, iconPath+'rename.png',
     _renameExpression,
-    'Rename the selected expression'
+    'Rename the selected expression.'
   );
   
 
@@ -85,6 +85,12 @@ function PS_ExpressionEditor( _node ){
   var findNextNodeButton = modal.addButton('', topGroup, smallBtnHeight, smallBtnHeight, iconPath+'findNextNode.png',
     _findNextUsedNode,
     'Find the next node using the selected expression. Hold Control key to open Node properties window.'
+  );
+
+  // GET NODE COLUMNS BUTTON
+  var getNodeColumnsButton = modal.addButton('', topGroup, smallBtnHeight, smallBtnHeight, iconPath+'getNodeColumns.png',
+    _getNodeColumns,
+    'Get names of columns connected to the selected node.'
   );
 
 
@@ -286,7 +292,9 @@ function PS_ExpressionEditor( _node ){
     // MessageLog.trace('nextLinkedNode: "'+nextLinkedNode+'"');
     if( !nextLinkedNode ) return;
 
-    _setMessage( '"'+nextLinkedNode+'" '+(nextLinkedNodeIndex+1)+'/'+linkedNodesNames.length );
+    var attributes = [];
+    allLinkedNodes[nextLinkedNode].forEach(function(attrData){ attributes.push('- '+attrData[1]) })
+    _setMessage( '"'+nextLinkedNode+'" '+(nextLinkedNodeIndex+1)+'/'+linkedNodesNames.length, attributes.join('\n') );
 
     selection.clearSelection();
     selection.addNodeToSelection( nextLinkedNode );
@@ -401,7 +409,7 @@ function PS_ExpressionEditor( _node ){
 
     });
 
-    // column.removeUnlinkedFunctionColumn(curentExpressionName); // Doesnot work
+    // column.removeUnlinkedFunctionColumn(curentExpressionName); // Doesn't work
     
     var _node = node.add( 'Top', '__'+column.generateAnonymousName(), 'PEG', 0, 0, 0 );
     node.linkAttr(_node, "ROTATION.ANGLEZ", curentExpressionName );
@@ -412,6 +420,61 @@ function PS_ExpressionEditor( _node ){
     _setMessage('Deleted. Removed links from '+nodeCount+' nodes.');
 
   }
+
+
+  //
+  function _getNodeColumns(){
+  
+    _setMessage('');
+
+    var _node = selection.selectedNode(0);
+    
+    if( !_node ){
+      _setMessage('Please select one node');
+      return;
+    }
+
+    var linkedColumns = [];
+    Utils.getFullAttributeList( _node, 1, true ).forEach(function(attrName){
+      var columnName = node.linkedColumn( _node, attrName );
+      if( !columnName ) return;
+      // if( curentExpressionName && curentExpressionName === columnName ) return; // skip same expression name
+      linkedColumns.push( [attrName, columnName] );
+    });
+
+    if( !linkedColumns.length ){
+      _setMessage('"'+_node+'" has no linked columns.');
+      return;
+    }
+
+    var currentFrame = frame.current();
+
+    var str = '';
+
+    linkedColumns.forEach(function(attrData){
+      str += 'value( "'+attrData[1]+'", currentFrame ); // '+_node+': '+attrData[0]+'\n';
+      str += 'value( "'+attrData[1]+'" ); // '+_node+': '+attrData[0]+'\n\n';
+    });
+
+    MessageLog.trace('_getNodeColumns: '+_node+'\n'+str);
+
+    var d = new Dialog();
+    d.width = 500;
+    d.minimumSize = {width:500,height:300};
+    d.title = 'Linked columns of the "'+_node+'" node:';
+    // d.okButtonText = 'OK';
+    // d.cancelButtonText = 'OK';
+    // MessageLog.trace( Object.getOwnPropertyNames(d).join('\n') );
+    // MessageLog.trace( JSON.stringify(d,true,'  '));
+
+    var userInput = new TextEdit();
+    userInput.text = str;
+    d.add(userInput);
+
+    d.exec();
+
+  }
+
 
   //
   function _refreshCurrentExpressionValue(){
@@ -425,8 +488,9 @@ function PS_ExpressionEditor( _node ){
 
 
   //
-  function _setMessage( str ){
+  function _setMessage( str, toolTip ){
     messageOutput.text = str || '';
+    messageOutput.toolTip = toolTip || '';
   }
 
 }
