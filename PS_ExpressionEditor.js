@@ -12,7 +12,7 @@ var pModal = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/pMo
 var _Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
 
 //
-function PS_ExpressionEditorModal( _node ){
+function PS_ExpressionEditor( _node ){
 
   //
   MessageLog.clearLog(); // !!!
@@ -433,4 +433,4 @@ function PS_ExpressionEditorModal( _node ){
 
 
 ///
-exports = PS_ExpressionEditorModal;
+exports = PS_ExpressionEditor;
