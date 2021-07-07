@@ -1,106 +1,94 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version: 0.2
+Version: 0.210706
+
+Simple implementation of an expression editor.
 
 ToDo:
-- to implement renaming of the selected expression
+- Get names of linked columns of a selected node
 */
 
 var pModal = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/pModal.js"));
+var _Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
 
 //
 function PS_ExpressionEditorModal( _node ){
 
   //
-  // MessageLog.clearLog();
-  // MessageLog.trace('!!!'+Object.getOwnPropertyNames(column).join('\n'));
-  // MessageLog.trace('!!!'+Action.getResponderList().join('\n'));
-  // MessageLog.trace('\n\n!!!'+Action.getActionList('xsheetView').join('\n'));
+  MessageLog.clearLog(); // !!!
+  
   //
   var scriptName = 'Expression Editor';
-  var scriptVer = '0.2';
+  var scriptVer = '0.210706';
   //
+
+  var Utils = _Utils;
 
   var btnHeight = 50;
+  var smallBtnHeight = 30;
+  var iconPath = fileMapper.toNativePath(specialFolders.userScripts+"/PS_ExpressionEditor-Resources/icons/");
+
   var listJustUpdated = true;
-  // var iconPath = fileMapper.toNativePath(specialFolders.userScripts+"/PS_PathTools-Resources/icons/");
+  var allLinkedNodes;
+  var nextLinkedNode;
 
   //
-  var modal = new pModal( scriptName + " v" + scriptVer, 500, 400, false );  
+  var modal = new pModal( scriptName + " v" + scriptVer, 600, 400, false );  
   if( !modal.ui ){
     return;
   }
   var ui = modal.ui;
 
-  var nameGroup = modal.addGroup( '', ui, false );//'QGroupBox{ position: relative; border: none; margin: 5px 0; padding: 5px 0;}');//, "padding: 0; " );
-  // alignGroup.setStyleSheet( alignGroup.styleSheet +' QPushButton{ border: none; }' );
 
-  // var btnAlignLeft = modal.addButton( '', alignGroup.mainLayout, btnHeight, btnHeight, iconPath+'align-left.png', AlignPaths.AlignLeft );
-  // var btnAlignHCenter = modal.addButton( '', alignGroup.mainLayout, btnHeight, btnHeight, iconPath+'align-h-center.png', AlignPaths.AlignHCenter );
+  /// TOP
 
-  /// SEARCH / CREATE GROUP
+  var topGroup = modal.addGroup( '', ui, true, true );
 
-  var searhGroup = modal.addGroup( '', nameGroup, true, true );
-
-  var searchLabel = modal.addLabel( 'Name:', searhGroup, 65, btnHeight, Qt.AlignRight | Qt.AlignVCenter );
-
-  // Search Field
-  var searchField = modal.searchField = new QLineEdit(searhGroup); // TODO: to implement the Expression list filter
-  searhGroup.mainLayout.addWidget( searchField, 0, 0 );
-
-  // CREATE BUTTON
-  var createButton = modal.addButton('Create', searhGroup, 70, btnHeight, undefined, _createExpression );
-  // createButton.setEnabled(false); // TODO: to implement creation
-  // createButton.setStyleSheet("background-color: #41414e;");
-
-  /// LIST GROUP
-
-  var listWidgetGroup = modal.addGroup( '', nameGroup, true, true );
-  
-  var listWidgetLabel = modal.addLabel( 'Expressions:', listWidgetGroup, 65, btnHeight, Qt.AlignRight | Qt.AlignVCenter );
-
-  var listWidget = modal.listWidget = new QComboBox(listWidgetGroup);
-  listWidgetGroup.mainLayout.addWidget( listWidget, 0, 0 );
-/*  
-  // listWidget.setLineEdit(searchField);
-  listWidget.editable = true;
-  listWidget.editTextChanged.connect(function(s){
-    MessageLog.trace('>editTextChanged>'+ s);
-    
-    // var filtered = modal.expressions;
-    // if(s) filtered = modal.expressions.filter(function(v){ return v.displayName.indexOf(s) !== -1; });
-    // _fillListWidget( filtered );
-    // listWidget.showPopup();
-    
-  });
-*/
-
-  // var listView = new QListView(listWidget);
-  // listWidget.setView(listView);
+  var listWidget = modal.listWidget = new QComboBox(topGroup);
+  topGroup.mainLayout.addWidget( listWidget, 0, 0 );
   
   //
   listWidget["currentIndexChanged(int)"].connect(function(i){
+
     if( listJustUpdated ){
       listJustUpdated = false;
       return;
     }
+
     var exprName = modal.expressions[i].name;
-    // var displayName = modal.expressions[i].displayName;
-    MessageLog.trace('Selected: '+ i+' : '+exprName );
-    modal.curentExpressionindex = i;
-    modal.curentExpressionName = exprName;
+    
+    _setCurrentExpression( exprName, i );
+    
     var exprText = column.getTextOfExpr(exprName);
     modal.textEdit.setText( exprText );
-    // searchField.setText( exprName );
-    bodyGroup.title = exprName;
+    
     _refreshCurrentExpressionValue();
+
+    _setMessage();
+
   });
   
   // REFRESH BUTTON
-  var refreshButton = modal.addButton('Refresh', listWidgetGroup, 70, btnHeight, undefined, function(){
-    _refreshExpressionList();
-  });
+  var refreshButton = modal.addButton('', topGroup, smallBtnHeight, smallBtnHeight, iconPath+'refresh.png',
+    _refreshExpressionList,
+    'Refresh expression list'
+  );
+
+  // RENAME BUTTON
+  var renameButton = modal.addButton('', topGroup, smallBtnHeight, smallBtnHeight, iconPath+'rename.png',
+    _renameExpression,
+    'Rename the selected expression'
+  );
   
+
+  // SERCH NEXT NODE BUTTON
+  var findNextNodeButton = modal.addButton('', topGroup, smallBtnHeight, smallBtnHeight, iconPath+'findNextNode.png',
+    _findNextUsedNode,
+    'Find the next node using the selected expression. Hold Control key to open Node properties window.'
+  );
+
+
+
 
   /// BODY
   var bodyGroup = modal.addGroup( '', ui, false );
@@ -109,31 +97,50 @@ function PS_ExpressionEditorModal( _node ){
   var textEdit = modal.textEdit = new QTextEdit(bodyGroup);
   bodyGroup.mainLayout.addWidget( textEdit, 0, 0 );
 
-  var expressionOutput = modal.addLabel( '', bodyGroup );
 
-  /// Buttons
-  var buttonsGroup = modal.addGroup( '', ui, true, 'QGroupBox{border: none; padding: 0; margin: 0;}' );
+
+  var messageGroup = modal.addGroup( '', bodyGroup, true, true );
+
+  var expressionOutput = modal.addLabel( '', messageGroup );
+
+  messageGroup.mainLayout.addStretch();
+
+  var messageOutput = modal.addLabel( '', messageGroup );
+
+
+
+  /// BOTTOM
+  var bottomGroup = modal.addGroup( '', ui, true, 'QGroupBox{border: none; padding: 0; margin: 0;}' );
 
 
   // DELETE BUTTON
-  var deleteButton = modal.addButton('Delete Expression', buttonsGroup, 120, btnHeight, undefined, _deleteExpression );
-  // deleteButton.setEnabled(false); // TODO: to implement deleting
-  // deleteButton.setStyleSheet("background-color: #4e4141;");
+  var deleteButton = modal.addButton('', bottomGroup, smallBtnHeight, smallBtnHeight, iconPath+'delete.png',
+    _deleteExpression,
+    'Delete the selected expression'
+  );
 
+  bottomGroup.mainLayout.addStretch();
 
-  // SAVE BUTTON
-  var saveButton = modal.addButton('Save Expression', buttonsGroup, 120, btnHeight, undefined, function(){
+   // CREATE BUTTON
+  var createButton = modal.addButton('', bottomGroup, smallBtnHeight, smallBtnHeight, iconPath+'create.png',
+    _createExpression,
+    'Create a new expression'
+  );
+
+  var saveButton = modal.addButton('', bottomGroup, smallBtnHeight, smallBtnHeight, iconPath+'save.png', function(){
     
-    if( !modal.curentExpressionName ) return;
-    // modal.curentExpressionindex;
-    var result = column.setTextOfExpr( modal.curentExpressionName, modal.textEdit.plainText );
-    // MessageLog.trace('!!!'+modal.curentExpressionName+' > '+result );
-    // MessageLog.trace('!!!'+modal.curentExpressionName+' > '+modal.textEdit.plainText );
-  });
-  // saveButton.setStyleSheet("background-color: #414e41;");
+    _setMessage();
 
-  //
-  var expressions = _getExpressionColumns();
+    if( !curentExpressionName ) return;
+    // curentExpressionindex;
+    var result = column.setTextOfExpr( curentExpressionName, modal.textEdit.plainText );
+    // MessageLog.trace('!!!'+curentExpressionName+' > '+result );
+    // MessageLog.trace('!!!'+curentExpressionName+' > '+modal.textEdit.plainText );
+    
+    _setMessage('Saved');
+
+  }, 'Save the selected expression');
+  // saveButton.setStyleSheet("background-color: #414e41;");
 
   //
   ui.mainLayout.addStretch();
@@ -141,8 +148,11 @@ function PS_ExpressionEditorModal( _node ){
   modal.show();
 
   //
-  _refreshExpressionList();
+  var expressions = _getExpressionColumns();
+  
+  _setCurrentExpression();
 
+  _refreshExpressionList();
 
 
   // Notifier
@@ -152,6 +162,21 @@ function PS_ExpressionEditorModal( _node ){
 
 
   // - - - -
+
+  //
+  function _setCurrentExpression( exprName, i ){
+    curentExpressionindex = i;
+    curentExpressionName = exprName;
+    bodyGroup.title = exprName || '';
+
+    findNextNodeButton.enabled =
+    renameButton.enabled =
+    saveButton.enabled =
+    deleteButton.enabled =
+      !!exprName;
+  
+  }
+
   //
   function _fillListWidget( v ){
     // MessageLog.trace('_fillListWidget: '+modal+' >>> '+JSON.stringify(v, true, '  '));
@@ -186,56 +211,222 @@ function PS_ExpressionEditorModal( _node ){
     return expressions;
   }
 
-  //
-  function _createExpression(){
-    
-    var columnName = (modal.searchField.text || '').trim();
-    // MessageLog.trace('_createExpression: '+columnName+', '+modal.textEdit.plainText );
 
-    if( !columnName ){
-      MessageLog.trace('Expression name required');
+  //
+  function _traverseNodes( nodes, callback ){
+
+    nodes.forEach(function(_node){
+
+      var name = node.getName(_node);
+      callback( _node, name );
+
+      if( node.isGroup(_node) ){
+        var childNodes = node.subNodes(_node);
+        _traverseNodes( childNodes, callback );
+      }
+
+    });
+
+  }
+
+
+  //
+  function _getAllUsedNodes( _columnName ){
+
+    allLinkedNodes = {};
+
+    _traverseNodes([node.root()],function(_node){
+
+      var linkedAttrs = [];
+
+      Utils.getFullAttributeList( _node, 1, true ).forEach(function(attrName){
+        var columnName = node.linkedColumn( _node, attrName );
+        if( columnName && column.type(columnName) === 'EXPR' && ( _columnName && _columnName === columnName ) ) linkedAttrs.push( [columnName, attrName] );
+      });
+
+      // MessageLog.trace('--> '+_node+'; '+JSON.stringify(linkedAttrs, true, '  ') );
+      
+      if( linkedAttrs.length) allLinkedNodes[_node] = linkedAttrs;
+
+    });
+
+    MessageLog.trace('_getAllUsedNodes: ' + JSON.stringify(allLinkedNodes, true, '  ') );
+
+  }
+
+
+  //
+  function _findNextUsedNode(){
+
+    if( !curentExpressionName ) return;
+
+    _getAllUsedNodes( curentExpressionName );
+
+    // try{
+      // MessageLog.trace('_findNextUsedNode: ' + JSON.stringify(allLinkedNodes, true, '  ') );
+
+    var linkedNodesNames = Object.keys(allLinkedNodes);
+    if( !linkedNodesNames.length ) {
+      _setMessage('No nodes found');
+      return;
+    }
+
+    if( nextLinkedNode === undefined ) nextLinkedNodeIndex = 0;
+    else {
+      var nextLinkedNodeIndex = linkedNodesNames.indexOf(nextLinkedNode);
+      if( nextLinkedNodeIndex === -1 ) nextLinkedNodeIndex = 0;
+      else {
+        nextLinkedNodeIndex++;
+        if( nextLinkedNodeIndex >= linkedNodesNames.length ) nextLinkedNodeIndex = 0;
+      }
+    }
+
+    nextLinkedNode = linkedNodesNames[nextLinkedNodeIndex];
+
+    // MessageLog.trace('nextLinkedNode: "'+nextLinkedNode+'"');
+    if( !nextLinkedNode ) return;
+
+    _setMessage( '"'+nextLinkedNode+'" '+(nextLinkedNodeIndex+1)+'/'+linkedNodesNames.length );
+
+    selection.clearSelection();
+    selection.addNodeToSelection( nextLinkedNode );
+
+    // MessageLog.trace('>>'+JSON.stringify(Action.validate("onActionFocusOnSelectionNV()", "Node View")) )
+
+    var actionCheck = Action.validate("onActionFocusOnSelectionNV()", "Node View");
+    if( actionCheck.isValid && actionCheck.enabled ){
+
+      modal.setFocusOnMainWindow();
+      Action.perform( "onActionFocusOnSelectionNV()", "Node View" );
+      
+      if( KeyModifiers.IsControlPressed() ) Action.perform("onActionEditProperties()", "scene");
+
+    }
+
+    // }catch(err){MessageLog.trace('Error: '+err)}
+
+  }
+
+
+  //
+  function resolveExpressionName(name){
+    return (name || '').trim().replace(/\s/gi,'_').replace(/[^0-9\w]/gi,'');
+  }
+
+
+  //
+  function _renameExpression(){
+
+    if( !curentExpressionName ) return;
+
+    _setMessage();
+
+    var expressionName = Input.getText('Enter Expression name',curentExpressionName,'Rename Expression');
+    if( !expressionName ) {
+      _setMessage('Expression name required');
       return;
     }
     
+    var columnName = resolveExpressionName(expressionName);
+
+    if( curentExpressionName === columnName ) return;
+
     var existingColumn = column.type(columnName);
     if( existingColumn ){
-      MessageLog.trace('Expression name required');
+      _setMessage('An expression with the same name already exists');
+      return;
+    }
+
+    column.rename( curentExpressionName, columnName );
+
+    _refreshExpressionList();
+
+  }
+
+
+  //
+  function _createExpression(){
+    
+    _setMessage();
+
+    var expressionName = Input.getText('Enter Expression name','','Create Expression');
+    if( !expressionName ) {
+      _setMessage('Expression name required');
+      return;
+    }
+    
+    // MessageLog.trace('_createExpression: '+columnName+', '+modal.textEdit.plainText );
+    
+    var columnName = resolveExpressionName(expressionName);
+
+    var existingColumn = column.type(columnName);
+    if( existingColumn ){
+      _setMessage('An expression with the same name already exists');
       return;
     }
 
     var result = column.add( columnName, 'EXPR' );
-    if( !result ) return;
+    if( !result ) {
+      MessageLog.trace('Expression creation error');
+      return;
+    }
 
-    if( modal.textEdit.plainText ) column.setTextOfExpr(columnName, modal.textEdit.plainText);
+    // if( modal.textEdit.plainText ) column.setTextOfExpr(columnName, modal.textEdit.plainText);
 
     _refreshExpressionList();
-
-    // MessageLog.trace('_createExpression: SUCCESS');
 
   }
 
+
   //
   function _deleteExpression(){
-    if(!modal.curentExpressionName) return;
+
+    if(!curentExpressionName) return;
+
+    _getAllUsedNodes( curentExpressionName );
+
+    var linkedNodesNames = Object.keys(allLinkedNodes);
+
+    var nodeCount = 0;
+
+    linkedNodesNames.forEach(function(_node){
+
+      allLinkedNodes[_node].forEach(function(attrData){
+
+        MessageLog.trace('unlink: '+_node+' : '+attrData[1]+' : '+attrData[0] );
+        node.unlinkAttr(_node, attrData[1]);
+        nodeCount++;
+
+      });
+
+    });
+
+    // column.removeUnlinkedFunctionColumn(curentExpressionName); // Doesnot work
     
     var _node = node.add( 'Top', '__'+column.generateAnonymousName(), 'PEG', 0, 0, 0 );
-    node.linkAttr(_node, "ROTATION.ANGLEZ", modal.curentExpressionName );
+    node.linkAttr(_node, "ROTATION.ANGLEZ", curentExpressionName );
     var result = node.deleteNode( _node, true, true );
-    
+
     _refreshExpressionList();
 
-    // MessageLog.trace('_deleteExpression: '+_node+', '+modal.curentExpressionName );
-    // MessageLog.trace('_deleteExpression: SUCCESS ' + result );
+    _setMessage('Deleted. Removed links from '+nodeCount+' nodes.');
+
   }
 
   //
   function _refreshCurrentExpressionValue(){
     var str = 'Frame '+frame.current();
-    if( modal.curentExpressionName ) {
-      var val = column.getEntry( modal.curentExpressionName, 1, frame.current() );
+    if( curentExpressionName ) {
+      var val = column.getEntry( curentExpressionName, 1, frame.current() );
       str += ' : ' + val;
     };
     expressionOutput.text = str;
+  }
+
+
+  //
+  function _setMessage( str ){
+    messageOutput.text = str || '';
   }
 
 }

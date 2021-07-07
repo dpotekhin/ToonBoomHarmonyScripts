@@ -229,13 +229,30 @@ pModal.prototype.addHLine = function( width, parent ){
 
 //
 pModal.prototype.getParentWidget = function(){
+
   var topWidgets = QApplication.topLevelWidgets();
+
   for( var i in topWidgets ){
     var widget = topWidgets[i];
     if( widget instanceof QMainWindow && !widget.parentWidget() )
       return widget;
   }
+
   return "";
+
+};
+
+pModal.prototype.setFocusOnMainWindow = function(){
+
+  var mainWindow = this.getParentWidget();
+  mainWindow.activateWindow();
+
+  /* // Try to get a particular Tab
+  mainWindow.children().forEach(function(w,i){
+    MessageLog.trace(i+') '+w.windowTitle+'; '+w.windowType );
+  });
+  */
+
 };
 
 
