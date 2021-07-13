@@ -85,14 +85,16 @@ function PS_ExpressionEditor( _node ){
   // COPY CURRENT EXPRESSION DATA
   var copyExpressionButton = modal.addButton('', topGroup, smallBtnHeight, smallBtnHeight, iconPath+'copyExpression.png',
     _copyExpression,
-    'Copy the selected expression data to the clipboard.'
+    'Copy the selected expression data to the clipboard.\n'
+    +'Hold Control key to save data to a file.'
   );
 
   
   // PASTE EXPRESSION DATA
   var pasteExpressionButton = modal.addButton('', topGroup, smallBtnHeight, smallBtnHeight, iconPath+'pasteExpression.png',
     _pasteExpression,
-    'Paste an expression data from the clipboard.'
+    'Paste an expression data from the clipboard.\n'
+    +'Hold Control key to load data from a file.'
   );
   
 
@@ -453,14 +455,33 @@ function PS_ExpressionEditor( _node ){
 
     if(!curentExpressionName) return;
 
+    _setMessage('');
+
     scene.beginUndoRedoAccum('Copy Expression');
 
     var expressionData = 'Expression Editor. Expression Data | v'+scriptVer+'\n';
     expressionData += expressionStartToken+curentExpressionName+'\n'+modal.textEdit.plainText+'\n';
 
-    QApplication.clipboard().setText( expressionData );
+    // Save to a File
+    if( KeyModifiers.IsControlPressed() ){
+      
+      var filePath = FileDialog.getSaveFileName('*.txt');
+      if( filePath ){
+       
+        if( saveDataToFile( filePath, expressionData ) )
+          _setMessage('Expression Data saved to the file');
+       
+        else _setMessage('An error occurred while saving');
 
-    _setMessage('Expression Data copied to the clipboard');
+      }else{
+        _setMessage('');
+      }
+
+    }else{ // Clipboard
+      
+      QApplication.clipboard().setText( expressionData );
+      _setMessage('Expression Data copied to the clipboard');
+    }
 
     scene.endUndoRedoAccum();
 
@@ -471,7 +492,25 @@ function PS_ExpressionEditor( _node ){
   //
   function _pasteExpression(){
 
-    var expressionData = (QApplication.clipboard().text() || '').trim();
+    var expressionData;
+
+    _setMessage('');
+
+    // Load from a File
+    if( KeyModifiers.IsControlPressed() ){
+
+      var filePath = FileDialog.getOpenFileName('*.txt');
+      if( filePath ){
+        expressionData = loadDataFromFile( filePath ) || '';
+      }
+
+    }else{ // Clipboard
+      
+      expressionData = QApplication.clipboard().text();
+
+    }
+
+    expressionData = (expressionData || '').trim();
 
     if( expressionData ){
       
@@ -616,6 +655,43 @@ function PS_ExpressionEditor( _node ){
 
   }
 
+
+  //
+  function saveDataToFile( path, data ){
+
+    try
+    { 
+      var file = new File( path );
+      file.open( 2 ); // write only
+      file.write( data );
+      file.close();
+      return true;
+    }
+    catch(err){
+      return false;
+    }
+
+  }
+
+
+  //
+  function loadDataFromFile( path ){
+
+    var file = new File( path );
+    
+    try
+    {
+      if ( file.exists )
+      { 
+        file.open( 1 ) // read only
+        var savedData = file.read();
+        file.close();
+        return savedData;
+      }
+    }
+    catch(err){}
+
+  }
 
 
   //
