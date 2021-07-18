@@ -62,6 +62,10 @@ function findParentPeg( _node )
     return "";
 }
 
+//
+function isFunction(functionToCheck) {
+ return functionToCheck && {}.toString.call(functionToCheck) === '[object Function]';
+}
 
 //
 function getAttributes(attribute, attributeList)
@@ -102,5 +106,6 @@ exports = {
     pixelsToGridY: pixelsToGridY,
     getPointGlobalPosition: getPointGlobalPosition,
     findParentPeg: findParentPeg,
-    getFullAttributeList: getFullAttributeList
+    getFullAttributeList: getFullAttributeList,
+    isFunction: isFunction
 };
