@@ -10,6 +10,7 @@ ToDo:
 
 var pModal = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/pModal.js"));
 var _Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
+var _TextEditSubmenu = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_ExpressionEditor-Resources/TextEditSubmenu.js"));
 
 //
 function PS_ExpressionEditor( _node ){
@@ -23,6 +24,7 @@ function PS_ExpressionEditor( _node ){
   //
 
   var Utils = _Utils;
+  var TextEditSubmenu = _TextEditSubmenu;
 
   var btnHeight = 50;
   var smallBtnHeight = 30;
@@ -116,11 +118,11 @@ function PS_ExpressionEditor( _node ){
   /// BODY
   var bodyGroup = modal.addGroup( '', ui, false );
 
-  //
+  // Expression Edit Area
   var textEdit = modal.textEdit = new QTextEdit(bodyGroup);
+  TextEditSubmenu.initSubmenu( textEdit );
   bodyGroup.mainLayout.addWidget( textEdit, 0, 0 );
-
-
+  
 
   var messageGroup = modal.addGroup( '', bodyGroup, true, true );
 
