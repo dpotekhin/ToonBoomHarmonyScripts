@@ -1,6 +1,6 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version: 0.210706
+Version: 0.210721
 
 Simple implementation of an expression editor.
 
@@ -20,7 +20,7 @@ function PS_ExpressionEditor( _node ){
   
   //
   var scriptName = 'Expression Editor';
-  var scriptVer = '0.210706';
+  var scriptVer = '0.210721';
   //
 
   var Utils = _Utils;
@@ -138,6 +138,12 @@ function PS_ExpressionEditor( _node ){
     'Delete the selected expression'
   );
 
+  // DELETE ALL BUTTON
+  var deleteAllButton = modal.addButton('', bottomGroup, smallBtnHeight, smallBtnHeight, iconPath+'deleteAll.png',
+    _deleteAllExpressions,
+    'Delete All expressions in the Scene'
+  );
+
   bottomGroup.mainLayout.addStretch();
 
    // CREATE BUTTON
@@ -221,9 +227,9 @@ function PS_ExpressionEditor( _node ){
 
 
   //
-  function _getExpressionColumns(){
+  function _getExpressionColumns( noFirstEmpty ){
     var expressions = column.getColumnListOfType('EXPR');
-    expressions.unshift('');
+    if( !noFirstEmpty ) expressions.unshift('');
     // MessageLog.trace('_getExpressionColumns '+JSON.stringify(expressions,true,'  '));
     expressions = expressions.map( function(v){
       return { name: v };
@@ -412,7 +418,76 @@ function PS_ExpressionEditor( _node ){
 
     scene.beginUndoRedoAccum('Delete Expression');
 
-    _getAllUsedNodes( curentExpressionName );
+    var nodeCount = __deleteExpression( curentExpressionName );
+
+    _refreshExpressionList();
+
+    _setMessage('Expression deleted. Removed links from '+nodeCount+' nodes.');
+
+    scene.endUndoRedoAccum();
+
+  }
+
+
+  //
+  function _deleteAllExpressions() {
+    
+    if( !confirmDialog(
+      'Confirm deletion',
+      'You are going to delete all the Expressions in the Scene.\nAre you sure?',
+      "Yep. Kill'em all.",
+      "Nope. Not today."
+    ) ) return;
+
+    var expressionsData = _getExpressionColumns( true );
+    if( !expressionsData.length ){
+      _setMessage('No expressions found.');
+      return;
+    }
+
+    scene.beginUndoRedoAccum('Delete All Expressions');
+
+    var nodeCount = 0;
+    var expressionCount = 0;
+
+    expressionsData.forEach(function( expressionData, i ){
+      if( !expressionData.name ) return;
+      // MessageLog.trace('expressions: '+JSON.stringify( expressionData, true, '  ') );
+      nodeCount += __deleteExpression( expressionData.name );
+      expressionCount++;
+    })
+    
+    _refreshExpressionList();
+
+    _setMessage('Expressions deleted: '+expressionCount+'. Removed links from '+nodeCount+' nodes.');
+
+    scene.endUndoRedoAccum();
+
+  }
+
+
+  function confirmDialog( title, text, okButtonText, cancelButtonText ) {
+    var d = new Dialog();
+    d.title = title;
+    if( okButtonText ) d.okButtonText = okButtonText;
+    if( cancelButtonText ) d.cancelButtonText = cancelButtonText;
+    if( text ){
+      var bodyText = new Label();
+      bodyText.text = text;
+      d.add( bodyText );
+    }
+
+    return d.exec();
+    
+  }
+
+
+  //
+  function __deleteExpression( expressionName ){
+
+    MessageLog.trace( '__deleteExpression: "'+expressionName+'"' );
+
+    _getAllUsedNodes( expressionName );
 
     var linkedNodesNames = Object.keys(allLinkedNodes);
 
@@ -430,17 +505,13 @@ function PS_ExpressionEditor( _node ){
 
     });
 
-    // column.removeUnlinkedFunctionColumn(curentExpressionName); // Doesn't work
+    // column.removeUnlinkedFunctionColumn(expressionName); // Doesn't work
     
     var _node = node.add( 'Top', '__'+column.generateAnonymousName(), 'PEG', 0, 0, 0 );
-    node.linkAttr(_node, "ROTATION.ANGLEZ", curentExpressionName );
+    node.linkAttr(_node, "ROTATION.ANGLEZ", expressionName );
     var result = node.deleteNode( _node, true, true );
 
-    _refreshExpressionList();
-
-    _setMessage('Expression deleted. Removed links from '+nodeCount+' nodes.');
-
-    scene.endUndoRedoAccum();
+    return nodeCount;
 
   }
 
