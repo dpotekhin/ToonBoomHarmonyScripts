@@ -6,6 +6,38 @@ var submenuConfig = {
 	'-': 1,
 
 	"Selected Node Columns": getSelectedNodeColumns,
+	
+	'Functions':{
+
+		"sin (angle)": "sin (angle)",
+		"cos (cosine)": "cos (cosine)",
+		"tan (angle)": "tan (angle)",
+		"asin( v )": "asin( v )",
+		"acos( v )": "acos( v )",
+		"atan( v )": "atan( v )",
+		"atan2( x, y )": "atan2( x, y )",
+		"int ( v )": "int ( v )",
+		"ceil( v )": "ceil( v )",
+		"floor( v )": "floor( v )",
+		"abs( v )": "abs( v )",
+		"sqrt( v )": "sqrt( v )",
+		"exp( v )": "exp( v )",
+		"ln( v )": "ln( v )",
+		"ln( v )": "ln( v )",
+
+		"--0": "",
+		"Math.random() * v": "Math.random() * v",
+		"Math.PI": "Math.PI",
+
+		"--1": "",
+		"numFrames": "numFrames",
+		"currentFrame": "currentFrame",
+
+		"--2": "",
+		"value( columnName )": "value( columnName )",
+		"value(columnName, frame )": "value(columnName, frame )",
+		"column( columnName )": "column( columnName )",
+	},
 
 	'Examples': {
 
@@ -45,7 +77,7 @@ function getSelectedNodeColumns(){
     linkedColumns.forEach(function(attrData){
       // str += 'value( "'+attrData[1]+'", currentFrame ); // '+_node+': '+attrData[0]+'\n';
       // str += 'value( "'+attrData[1]+'" ); // '+_node+': '+attrData[0]+'\n\n';
-      submenuItems[attrData[0]] = 'value( "'+attrData[1]+'", currentFrame ); /* '+_node+': '+attrData[0]+'*/';
+      submenuItems[attrData[0]] = 'value( column("'+attrData[1]+'") ); /* '+_node+': '+attrData[0]+'*/';
     });
 
     return submenuItems;
