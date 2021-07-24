@@ -9,8 +9,12 @@ var submenuConfig = {
 	
 	'Functions':{
 
+		"currentFrame": "currentFrame",
+		"numFrames": "numFrames",
+
+		"--0": "",
 		"sin (angle)": "sin (angle)",
-		"cos (cosine)": "cos (cosine)",
+		"cos (angle)": "cos (angle)",
 		"tan (angle)": "tan (angle)",
 		"asin( v )": "asin( v )",
 		"acos( v )": "acos( v )",
@@ -25,17 +29,16 @@ var submenuConfig = {
 		"ln( v )": "ln( v )",
 		"ln( v )": "ln( v )",
 
-		"--0": "",
+		"--1": "",
+		"Math.min( a, ... )": "Math.min( a, b )",
+		"Math.max( a, ... )": "Math.max( a, b )",
 		"Math.random() * v": "Math.random() * v",
 		"Math.PI": "Math.PI",
-
-		"--1": "",
-		"numFrames": "numFrames",
-		"currentFrame": "currentFrame",
+		"Math.pow( base, exponent )": "Math.pw( base, exponent )",		
 
 		"--2": "",
 		"value( columnName )": "value( columnName )",
-		"value(columnName, frame )": "value(columnName, frame )",
+		"value( columnName, frame )": "value( columnName, frame )",
 		"column( columnName )": "column( columnName )",
 	},
 
@@ -43,7 +46,13 @@ var submenuConfig = {
 
 		"Pendulum": "var speedCoef = 0.5;\nvar amp = 2;\nMath.sin( currentFrame * speedCoef ) * amp;",
 
-		"Random": "var minRandomValue = 2;\nvar maxRandomValue = 5;\nMath.random() * (maxRandomValue - minRandomValue) + minRandomValue;"
+		"Random": "var minRandomValue = 2;\nvar maxRandomValue = 5;\nMath.random() * (maxRandomValue - minRandomValue) + minRandomValue;",
+
+		"Wiggle": "// Wiggle expression\nvar seedOffset = 0; // Random seed offset\nvar amp = 100; // Amplitude\nvar freq = 5; // Random value changes every N-th frame\n\nfunction seedrandom( seed ) { // Seeded Random Generator\n    var x = Math.sin(seed + seedOffset) * 10000;\n    return x - Math.floor(x);\n}\n\nfunction interpolate(pa, pb, px){ // Interpolator\n	var ft = px * Math.PI, f = (1 - Math.cos(ft)) * 0.5;\n	return pa * (1 - f) + pb * f;\n}\n\nvar _currentFrame = ~~(currentFrame / freq);\nvar _currentRandom = seedrandom( _currentFrame );\nvar _prevRandom = seedrandom( _currentFrame - 1 );\ninterpolate(_prevRandom, _currentRandom, (currentFrame % freq) / freq) * amp; // Noise result",
+
+		"Degrees to Radians": "var DEG2RAD = Math.PI / 180;",
+
+		"Radians to Degrees": "var RAD2DEG = 180 / Math.PI;",
 
 	}
 
