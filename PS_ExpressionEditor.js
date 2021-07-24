@@ -132,16 +132,16 @@ function PS_ExpressionEditor( _node ){
   var bottomGroup = modal.addGroup( '', ui, true, 'QGroupBox{border: none; padding: 0; margin: 0;}' );
 
 
-  // DELETE BUTTON
-  var deleteButton = modal.addButton('', bottomGroup, smallBtnHeight, smallBtnHeight, iconPath+'delete.png',
-    _deleteExpression,
-    'Delete the selected expression'
-  );
-
   // DELETE ALL BUTTON
   var deleteAllButton = modal.addButton('', bottomGroup, smallBtnHeight, smallBtnHeight, iconPath+'deleteAll.png',
     _deleteAllExpressions,
     'Delete All expressions in the Scene'
+  );
+
+  // DELETE BUTTON
+  var deleteButton = modal.addButton('', bottomGroup, smallBtnHeight, smallBtnHeight, iconPath+'delete.png',
+    _deleteExpression,
+    'Delete the selected expression'
   );
 
   bottomGroup.mainLayout.addStretch();
