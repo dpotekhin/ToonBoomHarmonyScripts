@@ -52,8 +52,8 @@ function PS_ExpressionEditor( _node ){
   var topGroup = modal.addGroup( '', ui, true, true );
 
   var listWidget = modal.listWidget = new QComboBox(topGroup);
-  listWidget.editable = true;
-  listWidget.maxVisibleItems  = 10;
+  // listWidget.editable = true;
+  // listWidget.maxVisibleItems  = 10;
   topGroup.mainLayout.addWidget( listWidget, 0, 0 );
   
   //
@@ -226,6 +226,8 @@ function PS_ExpressionEditor( _node ){
   var expressions = _getExpressionColumns();
 
   _refreshExpressionList();
+
+  _setCurrentExpression();
   
   history.reset();
 
