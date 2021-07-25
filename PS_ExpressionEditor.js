@@ -10,7 +10,9 @@ ToDo:
 
 var pModal = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/pModal.js"));
 var _Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
-var _TextEditSubmenu = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_ExpressionEditor-Resources/TextEditSubmenu.js"));
+var resoursesPath = specialFolders.userScripts+"/PS_ExpressionEditor-Resources/";
+var _TextEditSubmenu = require(fileMapper.toNativePath(resoursesPath+"TextEditSubmenu.js"));
+var _History = require(fileMapper.toNativePath(resoursesPath+"History.js"));
 
 //
 function PS_ExpressionEditor( _node ){
@@ -25,10 +27,11 @@ function PS_ExpressionEditor( _node ){
 
   var Utils = _Utils;
   var TextEditSubmenu = _TextEditSubmenu;
+  var History = _History;
 
   var btnHeight = 50;
   var smallBtnHeight = 30;
-  var iconPath = fileMapper.toNativePath(specialFolders.userScripts+"/PS_ExpressionEditor-Resources/icons/");
+  var iconPath = fileMapper.toNativePath(resoursesPath+"/icons/");
 
   var expressionStartToken = '%EXPR:';
   var listJustUpdated = true;
@@ -68,14 +71,18 @@ function PS_ExpressionEditor( _node ){
     // MessageLog.trace('currentIndexChanged @2: '+exprName+' > '+listWidget.count );
 
     if( !exprName && currentExpressionName ){
+
       for( var ii=0; ii<listWidget.count; ii++){
+
         if( listWidget.itemText(ii) == currentExpressionName ){
-          MessageLog.trace('!!! ' +ii);
-          listJustUpdated = true;
+          // MessageLog.trace('!!! ' +ii);
+          // listJustUpdated = true;
           listWidget.setCurrentIndex(ii);
           exprName = currentExpressionName;
         }
+
       }
+
     }
     
     // MessageLog.trace('currentIndexChanged @3: '+exprName+': '+currentExpressionName );
@@ -86,6 +93,8 @@ function PS_ExpressionEditor( _node ){
     modal.textEdit.setText( exprText );
     
     _refreshCurrentExpressionValue();
+
+    history.reset();
 
     _setMessage();
     
@@ -136,8 +145,8 @@ function PS_ExpressionEditor( _node ){
   var textEdit = modal.textEdit = new QTextEdit(bodyGroup);
   TextEditSubmenu.initSubmenu( textEdit );
   bodyGroup.mainLayout.addWidget( textEdit, 0, 0 );
-  
 
+  //
   var messageGroup = modal.addGroup( '', bodyGroup, true, true );
 
   var expressionOutput = modal.addLabel( '', messageGroup );
@@ -164,6 +173,27 @@ function PS_ExpressionEditor( _node ){
     'Delete the selected expression'
   );
 
+  //
+  bottomGroup.mainLayout.addStretch();
+
+  // HISTORY
+  var history = new History( textEdit );
+
+  history.onChanged = function(){
+    saveButton.enabled = currentExpressionName && history.hasChanges;
+  }
+
+  history.undoButton = modal.addButton('', bottomGroup, smallBtnHeight, smallBtnHeight, iconPath+'undo.png',
+    function(){ history.undo(); },
+    'Undo Expression body changes'
+  );
+
+  history.redoButton = modal.addButton('', bottomGroup, smallBtnHeight, smallBtnHeight, iconPath+'redo.png',
+    function(){ history.redo(); },
+    'Redo Expression body changes'
+  );
+
+  //
   bottomGroup.mainLayout.addStretch();
 
    // CREATE BUTTON
@@ -194,11 +224,10 @@ function PS_ExpressionEditor( _node ){
 
   //
   var expressions = _getExpressionColumns();
-  
-  // _setCurrentExpression();
 
   _refreshExpressionList();
-
+  
+  history.reset();
 
   // Notifier
   var myNotifier = new SceneChangeNotifier(ui);
@@ -215,10 +244,11 @@ function PS_ExpressionEditor( _node ){
 
     findNextNodeButton.enabled =
     renameButton.enabled =
-    saveButton.enabled =
     deleteButton.enabled =
     copyExpressionButton.enabled =
       !!exprName;
+
+    saveButton.enabled = exprName && history.hasChanges;
   
   }
 
@@ -613,11 +643,6 @@ function PS_ExpressionEditor( _node ){
         
         // Parse Data
         var currentExpressionName, currentExpressionValue;
-        
-        function resetExpressionData(){
-          
-          
-        }
 
         function putCurrentExpression(){
 
