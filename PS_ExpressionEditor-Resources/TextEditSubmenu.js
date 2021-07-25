@@ -1,67 +1,146 @@
 var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
 
+
 //
-var submenuConfig = {
+function initSubmenu( editor ){
 
-	'-': 1,
-
-	"Selected Node Columns": getSelectedNodeColumns,
+	var submenuFlatList = {};
 	
-	'Functions':{
+	//
+	var submenuConfig = {
 
-		"currentFrame": "currentFrame",
-		"numFrames": "numFrames",
+		'-': 1,
 
-		"--0": "",
-		"sin (angle)": "sin (angle)",
-		"cos (angle)": "cos (angle)",
-		"tan (angle)": "tan (angle)",
-		"asin( v )": "asin( v )",
-		"acos( v )": "acos( v )",
-		"atan( v )": "atan( v )",
-		"atan2( x, y )": "atan2( x, y )",
-		"int ( v )": "int ( v )",
-		"ceil( v )": "ceil( v )",
-		"floor( v )": "floor( v )",
-		"abs( v )": "abs( v )",
-		"sqrt( v )": "sqrt( v )",
-		"exp( v )": "exp( v )",
-		"ln( v )": "ln( v )",
-		"ln( v )": "ln( v )",
+		"Selected Node Columns": getSelectedNodeColumns,
+		
+		'Functions':{
 
-		"--1": "",
-		"Math.min( a, ... )": "Math.min( a, b )",
-		"Math.max( a, ... )": "Math.max( a, b )",
-		"Math.random() * v": "Math.random() * v",
-		"Math.PI": "Math.PI",
-		"Math.pow( base, exponent )": "Math.pw( base, exponent )",		
+			"currentFrame": "currentFrame",
+			"numFrames": "numFrames",
 
-		"--2": "",
-		"value( columnName )": "value( columnName )",
-		"value( columnName, frame )": "value( columnName, frame )",
-		"column( columnName )": "column( columnName )",
-	},
+			"--0": "",
+			"sin (angle)": "sin (angle)",
+			"cos (angle)": "cos (angle)",
+			"tan (angle)": "tan (angle)",
+			"asin( v )": "asin( v )",
+			"acos( v )": "acos( v )",
+			"atan( v )": "atan( v )",
+			"atan2( x, y )": "atan2( x, y )",
+			"int ( v )": "int ( v )",
+			"ceil( v )": "ceil( v )",
+			"floor( v )": "floor( v )",
+			"abs( v )": "abs( v )",
+			"sqrt( v )": "sqrt( v )",
+			"exp( v )": "exp( v )",
+			"ln( v )": "ln( v )",
+			"ln( v )": "ln( v )",
 
-	'Examples': {
+			"--1": "",
+			"Math.min( a, ... )": "Math.min( a, b )",
+			"Math.max( a, ... )": "Math.max( a, b )",
+			"Math.random() * v": "Math.random() * v",
+			"Math.PI": "Math.PI",
+			"Math.pow( base, exponent )": "Math.pw( base, exponent )",		
 
-		"Pendulum": "var speedCoef = 0.5;\nvar amp = 2;\nMath.sin( currentFrame * speedCoef ) * amp;",
+			"--2": "",
+			"value( columnName )": "value( columnName )",
+			"value( columnName, frame )": "value( columnName, frame )",
+			"column( columnName )": "column( columnName )",
+		},
 
-		"Random": "var minRandomValue = 2;\nvar maxRandomValue = 5;\nMath.random() * (maxRandomValue - minRandomValue) + minRandomValue;",
+		'Examples': {
 
-		"Wiggle": "// Wiggle expression\nvar seedOffset = 0; // Random seed offset\nvar amp = 100; // Amplitude\nvar freq = 5; // Random value changes every N-th frame\n\nfunction seedrandom( seed ) { // Seeded Random Generator\n    var x = Math.sin(seed + seedOffset) * 10000;\n    return x - Math.floor(x);\n}\n\nfunction interpolate(pa, pb, px){ // Interpolator\n	var ft = px * Math.PI, f = (1 - Math.cos(ft)) * 0.5;\n	return pa * (1 - f) + pb * f;\n}\n\nvar _currentFrame = ~~(currentFrame / freq);\nvar _currentRandom = seedrandom( _currentFrame );\nvar _prevRandom = seedrandom( _currentFrame - 1 );\ninterpolate(_prevRandom, _currentRandom, (currentFrame % freq) / freq) * amp; // Noise result",
+			"Pendulum": "var speedCoef = 0.5;\nvar amp = 2;\nMath.sin( currentFrame * speedCoef ) * amp;",
 
-		"Degrees to Radians": "var DEG2RAD = Math.PI / 180;",
+			"Random": "var minRandomValue = 2;\nvar maxRandomValue = 5;\nMath.random() * (maxRandomValue - minRandomValue) + minRandomValue;",
 
-		"Radians to Degrees": "var RAD2DEG = 180 / Math.PI;",
+			"Wiggle": "// Wiggle expression\nvar seedOffset = 0; // Random seed offset\nvar amp = 100; // Amplitude\nvar freq = 5; // Random value changes every N-th frame\n\nfunction seedrandom( seed ) { // Seeded Random Generator\n    var x = Math.sin(seed + seedOffset) * 10000;\n    return x - Math.floor(x);\n}\n\nfunction interpolate(pa, pb, px){ // Interpolator\n	var ft = px * Math.PI, f = (1 - Math.cos(ft)) * 0.5;\n	return pa * (1 - f) + pb * f;\n}\n\nvar _currentFrame = ~~(currentFrame / freq);\nvar _currentRandom = seedrandom( _currentFrame );\nvar _prevRandom = seedrandom( _currentFrame - 1 );\ninterpolate(_prevRandom, _currentRandom, (currentFrame % freq) / freq) * amp; // Noise result",
+
+			"Degrees to Radians": "var DEG2RAD = Math.PI / 180;",
+
+			"Radians to Degrees": "var RAD2DEG = 180 / Math.PI;",
+
+		}
+
+	};
+
+
+	//
+	editor.textEdit.contextMenuEvent = function(event){
+    
+	    try{ // !!!
+
+	    var menu = editor.textEdit.createStandardContextMenu();
+	    
+	    createSubmenu( menu, submenuConfig );
+	    
+	    menu.triggered.connect(function(a){
+	      // MessageLog.trace('clicked '+a.text);
+	      var submenuItemData = submenuFlatList[a.text];
+	      editor.textEdit.textCursor().insertText(submenuItemData);
+	    });
+	    
+	    menu.exec(event.globalPos());
+	    delete menu;
+	    
+	    }catch(err){MessageLog.trace(err)} // !!!
 
 	}
 
-};
+	//
+	function createSubmenu( menu, submenuData ){
 
-//
-function getSelectedNodeColumns(){
+		Object.keys( submenuData ).forEach(function( submenuItemName ){
+	    	
+	    	var submenuItemData = submenuData[submenuItemName];
 
-	var _node = selection.selectedNode(0);
+	    	// MessageLog.trace('!! '+submenuItemName+' >> '+Utils.isFunction(submenuItemData) );
+
+	    	if( submenuItemName.charAt(0) === '-' ){ // Add a Separator
+
+	    		menu.addSeparator();
+
+	    	}else{
+
+	    		if( typeof submenuItemData === 'string' ){ // Add menu item
+					
+					menu.addAction(submenuItemName);	
+	    			submenuFlatList[submenuItemName] = submenuItemData;
+
+	    		}else if( Utils.isFunction(submenuItemData) ){ // Dynamic items
+
+	    			var submenuItems = submenuItemData();
+
+		    		if( submenuItems && Object.keys(submenuItems).length ){
+
+		    			var submenuObject = {};
+		    			submenuObject[submenuItemName] = submenuItems;
+		    			createSubmenu( menu, submenuObject );
+
+		    		}else{
+		    			
+		    			var submenu = menu.addMenu( submenuItemName );
+		    			submenu.enabled = false;
+
+		    		}
+
+	    		}else{ // Add a submenu
+
+	    			var submenu = menu.addMenu( submenuItemName );
+	    			createSubmenu( submenu, submenuItemData );
+
+	    		}
+
+	    	}
+
+	    })
+
+	}
+
+	//
+	function getSelectedNodeColumns(){
+
+		var _node = selection.selectedNode(0);
 
     if( !_node ){
       return;
@@ -71,7 +150,7 @@ function getSelectedNodeColumns(){
     Utils.getFullAttributeList( _node, 1, true ).forEach(function(attrName){
       var columnName = node.linkedColumn( _node, attrName );
       if( !columnName ) return;
-      if( curentExpressionName && curentExpressionName === columnName ) return; // skip same expression name
+      if( editor.currentExpressionName && editor.currentExpressionName === columnName ) return; // skip same expression name
       linkedColumns.push( [attrName, columnName] );
     });
 
@@ -90,85 +169,6 @@ function getSelectedNodeColumns(){
     });
 
     return submenuItems;
-
-}
-
-//
-var submenuFlatList = {};
-
-
-//
-function createSubmenu( menu, submenuData ){
-
-	Object.keys( submenuData ).forEach(function( submenuItemName ){
-    	
-    	var submenuItemData = submenuData[submenuItemName];
-
-    	// MessageLog.trace('!! '+submenuItemName+' >> '+Utils.isFunction(submenuItemData) );
-
-    	if( submenuItemName.charAt(0) === '-' ){ // Add a Separator
-
-    		menu.addSeparator();
-
-    	}else{
-
-    		if( typeof submenuItemData === 'string' ){ // Add menu item
-				
-				menu.addAction(submenuItemName);	
-    			submenuFlatList[submenuItemName] = submenuItemData;
-
-    		}else if( Utils.isFunction(submenuItemData) ){ // Dynamic items
-
-    			var submenuItems = submenuItemData();
-
-	    		if( submenuItems && Object.keys(submenuItems).length ){
-
-	    			var submenuObject = {};
-	    			submenuObject[submenuItemName] = submenuItems;
-	    			createSubmenu( menu, submenuObject );
-
-	    		}else{
-	    			
-	    			var submenu = menu.addMenu( submenuItemName );
-	    			submenu.enabled = false;
-
-	    		}
-
-    		}else{ // Add a submenu
-
-    			var submenu = menu.addMenu( submenuItemName );
-    			createSubmenu( submenu, submenuItemData );
-
-    		}
-
-    	}
-
-    })
-
-}
-
-
-//
-function initSubmenu( textEdit ){
-
-	textEdit.contextMenuEvent = function(event){
-    
-	    try{ // !!!
-
-	    var menu = textEdit.createStandardContextMenu();
-	    
-	    createSubmenu( menu, submenuConfig );
-	    
-	    menu.triggered.connect(function(a){
-	      // MessageLog.trace('clicked '+a.text);
-	      var submenuItemData = submenuFlatList[a.text];
-	      textEdit.textCursor().insertText(submenuItemData);
-	    });
-	    
-	    menu.exec(event.globalPos());
-	    delete menu;
-	    
-	    }catch(err){MessageLog.trace(err)} // !!!
 
 	}
 

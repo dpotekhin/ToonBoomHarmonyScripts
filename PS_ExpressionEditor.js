@@ -1,6 +1,6 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version: 0.210721
+Version: 0.210725
 
 Simple implementation of an expression editor.
 
@@ -22,7 +22,7 @@ function PS_ExpressionEditor( _node ){
   
   //
   var scriptName = 'Expression Editor';
-  var scriptVer = '0.210721';
+  var scriptVer = '0.210725';
   //
 
   var Utils = _Utils;
@@ -37,10 +37,13 @@ function PS_ExpressionEditor( _node ){
   var listJustUpdated = true;
   var allLinkedNodes;
   var nextLinkedNode;
-  var currentExpressionName;
+
+  var editor = {
+    currentExpressionName: undefined
+  };
 
   //
-  var modal = new pModal( scriptName + " v" + scriptVer, 600, 400, false );  
+  var modal = editor.modal = new pModal( scriptName + " v" + scriptVer, 600, 400, false );  
   if( !modal.ui ){
     return;
   }
@@ -70,22 +73,22 @@ function PS_ExpressionEditor( _node ){
 
     // MessageLog.trace('currentIndexChanged @2: '+exprName+' > '+listWidget.count );
 
-    if( !exprName && currentExpressionName ){
+    if( !exprName && editor.currentExpressionName ){
 
       for( var ii=0; ii<listWidget.count; ii++){
 
-        if( listWidget.itemText(ii) == currentExpressionName ){
+        if( listWidget.itemText(ii) == editor.currentExpressionName ){
           // MessageLog.trace('!!! ' +ii);
           // listJustUpdated = true;
           listWidget.setCurrentIndex(ii);
-          exprName = currentExpressionName;
+          exprName = editor.currentExpressionName;
         }
 
       }
 
     }
     
-    // MessageLog.trace('currentIndexChanged @3: '+exprName+': '+currentExpressionName );
+    // MessageLog.trace('currentIndexChanged @3: '+exprName+': '+editor.currentExpressionName );
 
     _setCurrentExpression( exprName );
     
@@ -102,7 +105,7 @@ function PS_ExpressionEditor( _node ){
   
   // REFRESH BUTTON
   var refreshButton = modal.addButton('', topGroup, smallBtnHeight, smallBtnHeight, iconPath+'refresh.png',
-    function(){ _refreshExpressionList(currentExpressionName) },
+    function(){ _refreshExpressionList(editor.currentExpressionName) },
     'Refresh expression list.'
   );
 
@@ -142,8 +145,8 @@ function PS_ExpressionEditor( _node ){
   var bodyGroup = modal.addGroup( '', ui, false );
 
   // Expression Edit Area
-  var textEdit = modal.textEdit = new QTextEdit(bodyGroup);
-  TextEditSubmenu.initSubmenu( textEdit );
+  var textEdit = editor.textEdit = modal.textEdit = new QTextEdit(bodyGroup);
+  TextEditSubmenu.initSubmenu( editor );
   bodyGroup.mainLayout.addWidget( textEdit, 0, 0 );
 
   //
@@ -177,10 +180,10 @@ function PS_ExpressionEditor( _node ){
   bottomGroup.mainLayout.addStretch();
 
   // HISTORY
-  var history = new History( textEdit );
+  var history = editor.history = new History( textEdit );
 
   history.onChanged = function(){
-    saveButton.enabled = currentExpressionName && history.hasChanges;
+    saveButton.enabled = editor.currentExpressionName && history.hasChanges;
   }
 
   history.undoButton = modal.addButton('', bottomGroup, smallBtnHeight, smallBtnHeight, iconPath+'undo.png',
@@ -206,11 +209,11 @@ function PS_ExpressionEditor( _node ){
     
     _setMessage();
 
-    if( !currentExpressionName ) return;
+    if( !editor.currentExpressionName ) return;
 
-    var result = column.setTextOfExpr( currentExpressionName, modal.textEdit.plainText );
-    // MessageLog.trace('!!!'+currentExpressionName+' > '+result );
-    // MessageLog.trace('!!!'+currentExpressionName+' > '+modal.textEdit.plainText );
+    var result = column.setTextOfExpr( editor.currentExpressionName, modal.textEdit.plainText );
+    // MessageLog.trace('!!!'+editor.currentExpressionName+' > '+result );
+    // MessageLog.trace('!!!'+editor.currentExpressionName+' > '+modal.textEdit.plainText );
     
     _setMessage('Saved');
 
@@ -241,7 +244,7 @@ function PS_ExpressionEditor( _node ){
 
   //
   function _setCurrentExpression( exprName ){
-    currentExpressionName = exprName;
+    editor.currentExpressionName = exprName;
     bodyGroup.title = exprName || '';
 
     findNextNodeButton.enabled =
@@ -271,7 +274,7 @@ function PS_ExpressionEditor( _node ){
 
   //
   function _refreshExpressionList( _currentExpressionName ){
-    // MessageLog.trace('_refreshExpressionList: '+currentExpressionName+' > '+_currentExpressionName );
+    // MessageLog.trace('_refreshExpressionList: '+editor.currentExpressionName+' > '+_currentExpressionName );
     column.update();
     var expressions = modal.expressions = _getExpressionColumns();
     // MessageLog.trace('_refreshExpressionList: '+JSON.stringify(expressions,true,'  '));
@@ -339,9 +342,9 @@ function PS_ExpressionEditor( _node ){
   //
   function _findNextUsedNode(){
 
-    if( !currentExpressionName ) return;
+    if( !editor.currentExpressionName ) return;
 
-    _getAllUsedNodes( currentExpressionName );
+    _getAllUsedNodes( editor.currentExpressionName );
 
     // try{
       // MessageLog.trace('_findNextUsedNode: ' + JSON.stringify(allLinkedNodes, true, '  ') );
@@ -400,11 +403,11 @@ function PS_ExpressionEditor( _node ){
   //
   function _renameExpression(){
 
-    if( !currentExpressionName ) return;
+    if( !editor.currentExpressionName ) return;
 
     _setMessage();
 
-    var expressionName = Input.getText('Enter Expression name',currentExpressionName,'Rename Expression');
+    var expressionName = Input.getText('Enter Expression name',editor.currentExpressionName,'Rename Expression');
     if( !expressionName ) {
       _setMessage('Expression name required');
       return;
@@ -412,7 +415,7 @@ function PS_ExpressionEditor( _node ){
     
     var columnName = resolveExpressionName(expressionName);
 
-    if( currentExpressionName === columnName ) return;
+    if( editor.currentExpressionName === columnName ) return;
 
     var columnExists = column.type(columnName);
     if( columnExists ){
@@ -420,7 +423,7 @@ function PS_ExpressionEditor( _node ){
       return;
     }
 
-    column.rename( currentExpressionName, columnName );
+    column.rename( editor.currentExpressionName, columnName );
 
     _refreshExpressionList( columnName );
 
@@ -469,11 +472,11 @@ function PS_ExpressionEditor( _node ){
   //
   function _deleteExpression(){
 
-    if(!currentExpressionName) return;
+    if(!editor.currentExpressionName) return;
 
     scene.beginUndoRedoAccum('Delete Expression');
 
-    var nodeCount = __deleteExpression( currentExpressionName );
+    var nodeCount = __deleteExpression( editor.currentExpressionName );
 
     _refreshExpressionList( false );
 
@@ -575,14 +578,14 @@ function PS_ExpressionEditor( _node ){
   //
   function _copyExpression(){
 
-    if(!currentExpressionName) return;
+    if(!editor.currentExpressionName) return;
 
     _setMessage('');
 
     scene.beginUndoRedoAccum('Copy Expression');
 
     var expressionData = 'Expression Editor. Expression Data | v'+scriptVer+'\n';
-    expressionData += expressionStartToken+currentExpressionName+'\n'+modal.textEdit.plainText+'\n';
+    expressionData += expressionStartToken+editor.currentExpressionName+'\n'+modal.textEdit.plainText+'\n';
 
     // Save to a File
     if( KeyModifiers.IsControlPressed() ){
@@ -644,7 +647,8 @@ function PS_ExpressionEditor( _node ){
 
         
         // Parse Data
-        var currentExpressionName, currentExpressionValue;
+        var currentExpressionName;
+        var currentExpressionValue;
 
         function putCurrentExpression(){
 
@@ -759,8 +763,8 @@ function PS_ExpressionEditor( _node ){
   //
   function _refreshCurrentExpressionValue(){
     var str = 'Frame '+frame.current();
-    if( currentExpressionName ) {
-      var val = column.getEntry( currentExpressionName, 1, frame.current() );
+    if( editor.currentExpressionName ) {
+      var val = column.getEntry( editor.currentExpressionName, 1, frame.current() );
       str += ' : ' + val;
     };
     expressionOutput.text = str;
