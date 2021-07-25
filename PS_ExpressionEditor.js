@@ -34,6 +34,7 @@ function PS_ExpressionEditor( _node ){
   var listJustUpdated = true;
   var allLinkedNodes;
   var nextLinkedNode;
+  var currentExpressionName;
 
   //
   var modal = new pModal( scriptName + " v" + scriptVer, 600, 400, false );  
@@ -156,11 +157,11 @@ function PS_ExpressionEditor( _node ){
     
     _setMessage();
 
-    if( !curentExpressionName ) return;
+    if( !currentExpressionName ) return;
     // curentExpressionindex;
-    var result = column.setTextOfExpr( curentExpressionName, modal.textEdit.plainText );
-    // MessageLog.trace('!!!'+curentExpressionName+' > '+result );
-    // MessageLog.trace('!!!'+curentExpressionName+' > '+modal.textEdit.plainText );
+    var result = column.setTextOfExpr( currentExpressionName, modal.textEdit.plainText );
+    // MessageLog.trace('!!!'+currentExpressionName+' > '+result );
+    // MessageLog.trace('!!!'+currentExpressionName+' > '+modal.textEdit.plainText );
     
     _setMessage('Saved');
 
@@ -191,7 +192,7 @@ function PS_ExpressionEditor( _node ){
   //
   function _setCurrentExpression( exprName, i ){
     curentExpressionindex = i;
-    curentExpressionName = exprName;
+    currentExpressionName = exprName;
     bodyGroup.title = exprName || '';
 
     findNextNodeButton.enabled =
@@ -284,9 +285,9 @@ function PS_ExpressionEditor( _node ){
   //
   function _findNextUsedNode(){
 
-    if( !curentExpressionName ) return;
+    if( !currentExpressionName ) return;
 
-    _getAllUsedNodes( curentExpressionName );
+    _getAllUsedNodes( currentExpressionName );
 
     // try{
       // MessageLog.trace('_findNextUsedNode: ' + JSON.stringify(allLinkedNodes, true, '  ') );
@@ -345,11 +346,11 @@ function PS_ExpressionEditor( _node ){
   //
   function _renameExpression(){
 
-    if( !curentExpressionName ) return;
+    if( !currentExpressionName ) return;
 
     _setMessage();
 
-    var expressionName = Input.getText('Enter Expression name',curentExpressionName,'Rename Expression');
+    var expressionName = Input.getText('Enter Expression name',currentExpressionName,'Rename Expression');
     if( !expressionName ) {
       _setMessage('Expression name required');
       return;
@@ -357,7 +358,7 @@ function PS_ExpressionEditor( _node ){
     
     var columnName = resolveExpressionName(expressionName);
 
-    if( curentExpressionName === columnName ) return;
+    if( currentExpressionName === columnName ) return;
 
     var columnExists = column.type(columnName);
     if( columnExists ){
@@ -365,7 +366,7 @@ function PS_ExpressionEditor( _node ){
       return;
     }
 
-    column.rename( curentExpressionName, columnName );
+    column.rename( currentExpressionName, columnName );
 
     _refreshExpressionList();
 
@@ -414,11 +415,11 @@ function PS_ExpressionEditor( _node ){
   //
   function _deleteExpression(){
 
-    if(!curentExpressionName) return;
+    if(!currentExpressionName) return;
 
     scene.beginUndoRedoAccum('Delete Expression');
 
-    var nodeCount = __deleteExpression( curentExpressionName );
+    var nodeCount = __deleteExpression( currentExpressionName );
 
     _refreshExpressionList();
 
@@ -520,14 +521,14 @@ function PS_ExpressionEditor( _node ){
   //
   function _copyExpression(){
 
-    if(!curentExpressionName) return;
+    if(!currentExpressionName) return;
 
     _setMessage('');
 
     scene.beginUndoRedoAccum('Copy Expression');
 
     var expressionData = 'Expression Editor. Expression Data | v'+scriptVer+'\n';
-    expressionData += expressionStartToken+curentExpressionName+'\n'+modal.textEdit.plainText+'\n';
+    expressionData += expressionStartToken+currentExpressionName+'\n'+modal.textEdit.plainText+'\n';
 
     // Save to a File
     if( KeyModifiers.IsControlPressed() ){
@@ -709,8 +710,8 @@ function PS_ExpressionEditor( _node ){
   //
   function _refreshCurrentExpressionValue(){
     var str = 'Frame '+frame.current();
-    if( curentExpressionName ) {
-      var val = column.getEntry( curentExpressionName, 1, frame.current() );
+    if( currentExpressionName ) {
+      var val = column.getEntry( currentExpressionName, 1, frame.current() );
       str += ' : ' + val;
     };
     expressionOutput.text = str;
