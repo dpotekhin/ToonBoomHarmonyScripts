@@ -16,7 +16,7 @@ var _TextEditSubmenu = require(fileMapper.toNativePath(specialFolders.userScript
 function PS_ExpressionEditor( _node ){
 
   //
-  MessageLog.clearLog(); // !!!
+  // MessageLog.clearLog(); // !!!
   
   //
   var scriptName = 'Expression Editor';
@@ -49,10 +49,14 @@ function PS_ExpressionEditor( _node ){
   var topGroup = modal.addGroup( '', ui, true, true );
 
   var listWidget = modal.listWidget = new QComboBox(topGroup);
+  listWidget.editable = true;
+  listWidget.maxVisibleItems  = 10;
   topGroup.mainLayout.addWidget( listWidget, 0, 0 );
   
   //
   listWidget["currentIndexChanged(int)"].connect(function(i){
+
+    // MessageLog.trace('currentIndexChanged @1: ' +i);
 
     if( listJustUpdated ){
       listJustUpdated = false;
@@ -60,8 +64,23 @@ function PS_ExpressionEditor( _node ){
     }
 
     var exprName = modal.expressions[i].name;
+
+    // MessageLog.trace('currentIndexChanged @2: '+exprName+' > '+listWidget.count );
+
+    if( !exprName && currentExpressionName ){
+      for( var ii=0; ii<listWidget.count; ii++){
+        if( listWidget.itemText(ii) == currentExpressionName ){
+          MessageLog.trace('!!! ' +ii);
+          listJustUpdated = true;
+          listWidget.setCurrentIndex(ii);
+          exprName = currentExpressionName;
+        }
+      }
+    }
     
-    _setCurrentExpression( exprName, i );
+    // MessageLog.trace('currentIndexChanged @3: '+exprName+': '+currentExpressionName );
+
+    _setCurrentExpression( exprName );
     
     var exprText = column.getTextOfExpr(exprName);
     modal.textEdit.setText( exprText );
@@ -69,12 +88,12 @@ function PS_ExpressionEditor( _node ){
     _refreshCurrentExpressionValue();
 
     _setMessage();
-
+    
   });
   
   // REFRESH BUTTON
   var refreshButton = modal.addButton('', topGroup, smallBtnHeight, smallBtnHeight, iconPath+'refresh.png',
-    _refreshExpressionList,
+    function(){ _refreshExpressionList(currentExpressionName) },
     'Refresh expression list.'
   );
 
@@ -158,7 +177,7 @@ function PS_ExpressionEditor( _node ){
     _setMessage();
 
     if( !currentExpressionName ) return;
-    // curentExpressionindex;
+
     var result = column.setTextOfExpr( currentExpressionName, modal.textEdit.plainText );
     // MessageLog.trace('!!!'+currentExpressionName+' > '+result );
     // MessageLog.trace('!!!'+currentExpressionName+' > '+modal.textEdit.plainText );
@@ -176,7 +195,7 @@ function PS_ExpressionEditor( _node ){
   //
   var expressions = _getExpressionColumns();
   
-  _setCurrentExpression();
+  // _setCurrentExpression();
 
   _refreshExpressionList();
 
@@ -190,8 +209,7 @@ function PS_ExpressionEditor( _node ){
   // - - - -
 
   //
-  function _setCurrentExpression( exprName, i ){
-    curentExpressionindex = i;
+  function _setCurrentExpression( exprName ){
     currentExpressionName = exprName;
     bodyGroup.title = exprName || '';
 
@@ -206,7 +224,7 @@ function PS_ExpressionEditor( _node ){
 
   //
   function _fillListWidget( v ){
-    // MessageLog.trace('_fillListWidget: '+modal+' >>> '+JSON.stringify(v, true, '  '));
+    // MessageLog.trace('_fillListWidget: >>> '+JSON.stringify(v, true, '  '));
     
     listJustUpdated = true;
 
@@ -215,15 +233,19 @@ function PS_ExpressionEditor( _node ){
     var items = v.map(function(exprData){return exprData.name;});
 
     modal.listWidget.addItems(items);
+
   }
 
 
   //
-  function _refreshExpressionList(){
+  function _refreshExpressionList( _currentExpressionName ){
+    // MessageLog.trace('_refreshExpressionList: '+currentExpressionName+' > '+_currentExpressionName );
     column.update();
     var expressions = modal.expressions = _getExpressionColumns();
     // MessageLog.trace('_refreshExpressionList: '+JSON.stringify(expressions,true,'  '));
+    if( _currentExpressionName !== undefined ) _setCurrentExpression( _currentExpressionName || undefined );
     _fillListWidget( expressions );
+    
   }
 
 
@@ -277,7 +299,7 @@ function PS_ExpressionEditor( _node ){
 
     });
 
-    MessageLog.trace('_getAllUsedNodes: ' + JSON.stringify(allLinkedNodes, true, '  ') );
+    // MessageLog.trace('_getAllUsedNodes: ' + JSON.stringify(allLinkedNodes, true, '  ') );
 
   }
 
@@ -368,7 +390,7 @@ function PS_ExpressionEditor( _node ){
 
     column.rename( currentExpressionName, columnName );
 
-    _refreshExpressionList();
+    _refreshExpressionList( columnName );
 
   }
 
@@ -404,7 +426,7 @@ function PS_ExpressionEditor( _node ){
 
     // if( modal.textEdit.plainText ) column.setTextOfExpr(columnName, modal.textEdit.plainText);
 
-    _refreshExpressionList();
+    _refreshExpressionList( columnName );
 
     scene.endUndoRedoAccum();
 
@@ -421,7 +443,7 @@ function PS_ExpressionEditor( _node ){
 
     var nodeCount = __deleteExpression( currentExpressionName );
 
-    _refreshExpressionList();
+    _refreshExpressionList( false );
 
     _setMessage('Expression deleted. Removed links from '+nodeCount+' nodes.');
 
@@ -458,7 +480,7 @@ function PS_ExpressionEditor( _node ){
       expressionCount++;
     })
     
-    _refreshExpressionList();
+    _refreshExpressionList( false );
 
     _setMessage('Expressions deleted: '+expressionCount+'. Removed links from '+nodeCount+' nodes.');
 
@@ -486,7 +508,7 @@ function PS_ExpressionEditor( _node ){
   //
   function __deleteExpression( expressionName ){
 
-    MessageLog.trace( '__deleteExpression: "'+expressionName+'"' );
+    // MessageLog.trace( '__deleteExpression: "'+expressionName+'"' );
 
     _getAllUsedNodes( expressionName );
 
@@ -498,7 +520,7 @@ function PS_ExpressionEditor( _node ){
 
       allLinkedNodes[_node].forEach(function(attrData){
 
-        MessageLog.trace('unlink: '+_node+' : '+attrData[1]+' : '+attrData[0] );
+        // MessageLog.trace('unlink: '+_node+' : '+attrData[1]+' : '+attrData[0] );
         node.unlinkAttr(_node, attrData[1]);
         nodeCount++;
 
@@ -632,7 +654,7 @@ function PS_ExpressionEditor( _node ){
 
           column.setTextOfExpr(columnName, _currentExpressionValue );
 
-          _refreshExpressionList();
+          _refreshExpressionList( columnName );
 
         }
 
