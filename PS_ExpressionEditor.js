@@ -181,13 +181,19 @@ function PS_ExpressionEditor( _node ){
   // DELETE ALL BUTTON
   var deleteAllButton = modal.addButton('', bottomGroup, smallBtnHeight, smallBtnHeight, iconPath+'deleteAll.png',
     editor.deleteAllExpressions,
-    'Delete All expressions in the Scene'
+    'Delete All Expressions in the Scene'
+  );
+
+  // DELETE UNUSED
+  var deleteAllUnusedButton = modal.addButton('', bottomGroup, smallBtnHeight, smallBtnHeight, iconPath+'deleteAllUnused.png',
+    editor.deleteAllUnusedExpressions,
+    'Delete All unused Expressions in the Scene'
   );
 
   // DELETE BUTTON
   var deleteButton = modal.addButton('', bottomGroup, smallBtnHeight, smallBtnHeight, iconPath+'delete.png',
     editor.deleteExpression,
-    'Delete the selected expression'
+    'Delete the selected Expression'
   );
 
   //
