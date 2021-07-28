@@ -1,3 +1,10 @@
+/*
+Author: D.Potekhin (d@peppers-studio.ru)
+Version: 0.210728
+
+Context menu of the Expression editor
+*/
+
 var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
 
 
@@ -5,7 +12,7 @@ var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Util
 function initSubmenu( editor ){
 
 	var submenuFlatList = {};
-	
+
 	//
 	var submenuConfig = {
 

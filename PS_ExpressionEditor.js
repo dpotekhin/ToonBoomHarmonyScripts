@@ -1,6 +1,6 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version: 0.210725
+Version: 0.210728
 
 Simple implementation of an expression editor.
 
@@ -9,10 +9,10 @@ ToDo:
 */
 
 var pModal = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/pModal.js"));
-var _Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
 var resoursesPath = specialFolders.userScripts+"/PS_ExpressionEditor-Resources/";
 var _TextEditSubmenu = require(fileMapper.toNativePath(resoursesPath+"TextEditSubmenu.js"));
 var _History = require(fileMapper.toNativePath(resoursesPath+"History.js"));
+var ExpressionEditor = require(fileMapper.toNativePath(resoursesPath+"ExpressionEditor.js"));
 
 //
 function PS_ExpressionEditor( _node ){
@@ -22,25 +22,37 @@ function PS_ExpressionEditor( _node ){
   
   //
   var scriptName = 'Expression Editor';
-  var scriptVer = '0.210725';
+  var scriptVer = '0.210728';
+  var outputColors = {
+    'success': 'color:#8bbe55',
+    'true': 'color:#8bbe55',
+    'error': 'color:#ff7070',
+    'false': 'color:#ff7070',
+    'warning': 'color:yellow'
+  };
   //
 
-  var Utils = _Utils;
   var TextEditSubmenu = _TextEditSubmenu;
   var History = _History;
 
+  //
+  var editor = new ExpressionEditor;
+  editor.version = scriptVer;
+  var showOutputMessage = editor.showOutputMessage = function( str, toolTip, type ){
+    messageOutput.text = str || '';
+    messageOutput.toolTip = toolTip || '';
+    messageOutput.styleSheet = outputColors[''+type] || '';
+  };
+  editor.onExpressionListRefreshed = function( expressionName ) {
+    refreshExpressionList( expressionName );
+  }
+
+  //
   var btnHeight = 50;
   var smallBtnHeight = 30;
   var iconPath = fileMapper.toNativePath(resoursesPath+"/icons/");
 
-  var expressionStartToken = '%EXPR:';
   var listJustUpdated = true;
-  var allLinkedNodes;
-  var nextLinkedNode;
-
-  var editor = {
-    currentExpressionName: undefined
-  };
 
   //
   var modal = editor.modal = new pModal( scriptName + " v" + scriptVer, 600, 400, false );  
@@ -69,7 +81,7 @@ function PS_ExpressionEditor( _node ){
       return;
     }
 
-    var exprName = modal.expressions[i].name;
+    var exprName = editor.expressions[i].name;
 
     // MessageLog.trace('currentIndexChanged @2: '+exprName+' > '+listWidget.count );
 
@@ -90,7 +102,7 @@ function PS_ExpressionEditor( _node ){
     
     // MessageLog.trace('currentIndexChanged @3: '+exprName+': '+editor.currentExpressionName );
 
-    _setCurrentExpression( exprName );
+    setCurrentExpression( exprName );
     
     var exprText = column.getTextOfExpr(exprName);
     modal.textEdit.setText( exprText );
@@ -99,26 +111,28 @@ function PS_ExpressionEditor( _node ){
 
     history.reset();
 
-    _setMessage();
+    showOutputMessage();
     
   });
   
   // REFRESH BUTTON
   var refreshButton = modal.addButton('', topGroup, smallBtnHeight, smallBtnHeight, iconPath+'refresh.png',
-    function(){ _refreshExpressionList(editor.currentExpressionName) },
+    function(){ refreshExpressionList(editor.currentExpressionName) },
     'Refresh expression list.'
   );
 
   // RENAME BUTTON
   var renameButton = modal.addButton('', topGroup, smallBtnHeight, smallBtnHeight, iconPath+'rename.png',
-    _renameExpression,
+    editor.renameExpression,
     'Rename the selected expression.'
   );
 
 
   // COPY CURRENT EXPRESSION DATA
   var copyExpressionButton = modal.addButton('', topGroup, smallBtnHeight, smallBtnHeight, iconPath+'copyExpression.png',
-    _copyExpression,
+    function(){
+      editor.copyExpression( editor.currentExpressionName, modal.textEdit.plainText );
+    },
     'Copy the selected expression data to the clipboard.\n'
     +'Hold Control key to save data to a file.'
   );
@@ -126,7 +140,7 @@ function PS_ExpressionEditor( _node ){
   
   // PASTE EXPRESSION DATA
   var pasteExpressionButton = modal.addButton('', topGroup, smallBtnHeight, smallBtnHeight, iconPath+'pasteExpression.png',
-    _pasteExpression,
+    editor.pasteExpression,
     'Paste an expression data from the clipboard.\n'
     +'Hold Control key to load data from a file.'
   );
@@ -134,7 +148,7 @@ function PS_ExpressionEditor( _node ){
 
   // SERCH NEXT NODE BUTTON
   var findNextNodeButton = modal.addButton('', topGroup, smallBtnHeight, smallBtnHeight, iconPath+'findNextNode.png',
-    _findNextUsedNode,
+    editor.findNextUsedNode,
     'Find the next node using the selected expression. Hold Control key to open Node properties window.'
   );
 
@@ -166,13 +180,13 @@ function PS_ExpressionEditor( _node ){
 
   // DELETE ALL BUTTON
   var deleteAllButton = modal.addButton('', bottomGroup, smallBtnHeight, smallBtnHeight, iconPath+'deleteAll.png',
-    _deleteAllExpressions,
+    editor.deleteAllExpressions,
     'Delete All expressions in the Scene'
   );
 
   // DELETE BUTTON
   var deleteButton = modal.addButton('', bottomGroup, smallBtnHeight, smallBtnHeight, iconPath+'delete.png',
-    _deleteExpression,
+    editor.deleteExpression,
     'Delete the selected expression'
   );
 
@@ -201,13 +215,13 @@ function PS_ExpressionEditor( _node ){
 
    // CREATE BUTTON
   var createButton = modal.addButton('', bottomGroup, smallBtnHeight, smallBtnHeight, iconPath+'create.png',
-    _createExpression,
+    editor.createExpression,
     'Create a new expression'
   );
 
   var saveButton = modal.addButton('', bottomGroup, smallBtnHeight, smallBtnHeight, iconPath+'save.png', function(){
     
-    _setMessage();
+    showOutputMessage();
 
     if( !editor.currentExpressionName ) return;
 
@@ -215,7 +229,7 @@ function PS_ExpressionEditor( _node ){
     // MessageLog.trace('!!!'+editor.currentExpressionName+' > '+result );
     // MessageLog.trace('!!!'+editor.currentExpressionName+' > '+modal.textEdit.plainText );
     
-    _setMessage('Saved');
+    showOutputMessage('Saved');
 
   }, 'Save the selected expression');
   // saveButton.setStyleSheet("background-color: #414e41;");
@@ -226,11 +240,11 @@ function PS_ExpressionEditor( _node ){
   modal.show();
 
   //
-  var expressions = _getExpressionColumns();
+  editor.getExpressionColumns();
 
-  _refreshExpressionList();
+  refreshExpressionList();
 
-  _setCurrentExpression();
+  setCurrentExpression();
   
   history.reset();
 
@@ -239,11 +253,10 @@ function PS_ExpressionEditor( _node ){
   myNotifier.currentFrameChanged.connect( _refreshCurrentExpressionValue );
 
 
-
   // - - - -
 
   //
-  function _setCurrentExpression( exprName ){
+  function setCurrentExpression( exprName ){
     editor.currentExpressionName = exprName;
     bodyGroup.title = exprName || '';
 
@@ -258,8 +271,8 @@ function PS_ExpressionEditor( _node ){
   }
 
   //
-  function _fillListWidget( v ){
-    // MessageLog.trace('_fillListWidget: >>> '+JSON.stringify(v, true, '  '));
+  function fillListWidget( v ){
+    // MessageLog.trace('fillListWidget: >>> '+JSON.stringify(v, true, '  '));
     
     listJustUpdated = true;
 
@@ -273,490 +286,14 @@ function PS_ExpressionEditor( _node ){
 
 
   //
-  function _refreshExpressionList( _currentExpressionName ){
-    // MessageLog.trace('_refreshExpressionList: '+editor.currentExpressionName+' > '+_currentExpressionName );
+  function refreshExpressionList( _currentExpressionName ){
+    // MessageLog.trace('refreshExpressionList: '+editor.currentExpressionName+' > '+_currentExpressionName );
     column.update();
-    var expressions = modal.expressions = _getExpressionColumns();
-    // MessageLog.trace('_refreshExpressionList: '+JSON.stringify(expressions,true,'  '));
-    if( _currentExpressionName !== undefined ) _setCurrentExpression( _currentExpressionName || undefined );
-    _fillListWidget( expressions );
+    var expressions = editor.getExpressionColumns();
+    // MessageLog.trace('refreshExpressionList: '+JSON.stringify(expressions,true,'  '));
+    if( _currentExpressionName !== undefined ) setCurrentExpression( _currentExpressionName || undefined );
+    fillListWidget( expressions );
     
-  }
-
-
-  //
-  function _getExpressionColumns( noFirstEmpty ){
-    var expressions = column.getColumnListOfType('EXPR');
-    if( !noFirstEmpty ) expressions.unshift('');
-    // MessageLog.trace('_getExpressionColumns '+JSON.stringify(expressions,true,'  '));
-    expressions = expressions.map( function(v){
-      return { name: v };
-    });
-    return expressions;
-  }
-
-
-  //
-  function _traverseNodes( nodes, callback ){
-
-    nodes.forEach(function(_node){
-
-      var name = node.getName(_node);
-      callback( _node, name );
-
-      if( node.isGroup(_node) ){
-        var childNodes = node.subNodes(_node);
-        _traverseNodes( childNodes, callback );
-      }
-
-    });
-
-  }
-
-
-  //
-  function _getAllUsedNodes( _columnName ){
-
-    allLinkedNodes = {};
-
-    _traverseNodes([node.root()],function(_node){
-
-      var linkedAttrs = [];
-
-      Utils.getFullAttributeList( _node, 1, true ).forEach(function(attrName){
-        var columnName = node.linkedColumn( _node, attrName );
-        if( columnName && column.type(columnName) === 'EXPR' && ( _columnName && _columnName === columnName ) ) linkedAttrs.push( [columnName, attrName] );
-      });
-
-      // MessageLog.trace('--> '+_node+'; '+JSON.stringify(linkedAttrs, true, '  ') );
-      
-      if( linkedAttrs.length) allLinkedNodes[_node] = linkedAttrs;
-
-    });
-
-    // MessageLog.trace('_getAllUsedNodes: ' + JSON.stringify(allLinkedNodes, true, '  ') );
-
-  }
-
-
-  //
-  function _findNextUsedNode(){
-
-    if( !editor.currentExpressionName ) return;
-
-    _getAllUsedNodes( editor.currentExpressionName );
-
-    // try{
-      // MessageLog.trace('_findNextUsedNode: ' + JSON.stringify(allLinkedNodes, true, '  ') );
-
-    var linkedNodesNames = Object.keys(allLinkedNodes);
-    if( !linkedNodesNames.length ) {
-      _setMessage('No nodes found');
-      return;
-    }
-
-    if( nextLinkedNode === undefined ) nextLinkedNodeIndex = 0;
-    else {
-      var nextLinkedNodeIndex = linkedNodesNames.indexOf(nextLinkedNode);
-      if( nextLinkedNodeIndex === -1 ) nextLinkedNodeIndex = 0;
-      else {
-        nextLinkedNodeIndex++;
-        if( nextLinkedNodeIndex >= linkedNodesNames.length ) nextLinkedNodeIndex = 0;
-      }
-    }
-
-    nextLinkedNode = linkedNodesNames[nextLinkedNodeIndex];
-
-    // MessageLog.trace('nextLinkedNode: "'+nextLinkedNode+'"');
-    if( !nextLinkedNode ) return;
-
-    var attributes = [];
-    allLinkedNodes[nextLinkedNode].forEach(function(attrData){ attributes.push('- '+attrData[1]) })
-    _setMessage( '"'+nextLinkedNode+'" '+(nextLinkedNodeIndex+1)+'/'+linkedNodesNames.length, attributes.join('\n') );
-
-    selection.clearSelection();
-    selection.addNodeToSelection( nextLinkedNode );
-
-    // MessageLog.trace('>>'+JSON.stringify(Action.validate("onActionFocusOnSelectionNV()", "Node View")) )
-
-    var actionCheck = Action.validate("onActionFocusOnSelectionNV()", "Node View");
-    if( actionCheck.isValid && actionCheck.enabled ){
-
-      modal.setFocusOnMainWindow();
-      Action.perform( "onActionFocusOnSelectionNV()", "Node View" );
-      
-      if( KeyModifiers.IsControlPressed() ) Action.perform("onActionEditProperties()", "scene");
-
-    }
-
-    // }catch(err){MessageLog.trace('Error: '+err)}
-
-  }
-
-
-  //
-  function resolveExpressionName(name){
-    return (name || '').trim().replace(/\s/gi,'_').replace(/[^0-9\w]/gi,'');
-  }
-
-
-  //
-  function _renameExpression(){
-
-    if( !editor.currentExpressionName ) return;
-
-    _setMessage();
-
-    var expressionName = Input.getText('Enter Expression name',editor.currentExpressionName,'Rename Expression');
-    if( !expressionName ) {
-      _setMessage('Expression name required');
-      return;
-    }
-    
-    var columnName = resolveExpressionName(expressionName);
-
-    if( editor.currentExpressionName === columnName ) return;
-
-    var columnExists = column.type(columnName);
-    if( columnExists ){
-      _setMessage('An expression with the same name already exists');
-      return;
-    }
-
-    column.rename( editor.currentExpressionName, columnName );
-
-    _refreshExpressionList( columnName );
-
-  }
-
-
-  //
-  function _createExpression(){
-    
-    scene.beginUndoRedoAccum('Create Expression');
-
-    _setMessage();
-
-    var expressionName = Input.getText('Enter Expression name','','Create Expression');
-    if( !expressionName ) {
-      _setMessage('Expression name required');
-      return;
-    }
-    
-    // MessageLog.trace('_createExpression: '+columnName+', '+modal.textEdit.plainText );
-    
-    var columnName = resolveExpressionName(expressionName);
-
-    var columnExists = column.type(columnName);
-    if( columnExists ){
-      _setMessage('An expression with the same name already exists');
-      return;
-    }
-
-    var result = column.add( columnName, 'EXPR' );
-    if( !result ) {
-      MessageLog.trace('Expression creation error');
-      return;
-    }
-
-    // if( modal.textEdit.plainText ) column.setTextOfExpr(columnName, modal.textEdit.plainText);
-
-    _refreshExpressionList( columnName );
-
-    scene.endUndoRedoAccum();
-
-  }
-
-
-
-  //
-  function _deleteExpression(){
-
-    if(!editor.currentExpressionName) return;
-
-    scene.beginUndoRedoAccum('Delete Expression');
-
-    var nodeCount = __deleteExpression( editor.currentExpressionName );
-
-    _refreshExpressionList( false );
-
-    _setMessage('Expression deleted. Removed links from '+nodeCount+' nodes.');
-
-    scene.endUndoRedoAccum();
-
-  }
-
-
-  //
-  function _deleteAllExpressions() {
-    
-    if( !confirmDialog(
-      'Confirm deletion',
-      'You are going to delete all the Expressions in the Scene.\nAre you sure?',
-      "Yep. Kill'em all.",
-      "Nope. Not today."
-    ) ) return;
-
-    var expressionsData = _getExpressionColumns( true );
-    if( !expressionsData.length ){
-      _setMessage('No expressions found.');
-      return;
-    }
-
-    scene.beginUndoRedoAccum('Delete All Expressions');
-
-    var nodeCount = 0;
-    var expressionCount = 0;
-
-    expressionsData.forEach(function( expressionData, i ){
-      if( !expressionData.name ) return;
-      // MessageLog.trace('expressions: '+JSON.stringify( expressionData, true, '  ') );
-      nodeCount += __deleteExpression( expressionData.name );
-      expressionCount++;
-    })
-    
-    _refreshExpressionList( false );
-
-    _setMessage('Expressions deleted: '+expressionCount+'. Removed links from '+nodeCount+' nodes.');
-
-    scene.endUndoRedoAccum();
-
-  }
-
-
-  function confirmDialog( title, text, okButtonText, cancelButtonText ) {
-    var d = new Dialog();
-    d.title = title;
-    if( okButtonText ) d.okButtonText = okButtonText;
-    if( cancelButtonText ) d.cancelButtonText = cancelButtonText;
-    if( text ){
-      var bodyText = new Label();
-      bodyText.text = text;
-      d.add( bodyText );
-    }
-
-    return d.exec();
-    
-  }
-
-
-  //
-  function __deleteExpression( expressionName ){
-
-    // MessageLog.trace( '__deleteExpression: "'+expressionName+'"' );
-
-    _getAllUsedNodes( expressionName );
-
-    var linkedNodesNames = Object.keys(allLinkedNodes);
-
-    var nodeCount = 0;
-
-    linkedNodesNames.forEach(function(_node){
-
-      allLinkedNodes[_node].forEach(function(attrData){
-
-        // MessageLog.trace('unlink: '+_node+' : '+attrData[1]+' : '+attrData[0] );
-        node.unlinkAttr(_node, attrData[1]);
-        nodeCount++;
-
-      });
-
-    });
-
-    // column.removeUnlinkedFunctionColumn(expressionName); // Doesn't work
-    
-    var _node = node.add( 'Top', '__'+column.generateAnonymousName(), 'PEG', 0, 0, 0 );
-    node.linkAttr(_node, "ROTATION.ANGLEZ", expressionName );
-    var result = node.deleteNode( _node, true, true );
-
-    return nodeCount;
-
-  }
-
-
-
-  //
-  function _copyExpression(){
-
-    if(!editor.currentExpressionName) return;
-
-    _setMessage('');
-
-    scene.beginUndoRedoAccum('Copy Expression');
-
-    var expressionData = 'Expression Editor. Expression Data | v'+scriptVer+'\n';
-    expressionData += expressionStartToken+editor.currentExpressionName+'\n'+modal.textEdit.plainText+'\n';
-
-    // Save to a File
-    if( KeyModifiers.IsControlPressed() ){
-      
-      var filePath = FileDialog.getSaveFileName('*.txt');
-      if( filePath ){
-       
-        if( saveDataToFile( filePath, expressionData ) )
-          _setMessage('Expression Data saved to the file');
-       
-        else _setMessage('An error occurred while saving');
-
-      }else{
-        _setMessage('');
-      }
-
-    }else{ // Clipboard
-      
-      QApplication.clipboard().setText( expressionData );
-      _setMessage('Expression Data copied to the clipboard');
-    }
-
-    scene.endUndoRedoAccum();
-
-  }
-
-
-
-  //
-  function _pasteExpression(){
-
-    var expressionData;
-
-    _setMessage('');
-
-    // Load from a File
-    if( KeyModifiers.IsControlPressed() ){
-
-      var filePath = FileDialog.getOpenFileName('*.txt');
-      if( filePath ){
-        expressionData = loadDataFromFile( filePath ) || '';
-      }
-
-    }else{ // Clipboard
-      
-      expressionData = QApplication.clipboard().text();
-
-    }
-
-    expressionData = (expressionData || '').trim();
-
-    if( expressionData ){
-      
-      expressionData = expressionData.split(/\r?\n/);
-
-      var dataHead = expressionData.shift();
-
-      if( dataHead && dataHead.indexOf('Expression Editor. Expression Data') !== -1 ){
-
-        
-        // Parse Data
-        var currentExpressionName;
-        var currentExpressionValue;
-
-        function putCurrentExpression(){
-
-          if( !(currentExpressionName && currentExpressionValue) ) return;
-          
-          var _currentExpressionName = currentExpressionName;
-          currentExpressionName = undefined;
-
-          var _currentExpressionValue = currentExpressionValue.join('\n');
-          currentExpressionValue = undefined;
-
-          //
-          var columnName = resolveExpressionName(_currentExpressionName);
-
-          // Check that the new expression is not exists in the Scene
-          var columnExists = column.type(columnName);
-          if( columnExists ){
-            var response = MessageBox.warning('Expression named "'+columnName+'" already exists in the Scene.\nOverride?',1,2,0,'Paste error');
-            if( response === 2 ) {
-              MessageLog.trace('Expression "'+columnName+'" skipped by user.');
-              return;
-            }
-          }
-
-          if( !columnExists ){
-
-            var result = column.add( columnName, 'EXPR' );
-            if( !result ) {
-              MessageLog.trace('Expression creation error');
-              return;
-            }
-
-          }
-
-          column.setTextOfExpr(columnName, _currentExpressionValue );
-
-          _refreshExpressionList( columnName );
-
-        }
-
-        scene.beginUndoRedoAccum('Paste Expression');
-
-        expressionData.forEach(function(line){
-          
-          line = line.trim();
-
-          if( line.indexOf(expressionStartToken)===0 ){
-            putCurrentExpression();
-            currentExpressionName = line.split(expressionStartToken)[1]
-            currentExpressionValue = [];
-          }else{
-            currentExpressionValue.push(line);
-          }
-
-        });
-
-        putCurrentExpression();
-
-        scene.endUndoRedoAccum();
-
-        _setMessage('Expression Data pasted successfully');
-
-        return;
-
-      }
-
-    }
-
-    _setMessage('Expression Data not found in the clipboard');
-
-  }
-
-
-  //
-  function saveDataToFile( path, data ){
-
-    try
-    { 
-      var file = new File( path );
-      file.open( 2 ); // write only
-      file.write( data );
-      file.close();
-      return true;
-    }
-    catch(err){
-      return false;
-    }
-
-  }
-
-
-  //
-  function loadDataFromFile( path ){
-
-    var file = new File( path );
-    
-    try
-    {
-      if ( file.exists )
-      { 
-        file.open( 1 ) // read only
-        var savedData = file.read();
-        file.close();
-        return savedData;
-      }
-    }
-    catch(err){}
-
   }
 
 
@@ -770,12 +307,6 @@ function PS_ExpressionEditor( _node ){
     expressionOutput.text = str;
   }
 
-
-  //
-  function _setMessage( str, toolTip ){
-    messageOutput.text = str || '';
-    messageOutput.toolTip = toolTip || '';
-  }
 
 }
 
