@@ -11,6 +11,19 @@ var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Util
 //
 function initSubmenu( editor ){
 
+	//
+	var innerActions = {
+		
+		createFixedFrameRateBy2Expression: function( editor ){ editor.createExpression( 'fixedFrameRateBy2', chunks.fixedFrameRateBy2 ); }
+
+	}
+
+	//
+	var chunks = {
+		fixedFrameRateBy2: "var holdFrame = 2;\nfloor( (currentFrame - .5 ) / holdFrame ) * holdFrame + 1"
+	};
+
+	//
 	var submenuFlatList = {};
 
 	//
@@ -18,8 +31,10 @@ function initSubmenu( editor ){
 
 		'-': 1,
 
+		// Selected node Columns
 		"Selected Node Columns": getSelectedNodeColumns,
 		
+		// Functions
 		'Functions':{
 
 			"currentFrame": "currentFrame",
@@ -55,6 +70,14 @@ function initSubmenu( editor ){
 			"column( columnName )": "column( columnName )",
 		},
 
+		// Actions
+		'Actions': {
+
+			'Create Fixed Framerate on 2s Expression': '!createFixedFrameRateBy2Expression'
+
+		},
+
+		// Examples
 		'Examples': {
 
 			"Pendulum": "var speedCoef = 0.5;\nvar amp = 2;\nMath.sin( currentFrame * speedCoef ) * amp;",
@@ -62,6 +85,8 @@ function initSubmenu( editor ){
 			"Random": "var minRandomValue = 2;\nvar maxRandomValue = 5;\nMath.random() * (maxRandomValue - minRandomValue) + minRandomValue;",
 
 			"Wiggle": "// Wiggle expression\nvar seedOffset = 0; // Random seed offset\nvar amp = 100; // Amplitude\nvar freq = 5; // Random value changes every N-th frame\n\nfunction seedrandom( seed ) { // Seeded Random Generator\n    var x = Math.sin(seed + seedOffset) * 10000;\n    return x - Math.floor(x);\n}\n\nfunction interpolate(pa, pb, px){ // Interpolator\n	var ft = px * Math.PI, f = (1 - Math.cos(ft)) * 0.5;\n	return pa * (1 - f) + pb * f;\n}\n\nvar _currentFrame = ~~(currentFrame / freq);\nvar _currentRandom = seedrandom( _currentFrame );\nvar _prevRandom = seedrandom( _currentFrame - 1 );\ninterpolate(_prevRandom, _currentRandom, (currentFrame % freq) / freq) * amp; // Noise result",
+
+			"Fixed Frame Rate by 2": chunks.fixedFrameRateBy2,
 
 			"Degrees to Radians": "var DEG2RAD = Math.PI / 180;",
 
@@ -84,7 +109,10 @@ function initSubmenu( editor ){
 	    menu.triggered.connect(function(a){
 	      // MessageLog.trace('clicked '+a.text);
 	      var submenuItemData = submenuFlatList[a.text];
-	      editor.textEdit.textCursor().insertText(submenuItemData);
+
+	      if( typeof submenuItemData === 'string' ) editor.textEdit.textCursor().insertText(submenuItemData);
+	      else submenuItemData( editor );
+
 	    });
 	    
 	    menu.exec(event.globalPos());
@@ -110,9 +138,19 @@ function initSubmenu( editor ){
 	    	}else{
 
 	    		if( typeof submenuItemData === 'string' ){ // Add menu item
-					
-					menu.addAction(submenuItemName);	
-	    			submenuFlatList[submenuItemName] = submenuItemData;
+						
+						menu.addAction(submenuItemName);
+
+						if( submenuItemData.charAt(0) === '!' ){ // Menu item is action
+
+							// MessageLog.trace('Action: "'+submenuItemName+'" '+submenuItemData.substr(1,submenuItemData.length));
+							submenuFlatList[submenuItemName] = innerActions[submenuItemData.substr(1,submenuItemData.length)];
+
+						}else{
+
+		    			submenuFlatList[submenuItemName] = submenuItemData;
+
+		    		}
 
 	    		}else if( Utils.isFunction(submenuItemData) ){ // Dynamic items
 

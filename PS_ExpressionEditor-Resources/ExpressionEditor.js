@@ -23,16 +23,20 @@ function ExpressionEditor(){
     this.showOutputMessage = undefined;
 
     //
-    this.createExpression = function() {
+    this.createExpression = function( expressionName, expressionBody ) {
 
         scene.beginUndoRedoAccum('Create Expression');
 
         _this.showOutputMessage();
 
-        var expressionName = Input.getText('Enter Expression name', '', 'Create Expression');
-        if (!expressionName) {
-            _this.showOutputMessage('Expression name required','',false);
-            return;
+        if( !expressionName ){
+
+            expressionName = Input.getText('Enter Expression name', '', 'Create Expression');
+            if (!expressionName) {
+                _this.showOutputMessage('Expression name required','',false);
+                return;
+            }
+
         }
 
         // MessageLog.trace('_createExpression: '+columnName+', '+_this.modal.textEdit.plainText );
@@ -41,7 +45,7 @@ function ExpressionEditor(){
 
         var columnExists = column.type(columnName);
         if (columnExists) {
-            _this.showOutputMessage('An expression with the same name already exists','',false);
+            _this.showOutputMessage('An expression with name "'+columnName+'" already exists','',false);
             return;
         }
 
@@ -51,11 +55,15 @@ function ExpressionEditor(){
             return;
         }
 
+        if( expressionBody ) column.setTextOfExpr( columnName, expressionBody );
+
         // if( _this.modal.textEdit.plainText ) column.setTextOfExpr(columnName, _this.modal.textEdit.plainText);
 
         _this.onExpressionListRefreshed(columnName);
 
         scene.endUndoRedoAccum();
+
+        return true;
 
     }
 
