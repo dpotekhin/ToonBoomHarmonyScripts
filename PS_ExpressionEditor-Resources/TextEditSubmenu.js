@@ -11,181 +11,252 @@ var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Util
 //
 function initSubmenu( editor ){
 
-	//
-	var innerActions = {
-		
-		createFixedFrameRateBy2Expression: function( editor ){ editor.createExpression( 'fixedFrameRateBy2', chunks.fixedFrameRateBy2 ); }
+  var nameFixes = [
+    ['DRAWING.ELEMENT',''], // Skip Element Node
+    ['SCALE.XY',''], // Skip Scale Switch
+    ['POSITION.',''],
+    ['OFFSET.',''],
+    ['ROTATION.',''],
+    ['SCALE.','Scl'],
+    ['SKEW','Scw'],
+    ['DEPTH','Dpt'],
+    ['MULT_LINE_ART_THICKNESS','MuLAT'],
+    ['ADD_LINE_ART_THICKNESS','ALAT'],
+    ['MIN_LINE_ART_THICKNESS','MnLAT'],
+    ['MAX_LINE_ART_THICKNESS','MxLAT'],
+    ['MORPHING_VELO','MphV'],
+    ['ANGLE','A'],
+    ['OPACITY','Opc'],
+  ];
 
-	}
+  //
+  var chunks = {
+    fixedFrameRateBy2: "var holdFrame = 2;\nfloor( (currentFrame - .5 ) / holdFrame ) * holdFrame + 1"
+  };
 
-	//
-	var chunks = {
-		fixedFrameRateBy2: "var holdFrame = 2;\nfloor( (currentFrame - .5 ) / holdFrame ) * holdFrame + 1"
-	};
+  //
+  var submenuFlatList = {};
 
-	//
-	var submenuFlatList = {};
+  //
+  var submenuConfig = {
 
-	//
-	var submenuConfig = {
+    '-': 1,
 
-		'-': 1,
+    // Selected node Columns
+    "Selected Node":{
+      "Get Linked Columns": getMenuItemsForLinkedColumns,
 
-		// Selected node Columns
-		"Selected Node Columns": getSelectedNodeColumns,
-		
-		// Functions
-		'Functions':{
+    // Create Expressions For Selected Node
+    // "!Create Expressions For Selected Node": createExpressionsForSelectedNode,
 
-			"currentFrame": "currentFrame",
-			"numFrames": "numFrames",
+      "Link Expression": getMenuItemsForLinkExpression,
 
-			"--0": "",
-			"sin (angle)": "sin (angle)",
-			"cos (angle)": "cos (angle)",
-			"tan (angle)": "tan (angle)",
-			"asin( v )": "asin( v )",
-			"acos( v )": "acos( v )",
-			"atan( v )": "atan( v )",
-			"atan2( x, y )": "atan2( x, y )",
-			"int ( v )": "int ( v )",
-			"ceil( v )": "ceil( v )",
-			"floor( v )": "floor( v )",
-			"abs( v )": "abs( v )",
-			"sqrt( v )": "sqrt( v )",
-			"exp( v )": "exp( v )",
-			"ln( v )": "ln( v )",
-			"ln( v )": "ln( v )",
+      "Create Expression": getMenuItemsForCreateExpression,
 
-			"--1": "",
-			"Math.min( a, ... )": "Math.min( a, b )",
-			"Math.max( a, ... )": "Math.max( a, b )",
-			"Math.random() * v": "Math.random() * v",
-			"Math.PI": "Math.PI",
-			"Math.pow( base, exponent )": "Math.pw( base, exponent )",		
+    },
 
-			"--2": "",
-			"value( columnName )": "value( columnName )",
-			"value( columnName, frame )": "value( columnName, frame )",
-			"column( columnName )": "column( columnName )",
-		},
+    // Functions
+    'Functions':{
 
-		// Actions
-		'Actions': {
+      "currentFrame": "currentFrame",
+      "numFrames": "numFrames",
 
-			'Create Fixed Framerate on 2s Expression': '!createFixedFrameRateBy2Expression'
+      "--0": "",
+      "sin (angle)": "sin (angle)",
+      "cos (angle)": "cos (angle)",
+      "tan (angle)": "tan (angle)",
+      "asin( v )": "asin( v )",
+      "acos( v )": "acos( v )",
+      "atan( v )": "atan( v )",
+      "atan2( x, y )": "atan2( x, y )",
+      "int ( v )": "int ( v )",
+      "ceil( v )": "ceil( v )",
+      "floor( v )": "floor( v )",
+      "abs( v )": "abs( v )",
+      "sqrt( v )": "sqrt( v )",
+      "exp( v )": "exp( v )",
+      "ln( v )": "ln( v )",
+      "ln( v )": "ln( v )",
 
-		},
+      "--1": "",
+      "Math.min( a, ... )": "Math.min( a, b )",
+      "Math.max( a, ... )": "Math.max( a, b )",
+      "Math.random() * v": "Math.random() * v",
+      "Math.PI": "Math.PI",
+      "Math.pow( base, exponent )": "Math.pw( base, exponent )",    
 
-		// Examples
-		'Examples': {
+      "--2": "",
+      "value( columnName )": "value( columnName )",
+      "value( columnName, frame )": "value( columnName, frame )",
+      "column( columnName )": "column( columnName )",
+    },
 
-			"Pendulum": "var speedCoef = 0.5;\nvar amp = 2;\nMath.sin( currentFrame * speedCoef ) * amp;",
+    // Actions
+    'Actions': {
 
-			"Random": "var minRandomValue = 2;\nvar maxRandomValue = 5;\nMath.random() * (maxRandomValue - minRandomValue) + minRandomValue;",
+      '!Create Fixed Framerate on 2s Expression': createFixedFrameRateBy2Expression
 
-			"Wiggle": "// Wiggle expression\nvar seedOffset = 0; // Random seed offset\nvar amp = 100; // Amplitude\nvar freq = 5; // Random value changes every N-th frame\n\nfunction seedrandom( seed ) { // Seeded Random Generator\n    var x = Math.sin(seed + seedOffset) * 10000;\n    return x - Math.floor(x);\n}\n\nfunction interpolate(pa, pb, px){ // Interpolator\n	var ft = px * Math.PI, f = (1 - Math.cos(ft)) * 0.5;\n	return pa * (1 - f) + pb * f;\n}\n\nvar _currentFrame = ~~(currentFrame / freq);\nvar _currentRandom = seedrandom( _currentFrame );\nvar _prevRandom = seedrandom( _currentFrame - 1 );\ninterpolate(_prevRandom, _currentRandom, (currentFrame % freq) / freq) * amp; // Noise result",
+    },
 
-			"Fixed Frame Rate by 2": chunks.fixedFrameRateBy2,
+    // Examples
+    'Examples': {
 
-			"Degrees to Radians": "var DEG2RAD = Math.PI / 180;",
+      "Pendulum": "var speedCoef = 0.5;\nvar amp = 2;\nMath.sin( currentFrame * speedCoef ) * amp;",
 
-			"Radians to Degrees": "var RAD2DEG = 180 / Math.PI;",
+      "Random": "var minRandomValue = 2;\nvar maxRandomValue = 5;\nMath.random() * (maxRandomValue - minRandomValue) + minRandomValue;",
 
-		}
+      "Wiggle": "// Wiggle expression\nvar seedOffset = 0; // Random seed offset\nvar amp = 100; // Amplitude\nvar freq = 5; // Random value changes every N-th frame\n\nfunction seedrandom( seed ) { // Seeded Random Generator\n    var x = Math.sin(seed + seedOffset) * 10000;\n    return x - Math.floor(x);\n}\n\nfunction interpolate(pa, pb, px){ // Interpolator\n  var ft = px * Math.PI, f = (1 - Math.cos(ft)) * 0.5;\n  return pa * (1 - f) + pb * f;\n}\n\nvar _currentFrame = ~~(currentFrame / freq);\nvar _currentRandom = seedrandom( _currentFrame );\nvar _prevRandom = seedrandom( _currentFrame - 1 );\ninterpolate(_prevRandom, _currentRandom, (currentFrame % freq) / freq) * amp; // Noise result",
 
-	};
+      "Fixed Frame Rate by 2": chunks.fixedFrameRateBy2,
+
+      "Degrees to Radians": "var DEG2RAD = Math.PI / 180;",
+
+      "Radians to Degrees": "var RAD2DEG = 180 / Math.PI;",
+
+    }
+
+  };
 
 
-	//
-	editor.textEdit.contextMenuEvent = function(event){
+  //
+  editor.textEdit.contextMenuEvent = function(event){
     
-	    try{ // !!!
+      try{ // !!!
 
-	    var menu = editor.textEdit.createStandardContextMenu();
-	    
-	    createSubmenu( menu, submenuConfig );
-	    
-	    menu.triggered.connect(function(a){
-	      // MessageLog.trace('clicked '+a.text);
-	      var submenuItemData = submenuFlatList[a.text];
+      var menu = editor.textEdit.createStandardContextMenu();
+      
+      createSubmenu( menu, submenuConfig );
+      
+      menu.triggered.connect(function(a){
+        // MessageLog.trace('clicked '+a.text);
+        var submenuItemData = submenuFlatList[a.text];
 
-	      if( typeof submenuItemData === 'string' ) editor.textEdit.textCursor().insertText(submenuItemData);
-	      else submenuItemData( editor );
+        if( typeof submenuItemData === 'string' ) editor.textEdit.textCursor().insertText(submenuItemData);
+        else submenuItemData( editor );
 
-	    });
-	    
-	    menu.exec(event.globalPos());
-	    delete menu;
-	    
-	    }catch(err){MessageLog.trace(err)} // !!!
+      });
+      
+      menu.exec(event.globalPos());
+      delete menu;
+      
+      }catch(err){MessageLog.trace(err)} // !!!
 
-	}
+  }
 
-	//
-	function createSubmenu( menu, submenuData ){
+  //
+  function createSubmenu( menu, submenuData ){
 
-		Object.keys( submenuData ).forEach(function( submenuItemName ){
-	    	
-	    	var submenuItemData = submenuData[submenuItemName];
+    Object.keys( submenuData ).forEach(function( submenuItemName ){
+        
+        var submenuItemData = submenuData[submenuItemName];
 
-	    	// MessageLog.trace('!! '+submenuItemName+' >> '+Utils.isFunction(submenuItemData) );
+        // MessageLog.trace('!! '+submenuItemName+' >> '+Utils.isFunction(submenuItemData) );
 
-	    	if( submenuItemName.charAt(0) === '-' ){ // Add a Separator
+        if( submenuItemName.charAt(0) === '-' ){ // Add a Separator
 
-	    		menu.addSeparator();
+          menu.addSeparator();
 
-	    	}else{
+        }else if( submenuItemName.charAt(0) === '!' ){ // Add a function
 
-	    		if( typeof submenuItemData === 'string' ){ // Add menu item
-						
-						menu.addAction(submenuItemName);
+          var _submenuItemName = submenuItemName.substr(1,submenuItemName.length);
+          // MessageLog.trace('Action: "'+submenuItemName+'" '+_submenuItemName);
+          menu.addAction(_submenuItemName);
+          submenuFlatList[_submenuItemName] = submenuItemData;
 
-						if( submenuItemData.charAt(0) === '!' ){ // Menu item is action
+        }else{
 
-							// MessageLog.trace('Action: "'+submenuItemName+'" '+submenuItemData.substr(1,submenuItemData.length));
-							submenuFlatList[submenuItemName] = innerActions[submenuItemData.substr(1,submenuItemData.length)];
+          if( typeof submenuItemData === 'string' ){ // Add menu item
+            
+            menu.addAction(submenuItemName);
+            submenuFlatList[submenuItemName] = submenuItemData;
 
-						}else{
+          }else if( Utils.isFunction(submenuItemData) ){ // Dynamic items
 
-		    			submenuFlatList[submenuItemName] = submenuItemData;
+            var submenuItems = submenuItemData();
 
-		    		}
+            if( submenuItems && Object.keys(submenuItems).length ){
 
-	    		}else if( Utils.isFunction(submenuItemData) ){ // Dynamic items
+              var submenuObject = {};
+              submenuObject[submenuItemName] = submenuItems;
+              createSubmenu( menu, submenuObject );
 
-	    			var submenuItems = submenuItemData();
+            }else{
+              
+              var submenu = menu.addMenu( submenuItemName );
+              submenu.enabled = false;
 
-		    		if( submenuItems && Object.keys(submenuItems).length ){
+            }
 
-		    			var submenuObject = {};
-		    			submenuObject[submenuItemName] = submenuItems;
-		    			createSubmenu( menu, submenuObject );
+          }else{ // Add a submenu
 
-		    		}else{
-		    			
-		    			var submenu = menu.addMenu( submenuItemName );
-		    			submenu.enabled = false;
+            var submenu = menu.addMenu( submenuItemName );
+            createSubmenu( submenu, submenuItemData );
 
-		    		}
+          }
 
-	    		}else{ // Add a submenu
+        }
 
-	    			var submenu = menu.addMenu( submenuItemName );
-	    			createSubmenu( submenu, submenuItemData );
+      })
 
-	    		}
+  }
 
-	    	}
 
-	    })
+  // ---------------------------------------------------------------------------
+  function getFixedAttributeColumn( _node, attrName ){
+    columnName = attrName;
+    nameFixes.forEach(function(nameFixData) { columnName = columnName.replace(nameFixData[0], nameFixData[1]) });
+    return editor.getAvailableColumnName( editor.resolveExpressionName( _node.split('/').pop()+'_'+columnName ) );
+  }
 
-	}
+  ///
+  function getMenuItemsForCreateExpression(){
 
-	//
-	function getSelectedNodeColumns(){
+    var submenuItems = {};
 
-		var _node = selection.selectedNode(0);
+    Utils.eachAnimatableAttr( true, function( attrName, i, _node ) {
+      
+      var columnName = getFixedAttributeColumn( _node, attrName );
+      if (!columnName) return;
+
+      submenuItems[ '!Add to: '+attrName ] = function(){
+        MessageLog.trace('add Expression To Node Attribute:'+ _node+', '+attrName+', '+columnName );
+        var _columnName = editor.createExpression( columnName, undefined, true );
+        if( !_columnName ) return;
+        node.linkAttr( _node, attrName, _columnName );
+      };
+
+    });
+
+    return Object.keys(submenuItems).length ? submenuItems : undefined;
+
+  }
+
+
+  //
+  function  getMenuItemsForLinkExpression() {
+    
+    if( !editor.currentExpressionName ) return;
+
+    var submenuItems = {};
+
+    Utils.eachAnimatableAttr( true, function( attrName, i, _node ) {
+
+      submenuItems[ '!Link to: '+attrName ] = function(){
+        MessageLog.trace('Link Expression To Node Attribute:'+ _node+', '+attrName+', '+columnName );
+        node.linkAttr( _node, attrName, editor.currentExpressionName );
+      };
+
+    });
+
+    return Object.keys(submenuItems).length ? submenuItems : undefined;
+
+  }
+
+
+  ///
+  function getMenuItemsForLinkedColumns(){
+
+    var _node = selection.selectedNode(0);
 
     if( !_node ){
       return;
@@ -215,11 +286,48 @@ function initSubmenu( editor ){
 
     return submenuItems;
 
-	}
+  }
+
+  //
+  function createFixedFrameRateBy2Expression(){
+    editor.createExpression( 'fixedFrameRateBy2', chunks.fixedFrameRateBy2 );
+  }
+
+  //
+  function createExpressionsForSelectedNode() {
+
+    var _node = selection.selectedNode(0);
+    if( !_node ){
+      editor.showOutputMessage('Selected Node required','',false);
+      return;
+    }
+
+    MessageLog.trace('createExpressionsForSelectedNode: '+_node );
+
+    var animatableAttrs = Utils.getAnimatableAttrs( _node );
+    MessageLog.trace( animatableAttrs.join('\n') );
+
+    animatableAttrs.forEach(function(attrName){
+      var columnName = attrName;
+      nameFixes.forEach(function(nameFixData){columnName = columnName.replace(nameFixData[0],nameFixData[1])});
+      if( !columnName ) return;
+      columnName = editor.getAvailableColumnName( editor.resolveExpressionName( '_'+_node.split('/').pop()+'_'+columnName ) );
+      MessageLog.trace( attrName +' > '+columnName );
+    });
+
+    /*
+    Utils.getFullAttributeList(_node, 1).forEach(function(attr) {
+      
+      MessageLog.trace('>>: '+attr );
+          
+    });
+    */
+
+  }
 
 }
 
 ///
 exports = {
-	initSubmenu: initSubmenu
+  initSubmenu: initSubmenu
 }

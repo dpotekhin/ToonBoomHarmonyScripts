@@ -23,15 +23,15 @@ function ExpressionEditor(){
     this.showOutputMessage = undefined;
 
     //
-    this.createExpression = function( expressionName, expressionBody ) {
+    this.createExpression = function( expressionName, expressionBody, forceNameInput ) {
 
         scene.beginUndoRedoAccum('Create Expression');
 
         _this.showOutputMessage();
 
-        if( !expressionName ){
+        if( !expressionName || forceNameInput ){
 
-            expressionName = Input.getText('Enter Expression name', '', 'Create Expression');
+            expressionName = Input.getText('Enter Expression name', expressionName || '', 'Create Expression');
             if (!expressionName) {
                 _this.showOutputMessage('Expression name required','',false);
                 return;
@@ -63,7 +63,7 @@ function ExpressionEditor(){
 
         scene.endUndoRedoAccum();
 
-        return true;
+        return expressionName;
 
     }
 
@@ -527,6 +527,22 @@ function ExpressionEditor(){
         return (name || '').trim().replace(/\s/gi,'_').replace(/[^0-9\w]/gi,'');
     }
 
+
+    //
+    this.getAvailableColumnName = function( columnName ) {
+        
+        if( !column.type(columnName) ) return columnName;
+
+        var counter = 0;
+        var _columnName = columnName;
+        do {
+            counter++;
+            _columnName = columnName+'_'+counter;
+        } while ( column.type(_columnName) && counter < 100 )
+
+        return _columnName;
+
+    }
 
 
 

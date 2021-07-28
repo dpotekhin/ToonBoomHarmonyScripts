@@ -79,8 +79,8 @@ function getAttributes(attribute, attributeList)
     getAttributes(subAttrList[j], attributeList);
   }
 }
-function getFullAttributeList( nodePath, frame, onlyNames )
-{
+
+function getFullAttributeList( nodePath, frame, onlyNames ){
   var attributeList = [];
   var topAttributeList = node.getAttrList(nodePath, frame);
   for (var i = 0; i < topAttributeList.length; ++i)
@@ -95,6 +95,70 @@ function getFullAttributeList( nodePath, frame, onlyNames )
   return attributeList;
 }
 
+
+function getAnimatableAttrs( _node ){
+
+    function getAnimatableAttrs( argNode, validAttrList, parAttrName, col )
+    {   
+        var attrList = node.getAttrList( argNode, 1, parAttrName ); 
+        
+        for ( var at = 0; at < attrList.length; at++ )
+        {
+            var attrName = attrList[at].keyword();          
+            // if current attr is a sub-attr, append parent attr's name
+            if( parAttrName !== "" )
+            {
+                attrName = parAttrName + "." + attrName;
+            } 
+        
+            // check if attr is linked to a column
+            var colName = node.linkedColumn( argNode, attrName );
+            if( colName == "" ) // not linked
+            {
+                // check if the attr is linkable
+                node.linkAttr( argNode, attrName, col );
+                var colName2 = node.linkedColumn( argNode, attrName );
+                if( colName2 == col )
+                {   
+                    validAttrList.push( attrName );
+                    node.unlinkAttr( argNode, attrName );   
+                }
+            }
+            else // linked
+            {
+                validAttrList.push( attrName ); 
+            }
+            
+            // check for sub-attrs
+            var subAttrCheck = node.getAttrList( argNode, 1, attrName );
+            if ( subAttrCheck.length > 0 )
+            {
+                var subList = getAnimatableAttrs( argNode, [], attrName, col );
+                validAttrList.push.apply( validAttrList, subList );
+            }
+        }
+        return validAttrList;
+    }   
+    
+    var testCol = "ATV-testCol___";
+    column.add( testCol, "BEZIER" );    
+    
+    var animatableAttrs = getAnimatableAttrs( _node, [], "", testCol );     
+    
+    column.removeUnlinkedFunctionColumn( testCol );
+
+    return animatableAttrs;
+}
+
+function eachAnimatableAttr( _node, callback ){
+    _node = _node === true ? selection.selectedNode(0) : _node;
+    var animatableAttrs = getAnimatableAttrs(_node);
+    animatableAttrs.forEach(function( attrName, i ) {
+      callback( attrName, i, _node );
+    });
+}
+
+
 //
 exports = {
     gridWidth: gridWidth,
@@ -107,5 +171,7 @@ exports = {
     getPointGlobalPosition: getPointGlobalPosition,
     findParentPeg: findParentPeg,
     getFullAttributeList: getFullAttributeList,
-    isFunction: isFunction
+    isFunction: isFunction,
+    getAnimatableAttrs: getAnimatableAttrs,
+    eachAnimatableAttr: eachAnimatableAttr
 };
