@@ -149,7 +149,8 @@ function PS_ExpressionEditor( _node ){
   // SERCH NEXT NODE BUTTON
   var findNextNodeButton = modal.addButton('', topGroup, smallBtnHeight, smallBtnHeight, iconPath+'findNextNode.png',
     editor.findNextUsedNode,
-    'Find the next node using the selected expression. Hold Control key to open Node properties window.'
+    'Find the next node using the selected expression.\n'
+    +'Hold Control key to open Node properties window.'
   );
 
 
