@@ -329,7 +329,7 @@ function ExpressionEditor(){
         } else { // Clipboard
 
             QApplication.clipboard().setText(expressionData);
-            _this.showOutputMessage('Expression Data copied to the clipboard','',true);
+            _this.showOutputMessage('Expression Data copied to the Clipboard','',true);
         }
 
         scene.endUndoRedoAccum();
@@ -440,7 +440,7 @@ function ExpressionEditor(){
 
         }
 
-        _this.showOutputMessage('Expression Data not found in the clipboard','',true);
+        _this.showOutputMessage('Expression Data not found in the Clipboard','',true);
 
     }
 

@@ -68,6 +68,7 @@ function PS_ExpressionEditor( _node ){
 
   var listWidget = modal.listWidget = new QComboBox(topGroup);
   // listWidget.editable = true;
+  // listWidget.insertPolicy = QComboBox.NoInsert;
   // listWidget.maxVisibleItems  = 10;
   topGroup.mainLayout.addWidget( listWidget, 0, 0 );
   

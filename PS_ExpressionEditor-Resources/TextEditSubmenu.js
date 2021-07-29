@@ -355,12 +355,12 @@ function initSubmenu( editor ){
 
   function copyCurrentExpressionName(editor) {
     QApplication.clipboard().setText( editor.currentExpressionName );
-    editor.showOutputMessage('Expression Name copied to clipboard','',true);
+    editor.showOutputMessage('Expression Name copied to the Clipboard','',true);
   }
 
   function copyCurrentExpressionLink(editor) {
     QApplication.clipboard().setText( 'value( column("'+editor.currentExpressionName+'") );' );
-    editor.showOutputMessage('Expression Link copied to clipboard','',true); 
+    editor.showOutputMessage('Expression Link copied to the Clipboard','',true); 
   }
 
 }
