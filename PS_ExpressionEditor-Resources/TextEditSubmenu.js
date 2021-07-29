@@ -105,6 +105,13 @@ function initSubmenu( editor ){
     // Actions
     'Actions': {
 
+      '!Create Constants Expressions (0 and 1)': function(editor){
+        var result0 = editor.createExpression('CONST_0','0');
+        var result1 = editor.createExpression('CONST_1','1');
+        if( !result0 && !result1 ) editor.showOutputMessage('"CONST_0" and "CONST_1" already exists','',false);
+        else if( result0 ) editor.showOutputMessage( (result0 ? '"CONST_0 created. "' : '') + (result1 ? '"CONST_0 created. "' : ''),'',true);
+      },
+
       '!Create Fixed Frame Rate on 2s Expression': createFixedFrameRateBy2Expression
 
     },
