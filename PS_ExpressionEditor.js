@@ -299,6 +299,8 @@ function PS_ExpressionEditor( _node ){
       ) ) {
         saveCurrentExpression();
       }
+
+      updateUIState( false );
       
     }
 
