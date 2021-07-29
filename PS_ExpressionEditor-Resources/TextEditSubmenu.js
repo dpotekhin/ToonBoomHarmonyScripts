@@ -31,7 +31,11 @@ function initSubmenu( editor ){
 
   //
   var chunks = {
-    fixedFrameRateBy2: "var holdFrame = 2;\nfloor( (currentFrame - .5 ) / holdFrame ) * holdFrame + 1"
+    
+    fixedFrameRateBy2: "var holdFrame = 2;\nfloor( (currentFrame - .5 ) / holdFrame ) * holdFrame + 1",
+
+    fixedFrameRateBy2Offset: "var offsetFrame = 1;\nvar holdFrame = 3;\nMath.max( 1, floor( (currentFrame - .5 - offsetFrame ) / holdFrame ) * holdFrame + 1 + offsetFrame )",
+
   };
 
   //
@@ -41,6 +45,7 @@ function initSubmenu( editor ){
   var submenuConfig = {
 
     '-': 1,
+    "Current Expression": getMenuItemsCurrentExpression,
 
     // Selected node Columns
     "Selected Node":{
@@ -94,7 +99,7 @@ function initSubmenu( editor ){
     // Actions
     'Actions': {
 
-      '!Create Fixed Framerate on 2s Expression': createFixedFrameRateBy2Expression
+      '!Create Fixed Frame Rate on 2s Expression': createFixedFrameRateBy2Expression
 
     },
 
@@ -108,6 +113,7 @@ function initSubmenu( editor ){
       "Wiggle": "// Wiggle expression\nvar seedOffset = 0; // Random seed offset\nvar amp = 100; // Amplitude\nvar freq = 5; // Random value changes every N-th frame\n\nfunction seedrandom( seed ) { // Seeded Random Generator\n    var x = Math.sin(seed + seedOffset) * 10000;\n    return x - Math.floor(x);\n}\n\nfunction interpolate(pa, pb, px){ // Interpolator\n  var ft = px * Math.PI, f = (1 - Math.cos(ft)) * 0.5;\n  return pa * (1 - f) + pb * f;\n}\n\nvar _currentFrame = ~~(currentFrame / freq);\nvar _currentRandom = seedrandom( _currentFrame );\nvar _prevRandom = seedrandom( _currentFrame - 1 );\ninterpolate(_prevRandom, _currentRandom, (currentFrame % freq) / freq) * amp; // Noise result",
 
       "Fixed Frame Rate by 2": chunks.fixedFrameRateBy2,
+      "Fixed Frame Rate by 2 with Offset": chunks.fixedFrameRateBy2Offset,
 
       "Degrees to Radians": "var DEG2RAD = Math.PI / 180;",
 
@@ -219,7 +225,7 @@ function initSubmenu( editor ){
       if (!columnName) return;
 
       submenuItems[ '!Add to: '+attrName ] = function(){
-        MessageLog.trace('add Expression To Node Attribute:'+ _node+', '+attrName+', '+columnName );
+        // MessageLog.trace('add Expression To Node Attribute:'+ _node+', '+attrName+', '+columnName );
         var _columnName = editor.createExpression( columnName, undefined, true );
         if( !_columnName ) return;
         node.linkAttr( _node, attrName, _columnName );
@@ -242,7 +248,7 @@ function initSubmenu( editor ){
     Utils.eachAnimatableAttr( true, function( attrName, i, _node ) {
 
       submenuItems[ '!Link to: '+attrName ] = function(){
-        MessageLog.trace('Link Expression To Node Attribute:'+ _node+', '+attrName+', '+columnName );
+        // MessageLog.trace('Link Expression To Node Attribute:'+ _node+', '+attrName+', '+columnName );
         node.linkAttr( _node, attrName, editor.currentExpressionName );
       };
 
@@ -251,6 +257,11 @@ function initSubmenu( editor ){
     return Object.keys(submenuItems).length ? submenuItems : undefined;
 
   }
+
+
+
+
+
 
 
   ///
@@ -323,6 +334,30 @@ function initSubmenu( editor ){
     });
     */
 
+  }
+
+
+
+
+
+  ///
+  function getMenuItemsCurrentExpression(){
+    if( editor.currentExpressionName ){
+      return {
+        "!Copy Name": copyCurrentExpressionName,
+        "!Copy Link": copyCurrentExpressionLink,
+      }
+    }
+  }
+
+  function copyCurrentExpressionName(editor) {
+    QApplication.clipboard().setText( editor.currentExpressionName );
+    editor.showOutputMessage('Expression Name copied to clipboard','',true);
+  }
+
+  function copyCurrentExpressionLink(editor) {
+    QApplication.clipboard().setText( 'value( column("'+editor.currentExpressionName+'") );' );
+    editor.showOutputMessage('Expression Link copied to clipboard','',true); 
   }
 
 }
