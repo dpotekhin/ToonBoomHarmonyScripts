@@ -72,48 +72,7 @@ function PS_ExpressionEditor( _node ){
   topGroup.mainLayout.addWidget( listWidget, 0, 0 );
   
   //
-  listWidget["currentIndexChanged(int)"].connect(function(i){
-
-    // MessageLog.trace('currentIndexChanged @1: ' +i);
-
-    if( listJustUpdated ){
-      listJustUpdated = false;
-      return;
-    }
-
-    var exprName = editor.expressions[i].name;
-
-    // MessageLog.trace('currentIndexChanged @2: '+exprName+' > '+listWidget.count );
-
-    if( !exprName && editor.currentExpressionName ){
-
-      for( var ii=0; ii<listWidget.count; ii++){
-
-        if( listWidget.itemText(ii) == editor.currentExpressionName ){
-          // MessageLog.trace('!!! ' +ii);
-          // listJustUpdated = true;
-          listWidget.setCurrentIndex(ii);
-          exprName = editor.currentExpressionName;
-        }
-
-      }
-
-    }
-    
-    // MessageLog.trace('currentIndexChanged @3: '+exprName+': '+editor.currentExpressionName );
-
-    setCurrentExpression( exprName );
-    
-    var exprText = column.getTextOfExpr(exprName);
-    modal.textEdit.setText( exprText );
-    
-    _refreshCurrentExpressionValue();
-
-    history.reset();
-
-    showOutputMessage();
-    
-  });
+  listWidget["currentIndexChanged(int)"].connect( onDropDownChanged );
   
   // REFRESH BUTTON
   var refreshButton = modal.addButton('', topGroup, smallBtnHeight, smallBtnHeight, iconPath+'refresh.png',
@@ -205,15 +164,22 @@ function PS_ExpressionEditor( _node ){
 
   history.onChanged = function(){
     saveButton.enabled = editor.currentExpressionName && history.hasChanges;
+    updateUIState();
   }
 
   history.undoButton = modal.addButton('', bottomGroup, smallBtnHeight, smallBtnHeight, iconPath+'undo.png',
-    function(){ history.undo(); },
+    function(){
+      history.undo();
+      updateUIState(true);
+    },
     'Undo Expression body changes'
   );
 
   history.redoButton = modal.addButton('', bottomGroup, smallBtnHeight, smallBtnHeight, iconPath+'redo.png',
-    function(){ history.redo(); },
+    function(){
+      history.redo();
+      updateUIState(true);
+    },
     'Redo Expression body changes'
   );
 
@@ -226,20 +192,10 @@ function PS_ExpressionEditor( _node ){
     'Create a new expression'
   );
 
-  var saveButton = modal.addButton('', bottomGroup, smallBtnHeight, smallBtnHeight, iconPath+'save.png', function(){
-    
-    showOutputMessage();
-
-    if( !editor.currentExpressionName ) return;
-
-    var result = column.setTextOfExpr( editor.currentExpressionName, modal.textEdit.plainText );
-    // MessageLog.trace('!!!'+editor.currentExpressionName+' > '+result );
-    // MessageLog.trace('!!!'+editor.currentExpressionName+' > '+modal.textEdit.plainText );
-    
-    showOutputMessage('Saved');
-
-  }, 'Save the selected expression');
-  // saveButton.setStyleSheet("background-color: #414e41;");
+  var saveButton = modal.addButton('', bottomGroup, smallBtnHeight, smallBtnHeight, iconPath+'save.png',
+    saveCurrentExpression,
+    'Save the selected expression'
+  );
 
   //
   ui.mainLayout.addStretch();
@@ -257,24 +213,33 @@ function PS_ExpressionEditor( _node ){
 
   // Notifier
   var myNotifier = new SceneChangeNotifier(ui);
-  myNotifier.currentFrameChanged.connect( _refreshCurrentExpressionValue );
+  myNotifier.currentFrameChanged.connect( refreshCurrentExpressionValue );
 
 
   // - - - -
 
   //
   function setCurrentExpression( exprName ){
-    editor.currentExpressionName = exprName;
-    bodyGroup.title = exprName || '';
 
+    editor.currentExpressionName = exprName;
+
+    updateUIState();
+
+  }
+
+
+  function updateUIState( saveState ) {
+    
     findNextNodeButton.enabled =
     renameButton.enabled =
     deleteButton.enabled =
     copyExpressionButton.enabled =
-      !!exprName;
+      !!editor.currentExpressionName;
 
-    saveButton.enabled = exprName && history.hasChanges;
-  
+    saveButton.enabled = saveState !== undefined ? saveState : editor.currentExpressionName && history.hasChanges;
+    
+    bodyGroup.title = editor.currentExpressionName ? editor.currentExpressionName + (saveButton.enabled ? '*' : '') : '';
+
   }
 
   //
@@ -305,13 +270,84 @@ function PS_ExpressionEditor( _node ){
 
 
   //
-  function _refreshCurrentExpressionValue(){
+  function refreshCurrentExpressionValue(){
     var str = 'Frame '+frame.current();
     if( editor.currentExpressionName ) {
       var val = column.getEntry( editor.currentExpressionName, 1, frame.current() );
       str += ' : ' + val;
     };
     expressionOutput.text = str;
+  }
+
+
+  //
+  function onDropDownChanged(i){
+
+    // MessageLog.trace('currentIndexChanged @1: ' +i);
+
+    if( listJustUpdated ){
+      listJustUpdated = false;
+      return;
+    }
+
+    if( saveButton.enabled ){ // Unsaved changes
+      
+      if( editor.showConfirmDialog(
+        'Save Changes?', 'You have unsaved changes. Do you want to save the expression body?',
+        'Save',
+        'Whatever'
+      ) ) {
+        saveCurrentExpression();
+      }
+      
+    }
+
+    var exprName = editor.expressions[i].name;
+
+    // MessageLog.trace('currentIndexChanged @2: '+exprName+' > '+listWidget.count );
+
+    if( !exprName && editor.currentExpressionName ){
+
+      for( var ii=0; ii<listWidget.count; ii++){
+
+        if( listWidget.itemText(ii) == editor.currentExpressionName ){
+          // MessageLog.trace('!!! ' +ii);
+          // listJustUpdated = true;
+          listWidget.setCurrentIndex(ii);
+          exprName = editor.currentExpressionName;
+        }
+
+      }
+
+    }
+    
+    // MessageLog.trace('currentIndexChanged @3: '+exprName+': '+editor.currentExpressionName );
+
+    setCurrentExpression( exprName );
+    
+    var exprText = column.getTextOfExpr(exprName);
+    modal.textEdit.setText( exprText );
+    
+    refreshCurrentExpressionValue();
+
+    history.reset();
+
+    showOutputMessage();
+    
+  }
+
+
+  //
+  function saveCurrentExpression(){
+    
+    showOutputMessage();
+
+    if( ! editor.saveExpression( editor.currentExpressionName, modal.textEdit.plainText ) ) return;
+    
+    updateUIState( false );
+
+    showOutputMessage('Saved');
+
   }
 
 

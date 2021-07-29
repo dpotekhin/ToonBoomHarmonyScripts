@@ -20,7 +20,7 @@ function ExpressionEditor(){
     this.modal = undefined;
     this.currentExpressionName = undefined;
     this.onExpressionListRefreshed = undefined;
-    this.showOutputMessage = undefined;
+    this.showOutputMessage = function(){};
 
     //
     this.createExpression = function( expressionName, expressionBody, forceNameInput ) {
@@ -55,9 +55,7 @@ function ExpressionEditor(){
             return;
         }
 
-        if( expressionBody ) column.setTextOfExpr( columnName, expressionBody );
-
-        // if( _this.modal.textEdit.plainText ) column.setTextOfExpr(columnName, _this.modal.textEdit.plainText);
+        if( expressionBody ) _this.saveExpression( columnName, expressionBody );
 
         _this.onExpressionListRefreshed(columnName);
 
@@ -67,6 +65,11 @@ function ExpressionEditor(){
 
     }
 
+    this.saveExpression = function( expressionName, expressionBody ){
+        if( !expressionName ) return;
+        var result = column.setTextOfExpr( expressionName, expressionBody );
+        return true;
+    }
 
     //
     this.renameExpression = function() {
@@ -105,7 +108,7 @@ function ExpressionEditor(){
 
         // try{
 
-        if (!confirmDialog(
+        if (!this.showConfirmDialog(
                 'Confirm deletion',
                 'You are going to delete all the Expressions in the Scene.\nAre you sure?',
                 "Yep. Kill'em all.",
@@ -144,7 +147,7 @@ function ExpressionEditor(){
     //
     this.deleteAllUnusedExpressions = function() {
         
-        if (!confirmDialog(
+        if (!this.showConfirmDialog(
                 'Confirm deletion',
                 'You are about to delete all unused Expressions in the Scene.\nAre you sure?'
             )) return;
@@ -445,7 +448,7 @@ function ExpressionEditor(){
 
     /// ------------------------------------------------
 
-    function confirmDialog(title, text, okButtonText, cancelButtonText) {
+    this.showConfirmDialog = function( title, text, okButtonText, cancelButtonText ) {
         var d = new Dialog();
         d.title = title;
         if (okButtonText) d.okButtonText = okButtonText;

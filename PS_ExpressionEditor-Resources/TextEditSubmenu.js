@@ -49,6 +49,9 @@ function initSubmenu( editor ){
 
     // Selected node Columns
     "Selected Node":{
+      
+      "!Show Node Properties": function (){ Action.perform("onActionEditProperties()", "scene") },
+
       "Get Linked Columns": getMenuItemsForLinkedColumns,
 
     // Create Expressions For Selected Node
