@@ -11,9 +11,12 @@ var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Util
 //
 function initSubmenu( editor ){
 
-  var nameFixes = [
-    ['DRAWING.ELEMENT',''], // Skip Element Node
-    ['SCALE.XY',''], // Skip Scale Switch
+  var skippedAttributeNames = [
+    'DRAWING.ELEMENT',
+    'SCALE.XY',
+  ];
+
+  var attributeNameFixes = [
     ['POSITION.',''],
     ['OFFSET.',''],
     ['ROTATION.',''],
@@ -211,9 +214,14 @@ function initSubmenu( editor ){
 
 
   // ---------------------------------------------------------------------------
-  function getFixedAttributeColumn( _node, attrName ){
+  function checkAttributeSkipByName( attrName ){
+    return skippedAttributeNames.indexOf(attrName) !== -1;
+  }
+
+  function getFixedAttributeColumn( _node, attrName, useSkipList ){
+    if( useSkipList && checkAttributeSkipByName(attrName) ) return;
     columnName = attrName;
-    nameFixes.forEach(function(nameFixData) { columnName = columnName.replace(nameFixData[0], nameFixData[1]) });
+    attributeNameFixes.forEach(function(nameFixData) { columnName = columnName.replace(nameFixData[0], nameFixData[1]) });
     return editor.getAvailableColumnName( editor.resolveExpressionName( _node.split('/').pop()+'_'+columnName ) );
   }
 
@@ -224,7 +232,7 @@ function initSubmenu( editor ){
 
     Utils.eachAnimatableAttr( true, function( attrName, i, _node ) {
       
-      var columnName = getFixedAttributeColumn( _node, attrName );
+      var columnName = getFixedAttributeColumn( _node, attrName, true );
       if (!columnName) return;
 
       submenuItems[ '!Add to: '+attrName ] = function(){
@@ -249,6 +257,8 @@ function initSubmenu( editor ){
     var submenuItems = {};
 
     Utils.eachAnimatableAttr( true, function( attrName, i, _node ) {
+
+      if( checkAttributeSkipByName(attrName) ) return; // skip attribute
 
       submenuItems[ '!Link to: '+attrName ] = function(){
         // MessageLog.trace('Link Expression To Node Attribute:'+ _node+', '+attrName+', '+columnName );
@@ -279,7 +289,7 @@ function initSubmenu( editor ){
     var linkedColumns = [];
     Utils.getFullAttributeList( _node, 1, true ).forEach(function(attrName){
       var columnName = node.linkedColumn( _node, attrName );
-      if( !columnName ) return;
+      if( !columnName || checkAttributeSkipByName(attrName) ) return;
       if( editor.currentExpressionName && editor.currentExpressionName === columnName ) return; // skip same expression name
       linkedColumns.push( [attrName, columnName] );
     });
@@ -323,7 +333,7 @@ function initSubmenu( editor ){
 
     animatableAttrs.forEach(function(attrName){
       var columnName = attrName;
-      nameFixes.forEach(function(nameFixData){columnName = columnName.replace(nameFixData[0],nameFixData[1])});
+      attributeNameFixes.forEach(function(nameFixData){columnName = columnName.replace(nameFixData[0],nameFixData[1])});
       if( !columnName ) return;
       columnName = editor.getAvailableColumnName( editor.resolveExpressionName( '_'+_node.split('/').pop()+'_'+columnName ) );
       MessageLog.trace( attrName +' > '+columnName );
