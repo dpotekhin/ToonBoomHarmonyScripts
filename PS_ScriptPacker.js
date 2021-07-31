@@ -12,7 +12,7 @@ var pModal = require("./ps/pModal.js");
 var _pFile = require("./ps/pFile.js");
 
 //
-function PS_ScrptPacker(){	
+function PS_ScriptPacker(){	
 
 	MessageLog.clearLog();
 
