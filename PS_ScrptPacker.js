@@ -3,6 +3,9 @@ Author: D.Potekhin (d@peppers-studio.ru)
 Version: 0.210731
 
 Utility script for assembling other scripts into separate packages
+
+#SkipPacking/#
+
 */
 
 var pModal = require("./ps/pModal.js");
@@ -91,10 +94,12 @@ function PS_ScrptPacker(){
   //
 	function updateList(){
 
-		var dir = new Dir();
-		dir.path = specialFolders.userScripts;
+		var dir = new Dir( specialFolders.userScripts );
 
-		var entries = dir.entryList('*.js');
+		var entries = dir.entryList('*.js').filter(function(scriptName){
+			var text = pFile.load( dir.path+'/'+scriptName );
+			return text.indexOf('#Description:') !== -1 && text.indexOf('#SkipPacking/#') === -1;
+		});
 		// MessageLog.trace(JSON.stringify(entries,true,'  '));
 
 		listJustUpdated = true;
