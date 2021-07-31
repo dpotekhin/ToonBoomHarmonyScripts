@@ -29,6 +29,7 @@ function PS_ScrptPacker(){
   var cellStyle = 'QLabel{ background:black; padding:2px; border: none; }';
   var scripts = [];
   var currentScriptName;
+  var buildFolderRootName = 'ps_build';
   //
 
 
@@ -110,6 +111,8 @@ function PS_ScrptPacker(){
 
     modal.listWidget.addItems(entries);
 
+    currentScriptName = entries[0];
+
     // getScriptData(entries[0]);
     // buildScript(entries[0]);
 
@@ -129,7 +132,6 @@ function PS_ScrptPacker(){
 		if( !scriptFile ) return;
 
 		var clearName = scriptName.split('.js').join('');
-		var buildFolderRootName = 'ps_build';
 		var buildFolderName = buildFolderRootName+'/'+clearName;
 		var buildFolder = rootPath+'/'+buildFolderName;
 		var resourceFolderName = clearName+'-Resources';
@@ -278,6 +280,7 @@ function PS_ScrptPacker(){
 	function buildSelectedScript(){
 
 		buildScript( currentScriptName );
+		updateMainReadme();
 
 	}
 
@@ -292,6 +295,8 @@ function PS_ScrptPacker(){
 			buildScript( scriptName );		
 			MessageLog.trace('...');
 		});
+
+		updateMainReadme();
 
 	}
 
@@ -385,15 +390,25 @@ function PS_ScrptPacker(){
 
 		var name = getContentFromScriptText( scriptText, /#Name:([^#]*)\/#/ );
 		MessageLog.trace('NAME: '+name );
-		if( name ) readmeText += '## '+name+'\n\n';
+		if( name ) {
+
+			readmeText += '## '+name+'\n';
+
+			var version = getContentFromScriptText( scriptText, /#Version:([^#]*)\/#/ );
+			if( version ) readmeText += ''+version+'\n';
+		}
 
 		var description = getContentFromScriptText( scriptText, /#Description:([^#]*)\/#/);
-		MessageLog.trace('description: '+description );
-		if( description ) readmeText += '### Description\n'+description;
+		// MessageLog.trace('description: '+description );
+		if( description ) readmeText += '\n### Description\n'+description+'\n';
+
+		var usage = getContentFromScriptText( scriptText, /#Usage:([^#]*)\/#/);
+		// MessageLog.trace('usage: '+usage );
+		if( usage ) readmeText += '\n### Usage\n'+usage+'\n';
 
 		var installation = getContentFromScriptText( scriptText, /#Installation:([^#]*)\/#/);
 		
-		readmeText += '\n\n### Installation:\n'
+		readmeText += '\n### Installation:\n'
 			// +'Copy files from ".\\'+scriptData.buildFolderRootName+'\\'+scriptData.clearName+'" to Harmony User Scripts directory'
 			+ ( installation ? installation : 'Copy all files from this folder to Harmony User Scripts directory.' )
 		;
@@ -408,6 +423,43 @@ function PS_ScrptPacker(){
 		var content = text.match(regexp);
 		if(content) content = content[1].trim();
 		return content;
+	}
+
+
+	//
+	function updateMainReadme(){
+
+		var mainReadme = '# Toon Boom Harmony Scripts\n'
+// '## Installation'
+// +'Unpack to: C:\\Users\\%UserName%\\AppData\\Roaming\\Toon Boom Animation\\Toon Boom Harmony Premium\\2000-scripts'
+		// +'# Script List\n\n'
+		;
+
+		var dir = new Dir( specialFolders.userScripts+'/'+buildFolderRootName );
+
+		var entries = dir.entryList('*');
+		if( !entries || !entries.length ) return;
+
+		entries.forEach(function(entry){
+			
+			if( entry.charAt(0) === '.' ) return;
+			
+			mainReadme += '\n## ['+entry+']('+buildFolderRootName+'/'+entry+')\n';
+
+			var text = pFile.load( dir.path+'/'+entry+'/Readme.md' );
+			if( text ){
+				text = text.split('### Description')[1];
+				text = text.split('###')[0];
+				text = text.replace(/^\n|\n\r/,'');
+				mainReadme += text;
+				// MessageLog.trace('!!!!'+text);
+			}
+
+		});
+
+		// MessageLog.trace( 'mainReadme:\n'+dir.path+'\n'+mainReadme );
+		pFile.save( specialFolders.userScripts+'/Readme.md', mainReadme );
+
 	}
 
 
