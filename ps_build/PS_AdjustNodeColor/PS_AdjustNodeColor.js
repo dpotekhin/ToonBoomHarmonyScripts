@@ -23,7 +23,7 @@ Options:
 */
 //
 
-var SelectionUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/SelectionUtils.js"));
+var SelectionUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_AdjustNodeColor-Resources/ps/SelectionUtils.js"));
 
 //
 function PS_AdjustNodeColor( processGroups, adjustColor ){

@@ -276,20 +276,30 @@ function PS_ScrptPacker(){
 
 	//
 	function buildSelectedScript(){
+
 		buildScript( currentScriptName );
+
 	}
 
 
 	//
 	function buildAllScripts(){
-		scripts.forEach(function( scriptName ){
+
+		MessageLog.trace('===== buildAllScripts: '+scripts);
+
+		scripts.forEach(function( scriptName, i ){
+			MessageLog.trace(''+i+']]] '+scriptName );
 			buildScript( scriptName );		
+			MessageLog.trace('...');
 		});
+
 	}
 
 
 	//
 	function buildScript( scriptName ){
+
+		try{
 
 		var scriptData = getScriptData( scriptName );
 		if( !scriptData ) return;
@@ -337,15 +347,17 @@ function PS_ScrptPacker(){
 
 		// Required scripts
 		Object.keys(scriptFile.files).forEach(function( filePath, i ){
-			try{
+			// try{
 			var fileNameData = pFile.getFileNameFromPath( filePath );
 			var destPath = scriptData.resourceBuildPath + ( filePath.indexOf('/ps/') !== -1 ? '/ps/' : '' );
-			MessageLog.trace(i+') '+filePath +' >>> '+destPath );
+			MessageLog.trace(i+') '+filePath.replace(scriptData.rootPath,'') +'\n>>> '+destPath );
 			createDir(destPath);
 			pFile.save( destPath+'/'+fileNameData.fileName, fixRequires( scriptFile.files[filePath], scriptData ) );
 
-			}catch(err){MessageLog.trace('Err:'+err);}
+			// }catch(err){MessageLog.trace('Err:'+err);}
 		});
+
+		}catch(err){MessageLog.trace('buildScript Error:'+err);}
 
 	}
 
