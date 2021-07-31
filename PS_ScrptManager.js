@@ -111,7 +111,7 @@ function PS_ScrptManager(){
 	//
 	function getScriptData( scriptName ){
 
-		MessageLog.clearLog();
+		// MessageLog.clearLog();
 
 		if( !scriptName ) scriptName = currentScriptName
 
@@ -312,6 +312,21 @@ function PS_ScrptManager(){
 		// Resources
 		var resDir = new Dir(scriptData.resourcePath);
 		if( resDir.exists )	copyDir( scriptData.resourcePath, scriptData.resourceBuildPath );
+
+		// Extra files
+		var extraFiles = getContentFromScriptText( scriptFile.text, /#ExtraFiles:([^#]*)\/#/);
+		if( extraFiles ){
+			extraFiles = extraFiles.split(/\n|\n\r/gi);
+			// MessageLog.trace('extraFiles: '+extraFiles);
+			extraFiles.forEach(function(extraFile,i){
+				extraFile = extraFile.trim();
+				if(!extraFile) return;
+				var destPath = scriptData.buildFolder + '/'+extraFile;
+				extraFile = scriptData.rootPath+'/'+extraFile;
+				// MessageLog.trace( i+'>'+ extraFile +' >>> '+destPath );
+				copyDir( extraFile, destPath ); // TODO: What about single files?
+			});
+		}
 
 		// Required scripts
 		Object.keys(scriptFile.files).forEach(function( filePath, i ){
