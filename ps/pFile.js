@@ -19,7 +19,7 @@ pFile.getFileNameFromPath = function(path){
 pFile.checkDir = function( path, createDirIfNotExists ){
 
   //path = fileMapper.toNativePath(path);
-  MessageLog.trace('checkDir: '+path);
+  // MessageLog.trace('checkDir: '+path);
  
   var dir = new Dir;
   if( !dir.fileExists( path ) ){
