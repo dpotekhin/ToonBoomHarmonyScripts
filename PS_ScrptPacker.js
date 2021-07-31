@@ -1,19 +1,21 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version: 0.1
+Version: 0.210731
+
+Utility script for assembling other scripts into separate packages
 */
 
 var pModal = require("./ps/pModal.js");
 var _pFile = require("./ps/pFile.js");
 
 //
-function PS_ScrptManager(){	
+function PS_ScrptPacker(){	
 
 	MessageLog.clearLog();
 
 	//
-	var scriptName = 'Script Manager';
-  var scriptVer = '0.1';
+	var scriptName = 'PS Script Packer';
+  var scriptVer = '0.210731';
 
 	//
 	var pFile = _pFile;
