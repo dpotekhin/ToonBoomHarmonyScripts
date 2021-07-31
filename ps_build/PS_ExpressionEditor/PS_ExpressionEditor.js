@@ -21,7 +21,7 @@ ToDo:
 - To save the current expression on Ctrl + Enter
 */
 
-var pModal = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/pModal.js"));
+var pModal = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_ExpressionEditor-Resources/ps/pModal.js"));
 
 var _TextEditSubmenu = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_ExpressionEditor-Resources/TextEditSubmenu.js"));
 var _History = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_ExpressionEditor-Resources/History.js"));
