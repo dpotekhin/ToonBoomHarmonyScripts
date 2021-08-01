@@ -1,5 +1,5 @@
 ## PS_AdjustNodeColor
-0.1
+v0.1
 
 ### Description
 Script lets to adjust the color of the selected node.

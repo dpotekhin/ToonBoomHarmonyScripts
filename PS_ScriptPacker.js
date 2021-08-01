@@ -406,7 +406,7 @@ function PS_ScriptPacker(){
 			readmeText += '## '+name+'\n';
 
 			var version = getContentFromScriptText( scriptText, 'Version' );
-			if( version ) readmeText += ''+version+'\n';
+			if( version ) readmeText += 'v'+version+'\n';
 		}
 
 		var description = getContentFromScriptText( scriptText, 'Description');

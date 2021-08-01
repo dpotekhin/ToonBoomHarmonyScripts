@@ -9,7 +9,7 @@ Simple implementation of an expression editor.
 :]
 
 [Install:
-Don't copy folder "packages" if you don't want to add "Animation / Expression Editor" main menu item.
+Don't copy folder "packages" if you don't want to add "Animation / Expression Editor" item to the Main Menu.
 :]
 
 [ExtraFiles:
