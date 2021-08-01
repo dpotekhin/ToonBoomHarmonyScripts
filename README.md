@@ -8,6 +8,10 @@ Script lets to adjust the color of the selected node.
 Simple implementation of an expression editor.
 
 
+## [PS_FitBackdrop](ps_build/PS_FitBackdrop)
+This is a script to quickly create and fitting backdrops.
+
+
 ## [PS_ResetTransformation](ps_build/PS_ResetTransformation)
 Three scripts to universal (pegs and deformers) reset of transformations, save transformation state and remove that state.
 
