@@ -11,3 +11,7 @@ Simple implementation of an expression editor.
 ## [PS_ResetTransformation](ps_build/PS_ResetTransformation)
 Three scripts to universal (pegs and deformers) reset of transformations, save transformation state and remove that state.
 
+
+## [PS_SetPlaybackRange](ps_build/PS_SetPlaybackRange)
+This script sets the playback range relative to the selected frames.
+
