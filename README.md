@@ -12,6 +12,10 @@ Simple implementation of an expression editor.
 This is a script to quickly create and fitting backdrops.
 
 
+## [PS_HexPaletteColor](ps_build/PS_HexPaletteColor)
+This script allows you to copy and paste a hexadecimal value of the selected Color.
+
+
 ## [PS_ResetTransformation](ps_build/PS_ResetTransformation)
 Three scripts to universal (pegs and deformers) reset of transformations, save transformation state and remove that state.
 
