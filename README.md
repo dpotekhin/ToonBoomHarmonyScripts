@@ -31,3 +31,8 @@ Three scripts to universal (pegs and deformers) reset of transformations, save t
 ## [PS_SetPlaybackRange](ps_build/PS_SetPlaybackRange)
 This script sets the playback range relative to the selected frames.
 
+
+## [PS_SwapNodes](ps_build/PS_SwapNodes)
+This script allows to swap two nodes keeping their connections.
+Swapping nodes between different groups is also supported.
+
