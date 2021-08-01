@@ -27,4 +27,5 @@ Removes custom attributes with the Default state of transformation of selected P
 - Hold the Alt key to clear only the saved Rotation of the selected node
 
 ### Installation:
-Copy all files from this folder to Harmony User Scripts directory.
+Copy all files from this folder to [Harmony User Scripts directory](https://docs.toonboom.com/help/harmony-20/premium/scripting/import-script.html).
+Add scripts "PS_ResetTransformation", "PS_SaveTransformation", "PS_ClearSavedTransformation" to a panel.
