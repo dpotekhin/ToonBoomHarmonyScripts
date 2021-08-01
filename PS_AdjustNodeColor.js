@@ -1,14 +1,14 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
 
-#Name: PS_AdjustNodeColor /#
-#Version: 0.1 /#
+[Name: PS_AdjustNodeColor :]
+[Version: 0.1 :]
 
-#Description:
+[Description:
 Script lets to adjust the color of the selected node.
-/#
+:]
 
-#Usage:
+[Usage:
 * Select node
 * Click on the script
 
@@ -16,7 +16,7 @@ Script lets to adjust the color of the selected node.
 * By default script resets color of the selected node
 * Hold down the Control key to reset all nodes in groups
 * Hold down the Alt key to change color of the node
-/#
+:]
 
 #TODO:
 - 

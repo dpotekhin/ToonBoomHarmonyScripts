@@ -1,21 +1,21 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
 
-#Name: PS_ExpressionEditor /#
-#Version: 0.210728 /#
+[Name: PS_ExpressionEditor :]
+[Version: 0.210728 :]
 
-#Description:
+[Description:
 Simple implementation of an expression editor.
-/#
+:]
 
-#Installation:
+[Installation:
 Copy all files from this folder to Harmony User Scripts directory.
 Don't copy folder "packages" if you don't want to add "Animation / Expression Editor" main menu item.
-/#
+:]
 
-#ExtraFiles:
+[ExtraFiles:
 packages/PS_ExpressionEditor
-/#
+:]
 
 ToDo:
 - To save the current expression on Ctrl + Enter

@@ -8,7 +8,7 @@ Script lets to adjust the color of the selected node.
 * Select node
 * Click on the script
 
-Options:
+#### Options:
 * By default script resets color of the selected node
 * Hold down the Control key to reset all nodes in groups
 * Hold down the Alt key to change color of the node
