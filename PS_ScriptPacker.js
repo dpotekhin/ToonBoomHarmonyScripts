@@ -4,7 +4,7 @@ Version: 0.210731
 
 Utility script for assembling other scripts into separate packages
 
-#SkipPacking/#
+[SkipPacking:]
 
 */
 
@@ -99,7 +99,7 @@ function PS_ScriptPacker(){
 
 		var entries = dir.entryList('*.js').filter(function(scriptName){
 			var text = pFile.load( dir.path+'/'+scriptName );
-			return text.indexOf('#Description:') !== -1 && text.indexOf('#SkipPacking/#') === -1;
+			return text.indexOf('[Description:') !== -1 && text.indexOf('[SkipPacking:]') === -1;
 		});
 		// MessageLog.trace(JSON.stringify(entries,true,'  '));
 
@@ -336,7 +336,7 @@ function PS_ScriptPacker(){
 		if( resDir.exists )	copyDir( scriptData.resourcePath, scriptData.resourceBuildPath );
 
 		// Extra files
-		var extraFiles = getContentFromScriptText( scriptFile.text, /#ExtraFiles:([^#]*)\/#/);
+		var extraFiles = getContentFromScriptText( scriptFile.text, /#ExtraFiles:(.*)\/#/);
 		if( extraFiles ){
 			extraFiles = extraFiles.split(/\n|\n\r/gi);
 			// MessageLog.trace('extraFiles: '+extraFiles);
@@ -388,25 +388,28 @@ function PS_ScriptPacker(){
 
 		var readmeText = '';
 
-		var name = getContentFromScriptText( scriptText, /#Name:([^#]*)\/#/ );
+		// try{
+
+		var name = getContentFromScriptText( scriptText, 'Name' );
 		MessageLog.trace('NAME: '+name );
+		
 		if( name ) {
 
 			readmeText += '## '+name+'\n';
 
-			var version = getContentFromScriptText( scriptText, /#Version:([^#]*)\/#/ );
+			var version = getContentFromScriptText( scriptText, 'Version' );
 			if( version ) readmeText += ''+version+'\n';
 		}
 
-		var description = getContentFromScriptText( scriptText, /#Description:([^#]*)\/#/);
-		// MessageLog.trace('description: '+description );
+		var description = getContentFromScriptText( scriptText, 'Description');
+		// MessageLog.trace('DESCR>>>>\n'+description+'\n<<<<' );
 		if( description ) readmeText += '\n### Description\n'+description+'\n';
 
-		var usage = getContentFromScriptText( scriptText, /#Usage:([^#]*)\/#/);
+		var usage = getContentFromScriptText( scriptText, 'Usage');
 		// MessageLog.trace('usage: '+usage );
 		if( usage ) readmeText += '\n### Usage\n'+usage+'\n';
 
-		var installation = getContentFromScriptText( scriptText, /#Installation:([^#]*)\/#/);
+		var installation = getContentFromScriptText( scriptText, 'Install');
 		
 		readmeText += '\n### Installation:\n'
 			// +'Copy files from ".\\'+scriptData.buildFolderRootName+'\\'+scriptData.clearName+'" to Harmony User Scripts directory'
@@ -415,14 +418,21 @@ function PS_ScriptPacker(){
 
 		pFile.save( path, readmeText );
 
+		// }catch(err){MessageLog.trace(err);}
+
 	}
 
 
 	//
-	function getContentFromScriptText( text, regexp ){
-		var content = text.match(regexp);
-		if(content) content = content[1].trim();
-		return content;
+	function getContentFromScriptText( text, keyWord ){
+		
+		var content = text.substr(2,text.indexOf('*/')).split('['+keyWord+':')[1];		
+		if(content) {
+			content = content.split(':]')[0];
+			content = content.trim();
+			return content;
+		}
+		
 	}
 
 
