@@ -15,4 +15,4 @@ This script allows you to copy and paste a hexadecimal value of the selected Col
 
 ### Installation:
 Copy all files from this folder to [Harmony User Scripts directory](https://docs.toonboom.com/help/harmony-20/premium/scripting/import-script.html).\
-Add script "PS_HexPaletteColor" to a panel.\
+Add script "PS_HexPaletteColor" to a panel.  

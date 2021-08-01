@@ -12,4 +12,4 @@ By default, the center of the selected strokes is used as the center of transfor
 
 ### Installation:
 Copy all files from this folder to [Harmony User Scripts directory](https://docs.toonboom.com/help/harmony-20/premium/scripting/import-script.html).\
-Add scripts "PS_test", "PS_PathTools" to a panel.\
+Add script "PS_PathTools" to a panel.  

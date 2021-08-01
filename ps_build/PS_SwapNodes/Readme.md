@@ -15,4 +15,4 @@ Swapping nodes between different groups is also supported.
 
 ### Installation:
 Copy all files from this folder to [Harmony User Scripts directory](https://docs.toonboom.com/help/harmony-20/premium/scripting/import-script.html).\
-Add script "PS_SwapNodes" to a panel.\
+Add script "PS_SwapNodes" to a panel.  
