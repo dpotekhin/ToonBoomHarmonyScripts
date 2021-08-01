@@ -29,7 +29,7 @@ var pModal = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_Pat
 
 
 /*
-function PS_test(){
+function _PS_test(){
   _AlignPaths.AlignLeft();
 }
 */

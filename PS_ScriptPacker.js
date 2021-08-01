@@ -385,7 +385,7 @@ function PS_ScriptPacker(){
 				scriptText = scriptText.replace( entry, entryFixed );
 			})
 		}*/
-		scriptText = scriptText.replace('specialFolders.userScripts+"/ps/','specialFolders.userScripts+"/'+scriptData.resourceFolderName+'/ps/');
+		scriptText = scriptText.replace(/specialFolders\.userScripts\+"\/ps\//g,'specialFolders.userScripts+"/'+scriptData.resourceFolderName+'/ps/');
 		// MessageLog.trace('requireEntries '+requireEntries );
 		return scriptText;
 	}
@@ -420,7 +420,7 @@ function PS_ScriptPacker(){
 		// How to Install
 		var	howToInstallText = 'Copy all files from this folder to [Harmony User Scripts directory](https://docs.toonboom.com/help/harmony-20/premium/scripting/import-script.html).';
 		if( scriptData.functionNames.length ){
-			howToInstallText += '\\\nAdd script'+( scriptData.functionNames.length > 1 ? 's' : '')+' '+scriptData.functionNames.map(function(t){return '"'+t+'"';}).join(', ')+' to a panel.\\\n'
+			howToInstallText += '\\\nAdd script'+( scriptData.functionNames.length > 1 ? 's' : '')+' '+scriptData.functionNames.map(function(t){return '"'+t+'"';}).join(', ')+' to a panel.  \n'
 		}
 
 		howToInstallText += getContentFromScriptText( scriptText, 'Install') || '';
@@ -500,7 +500,9 @@ function PS_ScriptPacker(){
 
 		var command = 'robocopy "'+srcParts.path+'" "'+destFolder+'" "'+ ( fileName ? fileName : srcParts.fileName )+'"';
 		var proc = new QProcess();
-  	proc.start(command);
+  		proc.start(command);
+  		proc.waitForFinished();
+		proc.close();
     // MessageLog.trace('>>>> '+ command );
    
   	// }catch(err){MessageLog.trace('Err:'+err)}
@@ -511,7 +513,9 @@ function PS_ScriptPacker(){
 	function copyDir( src, dest ){
 		var command = 'robocopy "'+src+'" "'+dest+'" /E';
 		var proc = new QProcess();
-  	proc.start(command);
+  		proc.start(command);
+  		proc.waitForFinished();
+		proc.close();
 	}
 
 

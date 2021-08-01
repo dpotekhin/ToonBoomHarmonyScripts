@@ -13,4 +13,4 @@ This is a script to quickly create and fitting backdrops.
 
 ### Installation:
 Copy all files from this folder to [Harmony User Scripts directory](https://docs.toonboom.com/help/harmony-20/premium/scripting/import-script.html).\
-Add script "PS_FitBackdrop" to a panel.\
+Add script "PS_FitBackdrop" to a panel.  
