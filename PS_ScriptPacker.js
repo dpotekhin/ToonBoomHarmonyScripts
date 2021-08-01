@@ -215,6 +215,10 @@ function PS_ScriptPacker(){
 
 		functionText.replace(/function\s*(.*)\s*\(/gi,function(a,b,c){ functionNames.push(b); });
 		
+		functionNames = functionNames.filter(function(functionName){
+			return functionName.indexOf('PS') === 0;
+		});
+
 		return functionNames;
 
 	}
