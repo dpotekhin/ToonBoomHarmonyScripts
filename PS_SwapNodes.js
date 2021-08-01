@@ -5,13 +5,12 @@ Author: D.Potekhin (d@peppers-studio.ru)
 [Version: 0.210704 :]
 
 [Description:
-This script allows to swap two nodes keeping their connections.
+This script allows to swap two nodes keeping their connections.\
 Swapping nodes between different groups is also supported.
 :]
 
 [Usage:
 * Select two nodes and click the Script button.\
-Swapping of nodes in different groups is supported.
 
 #### Options
 * Hold Control key ONLY to swap names of the nodes
