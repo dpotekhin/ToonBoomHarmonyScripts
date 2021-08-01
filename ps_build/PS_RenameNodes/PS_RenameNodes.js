@@ -27,7 +27,7 @@ You can change templates in the script body.
 
 
 //
-var SelectionUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/SelectionUtils.js"));
+var SelectionUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_RenameNodes-Resources/ps/SelectionUtils.js"));
 
 //
 function PS_RenameNodes(){

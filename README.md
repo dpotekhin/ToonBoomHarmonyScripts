@@ -20,6 +20,10 @@ This script allows you to copy and paste a hexadecimal value of the selected Col
 The script provides tools for aligning, mirroring and modifying strokes.
 
 
+## [PS_RenameNodes](ps_build/PS_RenameNodes)
+A small helper for batch renaming of nodes.
+
+
 ## [PS_ResetTransformation](ps_build/PS_ResetTransformation)
 Three scripts to universal (pegs and deformers) reset of transformations, save transformation state and remove that state.
 
