@@ -19,7 +19,7 @@ This script alows to unlink animation functions and expressions from selected no
 
 */
 
-var NodeUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/NodeUtils.js"));
+var NodeUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_UnlinkElementFunctions-Resources/ps/NodeUtils.js"));
 
 function PS_UnlinkElementFunctions(){	
 
