@@ -34,7 +34,7 @@ function PS_AdjustNodeColor( processGroups, adjustColor ){
             "Please select nodes to adjust their Color.\n\n"
             +"Options:\n"
             +"- Hold down the Control key to reset all nodes in groups.\n"
-            +"- Hold down the Alt key to change color.\n" of the node
+            +"- Hold down the Alt key to change color of the node.\n"
         ,0,0,0,"Error");
 
         return;

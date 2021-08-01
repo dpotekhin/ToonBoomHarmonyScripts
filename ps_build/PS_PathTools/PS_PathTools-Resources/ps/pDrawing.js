@@ -8,7 +8,7 @@ ToDo:
 */
 
 var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_PathTools-Resources/ps/Utils.js"));
-var pBox2D = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/pBox2D.js"));
+var pBox2D = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_PathTools-Resources/ps/pBox2D.js"));
 
 
 //

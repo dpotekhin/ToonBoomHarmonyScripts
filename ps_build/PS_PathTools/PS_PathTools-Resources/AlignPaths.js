@@ -4,9 +4,9 @@ Version: 0.31
 */
 
 //
-var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
-var pDrawing = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/pDrawing.js"));
-var pBox2D = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/pBox2D.js"));
+var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_PathTools-Resources/ps/Utils.js"));
+var pDrawing = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_PathTools-Resources/ps/pDrawing.js"));
+var pBox2D = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_PathTools-Resources/ps/pBox2D.js"));
 
 //
 var _exports = {
