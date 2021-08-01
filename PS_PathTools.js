@@ -210,7 +210,6 @@ function PS_ShowPathToolsModal(){
 function setPivot(){
 
   MessageLog.clearLog();
-  // _Utils.listAllActions();
 
   _AlignPaths.SetPivot();
   Action.perform( 'onActionChooseSpRotateTool()', 'sceneUI');

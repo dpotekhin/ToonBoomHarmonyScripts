@@ -1,7 +1,17 @@
 # Toon Boom Harmony Scripts
 
-## Installation
+## [PS_AdjustNodeColor](ps_build/PS_AdjustNodeColor)
+Script lets to adjust the color of the selected node.
 
-Unpack to: C:\Users\ %UserName% \AppData\Roaming\Toon Boom Animation\Toon Boom Harmony Premium\2000-scripts
 
-## Script List
+## [PS_ExpressionEditor](ps_build/PS_ExpressionEditor)
+Simple implementation of an expression editor.
+
+
+## [PS_ResetTransformation](ps_build/PS_ResetTransformation)
+Three scripts to universal (pegs and deformers) reset of transformations, save transformation state and remove that state.
+
+
+## [PS_SetPlaybackRange](ps_build/PS_SetPlaybackRange)
+This script sets the playback range relative to the selected frames.
+

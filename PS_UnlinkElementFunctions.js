@@ -1,7 +1,13 @@
 /*
-Author: D.Potekhin (https://peppers-studio.ru)
+Author: D.Potekhin (d@peppers-studio.ru)
+
+This script alows to unlink animation functions and expressions from selected nodes.
+
+Modifiers:
+- Hold Control key to unlink Bezier functions only
+- Hold Shift key to unlink Expressions only
+- Hold Alt key to keep current transformation values
 */
-// https://docs.toonboom.com/help/harmony-20/scripting/script/index.html
 
 var NodeUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/NodeUtils.js"));
 
@@ -10,6 +16,16 @@ function PS_UnlinkElementFunctions(){
 	MessageLog.clearLog();
 
 	var n = selection.numberOfNodesSelected();
+	
+	if( !n ){
+		MessageBox.warning('Please select at least one node to remove its animation functions and expressions.\n\n'
+			+'Options:\n'
+			+'- Hold Control key to unlink Bezier functions only\n'
+			+'- Hold Shift key to unlink Expressions only\n'
+			+'- Hold Alt key to keep current transformation values'
+		,0,0,0,'Error');
+		return;
+	}
 
 	var unlinkBeziers = KeyModifiers.IsControlPressed();
 	var unlinkExpressions = KeyModifiers.IsShiftPressed();

@@ -1,17 +1,7 @@
 /*
-Author: D.Potekhin (https://peppers-studio.ru)
-Version 0.2
+Author: D.Potekhin (d@peppers-studio.ru)
+Version 0.3
 
-If in selection:
-- there is only one drawing element, then the script takes its name as the base name.
-- there is not a single drawing element or there are more than one of them, but there is only one group - it takes its name as the base name.
-- otherwise shows a dialog box for entering the base name.
-
-Options:
-- if you hold down the Control key, then the script forcibly displays a dialog box for entering the base name.
-
-TODO:
-- Option: rename nodes inside selected groups
 */
 
 
@@ -26,11 +16,6 @@ function PS_RenameNodes(){
 	///
 	var namePaterns = {
 		
-		'READ': [
-			['-HND','{{NAME}}-HND'],
-			['-CTRL','{{NAME}}-CTRL'],
-			['','{{NAME}}'],
-		],
 		'PEG': '{{NAME}}-P',
 
 		'MasterController': '{{NAME}}-MC',
@@ -41,12 +26,14 @@ function PS_RenameNodes(){
 		'OffsetModule': '{{NAME}}-OFS', // OffsetModule
 		'CurveModule': '{{NAME}}-CRV', // CurveModule
 		'DeformTransformOut': '{{NAME}}-KOP', // Point-Kinematic-Output
+		'WeightedDeform': '{{NAME}}-WD', // Weighted Deform
 		'TransformLimit': '{{NAME}}-TL', // Transformation-Limit 
 		'PEG_APPLY3': '{{NAME}}-AIT', // Apply Image Transformation
 		'PEG_APPLY3_V2': '{{NAME}}-APT', // Apply Peg Transformation
 		'TransformGate': '{{NAME}}-TG', // Transform Gate
 		'FoldModule': '{{NAME}}-FLD', // Deformation-Fold
 		'AutoFoldModule': '{{NAME}}-AFD', // Auto-Fold
+		'DynamicSpring': '{{NAME}}-DS',
 
 		'LAYER_SELECTOR': '{{NAME}}-LS',
 		'OVERLAY': '{{NAME}}-OL',
@@ -63,14 +50,40 @@ function PS_RenameNodes(){
 		'MATTE_RESIZE': '{{NAME}}-MTR',
 		'BLEND_MODE_MODULE': '{{NAME}}-BLD',
 		'FADE': '{{NAME}}-TRS',
+		'WRITE': 'Write-{{NAME}}',
+		'DISPLAY': '{{NAME}}-DSP',
+		'COLOR_CARD': '{{NAME}}-CC',
 
 		'GROUP': [
-			['Deformation|-DFM', '{{NAME}}-DFM']
+			['Deformation|-DFM', '{{NAME}}-DFM'], // the naming pattern for standard deformation groups
+			['', '{{NAME}}-G']
 		],
-		// 'READ' is ignored
+
+		'READ': [
+			['-HND','{{NAME}}-HND'],
+			['-CTRL','{{NAME}}-CTRL'],
+			['','{{NAME}}']
+		]
 
 	};
 
+	var useShortPatterns = KeyModifiers.IsAlternatePressed();
+
+	if( !selection.numberOfNodesSelected() ){
+
+		MessageBox.warning(
+			"Please select nodes to rename.\n\n"
+			+"How it works:\n"
+			+"If there is only one DRAWING in the selection, its name will be used as the base name.\n"
+			+"- Otherwise, if there is only one GROUP in the selection, its name will be used as the base name.\n"
+			+"- Otherwise, if there is only one COMPOSITE in the selection, its name will be used as the base name.\n"
+			+"- Otherwise, the base name input field will be displayed (hold the Control key to force it)\n\n"
+			+"Hold the Alt key to use short name patterns."
+		,0,0,0,"Error");
+
+		return;
+
+	}
 
 	//
 	var mainNode, mainName;
@@ -78,31 +91,70 @@ function PS_RenameNodes(){
  	if( !KeyModifiers.IsControlPressed() ){ // If the Control key is not pressed get the Main Name from the Selection
 
 	 	var selectedDrawings = SelectionUtils.filterNodesByType( true, 'READ', false );
-	 	// MessageLog.trace("selectedDrawings "+selectedDrawings);
+	 	MessageLog.trace("selectedDrawings "+selectedDrawings);
 
-	 	if(selectedDrawings.length!==1){ // No Single Drawing selected
-			// MessageBox.warning("Please select ONLY ONE Drawing node.",0,0,0,"Error");
+	 	if(selectedDrawings.length===1){ // a Single Drawing selected
+	 		
+	 		mainNode = selectedDrawings[0];
+
+	 	}else{
+
 			var selectedGroups = SelectionUtils.filterNodesByType( true, 'GROUP', false );
 			// MessageLog.trace("selectedGroups "+selectedGroups);
 			
-			if(selectedGroups.length===1){ // No Single Group selected
+			if(selectedGroups.length===1){ // a Single Group is selected
+				
 				mainNode = selectedGroups[0];
+
+			}else{
+
+				var selectedComps = SelectionUtils.filterNodesByType( true, 'COMPOSITE', false );
+
+				if(selectedComps.length===1){ // a Single Composite is selected
+				
+					mainNode = selectedComps[0];
+
+				}
+
 			}
 	 		
-	 	}else{
-	 		mainNode = selectedDrawings[0];
 	 	}
 
 	 	if( mainNode ) mainName = node.getName(mainNode);
  	}
 
- 	
- 	if( !mainName ) mainName = Input.getText('Enter name');
+ 	if( !useShortPatterns ){
 
-	if( !mainName ) return;
+	 	if( !mainName) mainName = Input.getText('Enter name');
+		
+		if( !mainName ) return;
+
+	}else{
+
+		var shortPaterns = {
+			'LAYER_SELECTOR': 'LS',
+			'OVERLAY': 'OL',
+			'UNDERLAY': 'UL',
+			'LINE_ART': 'LA',
+			'COLOR_ART': 'CA',
+			'TbdColorSelector': 'CS',
+			'CUTTER': 'CUT',
+			'AutoPatchModule': 'AP',
+		}
+
+		Object.keys(shortPaterns).forEach(function( n ){
+			namePaterns[n] = shortPaterns[n];
+		});
+
+		if( !mainName ) mainName = '';
+
+	}
+
+
 
 	MessageLog.trace('Name: '+mainName );
 
+	// return; 
 
 	scene.beginUndoRedoAccum('Rename Drawing Links');
 
@@ -227,7 +279,7 @@ function PS_RenameNodes(){
 
 			renameTries++;
 
-		}while( !renameSuccess && renameTries<20 )
+		}while( !renameSuccess && renameTries<200 )
 
 		// MessageLog.trace('Node renamed from:"'+nodeName+'" to:"'+_newName);
 

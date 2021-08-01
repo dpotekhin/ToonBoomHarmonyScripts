@@ -26,16 +26,15 @@ function getFileNameFromPath(path){
 // = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 function openFolder( path, selectFile ){
   // Process2
-  var _process;
+  var _process, command;
   if(selectFile){
-    var fileFolder = getFileNameFromPath(path).path;
-    // var command = 'explorer /root,"'+fileFolder+'",select,"'+path+'"';
-    var command = 'explorer /root,"'+fileFolder+'"';
+    command = 'explorer /select,"'+path+'"';
+    // MessageLog.trace('command: '+command+' => ');
   }else{
-    var command = 'explorer "'+path+'"';
+    command = 'explorer "'+path+'"';
   }
-  _process = new Process2(command);
-  var result = _process.launchAndDetach();
+  var proc = new QProcess();
+  proc.start(command);
   // MessageLog.trace('openFolder >> ('+selectFile+') '+_process.commandLine()+' |||| '+ command );
 }
 // = = = = = = = = = = = = = = = = = = = = = = = = = = = 

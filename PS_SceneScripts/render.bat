@@ -1,8 +1,4 @@
-:: Version 210520
-::									1				2					3								4										5
-:: =============================================================================================================================================================
-:: Options: render-main.bat [Start Frame | 0] [End Frame | 0] [Write Node Name | 0] [Relative Movie Path | 1 (Just Force Video Fromat)] [WidthxHeight | 0]
-:: =============================================================================================================================================================
+:: Version 210616
 :: ToDo: to fix line weight when resolution is less than original
 
 @echo off
@@ -13,9 +9,11 @@ if "%~1"=="help" (
 	echo Options:
 	echo 1: Start Frame ^| 0
 	echo 2: End Frame ^| 0
-	echo 3: Write Node Name ^| 0 ^(Default: "Main-Write"^)
-	echo 4: Relative Movie Path ^(The target folder must exist!^) ^| 1 ^(Just Force Video Fromat^)
-	echo 5: WIDTHxHEIGHTxFOV ^| 0
+	echo 3: Write Node Name ^| 0 ^(Default: "Write-Main"^)
+	echo 4: Relative Export Path ^| 0 
+	echo 5: Output Format ^(1^=^'com.toonboom.mp4.1.0'^) ^| 0 ^(Default: Frame Sequence^)
+	echo 6: WIDTHxHEIGHTxFOV ^| 0
+	echo 7: Add Color Card ^| 0
 	
 	goto end
 )
@@ -23,11 +21,11 @@ if "%~1"=="help" (
 echo ................................................
 
 set startTime=%time%
-echo RENDER STARTED: %startTime%
+echo [93m RENDER STARTED: %startTime% [0m
 
 :: the name of the Write Node to be rendered
-:: Also it may be obtained as parameters of the bat file, like: render-main.bat 0 0 Main-Write
-set writeNode=Write
+:: Also it may be obtained as parameters of the bat file, like: render.bat 0 0 Write
+set writeNode=Write-Main
 if not "%~3"=="" if not "%~3"=="0" set writeNode=%3
 
 :: Time range
@@ -53,9 +51,9 @@ set resolution=
 set width=
 set height=
 set fov=
-FOR /f "tokens=1,2,3,4 delims=x" %%a IN ("%~5") do set width=%%a& set height=%%b& set fov=%%c
+FOR /f "tokens=1,2,3,4 delims=x" %%a IN ("%~6") do set width=%%a& set height=%%b& set fov=%%c
 ::echo width=%width% height=%height%
-if not "%~5"=="" if not "%~5"=="0" if not "%fov%"=="" (
+if not "%~6"=="" if not "%~6"=="0" if not "%fov%"=="" (
 	:: *1.777777777777778
 	set resolution=-resolution %width% %height% %fov%
 ) else (echo Default resolution.)
@@ -66,14 +64,20 @@ set preRenderScript=
 :: set preRenderScript=node.getNodes(['WRITE']).forEach(function(n){node.setEnable(n,false)});node.setEnable('Top/%writeNode%', true)
 set preRenderScript=node.getNodes(['WRITE']).forEach(function(n){node.setEnable(n,false)}); var nodeName='Top/%writeNode%'; node.setEnable(nodeName,true);
 
+:: Elements to hide
+if defined hideList set "preRenderScript=%preRenderScript% '%hideList%'.split(',').forEach(function(el){node.setEnable('Top/'+el,false);});"
+
 :: Force Video format
-if not "%~1"=="" (
-	set "preRenderScript=%preRenderScript% node.getAttr(nodeName,1,'MOVIE_FORMAT').setValue( 'com.toonboom.mp4.1.0' ); node.getAttr(nodeName,1,'EXPORT_TO_MOVIE').setValue('Output Movie');"	
+if not "%~5"=="0" if not "%~5"=="" (
+	set "preRenderScript=%preRenderScript% node.getAttr(nodeName,1,'EXPORT_TO_MOVIE').setValue('Output Movie');node.getAttr(nodeName,1,'SCRIPT_MOVIE').setValue(false);node.getAttr(nodeName,1,'MOVIE_FORMAT').setValue('com.toonboom.mp4.1.0');"	
 )
-if not "%~1"==1 set "preRenderScript=%preRenderScript% node.getAttr(nodeName,1,'MOVIE_PATH').setValue('%4');"
+
+:: EXPORT PATH
+if not "%~4"=="0" if not "%~4"=="1" if "%~5"=="1" set "preRenderScript=%preRenderScript% node.getAttr(nodeName,1,'MOVIE_PATH').setValue('%~4');"
+if not "%~4"=="0" if not "%~4"=="1" if "%~5"=="0" set "preRenderScript=%preRenderScript% node.getAttr(nodeName,1,'DRAWING_NAME').setValue('%~4.');"
 
 :: Add a Colour Card
-set "preRenderScript=%preRenderScript% var comp=node.srcNode(nodeName,0); if(node.type(comp)=='COMPOSITE'){var cc=node.add(node.parentNode(nodeName),'__TEMPCC__','COLOR_CARD', 100,100,0); node.link(cc,0,comp,0,false,true);}
+if "%~7"=="1" set "preRenderScript=%preRenderScript% var comp=node.srcNode(nodeName,0); if(node.type(comp)=='COMPOSITE'){var cc=node.add(node.parentNode(nodeName),'__TEMPCC__','COLOR_CARD', 100,100,0); node.link(cc,0,comp,0,false,true);}"
 
 
 :: Start render
@@ -105,7 +109,7 @@ if %DURATIONS% LSS 10 set DURATIONS=0%DURATIONS%
 if %DURATIONHS% LSS 10 set DURATIONHS=0%DURATIONHS%
 ::
 
-echo RENDER COMPLETE: %time% ^( %DURATIONH%:%DURATIONM%:%DURATIONS%,%DURATIONHS% ^)
+echo [93m RENDER COMPLETE: %time% ^( %DURATIONH%:%DURATIONM%:%DURATIONS%,%DURATIONHS% ^) [0m
 echo ...
 
 :end

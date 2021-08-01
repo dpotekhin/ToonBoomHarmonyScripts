@@ -1,139 +1,215 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version: 0.2
+
+[Name: PS_ExpressionEditor :]
+[Version: 0.210728 :]
+
+[Description:
+Simple implementation of an expression editor.
+:]
+
+[Installation:
+Copy all files from this folder to Harmony User Scripts directory.
+Don't copy folder "packages" if you don't want to add "Animation / Expression Editor" main menu item.
+:]
+
+[ExtraFiles:
+packages/PS_ExpressionEditor
+:]
 
 ToDo:
-- to implement renaming of the selected expression
+- To save the current expression on Ctrl + Enter
 */
 
 var pModal = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/pModal.js"));
 
+var _TextEditSubmenu = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_ExpressionEditor-Resources/TextEditSubmenu.js"));
+var _History = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_ExpressionEditor-Resources/History.js"));
+var ExpressionEditor = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_ExpressionEditor-Resources/ExpressionEditor.js"));
+
 //
-function PS_ExpressionEditorModal( _node ){
+function PS_ExpressionEditor( _node ){
 
   //
-  // MessageLog.clearLog();
-  // MessageLog.trace('!!!'+Object.getOwnPropertyNames(column).join('\n'));
-  // MessageLog.trace('!!!'+Action.getResponderList().join('\n'));
-  // MessageLog.trace('\n\n!!!'+Action.getActionList('xsheetView').join('\n'));
+  // MessageLog.clearLog(); // !!!
+  
   //
   var scriptName = 'Expression Editor';
-  var scriptVer = '0.2';
+  var scriptVer = '0.210728';
+  var outputColors = {
+    'success': 'color:#8bbe55',
+    'true': 'color:#8bbe55',
+    'error': 'color:#ff7070',
+    'false': 'color:#ff7070',
+    'warning': 'color:yellow'
+  };
   //
 
+  var TextEditSubmenu = _TextEditSubmenu;
+  var History = _History;
+
+  //
+  var editor = new ExpressionEditor;
+  editor.version = scriptVer;
+  var showOutputMessage = editor.showOutputMessage = function( str, toolTip, type ){
+    messageOutput.text = str || '';
+    messageOutput.toolTip = toolTip || '';
+    messageOutput.styleSheet = outputColors[''+type] || '';
+  };
+  editor.onExpressionListRefreshed = function( expressionName ) {
+    refreshExpressionList( expressionName );
+  }
+
+  //
   var btnHeight = 50;
+  var smallBtnHeight = 30;
+  var iconPath = fileMapper.toNativePath(specialFolders.userScripts+"/PS_ExpressionEditor-Resources/icons/");
+
   var listJustUpdated = true;
-  // var iconPath = fileMapper.toNativePath(specialFolders.userScripts+"/PS_PathTools-Resources/icons/");
 
   //
-  var modal = new pModal( scriptName + " v" + scriptVer, 500, 400, false );  
+  var modal = editor.modal = new pModal( scriptName + " v" + scriptVer, 600, 400, false );  
   if( !modal.ui ){
     return;
   }
   var ui = modal.ui;
 
-  var nameGroup = modal.addGroup( '', ui, false );//'QGroupBox{ position: relative; border: none; margin: 5px 0; padding: 5px 0;}');//, "padding: 0; " );
-  // alignGroup.setStyleSheet( alignGroup.styleSheet +' QPushButton{ border: none; }' );
 
-  // var btnAlignLeft = modal.addButton( '', alignGroup.mainLayout, btnHeight, btnHeight, iconPath+'align-left.png', AlignPaths.AlignLeft );
-  // var btnAlignHCenter = modal.addButton( '', alignGroup.mainLayout, btnHeight, btnHeight, iconPath+'align-h-center.png', AlignPaths.AlignHCenter );
+  /// TOP
 
-  /// SEARCH / CREATE GROUP
+  var topGroup = modal.addGroup( '', ui, true, true );
 
-  var searhGroup = modal.addGroup( '', nameGroup, true, true );
-
-  var searchLabel = modal.addLabel( 'Name:', searhGroup, 65, btnHeight, Qt.AlignRight | Qt.AlignVCenter );
-
-  // Search Field
-  var searchField = modal.searchField = new QLineEdit(searhGroup); // TODO: to implement the Expression list filter
-  searhGroup.mainLayout.addWidget( searchField, 0, 0 );
-
-  // CREATE BUTTON
-  var createButton = modal.addButton('Create', searhGroup, 70, btnHeight, undefined, _createExpression );
-  // createButton.setEnabled(false); // TODO: to implement creation
-  // createButton.setStyleSheet("background-color: #41414e;");
-
-  /// LIST GROUP
-
-  var listWidgetGroup = modal.addGroup( '', nameGroup, true, true );
-  
-  var listWidgetLabel = modal.addLabel( 'Expressions:', listWidgetGroup, 65, btnHeight, Qt.AlignRight | Qt.AlignVCenter );
-
-  var listWidget = modal.listWidget = new QComboBox(listWidgetGroup);
-  listWidgetGroup.mainLayout.addWidget( listWidget, 0, 0 );
-/*  
-  // listWidget.setLineEdit(searchField);
-  listWidget.editable = true;
-  listWidget.editTextChanged.connect(function(s){
-    MessageLog.trace('>editTextChanged>'+ s);
-    
-    // var filtered = modal.expressions;
-    // if(s) filtered = modal.expressions.filter(function(v){ return v.displayName.indexOf(s) !== -1; });
-    // _fillListWidget( filtered );
-    // listWidget.showPopup();
-    
-  });
-*/
-
-  // var listView = new QListView(listWidget);
-  // listWidget.setView(listView);
+  var listWidget = modal.listWidget = new QComboBox(topGroup);
+  // listWidget.editable = true;
+  // listWidget.insertPolicy = QComboBox.NoInsert;
+  // listWidget.maxVisibleItems  = 10;
+  topGroup.mainLayout.addWidget( listWidget, 0, 0 );
   
   //
-  listWidget["currentIndexChanged(int)"].connect(function(i){
-    if( listJustUpdated ){
-      listJustUpdated = false;
-      return;
-    }
-    var exprName = modal.expressions[i].name;
-    // var displayName = modal.expressions[i].displayName;
-    MessageLog.trace('Selected: '+ i+' : '+exprName );
-    modal.curentExpressionindex = i;
-    modal.curentExpressionName = exprName;
-    var exprText = column.getTextOfExpr(exprName);
-    modal.textEdit.setText( exprText );
-    // searchField.setText( exprName );
-    bodyGroup.title = exprName;
-    _refreshCurrentExpressionValue();
-  });
+  listWidget["currentIndexChanged(int)"].connect( onDropDownChanged );
   
   // REFRESH BUTTON
-  var refreshButton = modal.addButton('Refresh', listWidgetGroup, 70, btnHeight, undefined, function(){
-    _refreshExpressionList();
-  });
+  var refreshButton = modal.addButton('', topGroup, smallBtnHeight, smallBtnHeight, iconPath+'refresh.png',
+    function(){ refreshExpressionList(editor.currentExpressionName) },
+    'Refresh expression list.'
+  );
+
+  // RENAME BUTTON
+  var renameButton = modal.addButton('', topGroup, smallBtnHeight, smallBtnHeight, iconPath+'rename.png',
+    editor.renameExpression,
+    'Rename the selected expression.'
+  );
+
+
+  // COPY CURRENT EXPRESSION DATA
+  var copyExpressionButton = modal.addButton('', topGroup, smallBtnHeight, smallBtnHeight, iconPath+'copyExpression.png',
+    function(){
+      editor.copyExpression( editor.currentExpressionName, modal.textEdit.plainText );
+    },
+    'Copy the selected expression data to the clipboard.\n'
+    +'Hold Control key to save data to a file.'
+  );
+
   
+  // PASTE EXPRESSION DATA
+  var pasteExpressionButton = modal.addButton('', topGroup, smallBtnHeight, smallBtnHeight, iconPath+'pasteExpression.png',
+    editor.pasteExpression,
+    'Paste an expression data from the clipboard.\n'
+    +'Hold Control key to load data from a file.'
+  );
+  
+
+  // SERCH NEXT NODE BUTTON
+  var findNextNodeButton = modal.addButton('', topGroup, smallBtnHeight, smallBtnHeight, iconPath+'findNextNode.png',
+    editor.findNextUsedNode,
+    'Find the next node using the selected expression.\n'
+    +'Hold Control key to open Node properties window.'
+  );
+
+
+
 
   /// BODY
   var bodyGroup = modal.addGroup( '', ui, false );
 
-  //
-  var textEdit = modal.textEdit = new QTextEdit(bodyGroup);
+  // Expression Edit Area
+  var textEdit = editor.textEdit = modal.textEdit = new QTextEdit(bodyGroup);
+  TextEditSubmenu.initSubmenu( editor );
   bodyGroup.mainLayout.addWidget( textEdit, 0, 0 );
 
-  var expressionOutput = modal.addLabel( '', bodyGroup );
+  //
+  var messageGroup = modal.addGroup( '', bodyGroup, true, true );
 
-  /// Buttons
-  var buttonsGroup = modal.addGroup( '', ui, true, 'QGroupBox{border: none; padding: 0; margin: 0;}' );
+  var expressionOutput = modal.addLabel( '', messageGroup );
 
+  messageGroup.mainLayout.addStretch();
+
+  var messageOutput = modal.addLabel( '', messageGroup );
+
+
+
+  /// BOTTOM
+  var bottomGroup = modal.addGroup( '', ui, true, 'QGroupBox{border: none; padding: 0; margin: 0;}' );
+
+
+  // DELETE ALL BUTTON
+  var deleteAllButton = modal.addButton('', bottomGroup, smallBtnHeight, smallBtnHeight, iconPath+'deleteAll.png',
+    editor.deleteAllExpressions,
+    'Delete All Expressions in the Scene'
+  );
+
+  // DELETE UNUSED
+  var deleteAllUnusedButton = modal.addButton('', bottomGroup, smallBtnHeight, smallBtnHeight, iconPath+'deleteAllUnused.png',
+    editor.deleteAllUnusedExpressions,
+    'Delete All unused Expressions in the Scene'
+  );
 
   // DELETE BUTTON
-  var deleteButton = modal.addButton('Delete Expression', buttonsGroup, 120, btnHeight, undefined, _deleteExpression );
-  // deleteButton.setEnabled(false); // TODO: to implement deleting
-  // deleteButton.setStyleSheet("background-color: #4e4141;");
-
-
-  // SAVE BUTTON
-  var saveButton = modal.addButton('Save Expression', buttonsGroup, 120, btnHeight, undefined, function(){
-    
-    if( !modal.curentExpressionName ) return;
-    // modal.curentExpressionindex;
-    var result = column.setTextOfExpr( modal.curentExpressionName, modal.textEdit.plainText );
-    // MessageLog.trace('!!!'+modal.curentExpressionName+' > '+result );
-    // MessageLog.trace('!!!'+modal.curentExpressionName+' > '+modal.textEdit.plainText );
-  });
-  // saveButton.setStyleSheet("background-color: #414e41;");
+  var deleteButton = modal.addButton('', bottomGroup, smallBtnHeight, smallBtnHeight, iconPath+'delete.png',
+    editor.deleteExpression,
+    'Delete the selected Expression'
+  );
 
   //
-  var expressions = _getExpressionColumns();
+  bottomGroup.mainLayout.addStretch();
+
+  // HISTORY
+  var history = editor.history = new History( textEdit );
+
+  history.onChanged = function(){
+    saveButton.enabled = editor.currentExpressionName && history.hasChanges;
+    updateUIState();
+  }
+
+  history.undoButton = modal.addButton('', bottomGroup, smallBtnHeight, smallBtnHeight, iconPath+'undo.png',
+    function(){
+      history.undo();
+      updateUIState(true);
+    },
+    'Undo Expression body changes'
+  );
+
+  history.redoButton = modal.addButton('', bottomGroup, smallBtnHeight, smallBtnHeight, iconPath+'redo.png',
+    function(){
+      history.redo();
+      updateUIState(true);
+    },
+    'Redo Expression body changes'
+  );
+
+  //
+  bottomGroup.mainLayout.addStretch();
+
+   // CREATE BUTTON
+  var createButton = modal.addButton('', bottomGroup, smallBtnHeight, smallBtnHeight, iconPath+'create.png',
+    editor.createExpression,
+    'Create a new expression'
+  );
+
+  var saveButton = modal.addButton('', bottomGroup, smallBtnHeight, smallBtnHeight, iconPath+'save.png',
+    saveCurrentExpression,
+    'Save the selected expression'
+  );
 
   //
   ui.mainLayout.addStretch();
@@ -141,20 +217,48 @@ function PS_ExpressionEditorModal( _node ){
   modal.show();
 
   //
-  _refreshExpressionList();
+  editor.getExpressionColumns();
 
+  refreshExpressionList();
 
+  setCurrentExpression();
+  
+  history.reset();
 
   // Notifier
   var myNotifier = new SceneChangeNotifier(ui);
-  myNotifier.currentFrameChanged.connect( _refreshCurrentExpressionValue );
-
+  myNotifier.currentFrameChanged.connect( refreshCurrentExpressionValue );
 
 
   // - - - -
+
   //
-  function _fillListWidget( v ){
-    // MessageLog.trace('_fillListWidget: '+modal+' >>> '+JSON.stringify(v, true, '  '));
+  function setCurrentExpression( exprName ){
+
+    editor.currentExpressionName = exprName;
+
+    updateUIState();
+
+  }
+
+
+  function updateUIState( saveState ) {
+    
+    findNextNodeButton.enabled =
+    renameButton.enabled =
+    deleteButton.enabled =
+    copyExpressionButton.enabled =
+      !!editor.currentExpressionName;
+
+    saveButton.enabled = saveState !== undefined ? saveState : editor.currentExpressionName && history.hasChanges;
+    
+    bodyGroup.title = editor.currentExpressionName ? editor.currentExpressionName + (saveButton.enabled ? '*' : '') : '';
+
+  }
+
+  //
+  function fillListWidget( v ){
+    // MessageLog.trace('fillListWidget: >>> '+JSON.stringify(v, true, '  '));
     
     listJustUpdated = true;
 
@@ -163,83 +267,108 @@ function PS_ExpressionEditorModal( _node ){
     var items = v.map(function(exprData){return exprData.name;});
 
     modal.listWidget.addItems(items);
+
   }
 
 
   //
-  function _refreshExpressionList(){
+  function refreshExpressionList( _currentExpressionName ){
+    // MessageLog.trace('refreshExpressionList: '+editor.currentExpressionName+' > '+_currentExpressionName );
     column.update();
-    var expressions = modal.expressions = _getExpressionColumns();
-    // MessageLog.trace('_refreshExpressionList: '+JSON.stringify(expressions,true,'  '));
-    _fillListWidget( expressions );
+    var expressions = editor.getExpressionColumns();
+    // MessageLog.trace('refreshExpressionList: '+JSON.stringify(expressions,true,'  '));
+    if( _currentExpressionName !== undefined ) setCurrentExpression( _currentExpressionName || undefined );
+    fillListWidget( expressions );
+    
   }
 
 
   //
-  function _getExpressionColumns(){
-    var expressions = column.getColumnListOfType('EXPR');
-    expressions.unshift('');
-    // MessageLog.trace('_getExpressionColumns '+JSON.stringify(expressions,true,'  '));
-    expressions = expressions.map( function(v){
-      return { name: v };
-    });
-    return expressions;
-  }
-
-  //
-  function _createExpression(){
-    
-    var columnName = (modal.searchField.text || '').trim();
-    // MessageLog.trace('_createExpression: '+columnName+', '+modal.textEdit.plainText );
-
-    if( !columnName ){
-      MessageLog.trace('Expression name required');
-      return;
-    }
-    
-    var existingColumn = column.type(columnName);
-    if( existingColumn ){
-      MessageLog.trace('Expression name required');
-      return;
-    }
-
-    var result = column.add( columnName, 'EXPR' );
-    if( !result ) return;
-
-    if( modal.textEdit.plainText ) column.setTextOfExpr(columnName, modal.textEdit.plainText);
-
-    _refreshExpressionList();
-
-    // MessageLog.trace('_createExpression: SUCCESS');
-
-  }
-
-  //
-  function _deleteExpression(){
-    if(!modal.curentExpressionName) return;
-    
-    var _node = node.add( 'Top', '__'+column.generateAnonymousName(), 'PEG', 0, 0, 0 );
-    node.linkAttr(_node, "ROTATION.ANGLEZ", modal.curentExpressionName );
-    var result = node.deleteNode( _node, true, true );
-    
-    _refreshExpressionList();
-
-    // MessageLog.trace('_deleteExpression: '+_node+', '+modal.curentExpressionName );
-    // MessageLog.trace('_deleteExpression: SUCCESS ' + result );
-  }
-
-  //
-  function _refreshCurrentExpressionValue(){
+  function refreshCurrentExpressionValue(){
     var str = 'Frame '+frame.current();
-    if( modal.curentExpressionName ) {
-      var val = column.getEntry( modal.curentExpressionName, 1, frame.current() );
+    if( editor.currentExpressionName ) {
+      var val = column.getEntry( editor.currentExpressionName, 1, frame.current() );
       str += ' : ' + val;
     };
     expressionOutput.text = str;
   }
 
+
+  //
+  function onDropDownChanged(i){
+
+    // MessageLog.trace('currentIndexChanged @1: ' +i);
+
+    if( listJustUpdated ){
+      listJustUpdated = false;
+      return;
+    }
+
+    if( saveButton.enabled ){ // Unsaved changes
+      
+      if( editor.showConfirmDialog(
+        'Save Changes?', 'You have unsaved changes. Do you want to save the expression body?',
+        'Save',
+        'Whatever'
+      ) ) {
+        saveCurrentExpression();
+      }
+
+      updateUIState( false );
+      
+    }
+
+    var exprName = editor.expressions[i].name;
+
+    // MessageLog.trace('currentIndexChanged @2: '+exprName+' > '+listWidget.count );
+
+    if( !exprName && editor.currentExpressionName ){
+
+      for( var ii=0; ii<listWidget.count; ii++){
+
+        if( listWidget.itemText(ii) == editor.currentExpressionName ){
+          // MessageLog.trace('!!! ' +ii);
+          // listJustUpdated = true;
+          listWidget.setCurrentIndex(ii);
+          exprName = editor.currentExpressionName;
+        }
+
+      }
+
+    }
+    
+    // MessageLog.trace('currentIndexChanged @3: '+exprName+': '+editor.currentExpressionName );
+
+    setCurrentExpression( exprName );
+    
+    var exprText = column.getTextOfExpr(exprName);
+    modal.textEdit.setText( exprText );
+    
+    refreshCurrentExpressionValue();
+
+    history.reset();
+
+    showOutputMessage();
+    
+  }
+
+
+  //
+  function saveCurrentExpression(){
+    
+    showOutputMessage();
+
+    if( ! editor.saveExpression( editor.currentExpressionName, modal.textEdit.plainText ) ) return;
+    
+    updateUIState( false );
+
+    showOutputMessage('Saved');
+
+  }
+
+
 }
 
 
 ///
-exports = PS_ExpressionEditorModal;
+exports = PS_ExpressionEditor;

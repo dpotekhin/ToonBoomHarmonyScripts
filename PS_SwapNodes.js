@@ -1,113 +1,367 @@
 /*
-Author: D.Potekhin (https://peppers-studio.ru)
-Version 0.1
-*/
+Author: D.Potekhin (d@peppers-studio.ru)
+Version 0.210704
 
-/*
+This script allows to swap two nodes keeping their connections.
+Swapping nodes between different groups is also supported.
+
+Options:
+- Hold Control key ONLY to swap names of the nodes
+- Hold Shift key to disable swapping position of the nodes
+- Hold Alt key to ONLY swap animation functions and expressions of the nodes (not for child nodes of the swaped groups)
+
 TODO:
-- to copy all connections from one node to another
+- 
 */
 
 function PS_SwapNodes(){
 
 	var selectedNodes = selection.selectedNodes();
 	if( selectedNodes.length != 2 ){
+		MessageBox.warning('Please select two nodes to swap them.\n\n'
+			+'Options:\n'
+			+'- Hold Control key to ONLY swap names of the nodes\n'
+			+'- Hold Shift key to disable swapping position of the nodes\n'
+			+'- Hold Alt key to ONLY swap animation functions and expressions of the nodes'
+		,0,0,0,'Error');
 		return;
 	}
 
-	MessageLog.clearLog();
+	// MessageLog.clearLog(); // !!!
 	
 	scene.beginUndoRedoAccum('Swap Nodes');
 
-	var nodeDataA = getNodeData( selectedNodes[0] );
-	var nodeDataB = getNodeData( selectedNodes[1] );
+	var nodeA = getNodeData( selectedNodes[0], 'A' );
+    var nodeB = getNodeData( selectedNodes[1], 'B' );
 
-	setNodeLinks( nodeDataA.node, nodeDataB );
-	setNodeLinks( nodeDataB.node, nodeDataA );
+    // MessageLog.trace('A:'+JSON.stringify(nodeA,true,'  '));
+    // MessageLog.trace('B:'+JSON.stringify(nodeB,true,'  '));
+	
+	var linksByNode = {};
 
-	// Swap positions
-	node.setCoord( nodeDataA.node, nodeDataB.x, nodeDataB.y );
-	node.setCoord( nodeDataB.node, nodeDataA.x, nodeDataA.y );
+	var swapAnimationMode = KeyModifiers.IsAlternatePressed();
+	var swapNamesMode = KeyModifiers.IsControlPressed();
+
+	try{
+		
+		if( !swapAnimationMode && !swapNamesMode ){ // Swap nodes only if there's no mode modifiers
+
+			collectLinks( nodeA.tempPath, function(){ return nodeA.tempPath; });
+			collectLinks( nodeB.tempPath, function(){ return nodeB.tempPath; });
+
+			// Sort outputs of both swapping nodes by a port index in ascending order
+			var linksByNodeNames = Object.keys(linksByNode);
+
+			linksByNodeNames.forEach(function(nodeName){
+
+				linksByNode[nodeName] = linksByNode[nodeName].sort(function( a, b ) {
+				  if ( a.dest.port < b.dest.port ){
+				    return -1;
+				  }
+				  if ( a.dest.port > b.dest.port ){
+				    return 1;
+				  }
+				  return 0;
+				});
+
+			});
+
+			// MessageLog.trace('linksByNode: \n'+ JSON.stringify(linksByNode,true,'  '));
+
+			// Unlinking nodes from the list of input ports starting from its end to avoid disorder of other connections
+			linksByNodeNames.forEach(function(nodeName){
+
+				var nodeLinks = linksByNode[nodeName];
+
+				for( var i=nodeLinks.length-1; i>=0; i-- ){
+					var linkData = nodeLinks[i];
+					node.unlink( linkData.dest.node, linkData.dest.port );
+				}
+
+			});
+
+
+			// Move nodes between groups
+			moveToGroup( nodeA, nodeB );
+			moveToGroup( nodeB, nodeA );
+
+			// Linking swapped connections
+			linksByNodeNames.forEach(function(nodeName){
+
+				var nodeLinks = linksByNode[nodeName];
+
+				nodeLinks.forEach(function(linkData){
+					
+					if( linkData.isInput ){
+
+						//node.link(
+						linkNode(
+				        	linkData.src.node, linkData.src.port, // src
+				        	getSwapedNodeName( linkData.dest.node ), linkData.dest.port // dest - swapped node
+				        	// ,false, false // Not allow to create ports in groups
+				      	);
+
+					}else{
+						
+						// node.link(
+						linkNode(
+				        	getSwapedNodeName( linkData.src.node ), linkData.src.port, // src - swapped node
+				        	linkData.dest.node, linkData.dest.port // dest
+				        	// ,false, false // Not allow to create ports in groups
+				      	);
+				      	
+					}
+
+				});
+
+			});
+
+			// Swap positions
+			if( !KeyModifiers.IsShiftPressed() ){
+
+				placeNode( nodeA.tempPath, nodeB.x, nodeB.y );
+		     	placeNode( nodeB.tempPath, nodeA.x, nodeA.y );
+
+		    }
+
+		}
+
+	    // Swap animated functions and expressions
+	    if( swapAnimationMode ){
+	    	swapLinkedAttributes( nodeA.tempPath, nodeB.tempPath );
+	    }
+
+     	// Swap names of the nodes if needed
+     	if( swapNamesMode ){
+
+     		node.rename( nodeA.tempPath, nodeB.name );
+     		node.rename( nodeB.tempPath, nodeA.name );
+     		
+     	}else{
+
+     		node.rename( nodeA.tempPath, nodeA.name );
+     		node.rename( nodeB.tempPath, nodeB.name );
+
+     	}
+
+
+	}catch( err ){ MessageLog.trace('Catch Error: '+err); }
 
 	///
 	scene.endUndoRedoAccum();
 
-	//
-	function getNodeData( _node ){
 
-		var data = {
-			node: _node,
-			x: node.coordX(_node),
-			y: node.coordY(_node),
-			inputCount: node.numberOfInputPorts( _node ),
-			inputNodesInfo: [],
-			outputCount: node.numberOfOutputPorts( _node ),
-			outputNodesInfo: []
-		};
+	//
+	function placeNode( _node, x, y ){
+		node.setCoord( _node, x - node.width(_node)/2, y - node.height(_node)/2 );
+	}
+
+
+	//
+	function linkNode( srcNode, srcPort, destNode, destPort ){
+		
+		// MessageLog.trace('>>> linkNode');
+		// MessageLog.trace('srcNode: '+srcNode+'('+node.type(srcNode)+')' );
+		// MessageLog.trace('destNode: '+destNode+'('+node.type(destNode)+')' );
+
+		if( node.type(srcNode) === 'MULTIPORT_IN' || node.type(destNode) === 'MULTIPORT_OUT' ){
+			node.link( srcNode, srcPort, destNode, destPort, false, false );
+		}else{
+			node.link( srcNode, srcPort, destNode, destPort );
+		}
+
+	}
+
+
+	//
+	function getNodeData( _node, suffix ){
+		var nodePath = _node.split('/');
+     	var nodeName = nodePath.pop();
+     	var groupPath = nodePath.join('/')+'/';
+     	var nodeTempName = nodeName+'__TMP'+(suffix || '')+'__';
+     	var tempPath = groupPath+nodeTempName;
+     	var x = node.coordX(_node) + node.width(_node)/2;
+     	var y = node.coordY(_node) + node.height(_node)/2;
+     	node.rename( _node, nodeTempName );
+     	return {
+     		groupPath: groupPath,
+     		name: nodeName,
+     		path: groupPath+nodeName,
+     		tempName: nodeTempName,
+     		tempPath: tempPath,
+     		x: x,
+     		y: y
+     	};
+	}
+
+	//
+	function getSwapedNodeName( _node ){
+		return _node === nodeA.tempPath ? nodeB.tempPath : nodeA.tempPath;
+	}
+
+	//
+	function getlinksByNodeItem( _node ){
+		if( !linksByNode[_node] ) linksByNode[_node] = [];
+		return linksByNode[_node];
+	}
+	
+	//
+	function moveToGroup( _nodeA, _nodeB ){
+
+		var subnodeCount = node.numberOfSubNodes(_nodeB.groupPath);
+		// MessageLog.trace('before: '+ node.subNodes(_nodeB.groupPath).join('\n') );
+
+		node.moveToGroup( _nodeA.tempPath, _nodeB.groupPath );
+		_nodeA.tempPath = _nodeB.groupPath + _nodeA.tempName;
+
+		// Remove automaticaly created Composite
+		if( subnodeCount+1 < node.numberOfSubNodes(_nodeB.groupPath) ){ 
+			var lastSubnode = node.subNodes(_nodeB.groupPath).pop();
+			// MessageLog.trace('after: '+ node.subNodes(_nodeB.groupPath).join('\n') );
+			if( node.type(lastSubnode) === 'COMPOSITE' ) node.deleteNode(lastSubnode,false,false);
+		}
+
+		// Unlink an autoconnected transform
+		node.unlink(_nodeA.tempPath, 0);
+
+		// Unlink an autoconnected output
+		var dest = node.dstNodeInfo(_nodeA.tempPath, 0, 0);
+		if( dest ) node.unlink( dest.node, dest.port );
+
+	}
+
+	//
+	function collectLinks( _node, getNodeName ){
 
 		// Get input connections
-		for( var i=0; i<data.inputCount; i++){
-			data.inputNodesInfo.push( node.srcNodeInfo( _node, i ) );
-		}
+	    var inputPortCount = node.numberOfInputPorts( _node );
+	    var linksByNodeItem = getlinksByNodeItem(_node);
 
-		// Unlink inputs
-		data.inputNodesInfo.forEach(function( inputData, portIndex ){
-			if( !inputData || !inputData.node) return;
-			node.unlink( _node, portIndex );
-		});
+	    for( var i=0; i<inputPortCount; i++){
 
-		// Get output connections
-		var outputNodes = [];
-		for( var i=0; i<data.outputCount; i++){
-			outputNodes.push( node.dstNodeInfo( _node, i, 0 ) );
-		}
+	      var inputNodeData = node.srcNodeInfo( _node, i );
+	      if( !inputNodeData ) continue;
 
-		outputNodes.forEach( function(outputData, portIndex ){
+	      var obj = {
+	      	// node: _node,
+	      	isInput: true,
+	        src: inputNodeData,
+	        dest: {
+	        	// node: _node,
+	        	port: i
+	        }
+	      };
+	      Object.defineProperty(obj, 'node', { get: getNodeName });
+	      Object.defineProperty(obj.dest, 'node', { get: getNodeName });
+	      // MessageLog.trace('OBJ: '+_node+'; '+obj.dest.node );
+	      linksByNodeItem.push(obj);
 
-			if( !outputData || !outputData.node) return;
+	    }
 
-			var portCount = node.numberOfInputPorts( outputData.node );
+	    // Get output connections
+	    var outputPortCount = node.numberOfOutputPorts( _node );
 
-			for( var i=0; i<portCount; i++){
-				portData = node.srcNodeInfo( outputData.node, i );
-				// MessageLog.trace('--->'+JSON.stringify(portData,true,'  '));
-				if( !portData || portData.node !== _node ) continue;
+	    for( var opi=0; opi<outputPortCount; opi++){
 
-				portData.destNode = outputData.node;
-				portData.destPort = outputData.port;
-				data.outputNodesInfo.push(portData);
-			}
-		});
+	      for(var opli = 0; opli < node.numberOfOutputLinks(_node, opi); opli++){
+	        
+	        var outputNodeData = node.dstNodeInfo( _node, opi, opli );
+	        if( !outputNodeData ) continue;
 
-		// Unlink outputs
-		data.outputNodesInfo.forEach(function( outputData ){
-			if( !outputData || !outputData.node) return;
-			node.unlink( outputData.destNode, outputData.port );
-		});
+	        var obj = {
+	          // node: _node,
+	          isOutput: true,
+	          src: {
+	          	// node: _node,
+	          	port: opi,
+	          	link: opli
+	          },
+	          dest: outputNodeData
+	        };
 
-		//
-		MessageLog.trace(_node+' >> '+JSON.stringify(data,true,'  '));
+	        Object.defineProperty(obj, 'node', { get: getNodeName });
+	      	Object.defineProperty(obj.src, 'node', { get: getNodeName });
+	      	getlinksByNodeItem(outputNodeData.node).push(obj);
 
-		return data;
+	      }
+
+	    }
+
 	}
 
+
+	// SWAPPING NODES ANIMATION FUNCTIONS AND EXPRESSIONS
+	// 
+	function swapLinkedAttributes( nodeA, nodeB ){
+		
+		var linkedAttributesA = getNodeLinkedAttributes( nodeA );
+		var linkedAttributesB = getNodeLinkedAttributes( nodeB );
+
+		linkNodeAttributes( nodeA, linkedAttributesB );
+		linkNodeAttributes( nodeB, linkedAttributesA );
+	}
 
 
 	//
-	function setNodeLinks( _node, nodeData ){
+	function linkNodeAttributes( _node, attributeData ){
 
-		// Link inputs
-		nodeData.inputNodesInfo.forEach(function( inputData, portIndex ){
-			if( !inputData || !inputData.node) return;
-			node.link( inputData.node, inputData.port, _node, portIndex  );
+		attributeData.forEach(function( attrData ){
+			node.linkAttr( _node, attrData[0], attrData[1] );
 		});
 
-		// Link outputs
-		nodeData.outputNodesInfo.forEach(function( outputData ){
-			if( !outputData || !outputData.node) return;
-			node.link( _node, outputData.port, outputData.destNode, outputData.destPort  );
-		});
 	}
 
+
+	//
+	function getNodeLinkedAttributes( _node ){
+
+		// MessageLog.trace('getNodeLinkedAttributes: '+_node); //+' :\n'+getFullAttributeNames(_node).join('\n') );
+		
+		var linkedAttributes = [];
+		getNodeAttributesNames( _node ).forEach(function(attrName,i){
+
+			var linkedColumn = node.linkedColumn(_node,attrName);
+			var linkedColumnType = column.type(linkedColumn);
+			
+			if( linkedColumn && linkedColumnType !== 'DRAWING' ) {
+				linkedAttributes.push([attrName, linkedColumn ]);
+				node.unlinkAttr( _node, attrName );
+				// MessageLog.trace(i+') '+ attrName+' : '+linkedColumnType );
+			}
+
+		});
+
+		// MessageLog.trace('linkedAttributes: '+JSON.stringify(linkedAttributes,true,'  '));
+		return linkedAttributes;
+		
+	}
+
+
+	//
+	function getAttributes(attribute, attributeList, keyword )
+	{
+	
+	  var subAttrList = attribute.getSubAttributes();
+	  for (var j = 0; j < subAttrList.length; ++j)
+	  {
+	    if(typeof(subAttrList[j].keyword()) === 'undefined' || subAttrList[j].keyword().length == 0)
+	      continue;
+	    getAttributes(subAttrList[j], attributeList, keyword+'.'+subAttrList[j].keyword() );
+	  }
+
+	  attributeList.push( keyword );
+
+	}
+
+	function getNodeAttributesNames(nodePath)
+	{
+	  var attributeList = [];
+	  var topAttributeList = node.getAttrList(nodePath, 1);
+	  for (var i = 0; i < topAttributeList.length; ++i)
+	  {
+	    getAttributes(topAttributeList[i], attributeList, topAttributeList[i].keyword() );
+	  }
+	  return attributeList;
+	}
 
 }
