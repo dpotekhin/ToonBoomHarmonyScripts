@@ -24,7 +24,7 @@ ToDo:
 
 //
 var _AlignPaths = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_PathTools-Resources/AlignPaths.js"));
-var _Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
+var _Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_PathTools-Resources/ps/Utils.js"));
 var pModal = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/pModal.js"));
 
 
