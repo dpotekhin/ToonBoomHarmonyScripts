@@ -22,7 +22,7 @@ function PS_test(){
 */
 
 //
-function PS_ShowPathToolsModal(){
+function PS_PathTools(){
 
    //
   MessageLog.clearLog();
@@ -185,6 +185,7 @@ function PS_ShowPathToolsModal(){
     +'\nHold down the Control key to also merge the Control points'
   );
 
+/*
   var btnSetPivot = modal.addButton( '', modifyGroup, btnHeight, btnHeight, iconPath+'pivot-to-selection.png',
     function (){
       AlignPaths.SetPivot();
@@ -193,7 +194,8 @@ function PS_ShowPathToolsModal(){
     ,
     'Move pivot to the center of the selection'
   );
-  
+*/
+
   modifyGroup.mainLayout.addStretch();
 
   //
