@@ -1,6 +1,19 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version: 0.5
+
+[Name: PS_PathTools :]
+[Version: 0.210424 :]
+
+[Description:
+The script provides tools for aligning, mirroring and modifying strokes.
+:]
+
+[Usage:
+Open the script window by clicking on its button.
+Select the strokes and click the align and mirror buttons.
+
+By default, the center of the selected strokes is used as the center of transformations. To change the center of transformations to an arbitrary point, click the "Relative to" checkbox and enter the position of the transform center manually.
+:]
 
 ToDo:
 - add aligment options (like in Adobe animate)
@@ -22,14 +35,14 @@ function PS_test(){
 */
 
 //
-function PS_ShowPathToolsModal(){
+function PS_PathTools(){
 
    //
   MessageLog.clearLog();
 
   //
   var scriptName = 'Path Tools';
-  var scriptVer = '0.5';
+  var scriptVer = '0.210424';
   //
 
   var SETTINGS_NAME = 'PS_PATH_TOOLS_SETTINGS';
@@ -185,6 +198,7 @@ function PS_ShowPathToolsModal(){
     +'\nHold down the Control key to also merge the Control points'
   );
 
+/*
   var btnSetPivot = modal.addButton( '', modifyGroup, btnHeight, btnHeight, iconPath+'pivot-to-selection.png',
     function (){
       AlignPaths.SetPivot();
@@ -193,7 +207,8 @@ function PS_ShowPathToolsModal(){
     ,
     'Move pivot to the center of the selection'
   );
-  
+*/
+
   modifyGroup.mainLayout.addStretch();
 
   //

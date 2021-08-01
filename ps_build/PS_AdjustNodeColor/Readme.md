@@ -1,5 +1,5 @@
 ## PS_AdjustNodeColor
-0.1
+v0.1
 
 ### Description
 Script lets to adjust the color of the selected node.
@@ -14,5 +14,5 @@ Script lets to adjust the color of the selected node.
 * Hold down the Alt key to change color of the node
 
 ### Installation:
-Copy all files from this folder to [Harmony User Scripts directory](https://docs.toonboom.com/help/harmony-20/premium/scripting/import-script.html).
-Add script "PS_AdjustNodeColor" to a panel.
+Copy all files from this folder to [Harmony User Scripts directory](https://docs.toonboom.com/help/harmony-20/premium/scripting/import-script.html).\
+Add script "PS_AdjustNodeColor" to a panel.\

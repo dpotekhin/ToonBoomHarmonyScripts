@@ -8,9 +8,8 @@ Author: D.Potekhin (d@peppers-studio.ru)
 Simple implementation of an expression editor.
 :]
 
-[Installation:
-Copy all files from this folder to Harmony User Scripts directory.
-Don't copy folder "packages" if you don't want to add "Animation / Expression Editor" main menu item.
+[Install:
+Don't copy folder "packages" if you don't want to add "Animation / Expression Editor" item to the Main Menu.
 :]
 
 [ExtraFiles:
