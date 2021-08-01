@@ -153,6 +153,7 @@ function PS_ScriptPacker(){
 			buildFolder: buildFolder,
 			path: scriptPath,
 			icons: icons,
+			functionNames: functionNames,
 		};
 
 		// MessageLog.trace('scriptData >>\n'+ JSON.stringify(scriptData,true,'  ') );
@@ -412,11 +413,16 @@ function PS_ScriptPacker(){
 		// MessageLog.trace('usage: '+usage );
 		if( usage ) readmeText += '\n### Usage\n'+usage+'\n';
 
-		var installation = getContentFromScriptText( scriptText, 'Install');
-		
-		readmeText += '\n### Installation:\n'
+		// How to Install
+		var	howToInstallText = 'Copy all files from this folder to [Harmony User Scripts directory](https://docs.toonboom.com/help/harmony-20/premium/scripting/import-script.html).';
+		if( scriptData.functionNames.length ){
+			howToInstallText += '\nAdd script'+( scriptData.functionNames.length > 1 ? 's' : '')+' '+scriptData.functionNames.map(function(t){return '"'+t+'"';}).join(', ')+' to a panel.\n'
+		}
+
+		howToInstallText += getContentFromScriptText( scriptText, 'Install') || '';
+
+		readmeText += '\n### Installation:\n' + howToInstallText
 			// +'Copy files from ".\\'+scriptData.buildFolderRootName+'\\'+scriptData.clearName+'" to Harmony User Scripts directory'
-			+ ( installation ? installation : 'Copy all files from this folder to Harmony User Scripts directory.' )
 		;
 
 		pFile.save( path, readmeText );
