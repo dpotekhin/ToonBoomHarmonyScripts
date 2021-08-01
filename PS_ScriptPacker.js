@@ -2,7 +2,7 @@
 Author: D.Potekhin (d@peppers-studio.ru)
 Version: 0.210731
 
-Utility script for assembling other scripts into separate packages
+Utility script for assembling other PS scripts into separate packages
 
 [SkipPacking:]
 
@@ -336,7 +336,8 @@ function PS_ScriptPacker(){
 		if( resDir.exists )	copyDir( scriptData.resourcePath, scriptData.resourceBuildPath );
 
 		// Extra files
-		var extraFiles = getContentFromScriptText( scriptFile.text, /#ExtraFiles:(.*)\/#/);
+		var extraFiles = getContentFromScriptText( scriptFile.text, 'ExtraFiles');
+
 		if( extraFiles ){
 			extraFiles = extraFiles.split(/\n|\n\r/gi);
 			// MessageLog.trace('extraFiles: '+extraFiles);
@@ -346,7 +347,9 @@ function PS_ScriptPacker(){
 				var destPath = scriptData.buildFolder + '/'+extraFile;
 				extraFile = scriptData.rootPath+'/'+extraFile;
 				// MessageLog.trace( i+'>'+ extraFile +' >>> '+destPath );
-				copyDir( extraFile, destPath ); // TODO: What about single files?
+				// TODO: fix required paths in extra files
+				// TODO: What about single files?
+				copyDir( extraFile, destPath );
 			});
 		}
 
