@@ -14,5 +14,5 @@ If the frame range is not selected, then the nearest edge of the playback range 
 - Hold the Alt key to set the playback range to fit the timeline
 
 ### Installation:
-Copy all files from this folder to [Harmony User Scripts directory](https://docs.toonboom.com/help/harmony-20/premium/scripting/import-script.html).
-Add script "PS_SetPlaybackRange" to a panel.
+Copy all files from this folder to [Harmony User Scripts directory](https://docs.toonboom.com/help/harmony-20/premium/scripting/import-script.html).\
+Add script "PS_SetPlaybackRange" to a panel.\
