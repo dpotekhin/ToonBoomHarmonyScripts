@@ -1,18 +1,30 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version: 0.210728
 
+[Name: PS_ExpressionEditor :]
+[Version: 0.210728 :]
+
+[Description:
 Simple implementation of an expression editor.
+:]
+
+[Install:
+Don't copy folder "packages" if you don't want to add "Animation / Expression Editor" item to the Main Menu.
+:]
+
+[ExtraFiles:
+packages/PS_ExpressionEditor
+:]
 
 ToDo:
 - To save the current expression on Ctrl + Enter
 */
 
 var pModal = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/pModal.js"));
-var resoursesPath = specialFolders.userScripts+"/PS_ExpressionEditor-Resources/";
-var _TextEditSubmenu = require(fileMapper.toNativePath(resoursesPath+"TextEditSubmenu.js"));
-var _History = require(fileMapper.toNativePath(resoursesPath+"History.js"));
-var ExpressionEditor = require(fileMapper.toNativePath(resoursesPath+"ExpressionEditor.js"));
+
+var _TextEditSubmenu = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_ExpressionEditor-Resources/TextEditSubmenu.js"));
+var _History = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_ExpressionEditor-Resources/History.js"));
+var ExpressionEditor = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_ExpressionEditor-Resources/ExpressionEditor.js"));
 
 //
 function PS_ExpressionEditor( _node ){
@@ -50,7 +62,7 @@ function PS_ExpressionEditor( _node ){
   //
   var btnHeight = 50;
   var smallBtnHeight = 30;
-  var iconPath = fileMapper.toNativePath(resoursesPath+"/icons/");
+  var iconPath = fileMapper.toNativePath(specialFolders.userScripts+"/PS_ExpressionEditor-Resources/icons/");
 
   var listJustUpdated = true;
 

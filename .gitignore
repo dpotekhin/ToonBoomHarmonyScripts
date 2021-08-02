@@ -16,3 +16,5 @@ script-icons/*
 packages/*
 !/packages/PS_**
 !/packages/PS_**.js
+
+!/ps_build/**

@@ -108,7 +108,7 @@ function ExpressionEditor(){
 
         // try{
 
-        if (!this.showConfirmDialog(
+        if (!_this.showConfirmDialog(
                 'Confirm deletion',
                 'You are going to delete all the Expressions in the Scene.\nAre you sure?',
                 "Yep. Kill'em all.",
@@ -147,7 +147,7 @@ function ExpressionEditor(){
     //
     this.deleteAllUnusedExpressions = function() {
         
-        if (!this.showConfirmDialog(
+        if (!_this.showConfirmDialog(
                 'Confirm deletion',
                 'You are about to delete all unused Expressions in the Scene.\nAre you sure?'
             )) return;
