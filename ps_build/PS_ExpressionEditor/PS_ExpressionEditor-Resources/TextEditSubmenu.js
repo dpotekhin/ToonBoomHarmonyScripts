@@ -117,7 +117,7 @@ function initSubmenu( editor ){
     },
 
     // Examples
-    'Examples': {
+    'Insert Chunk': {
 
       "Pendulum": "var speedCoef = 0.5;\nvar amp = 2;\nMath.sin( currentFrame * speedCoef ) * amp;",
 

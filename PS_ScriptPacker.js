@@ -285,7 +285,10 @@ function PS_ScriptPacker(){
 	function buildSelectedScript(){
 
 		buildScript( currentScriptName );
+		
 		updateMainReadme();
+
+		MessageBox.information('Build completed!',0,0,0);
 
 	}
 
@@ -302,6 +305,8 @@ function PS_ScriptPacker(){
 		});
 
 		updateMainReadme();
+
+		MessageBox.information('Build completed!',0,0,0);
 
 	}
 
