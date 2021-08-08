@@ -92,9 +92,29 @@ function getAttributeValue( attr ){
 }
 
 
+function getUnusedName( _node ){
+
+  if( !node.type(_node) ) return _node;
+
+  var _newName;
+  var renameTries = 0;
+  var nameIsUnused = false;
+  
+  do{ // Rename until success omitting existing names
+    renameTries++;
+    _newName = _node+'_'+renameTries;
+    if( !node.type(_newName) ) nameIsUnused = true;    
+
+  }while( !nameIsUnused && renameTries<200 )
+
+  return nameIsUnused ? _newName : undefined;
+
+}
+
 ///
 exports = {
   getAttributes: getAttributes,
   getFullAttributeList: getFullAttributeList,
-  unlinkFunctions: unlinkFunctions
+  unlinkFunctions: unlinkFunctions,
+  getUnusedName: getUnusedName
 }
