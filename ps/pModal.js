@@ -98,7 +98,11 @@ pModal.prototype.addGroup = function( title, parent, layoutType, style ){
 
   groupBox.setLayout( groupBoxLayout );   
   if( style ) {
-    groupBox.setStyleSheet( style === true ? 'QGroupBox{ border:none; margin: 0; padding: 0; }' : style );
+    if( style === true ){
+      this.removeElementMargins( groupBox );
+    }else{
+      groupBox.setStyleSheet( style );
+    }
   }
   parent.mainLayout.addWidget( groupBox, 0, 0 );
   return groupBox;
@@ -241,6 +245,14 @@ pModal.prototype.getParentWidget = function(){
   return "";
 
 };
+
+
+//
+pModal.prototype.removeElementMargins = function( group ){
+  group.setStyleSheet('QGroupBox{ border:none; margin: 0; padding: 0; }' );
+  ( group.mainLayout || group ).setContentsMargins(0,0,0,0);
+}
+
 
 pModal.prototype.setFocusOnMainWindow = function(){
 
