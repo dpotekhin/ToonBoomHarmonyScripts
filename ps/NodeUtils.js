@@ -91,7 +91,7 @@ function getAttributeValue( attr ){
   }
 }
 
-
+//
 function getUnusedName( _node ){
 
   if( !node.type(_node) ) return _node;
@@ -111,10 +111,49 @@ function getUnusedName( _node ){
 
 }
 
+
+//
+function getNodesBounds( _nodes ){
+  
+  var bounds = {
+    x:{
+      left: 9999999,
+      right: -9999999,
+    },
+    y:{
+      bottom: -9999999,
+      top: 999999
+    }
+  };
+
+  _nodes.forEach(function(_node){
+    var x = node.coordX(_node);
+    var y = node.coordY(_node);
+    var w = node.width(_node);
+    var wh = w/2;
+    var h = node.height(_node);
+    var hh = h/2;
+    if( bounds.x.right < x ) bounds.x.right = x;
+    if( bounds.x.left > x ) bounds.x.left = x;
+    if( bounds.y.top > y ) bounds.y.top = y;
+    if( bounds.y.bottom < y ) bounds.y.bottom = y;
+  });
+
+  bounds.width = bounds.x.right - bounds.x.left;
+  bounds.x.center = bounds.x.left + (bounds.width) / 2;
+  bounds.height = bounds.y.bottom - bounds.y.top;
+  bounds.y.center = bounds.y.top + (bounds.height) / 2;
+
+  return bounds;
+
+}
+
+
 ///
 exports = {
   getAttributes: getAttributes,
   getFullAttributeList: getFullAttributeList,
   unlinkFunctions: unlinkFunctions,
-  getUnusedName: getUnusedName
+  getUnusedName: getUnusedName,
+  getNodesBounds: getNodesBounds,
 }
