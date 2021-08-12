@@ -13,7 +13,7 @@ function showContextMenu( menuData, event, parentWidget ){
   var submenuFlatList = createSubmenu( menu, menuData );
 
   menu.triggered.connect(function(a){
-    MessageLog.trace('clicked '+JSON.stringify(a,true,'  '));
+    // MessageLog.trace('clicked '+JSON.stringify(a,true,'  '));
     var action = submenuFlatList[a.text];
     if( action ) action();
   });

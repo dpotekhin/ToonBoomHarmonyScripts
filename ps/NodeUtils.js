@@ -92,9 +92,9 @@ function getAttributeValue( attr ){
 }
 
 //
-function getUnusedName( _node ){
+function getUnusedName( _node, nameOnly ){
 
-  if( !node.type(_node) ) return _node;
+  if( !node.type(_node) ) return nameOnly ? _node.split('/').pop() : _node;
 
   var _newName;
   var renameTries = 0;
@@ -107,8 +107,14 @@ function getUnusedName( _node ){
 
   }while( !nameIsUnused && renameTries<200 )
 
-  return nameIsUnused ? _newName : undefined;
+  if( !nameIsUnused ) return;
+  return nameOnly ? _newName.split('/').pop() : _newName;
 
+}
+
+//
+function getValidNodeName( nodeName ){
+  return nodeName ? nodeName.replace(/\s/gi,'_').replace(/[^a-zA-Z0-9_-]+/gi,'') : undefined;
 }
 
 
@@ -155,5 +161,6 @@ exports = {
   getFullAttributeList: getFullAttributeList,
   unlinkFunctions: unlinkFunctions,
   getUnusedName: getUnusedName,
+  getValidNodeName: getValidNodeName,
   getNodesBounds: getNodesBounds,
 }
