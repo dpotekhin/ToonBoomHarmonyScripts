@@ -66,9 +66,17 @@ function hasSelectedNodes(){
 }
 
 //
+function selectNodes( _nodes ){
+	selection.clearSelection();
+	if( typeof _nodes === 'string' ) selection.addNodeToSelection(_nodes);
+	else selection.addNodesToSelection(_nodes);
+}
+
+//
 exports = {
 	eachNode: eachNode,
 	eachSelectedNode: eachSelectedNode,
 	filterNodesByType: filterNodesByType,
-	hasSelectedNodes: hasSelectedNodes
+	hasSelectedNodes: hasSelectedNodes,
+	selectNodes: selectNodes
 }
