@@ -16,6 +16,8 @@ If the scene name pattern is not found in the path, then the file name will be l
 
 Scene resolution is exposed: 3840x2160
 
+Script output can be found in Message Log panel (Windows / Message Log)
+
 ToDo:
 - Automatic creation of Write nodes for the selected Composite nodes if they hasn't them
 - Ability to change the default resolution
@@ -25,6 +27,9 @@ ToDo:
 function PS_SetupSceneToRender(){
 	
 	MessageLog.clearLog();
+
+	var framePrefix = '';
+
 	var scenePath = scene.currentProjectPath().split('/');
 	var scName;
 	do{
@@ -33,26 +38,31 @@ function PS_SetupSceneToRender(){
 	}while( scenePath.length || !scName );
 
 	if( !scName ){
-		MessageLog.trace('Scene Name Folder not Found');
-		return;
+		MessageLog.trace('Scene Name Folder with "*_sq###_sh####" pattern not Found.');
+		// return;
+	}else{
+		scName = scName.split('_');
+		framePrefix = scName[0]+'_'+scName[2]+'-';
+		MessageLog.trace('framePrefix: '+ framePrefix );
 	}
-	scName = scName.split('_');
-
-	var framePrefix = scName[0]+'_'+scName[2]+'-';
-	MessageLog.trace('framePrefix: '+ framePrefix );
+	
 
 	node.getNodes(['WRITE']).forEach(function(n,i){
 		var nn = node.getName(n);
 		MessageLog.trace((i+1)+') "'+nn+'", "'+n+'"');
 		if( nn==='Write-Main' || nn.indexOf('Write_') !== -1 ) {
 			node.setEnable(n,false);
+			MessageLog.trace('-- Disabled');
 			return;
 		}
 		var ncn = nn.replace('Write-','');
 		node.setEnable(n,true);
 		node.setTextAttr(n,'EXPORT_TO_MOVIE',1,'Output Drawings');
 		node.setTextAttr(n,'DRAWING_TYPE',1,'PNG4');
-		node.setTextAttr(n,'DRAWING_NAME',1,'frames/'+ncn+'/'+framePrefix+ncn+'-');
+		var frameName = 'frames/'+ncn+'/'+framePrefix+ncn+'-';
+		node.setTextAttr(n,'DRAWING_NAME',1,frameName);
+		MessageLog.trace('++ Enabled');
+		MessageLog.trace('++ Frame name: "'+frameName+'"');
 	});
 
 	// Scene settings
