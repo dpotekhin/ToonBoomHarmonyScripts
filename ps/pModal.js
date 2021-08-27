@@ -161,10 +161,12 @@ pModal.prototype.addButton = function( title, parent, width, height, icon, onRel
 
   if( width ){
     btn.setFixedSize( width, height );
-  }else{
+  }
+/*
+  else{
     btn.setMaximumSize( width, height );
   }
-
+*/
   if( toolTip ) btn.toolTip = toolTip;
 
   //
@@ -189,7 +191,9 @@ pModal.prototype.addButton = function( title, parent, width, height, icon, onRel
 pModal.prototype.addLineEdit = function( text, parent, width, height ){
   var line = new QLineEdit();
   line.text = text;
-  line.setMaximumSize( width, height );
+  if(width){
+    line.setMaximumSize( width, height );
+  }
   parent.mainLayout.addWidget( line, 0, 0 );
   return line;
 }
