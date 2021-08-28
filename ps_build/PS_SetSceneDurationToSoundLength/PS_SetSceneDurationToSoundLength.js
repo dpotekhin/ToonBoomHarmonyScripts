@@ -34,15 +34,20 @@ function PS_SetSceneDurationToSoundLength(){
     }
 
     var soundColumn = column.soundColumn( columnName );
+    MessageLog.trace( 'Sound Layer: "'+columnName+'"');
+
+    var maxFrame = 0;
+
+    var sequences = soundColumn.sequences();
+    sequences.forEach(function(sequence,i){
+        MessageLog.trace('Sequence '+i+' > '+sequence.startFrame+' - '+sequence.stopFrame );
+        if( maxFrame < sequence.stopFrame ) maxFrame = sequence.stopFrame;
+        // MessageLog.trace('>> '+Object.getOwnPropertyNames( sequence ).join('\n'));    
+    });
     
-    var sequence = soundColumn.sequences()[0];
-    if( !sequence ) return;
-    // MessageLog.trace( Object.getOwnPropertyNames( sequence ).join('\n')   );
+    var durationDiff = maxFrame - frame.numberOf();
 
-    var soundLengthInFrames = sequence.stopFrame;
-    var durationDiff = soundLengthInFrames - frame.numberOf();
-
-    MessageLog.trace( 'Sound Length In Frames:' + soundLengthInFrames+' ('+durationDiff+')'  );
+    MessageLog.trace( 'Sound Length In Frames:' + maxFrame+' ('+durationDiff+')'  );
     
     if ( durationDiff > 0 ) {
         frame.insert(frame.numberOf(), durationDiff );
