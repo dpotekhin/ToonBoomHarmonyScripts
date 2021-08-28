@@ -32,6 +32,10 @@ Three scripts to universal (pegs and deformers) reset of transformations, save t
 This script sets the playback range relative to the selected frames.
 
 
+## [PS_SetSceneDurationToSoundLength](ps_build/PS_SetSceneDurationToSoundLength)
+This script quickly sets the Scene duration to the selected Sound layer duration.
+
+
 ## [PS_SwapNodes](ps_build/PS_SwapNodes)
 This script allows to swap two nodes keeping their connections.\
 Swapping nodes between different groups is also supported.
