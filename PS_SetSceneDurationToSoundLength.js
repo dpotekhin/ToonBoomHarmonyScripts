@@ -24,7 +24,7 @@ function PS_SetSceneDurationToSoundLength(){
 
     if ( Timeline.selIsColumn(0) ) {
 
-        columnName = Timeline.layerToColumn(0);
+        columnName = Timeline.selToColumn(0);
         if( column.type(columnName) !== 'SOUND' ) columnName = undefined;
     }
 
