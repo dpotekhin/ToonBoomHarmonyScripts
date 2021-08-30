@@ -102,7 +102,7 @@ function PS_SoundAmplitudeToKeyframes(){
 
 	//
 	listWidget["currentIndexChanged(int)"].connect( function(i){
-		MessageLog.trace('-->'+i);
+		// MessageLog.trace('-->'+i);
 		onAttrNameChanged( i );
 	});
 
@@ -164,8 +164,12 @@ function PS_SoundAmplitudeToKeyframes(){
 
 	});
 
-	//
-	onAttrNameChanged(0);
+	// Try to set Scale.Y attr by default
+	selectedNodeAttrs.every(function(attrName,i){
+		if( attrName !== 'SCALE.Y' ) return true;
+		listWidget.setCurrentIndex(i);
+	});
+
 	ui.mainLayout.addStretch();
   	modal.show();
 
@@ -177,8 +181,9 @@ function PS_SoundAmplitudeToKeyframes(){
 
   	//
   	function onAttrNameChanged( i ){
-  		// try{
+  		// try{ 
   		selectedAttrName = selectedNodeAttrs[i];
+  		
   		var linkedColumnName = node.linkedColumn( selectedNode, selectedAttrName );
   		var columnName = linkedColumnName === "" ? selectedNode.split('/').pop()+"_SND-AMP" : linkedColumnName;
 
