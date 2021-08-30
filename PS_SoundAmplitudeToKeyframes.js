@@ -28,6 +28,8 @@ var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Util
 //
 function PS_SoundAmplitudeToKeyframes(){
 
+	// MessageLog.clearLog();
+
 	//
   	var scriptName = 'Sound Amplitude To Keyframes';
   	var scriptVer = '0.210830';
@@ -36,21 +38,31 @@ function PS_SoundAmplitudeToKeyframes(){
 	var selectedNode;
 	var selectedSoundColumnName;
 
-	var numLayers = Timeline.numLayerSel;
+	MessageLog.trace('--------- '+Timeline.numLayerSel+' --------');
 
-  	for ( var i = 0; i < numLayers;i++ )
-  	{
+	// for( var i=0; i<Timeline.numLayerSel; i++){
+	// 	MessageLog.trace(i+') '+Timeline.selIsNode(i)+', '+Timeline.selToNode(i)+', '+Timeline.selIsColumn(i) );
+	// }
 
-		if ( !selectedNode && Timeline.selIsNode( i ) ){
-			selectedNode = Timeline.selToNode(i);
-		}
+	// MessageLog.trace('-----------------');
+
+	[0,Timeline.numLayerSel-1].forEach(function(i){
 		
-		if ( Timeline.selIsColumn(i) ){
-			var selectedSoundColumnName = Timeline.selToColumn(0);
+		// MessageLog.trace(i+') '+Timeline.selIsNode(i)+', '+Timeline.selToNode(i)+', '+Timeline.selIsColumn(i) );
+
+		if ( !selectedNode && Timeline.selIsNode(i) ){
+			
+			selectedNode = Timeline.selToNode(i);
+		
+		}else  if ( Timeline.selIsColumn(i) ){
+			
+			selectedSoundColumnName = Timeline.selToColumn(i);
         	if( column.type(selectedSoundColumnName) !== 'SOUND' ) selectedSoundColumnName = undefined;
+
 		}
 
-	}
+	});
+
 
    	MessageLog.trace('selectedNode: "'+selectedNode+'"');
    	MessageLog.trace('selectedSoundColumnName: "'+selectedSoundColumnName+'"');
