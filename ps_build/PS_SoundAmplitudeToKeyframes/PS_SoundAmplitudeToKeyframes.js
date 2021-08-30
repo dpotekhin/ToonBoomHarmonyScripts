@@ -133,6 +133,7 @@ function PS_SoundAmplitudeToKeyframes(){
     	var lastFrame = parseInt(lastFrameInput.text) || frame.numberOf();
     	var mapMin = parseFloat(remapMinInput.text) || 0;
     	var mapMax = parseFloat(remapMaxInput.text) || 1;
+    	var mapRange = mapMax - mapMin;
 
     	MessageLog.trace('Create keyframes.\ncolumnName:"'+attrColumnName+'", isNew:'+attrColumnIsNew+', firstFrame:'+firstFrame+', lastFrame:'+lastFrame+', mapMin:'+mapMin+', mapMax:'+mapMax );
 
@@ -150,7 +151,7 @@ function PS_SoundAmplitudeToKeyframes(){
 
     	for( var _frame=firstFrame-1; _frame < lastFrame-1 && _frame < medianData.values.length; _frame++ ){
 
-    		var mappedValue = mapMin + ( (medianData.values[_frame] - medianData.min) / medianData.minMaxRange ) * mapMax;
+    		var mappedValue = mapMin + ( (medianData.values[_frame] - medianData.min) / medianData.minMaxRange ) * mapRange;
     		column.setEntry( attrColumnName, 1, _frame+1, mappedValue );
 
     	}
@@ -254,8 +255,8 @@ function PS_SoundAmplitudeToKeyframes(){
 		do{
 			var frameForm = waveForm.splice(0, 15);
 			waveFormChannels.push( frameForm );
-			var medianValue = getSimpleMedian(frameForm);
-			// var medianValue = getMedian(frameForm);
+			// var medianValue = getAverage(frameForm);
+			var medianValue = getMedian(frameForm);
 			medianValues.push(medianValue);
 			if( min > medianValue ) min = medianValue;
 			if( max < medianValue ) max = medianValue;
@@ -272,7 +273,7 @@ function PS_SoundAmplitudeToKeyframes(){
 
 
 	//
-	function getSimpleMedian(values){
+	function getAverage(values){
 	  if( !values || !values.length ) return 0;
 	  var sum = 0;
 	  values.forEach(function(v){sum+=v;});
