@@ -8,7 +8,7 @@ This script lets you to set up all the Write nodes of a scene for frame sequence
 
 After running the script, all nodes named "Write-Main" (general output) and "Write_*" (standard nodes) will be disabled.
 
-The rest of the nodes named by the "Write_ <COMP_NAME>" pattern will have the following settings:
+The rest of the nodes named by the "Write_<COMP_NAME>" or "<COMP_NAME>_Write" pattern will have the following settings:
 - Output: Output Drawings
 - Format: PNG4
 - File name: "frames/<COMP_NAME>/<SCENE_NAME>-<COMP_NAME>-", where SCENE_NAME is formed from the closest fragment of the path of the scene matching this pattern "*_sq###_sh####". For example, for a scene with the path "D:\project\ep006\ep006_sq001\ep006_sq001_sh1340\anim2d\harmony\sceneFolder" and the name of the composition "Char1", the following file name will be generated: "frames/CharA/ep006_sh1340-CharA-".
@@ -30,22 +30,41 @@ function PS_SetupSceneToRender(){
 
 	var framePrefix = '';
 
-	var scenePath = scene.currentProjectPath().split('/');
-	var scName;
-	do{
-		var _name = scenePath.pop();
-		if( _name.match(/_sq\d\d\d_sh\d\d\d\d$/i) ) scName = _name;
-	}while( scenePath.length || !scName );
+	if( !KeyModifiers.IsShiftPressed() ){
+		var scenePath = scene.currentProjectPath().split('/');
+		MessageLog.trace('scenePath: '+scenePath);
 
-	if( !scName ){
-		MessageLog.trace('Scene Name Folder with "*_sq###_sh####" pattern not Found.');
-		// return;
-	}else{
-		scName = scName.split('_');
-		framePrefix = scName[0]+'_'+scName[2]+'-';
-		MessageLog.trace('framePrefix: '+ framePrefix );
+		var scName;
+		var scNameLoc;
+		do{
+			var _name = scenePath.pop();
+			if( !scNameLoc ) scNameLoc = _name;
+			// MessageLog.trace('_name: '+_name+', '+scenePath.length);
+			if( _name.match(/_sq\d\d\d_sh\d\d\d\d/i) ) scName = _name;
+		}while( scenePath.length && !scName );
+
+		if( !scName ){
+			MessageLog.trace('!!! Scene Name Folder with "*_sq###_sh####" pattern not Found.');
+			var scNameLocParsed = scNameLoc.match(/_(sh\d\d\d\d)/i);
+			// MessageLog.trace('scNameLoc: '+ scNameLoc+', '+scNameLocParsed);
+			if( scNameLocParsed ){
+				framePrefix = scNameLocParsed[1]+'-';
+				MessageLog.trace('!!! Only Scene number found in the Scene name: ' + framePrefix );
+			}
+			// return;
+		}else{
+			scName = scName.split('_');
+			framePrefix = scName[0]+'_'+scName[2]+'-';
+		}
 	}
-	
+
+	if( !KeyModifiers.IsControlPressed() ){
+		
+		framePrefix = Input.getText('Enter Scene prefix:', framePrefix, '');
+
+	}
+
+	MessageLog.trace('framePrefix: "'+ framePrefix +'"');
 
 	node.getNodes(['WRITE']).forEach(function(n,i){
 		var nn = node.getName(n);
@@ -55,7 +74,7 @@ function PS_SetupSceneToRender(){
 			MessageLog.trace('-- Disabled');
 			return;
 		}
-		var ncn = nn.replace('Write-','');
+		var ncn = nn.replace('Write-','').replace('_Write','');
 		node.setEnable(n,true);
 		node.setTextAttr(n,'EXPORT_TO_MOVIE',1,'Output Drawings');
 		node.setTextAttr(n,'DRAWING_TYPE',1,'PNG4');
