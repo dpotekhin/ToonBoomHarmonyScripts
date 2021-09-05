@@ -20,7 +20,7 @@ function SSList( scriptVer, parent ){
   var treeView = new TreeView( parent );
 
   //
-  treeView.onItemClick = function( event, itemData ){
+  treeView.onItemClick = function( itemData, event ){
 
     // MessageLog.trace('clicked:'+JSON.stringify(itemData,true,'  '));
     
@@ -35,7 +35,7 @@ function SSList( scriptVer, parent ){
   }
 
   //
-  treeView.onItemContextMenu = function( event, itemData ){
+  treeView.onItemContextMenu = function( itemData, event ){
 
     try{
 

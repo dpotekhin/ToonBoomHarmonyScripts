@@ -21,6 +21,65 @@ var TreeView = function( parent ){
   
   // -------------------------------------------------
   /// Events
+
+  var isRightButtonClick;
+  var currentItemData;
+  var clickedPoint;
+
+  var clickTimer = new QTimer(treeView);
+
+  function clickTimerComplete(){
+    clickTimer.stop();
+    // MessageLog.trace('CLICK TIMER ' +isRightButtonClick );
+
+    if( isRightButtonClick ){
+
+      // MessageLog.trace('RIGHT MOUSE BUTTON');
+      if( _this.onItemContextMenu ) _this.onItemContextMenu( currentItemData, {
+        globalPos: function(){ return clickedPoint; }
+      });
+
+    }else{
+
+      // MessageLog.trace('LEFT MOUSE BUTTON');
+      if( currentItemData && _this.onItemClick ) _this.onItemClick( currentItemData );
+
+    }
+
+    isRightButtonClick = undefined;
+    currentItemData = undefined;
+
+  }
+
+  clickTimer.timeout.connect(clickTimerComplete);
+
+  //
+  treeView.clicked.connect( function(index){
+    
+    clickTimer.stop();
+    isRightButtonClick = false;
+
+    var item = index ? model.itemFromIndex(index) : null;
+    currentItemData = item ? dataByItemId[item.whatsThis()] : null;
+
+    // MessageLog.trace('CLICKED'+currentItemData);
+    
+    clickTimer.start(6);
+
+  });
+
+  treeView.contextMenuPolicy = Qt.CustomContextMenu;
+  treeView.customContextMenuRequested.connect(function(_clickedPoint){
+    // MessageLog.trace('CONTEXT MENU '+isRightButtonClick );
+    var _isRightButtonClick = isRightButtonClick;
+    isRightButtonClick = true;
+    clickedPoint = treeView.mapToGlobal( _clickedPoint );
+    if( _isRightButtonClick === undefined ) clickTimerComplete();
+
+  });
+
+  
+  /*
   treeView.mouseReleaseEvent = function(event){
     // MessageLog.trace('MOUSE CLICK: '+JSON.stringify(event,true,'  ') );
     try{
@@ -39,13 +98,13 @@ var TreeView = function( parent ){
       if( currentItemData && _this.onItemClick ) _this.onItemClick( event, currentItemData );
     }
 
-    treeView.clearSelection();
+    // treeView.clearSelection();
 
     }catch(err){MessageLog.trace('err:'+err)}
     
 
   }
-
+*/
 
   // -------------------------------------------------
   /// Methods
