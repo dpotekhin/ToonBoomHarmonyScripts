@@ -158,6 +158,11 @@ function eachAnimatableAttr( _node, callback ){
     });
 }
 
+//
+function createUid(){
+  return QUuid.createUuid().toString().replace(/{|}/g, '');
+}
+
 
 //
 exports = {
@@ -173,5 +178,6 @@ exports = {
     getFullAttributeList: getFullAttributeList,
     isFunction: isFunction,
     getAnimatableAttrs: getAnimatableAttrs,
-    eachAnimatableAttr: eachAnimatableAttr
+    eachAnimatableAttr: eachAnimatableAttr,
+    createUid: createUid
 };
