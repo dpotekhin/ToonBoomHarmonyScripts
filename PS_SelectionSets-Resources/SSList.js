@@ -53,7 +53,8 @@ function SSList( scriptVer, parent ){
             '!Duplicate Group': duplicateGroup,
             '!Delete Group': deleteItem,
             '-1': 1,
-            '!Create Selection Set': showCreateSetUI,
+            '!Create Selection Set from Selection': function(){ showCreateSetUI(true) },
+            '!Create Empty Selection Set': showCreateSetUI,
             '-2': 1,
             '!Select Group Data Node': selectGroupDataNode,
             '!Refresh': refreshData,
@@ -167,7 +168,7 @@ function SSList( scriptVer, parent ){
 
 
   //
-  function showCreateSetUI( ){
+  function showCreateSetUI( fromSelection ){
 
     // try{
 
@@ -179,7 +180,7 @@ function SSList( scriptVer, parent ){
     setName = setName.trim();
     if( !setName ) return;
 
-    model.createSetInGroup( currentItemData.id, setName );
+    model.createSetInGroup( currentItemData.id, setName, fromSelection ? selection.selectedNodes() : undefined );
 
     updateList();
 

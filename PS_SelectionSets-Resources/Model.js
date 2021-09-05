@@ -246,7 +246,7 @@ function Model( scriptVer ){
 
 
   //
-  this.createSetInGroup = function( groupId, setName ){
+  this.createSetInGroup = function( groupId, setName, nodes ){
     
     // try{
 
@@ -261,7 +261,7 @@ function Model( scriptVer ){
       id: Utils.createUid(),
       name: setName,
       groupId: groupData.id,
-      nodes: [] 
+      nodes: nodes || [],
     };
     groupData.items.push( itemData );
 
