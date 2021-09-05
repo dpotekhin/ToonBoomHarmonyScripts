@@ -145,12 +145,19 @@ var TreeView = function( parent ){
 
   ///
   function addItem( itemData, parent, id ){
+    
     var item = new QStandardItem(itemData.name);
     item.setEditable(false);
+    
+    var counterItem = new QStandardItem();
+    if( !itemData.isGroup ) counterItem.setText( itemData.nodes ? itemData.nodes.length : 0 );
+    counterItem.setEditable(false);
+
     // if( !isGroup ) item.setTextAlignment(Qt.AlignRight);
-    ( parent===true ? rootItem : parent ).appendRow(item);
+    ( parent===true ? rootItem : parent ).appendRow([item,counterItem]);
     item.setWhatsThis(itemData.id);
     itemData.modelItem = item;
+    itemData.counterItem = counterItem;
     dataByItemId[itemData.id] = itemData;
     return item;
   }

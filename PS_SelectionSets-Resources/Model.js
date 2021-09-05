@@ -361,6 +361,11 @@ function Model( scriptVer ){
       itemData = this.getItemDataById( itemData.groupId );
     }
 
+    // Update nodes count of the Selection Sets
+    itemData.items.forEach(function( itemData ){
+      if( itemData.counterItem ) itemData.counterItem.setText( itemData.nodes ? itemData.nodes.length : 0 );
+    });
+
     if( !node.type(itemData.dataNode) ) {
       MessageLog.trace('Data node is not available "'+itemData.dataNode+'"');
       MessageBox.warning('Unable to save Selection Set data to Data Node "'+itemData.dataNode+'".\nProbably it was just deleted, renamed or removed.\nYou can try to press Refresh button in context menu.',0,0,0,'Saving Error')

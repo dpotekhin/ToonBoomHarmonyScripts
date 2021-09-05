@@ -13,7 +13,7 @@ function PS_SelectionSets(){
 
   var scriptName = 'Selection Sets';
   var scriptVer = '0.210821';
-  var modalWidth = 150;
+  var modalWidth = 160;
   var modalHeightMin = 120;
   var modalHeightMax = 500;
   var modalHeight = ~~(modalHeightMin + (modalHeightMax-modalHeightMin) * .5);
