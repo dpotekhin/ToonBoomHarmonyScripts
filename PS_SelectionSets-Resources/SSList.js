@@ -90,6 +90,22 @@ function SSList( scriptVer, parent ){
     
   }
 
+  
+  //
+  treeView.onCollapsed = function( itemData, index ){
+    if( !itemData ) return;
+    // MessageLog.trace('onCollapsed '+JSON.stringify(itemData,true,'  ') );
+    itemData.isExpanded = false;
+    model.saveGroupData( itemData );
+  }
+
+  //
+  treeView.onExpanded = function( itemData, index ){
+    if( !itemData ) return;
+    // MessageLog.trace('onExpanded '+JSON.stringify(itemData,true,'  ') );
+    itemData.isExpanded = true;
+    model.saveGroupData( itemData );
+  }
 
   /// START  
   updateList();

@@ -59,8 +59,7 @@ var TreeView = function( parent ){
     clickTimer.stop();
     isRightButtonClick = false;
 
-    var item = index ? model.itemFromIndex(index) : null;
-    currentItemData = item ? dataByItemId[item.whatsThis()] : null;
+    currentItemData = getItemDataByIndex( index );
 
     // MessageLog.trace('CLICKED'+currentItemData);
     
@@ -105,6 +104,19 @@ var TreeView = function( parent ){
 
   }
 */
+  
+  //
+  treeView.collapsed.connect(function(index){
+    // MessageLog.trace('collapsed');
+    if( _this.onCollapsed ) _this.onCollapsed( getItemDataByIndex( index ), index );
+  });
+
+  //
+  treeView.expanded.connect(function(index){
+    // MessageLog.trace('expanded');
+    if( _this.onExpanded ) _this.onExpanded( getItemDataByIndex( index ), index );
+  });
+
 
   // -------------------------------------------------
   /// Methods
@@ -128,13 +140,16 @@ var TreeView = function( parent ){
 
         });
 
+        if( groupData.isExpanded ) treeView.expand( model.indexFromItem( groupItem ) );
+
       }
 
     });
 
-    this.treeView.expandAll();
+    // this.treeView.expandAll();
 
   }
+
 
   this.refresh = function(){
     // treeView.dataChanged.emit(new QModelIndex(), new QModelIndex());
@@ -142,6 +157,7 @@ var TreeView = function( parent ){
     // treeView.layoutChanged.emit();
     // treeView.itemChanged.emit();
   }
+
 
   ///
   function addItem( itemData, parent, id ){
@@ -159,7 +175,16 @@ var TreeView = function( parent ){
     itemData.modelItem = item;
     itemData.counterItem = counterItem;
     dataByItemId[itemData.id] = itemData;
+
     return item;
+
+  }
+
+
+  //
+  function getItemDataByIndex( index ){
+    item = index ? model.itemFromIndex(index) : null;
+    return item ? dataByItemId[item.whatsThis()] : null;
   }
 
 }

@@ -145,7 +145,7 @@ function Model( scriptVer ){
       _this.duplicateItem( itemData, itemData.name, newGroupData, true );
     });
 
-    this.applyItemData( newGroupData );
+    this.saveGroupData( newGroupData );
 
     return newGroupData;
     
@@ -170,7 +170,7 @@ function Model( scriptVer ){
 
     newItemData.nodes = itemData.nodes ? itemData.nodes.slice(0) : [];
 
-    if( !skipApply ) this.applyItemData( itemData );
+    if( !skipApply ) this.saveGroupData( itemData );
     
     MessageLog.trace('duplicateItem: Successed: '+JSON.stringify(newItemData,true,'  ') );
 
@@ -204,7 +204,7 @@ function Model( scriptVer ){
       var index = groupData.items.indexOf(itemData);
       if( index >= 0 ) {
         groupData.items.splice( index, 1 );
-        this.applyItemData( groupData );
+        this.saveGroupData( groupData );
       }
 
     }
@@ -240,7 +240,7 @@ function Model( scriptVer ){
       itemData.dataNode = itemData.dataNode = dataNodeParent+'/'+dataNodeName;
     }
 
-    this.applyItemData( itemData );
+    this.saveGroupData( itemData );
 
   }
 
@@ -267,7 +267,7 @@ function Model( scriptVer ){
 
     // MessageLog.trace('createSetInGroup', groupId, setName, JSON.stringify(groupData,true,' ') );
 
-    this.applyItemData( groupData );
+    this.saveGroupData( groupData );
 
     return itemData;
     // }catch(err){MessageLog.trace('createSetInGroup Err:'+err)}
@@ -286,7 +286,7 @@ function Model( scriptVer ){
       })
     ;
 
-    this.applyItemData( itemData );
+    this.saveGroupData( itemData );
 
   }
 
@@ -303,7 +303,7 @@ function Model( scriptVer ){
       }
     });
 
-    this.applyItemData( itemData );
+    this.saveGroupData( itemData );
 
   }
 
@@ -319,7 +319,7 @@ function Model( scriptVer ){
       return node.type(_node);
     });
 
-    this.applyItemData( itemData );
+    this.saveGroupData( itemData );
 
      // }catch(err){MessageLog.trace('showCreateSetUI Err:'+err)}
 
@@ -354,7 +354,7 @@ function Model( scriptVer ){
 
 
   ///
-  this.applyItemData = function( itemData ){
+  this.saveGroupData = function( itemData ){
     // check Data Node is available
     
     if( !itemData.isGroup ){
@@ -374,6 +374,8 @@ function Model( scriptVer ){
 
     node.setTextAttr( itemData.dataNode, 'text', 1, this.getItemDataText(itemData) );
 
+    // MessageLog.trace('saveGroupData success'+JSON.stringify(itemData,true,'  '));
+
   }
 
 
@@ -383,17 +385,19 @@ function Model( scriptVer ){
     // Cleanup data
     data = {
       name: data.name,
+      id: data.id,
+      isExpanded: data.isExpanded,
       items: data.items.map(function(setData){
         return {
           name: setData.name,
           id: setData.id,
           nodes: setData.nodes,
         }
-      }),
-      id: data.id,
+      })
     };
 
     return '%%PS_SelectionSets|v'+scriptVer+'%%\n'+JSON.stringify(data,true,'  ');
+    
   }
 
 
