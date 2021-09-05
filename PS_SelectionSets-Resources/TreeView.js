@@ -73,6 +73,8 @@ var TreeView = function( parent ){
 
     });
 
+    this.treeView.expandAll();
+
   }
 
   this.refresh = function(){

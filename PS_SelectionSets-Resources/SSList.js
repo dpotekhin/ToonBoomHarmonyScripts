@@ -23,6 +23,7 @@ function SSList( scriptVer, parent ){
   treeView.onItemClick = function( event, itemData ){
 
     // MessageLog.trace('clicked:'+JSON.stringify(itemData,true,'  '));
+    
     currentItemData = itemData;
 
     if( KeyModifiers.IsControlPressed() ) addSelectionToSet();
@@ -48,7 +49,8 @@ function SSList( scriptVer, parent ){
         
         ContextMenu.showContextMenu({
             '!Rename Group': showRenameUI,
-            '!Create Group': showCreateGroupUI,
+            '!Create Group': createGroup,
+            '!Duplicate Group': duplicateGroup,
             '!Delete Group': deleteItem,
             '-1': 1,
             '!Create Selection Set': showCreateSetUI,
@@ -67,6 +69,7 @@ function SSList( scriptVer, parent ){
             '!Remove Missed Nodes': removeMissedNodes,
             '-1': 1,
             '!Rename Set': showRenameUI,
+            '!Duplicate Set': duplicateSet,
             '!Delete Set': deleteItem,
           }, event, parent );
 
@@ -76,7 +79,7 @@ function SSList( scriptVer, parent ){
 
       // MessageLog.trace('Click in empty place.');
       ContextMenu.showContextMenu({
-          '!Create Group': showCreateGroupUI,
+          '!Create Group': createGroup,
           '!Refresh': refreshData,
         }, event, parent );
 
@@ -184,28 +187,129 @@ function SSList( scriptVer, parent ){
 
   }
 
-
   //
-  function showCreateGroupUI(){
+  function duplicateSet(){
 
-    var myDialog = new Dialog();
-    myDialog.title = "Create Selection Set Group";
+    var itemType = model.getItemType( currentItemData );
 
-    var groupList = SelectionUtils.filterNodesByType( 'Top', 'GROUP', true );
+    var dlg = new Dialog();
+    dlg.title = "Duplicate Selection Set";
+
+    var groupListData = {};
+    var currentGroupIndex = 0;
+
+    var groupList = model.dataNodes.map(function( groupData, i ){
+      var groupLabel = (i+1)+': '+groupData.name;
+      groupListData[groupLabel] = groupData;
+      if( groupData.id === currentItemData.groupId ) currentGroupIndex = i;
+      return groupLabel;
+    });
 
     // Parent node
     var groupNodeInput = new ComboBox();
     groupNodeInput.label = "Parent Group:"
     // groupNodeInput.editable = true;
     groupNodeInput.itemList = groupList;
-    myDialog.add( groupNodeInput );
+    groupNodeInput.currentItemPos = currentGroupIndex;
+    dlg.add( groupNodeInput );
+
+    // SS Name
+    var itemNameInput = new LineEdit();
+    itemNameInput.label = "Selection Set Name:";
+    itemNameInput.text = currentItemData.name;
+    dlg.add( itemNameInput );
+
+    if( !dlg.exec() ) return;
+
+    var parentNode = groupNodeInput.currentItem;
+    if( !parentNode ) return;
+    parentNode = groupListData[parentNode];
+
+    var itemName = itemNameInput.text.trim();
+    if( !itemName ){
+      MessageBox.warning('Selection Set Name required',0,0,0,'Error');
+      return;
+    }
+
+    scene.beginUndoRedoAccum('Duplicate Selection Set');
+
+    model.duplicateItem( currentItemData, itemName, parentNode );
+    
+    updateList();
+
+    scene.endUndoRedoAccum();
+
+  }
+
+
+  //
+  function createGroup(){
+
+    var userInput = showCreateGroupUI( "Create Selection Set Group" );
+    if( !userInput ) return;
+
+    MessageLog.trace("createGroup:" +userInput.parentNode+ ", "+userInput.ssGroupName );
+
+    scene.beginUndoRedoAccum('Create Selection Set Group');
+
+    var groupData = model.createDataNode( userInput.parentNode, userInput.ssGroupName );
+    
+    SelectionUtils.selectNodes( groupData.dataNode );
+
+    updateList();
+
+    scene.endUndoRedoAccum();
+
+  }
+
+
+  function duplicateGroup(){
+
+    var userInput = showCreateGroupUI( 'Duplicate Selection Set Group', currentItemData );
+    if( !userInput ) return;
+
+    // MessageLog.trace("duplicateGroup:" +userInput.parentNode+ ", "+userInput.ssGroupName );
+
+    scene.beginUndoRedoAccum('Duplicate Selection Set Group');
+
+    var groupData = model.duplicateGroup( currentItemData, userInput.ssGroupName, userInput.parentNode );
+    
+    SelectionUtils.selectNodes( groupData.dataNode );
+
+    updateList();
+
+    scene.endUndoRedoAccum();
+
+  }
+
+
+  function showCreateGroupUI( title, groupData ){
+
+    var dlg = new Dialog();
+    dlg.title = title;
+
+    var groupList = SelectionUtils.filterNodesByType( 'Top', 'GROUP', true );
+
+    // Parent node
+    var groupNodeInput = new ComboBox();
+    groupNodeInput.label = "Parent Group:"
+    if( groupData ){
+      var groupDataParentNode = groupData.dataNode.split('/');
+      groupDataParentNode.pop();
+      groupDataParentNode = groupDataParentNode.join('/');
+      groupNodeInput.currentItemPos = groupList.indexOf( groupDataParentNode );
+    }
+    // groupNodeInput.editable = true;
+    groupNodeInput.itemList = groupList;
+    dlg.add( groupNodeInput );
 
     // SS group Name
     var groupNameInput = new LineEdit();
     groupNameInput.label = "Group Name:";
-    myDialog.add( groupNameInput );
+    if( groupData ) groupNameInput.text = groupData.name;
+    dlg.add( groupNameInput );
 
-    if( !myDialog.exec() ) return;
+    if( !dlg.exec() ) return;
 
     var parentNode = groupNodeInput.currentItem;
     if( !parentNode ) return;
@@ -216,17 +320,10 @@ function SSList( scriptVer, parent ){
       return;
     }
 
-    MessageLog.trace("Data:" +parentNode+ ", "+ssGroupName );
-
-    scene.beginUndoRedoAccum('Create Selection Set Group');
-
-    model.createDataNode( parentNode, ssGroupName );
-    
-    SelectionUtils.selectNodes( parentNode );
-
-    updateList();
-
-    scene.endUndoRedoAccum();
+    return {
+      parentNode: parentNode,
+      ssGroupName: ssGroupName,
+    };
 
   }
 

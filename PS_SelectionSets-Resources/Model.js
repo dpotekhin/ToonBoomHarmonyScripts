@@ -13,6 +13,8 @@ var dataNodePrefix = 'PS-SS_';
 ///
 function Model( scriptVer ){
 
+  var _this = this;
+
   //
   this.getSetsDataFromScene = function(){
     
@@ -53,6 +55,12 @@ function Model( scriptVer ){
 
   }
 
+  
+  //
+  this.getItemType = function( itemData ){
+    return itemData ? (itemData.isGroup ? 'Group' : 'Selection Set') : undefined;
+  }
+
 
   //
   this.createDataNode = function( parentNode, nodeName ){
@@ -77,6 +85,8 @@ function Model( scriptVer ){
 
     // Node data
     var data = {
+      isGroup: true,
+      dataNode: dataNode,
       name: dataNodeName,
       id: Utils.createUid(),
       items: []
@@ -86,7 +96,7 @@ function Model( scriptVer ){
 
     // MessageLog.trace('Created SS dataNode:'+dataNode);
 
-    return dataNode;
+    return data;
     
   }
 
@@ -95,6 +105,7 @@ function Model( scriptVer ){
   this.getItemDataById = function( id ){
     
     if( !this.dataNodes ) return;
+    if( id.id ) return id;
 
     var result;
 
@@ -119,6 +130,51 @@ function Model( scriptVer ){
     });
 
     return result;
+  }
+
+  
+  //
+  this.duplicateGroup = function( id, name, parentNode ){
+
+    var originalGroupData = this.getItemDataById(id);
+    if( !originalGroupData || !originalGroupData.isGroup ) return;
+
+    var newGroupData = this.createDataNode( parentNode, name );
+
+    originalGroupData.items.forEach(function( itemData ){
+      _this.duplicateItem( itemData, itemData.name, newGroupData, true );
+    });
+
+    this.applyItemData( newGroupData );
+
+    return newGroupData;
+    
+  }
+
+
+  //
+  this.duplicateItem = function( id, name, groupId, skipApply ){
+
+    // MessageLog.trace('duplicateItem: '+id+' > '+name+' > '+groupId);
+    var itemData = this.getItemDataById(id);
+    if( !itemData || itemData.isGroup ) {
+      // MessageLog.trace('duplicateItem: no ItemData received.');
+      return;
+    }
+
+    var newItemData = this.createSetInGroup( groupId || itemData.groupId, name );
+    if( !newItemData ) {
+      // MessageLog.trace('duplicateItem: newItemData not created');
+      return;
+    }
+
+    newItemData.nodes = itemData.nodes ? itemData.nodes.slice(0) : [];
+
+    if( !skipApply ) this.applyItemData( itemData );
+    
+    MessageLog.trace('duplicateItem: Successed: '+JSON.stringify(newItemData,true,'  ') );
+
+    return newItemData;
   }
 
 
@@ -196,18 +252,24 @@ function Model( scriptVer ){
 
     var groupData = this.getItemDataById(groupId);
     // MessageLog.trace('createSetInGroup'+JSON.stringify(groupData,true,'  '));
-    if( !groupData || !groupData.isGroup ) return;
+    if( !groupData || !groupData.isGroup ) {
+      MessageLog.trace('createSetInGroup: groupId not recqived '+groupData.name);
+      return;
+    }
 
-    groupData.items.push({
+    var itemData = {
       id: Utils.createUid(),
       name: setName,
-      groupId: groupData.id 
-    });
+      groupId: groupData.id,
+      nodes: [] 
+    };
+    groupData.items.push( itemData );
 
     // MessageLog.trace('createSetInGroup', groupId, setName, JSON.stringify(groupData,true,' ') );
 
     this.applyItemData( groupData );
 
+    return itemData;
     // }catch(err){MessageLog.trace('createSetInGroup Err:'+err)}
 
   }
