@@ -162,17 +162,15 @@ function Model( scriptVer ){
       return;
     }
 
-    var newItemData = this.createSetInGroup( groupId || itemData.groupId, name );
+    var newItemData = this.createSetInGroup( groupId || itemData.groupId, name, itemData.nodes ? itemData.nodes.slice(0) : [] );
     if( !newItemData ) {
       // MessageLog.trace('duplicateItem: newItemData not created');
       return;
     }
 
-    newItemData.nodes = itemData.nodes ? itemData.nodes.slice(0) : [];
-
     if( !skipApply ) this.saveGroupData( itemData );
     
-    MessageLog.trace('duplicateItem: Successed: '+JSON.stringify(newItemData,true,'  ') );
+    // MessageLog.trace('duplicateItem: Successed: '+groupId.name+' >> '+skipApply+' >> '+JSON.stringify(newItemData,true,'  ') );
 
     return newItemData;
   }
@@ -397,7 +395,7 @@ function Model( scriptVer ){
     };
 
     return '%%PS_SelectionSets|v'+scriptVer+'%%\n'+JSON.stringify(data,true,'  ');
-    
+
   }
 
 
