@@ -115,14 +115,14 @@ function SSList( scriptVer, parent ){
   ///
   function updateList(){
     
-    var setsData = model.getSetsDataFromScene();
+    var setsData = model.getSetsDataFromScene() || [];
 
-    if( !setsData ){ // Create a default Selection Set group if there's no Selection sets groups in scene
+    // if( !setsData ){ // Create a default Selection Set group if there's no Selection sets groups in scene
 
-      model.createDataNode();
-      setsData = model.getSetsDataFromScene();
+    //   model.createDataNode();
+    //   setsData = model.getSetsDataFromScene();
 
-    }
+    // }
 
     /*
     MessageLog.trace('>>>>>>>>>>>> updateList >>>>>>>>>>>>');
