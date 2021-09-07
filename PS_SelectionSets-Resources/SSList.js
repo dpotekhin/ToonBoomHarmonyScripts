@@ -49,10 +49,10 @@ function SSList( scriptVer, parent ){
         
         ContextMenu.showContextMenu({
             '!Rename Group': showRenameUI,
-            '!Create Group': createGroup,
             '!Duplicate Group': duplicateGroup,
             '!Delete Group': deleteItem,
             '-1': 1,
+            '!Create Group': createGroup,
             '!Create Selection Set from Selection': function(){ showCreateSetUI(true) },
             '!Create Empty Selection Set': showCreateSetUI,
             '-2': 1,
@@ -305,7 +305,11 @@ function SSList( scriptVer, parent ){
     var dlg = new Dialog();
     dlg.title = title;
 
-    var groupList = SelectionUtils.filterNodesByType( 'Top', 'GROUP', true );
+    var groupList = SelectionUtils.filterNodesByType( 'Top', 'GROUP', true )
+      .filter(function(_node){ // To avoid a mess, only the root group and its first children are accepted in the group list.
+        return !_node.match(/.*\/.*\/.*/g);
+      })
+    ;
 
     // Parent node
     var groupNodeInput = new ComboBox();
