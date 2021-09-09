@@ -9,7 +9,7 @@ var Model = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_Sele
 var SelectionUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/SelectionUtils.js"));
 
 ///
-function SSList( scriptVer, parent ){
+function SSList( scriptVer, parentWidget ){
 
   var ContextMenu = _ContextMenu;
 
@@ -17,7 +17,7 @@ function SSList( scriptVer, parent ){
 
   var model = new Model( scriptVer );
 
-  var treeView = new TreeView( parent );
+  var treeView = new TreeView( parentWidget );
 
   //
   treeView.onItemClick = function( itemData, event ){
@@ -30,7 +30,9 @@ function SSList( scriptVer, parent ){
     else if( KeyModifiers.IsShiftPressed() ) removeSelectionFromSet();
     else if( KeyModifiers.IsAlternatePressed() ) toggleSetNodes();
     else selectSetNodes();
-    
+
+    setFocusOnMainWindow();
+
     // MessageLog.trace('-->'+itemData.modelItem.text()+', '+itemData.id );
   }
 
@@ -58,7 +60,7 @@ function SSList( scriptVer, parent ){
             '-2': 1,
             '!Select Group Data Node': selectGroupDataNode,
             '!Refresh': refreshData,
-          }, event, parent );
+          }, event, parentWidget );
 
       }else{
 
@@ -72,7 +74,7 @@ function SSList( scriptVer, parent ){
             '!Rename Set': showRenameUI,
             '!Duplicate Set': duplicateSet,
             '!Delete Set': deleteItem,
-          }, event, parent );
+          }, event, parentWidget );
 
       }
 
@@ -82,7 +84,7 @@ function SSList( scriptVer, parent ){
       ContextMenu.showContextMenu({
           '!Create Group': createGroup,
           '!Refresh': refreshData,
-        }, event, parent );
+        }, event, parentWidget );
 
     }
 
@@ -466,6 +468,14 @@ function SSList( scriptVer, parent ){
     scene.endUndoRedoAccum();
 
   }
+
+  //
+  function setFocusOnMainWindow(){
+  
+    parentWidget.setFocusOnMainWindow();
+
+  }
+
 
 }
 
