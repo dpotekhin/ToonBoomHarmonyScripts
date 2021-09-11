@@ -34,9 +34,17 @@ var TreeView = function( parent, resourcesPath ){
 
   var clickTimer = new QTimer(treeView);
 
+  function clearClickTimerData(){
+
+    isRightButtonClick = undefined;
+    currentItemData = undefined;
+
+  }
+
   function clickTimerComplete(){
-    clickTimer.stop();
+    
     // MessageLog.trace('CLICK TIMER ' +isRightButtonClick );
+     clickTimer.stop();
 
     if( isRightButtonClick ){
 
@@ -52,8 +60,7 @@ var TreeView = function( parent, resourcesPath ){
 
     }
 
-    isRightButtonClick = undefined;
-    currentItemData = undefined;
+    clearClickTimerData();
 
   }
 
@@ -77,6 +84,7 @@ var TreeView = function( parent, resourcesPath ){
 
       case 1:
         if( _this.onItemVisibilityClick ) _this.onItemVisibilityClick( currentItemData );
+        clearClickTimerData();
         break;
     }
 
