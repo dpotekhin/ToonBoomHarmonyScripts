@@ -180,7 +180,7 @@ var TreeView = function( parent, resourcesPath ){
       rowItems
     );
 
-    visibilityItem.setToolTip( 'Click to toggle visibility of the Selection Set nodes' );
+    visibilityItem.setToolTip( 'Click to toggle visibility of the Selection Set nodes.\nOr Click + Alt on a Selection Set Name.' );
 
     if( !itemData.isGroup ) {
 

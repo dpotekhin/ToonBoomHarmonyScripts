@@ -13,23 +13,42 @@ function PS_SelectionSets(){
 
   var scriptName = 'Selection Sets';
   var scriptVer = '0.210821';
-  var modalWidth = 174;
-  var modalHeightMin = 120;
-  var modalHeightMax = 500;
+
+  var modalWidthMin = 100;
+  var modalWidthMax = 400;
+  var modalWidth = 176;
+
+  var modalHeightMin = 110;
+  var modalHeightMax = 600;
   var modalHeight = ~~(modalHeightMin + (modalHeightMax-modalHeightMin) * .5);
-  
-  
+
   //
   var modal = new pModal( scriptName + " v" + scriptVer, modalWidth, modalHeight, false );  
   if( !modal.ui ){
     return;
   }
   var ui = modal.ui;
-  ui.setMinimumSize( modalWidth, modalHeightMin );
-  ui.setMaximumSize( modalWidth, modalHeightMax );
+  ui.setMinimumSize( modalWidthMin, modalHeightMin );
+  ui.setMaximumSize( modalWidthMax, modalHeightMax );
+  ui.resize( modalWidth, modalHeight );
 
   var sSList = new SSList( scriptVer, ui );
-  
+
+  ui.resizeEvent = function(e){
+    // MessageLog.trace('RESIZE '+ui.width );
+    sSList.prefs.windowWidth = ui.width;
+    sSList.prefs.windowHeight = ui.height;
+    sSList.savePrefs();
+    // QWidget.resizeEvent( e );
+  }
+
+  /*
+  ui.closeEvent = function(e){
+    MessageLog.trace('closeEvent');
+    QWidget.closeEvent(e);
+  }
+  */
+
   // ui.mainLayout.addStretch();
 
   modal.show();
