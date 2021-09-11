@@ -75,7 +75,7 @@ function SSList( scriptVer, parentWidget ){
             '!Remove Selection from Set': removeSelectionFromSet,
             '!Replace Set with Selection': replaceSetWithSelection,
             '!Clear Set': clearSet,
-            '!Remove Missed Nodes': removeMissedNodes,
+            '!Remove Lost Nodes': removeLostNodes,
             '-1': 1,
             '!Rename Set': showRenameUI,
             '!Duplicate Set': duplicateSet,
@@ -416,6 +416,8 @@ function SSList( scriptVer, parentWidget ){
 
     model.addNodesToItem( currentItemData, selection.selectedNodes() );
 
+    currentItemData.updateVisibilityCellState( true );
+
     scene.endUndoRedoAccum();
 
     // MessageLog.trace('addSelectionToSet: @2: '+JSON.stringify(currentItemData,true,'  ') );
@@ -448,6 +450,8 @@ function SSList( scriptVer, parentWidget ){
 
     model.addNodesToItem( currentItemData, selection.selectedNodes(), true );
 
+    currentItemData.updateVisibilityCellState( true );
+
     scene.endUndoRedoAccum();
 
     // MessageLog.trace('replaceSetWithSelection: @2: '+JSON.stringify(currentItemData,true,'  ') );
@@ -460,9 +464,11 @@ function SSList( scriptVer, parentWidget ){
 
     // MessageLog.trace('clearSet: @1: '+JSON.stringify(currentItemData,true,'  ') );
     
-    scene.beginUndoRedoAccum('Remove Missed Nodes');
+    scene.beginUndoRedoAccum('Remove Lost Nodes');
 
     model.addNodesToItem( currentItemData, [], true );
+
+    currentItemData.updateVisibilityCellState( true );
 
     scene.endUndoRedoAccum();
 
@@ -472,17 +478,19 @@ function SSList( scriptVer, parentWidget ){
 
 
   //
-  function removeMissedNodes(){
+  function removeLostNodes(){
 
-    // MessageLog.trace('removeMissedNodes: @1: '+JSON.stringify(currentItemData,true,'  ') );
+    // MessageLog.trace('removeLostNodes: @1: '+JSON.stringify(currentItemData,true,'  ') );
     
-    scene.beginUndoRedoAccum('Remove Missed Nodes');
+    scene.beginUndoRedoAccum('Remove Lost Nodes');
 
-    model.removeMissedNodes( currentItemData );
+    model.removeLostNodes( currentItemData );
+
+    currentItemData.updateVisibilityCellState( true );
 
     scene.endUndoRedoAccum();
 
-    // MessageLog.trace('removeMissedNodes: @2: '+JSON.stringify(currentItemData,true,'  ') );
+    // MessageLog.trace('removeLostNodes: @2: '+JSON.stringify(currentItemData,true,'  ') );
 
   }
 

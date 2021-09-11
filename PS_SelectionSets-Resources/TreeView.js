@@ -9,6 +9,9 @@ var TreeView = function( parent, resourcesPath ){
   var hiddenIcon = new QIcon( resourcesPath + 'hidden.png' );
   var mixedVisibilityIcon = new QIcon( resourcesPath + 'mixedVisibility.png' );
 
+  var normalBackgroundBrush = new QBrush( new QColor('#000000') );
+  var warningBackgroundBrush = new QBrush( new QColor('#400000') );
+
   var _this = this;
   var rootItem;
   var dataByItemId = {};
@@ -209,8 +212,6 @@ var TreeView = function( parent, resourcesPath ){
 
       }
 
-      itemData.updateVisibilityCellState( true );
-
     }else{
         
       itemData.updateVisibilityCellState = function(){};
@@ -224,11 +225,25 @@ var TreeView = function( parent, resourcesPath ){
       rowItems
     );
 
-    counterItem.setToolTip( 'Number of nodes in this Selection Set' );
+    if( itemData.isGroup ){
+      
+      if( itemData.dataNodeIsMoved ){
+        counterItem.setBackground( warningBackgroundBrush );
+        counterItem.setText( '!' );
+        counterItem.setToolTip( "The Data Node was moved to another group or its group was renamed and some Selection Sets nodes could't be found." );
+      }
+    
+    }else{
 
+      // counterItem.setToolTip( 'Number of nodes in this Selection Set' );
+
+    }
        
     //
     // if( !isGroup ) item.setTextAlignment(Qt.AlignRight);
+    
+    itemData.updateVisibilityCellState( true );
+
     ( parent===true ? rootItem : parent ).appendRow( rowItems );
 
     dataByItemId[itemData.id] = itemData;
@@ -242,12 +257,13 @@ var TreeView = function( parent, resourcesPath ){
 
     // Update nodes state
     var nodesVisibilityState;
+    var notFoundNodes = [];
 
     setData.nodes.forEach(function(_node,i){
 
       if( !node.type(_node) ){ // Node not exists
         // MessageLog.trace('Node in Selection Set "'+dataNode+'" not found "'+_node+'"');
-        MessageLog.trace('Node in Selection Set not found "'+_node+'"');
+        notFoundNodes.push( _node );
         return;
       }
 
@@ -256,8 +272,18 @@ var TreeView = function( parent, resourcesPath ){
 
     });
 
+    if( notFoundNodes.length ){ // Lost nodes detected
+
+      setData.counterItem.setBackground( warningBackgroundBrush );
+      setData.counterItem.setToolTip( 'Lost Nodes:\n - '+notFoundNodes.join('\n - ') );
+    }else{
+
+      setData.counterItem.setBackground( normalBackgroundBrush );
+      setData.counterItem.setToolTip( 'Number of nodes in this Selection Set' );
+
+    }
+
     setData.nodesVisibilityState = nodesVisibilityState === 'mixed' ? 'mixed' : ( nodesVisibilityState ? 'visible' : 'hidden' );
-    // item.setBackground( new QBrush( new QColor('#ff0000') ) );
 
   }
 

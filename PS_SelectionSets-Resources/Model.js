@@ -23,6 +23,7 @@ function Model( scriptVer ){
     var dataNodes = [];
 
     _dataNodes.forEach(function(dataNode){
+
       var text = (node.getTextAttr(dataNode, 1, 'text') || '').trim();
       if( text.indexOf('%%PS_SelectionSets|') !== 0 ) return;
       try{
@@ -34,6 +35,26 @@ function Model( scriptVer ){
         groupData.id = Utils.createUid();
         groupData.isGroup = true;
         groupData.dataNode = dataNode;
+        groupData.dataNodeParent = NodeUtils.getNodeParent( dataNode )
+
+        if( groupData.originalDataNodeParent ) {
+          
+          if( groupData.originalDataNodeParent !== groupData.dataNodeParent ){
+            
+            if( _this.fixNodesToNewDataNodeGroup( groupData ) ){
+
+              groupData.originalDataNodeParent = groupData.dataNodeParent;
+
+            }else{
+
+              groupData.dataNodeIsMoved = true;
+
+            }
+
+          }
+          
+          // TODO: Fix node paths of Selections Sets in this Group
+        }
 
         groupData.items.forEach(function(setData){
           
@@ -58,6 +79,39 @@ function Model( scriptVer ){
   }
 
   
+  //
+  this.fixNodesToNewDataNodeGroup = function( groupData ){
+
+    var success = true;
+
+    groupData.items.forEach(function( setData ){
+
+      setData.nodes = setData.nodes.map(function( _node ){
+        // MessageLog.trace( '-> '+_node+' >> '+groupData.originalDataNodeParent+' >> '+groupData.dataNodeParent );
+        if( !node.type(_node) ){
+
+          var __node = _node.replace( groupData.originalDataNodeParent, groupData.dataNodeParent );
+
+          if( !node.type(__node) ){
+            success = false;
+            return _node;
+          }
+
+          return __node;
+
+        }
+
+        return _node;
+
+      });
+
+    });
+
+    return success;
+
+  }
+
+
   //
   this.getItemType = function( itemData ){
     return itemData ? (itemData.isGroup ? 'Group' : 'Selection Set') : undefined;
@@ -303,8 +357,6 @@ function Model( scriptVer ){
       })
     ;
 
-    setData.updateVisibilityCellState( true );
-
     this.saveGroupData( setData );
 
   }
@@ -328,7 +380,7 @@ function Model( scriptVer ){
 
 
   //
-  this.removeMissedNodes = function( itemData ){
+  this.removeLostNodes = function( itemData ){
 
     // try{
 
@@ -409,6 +461,9 @@ function Model( scriptVer ){
       id: data.id,
       isExpanded: data.isExpanded,
       description: data.description,
+      dataNode: data.dataNode,
+      dataNodeParent: data.dataNodeParent,
+      originalDataNodeParent: data.originalDataNodeParent || data.dataNodeParent,
       items: data.items.map(function(setData){
         return {
           name: setData.name,
