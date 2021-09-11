@@ -9,7 +9,7 @@ var Model = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_Sele
 var SelectionUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/SelectionUtils.js"));
 
 ///
-function SSList( scriptVer, parent ){
+function SSList( scriptVer, parentWidget ){
 
   var resourcesPath = fileMapper.toNativePath(specialFolders.userScripts+"/PS_SelectionSets-Resources/icons/");
   var ContextMenu = _ContextMenu;
@@ -18,7 +18,7 @@ function SSList( scriptVer, parent ){
 
   var model = new Model( scriptVer );
 
-  var treeView = new TreeView( parent, resourcesPath );
+  var treeView = new TreeView( parentWidget, resourcesPath );
 
   //
   treeView.onItemClick = function( itemData ){
@@ -31,7 +31,9 @@ function SSList( scriptVer, parent ){
     else if( KeyModifiers.IsShiftPressed() ) removeSelectionFromSet();
     else if( KeyModifiers.IsAlternatePressed() ) toggleSetNodes();
     else selectSetNodes();
-    
+
+    setFocusOnMainWindow();
+
     // MessageLog.trace('-->'+itemData.modelItem.text()+', '+itemData.id );
   }
 
@@ -50,16 +52,16 @@ function SSList( scriptVer, parent ){
         
         ContextMenu.showContextMenu({
             '!Rename Group': showRenameUI,
-            '!Create Group': createGroup,
             '!Duplicate Group': duplicateGroup,
             '!Delete Group': deleteItem,
             '-1': 1,
+            '!Create Group': createGroup,
             '!Create Selection Set from Selection': function(){ showCreateSetUI(true) },
             '!Create Empty Selection Set': showCreateSetUI,
             '-2': 1,
             '!Select Group Data Node': selectGroupDataNode,
             '!Refresh': refreshData,
-          }, event, parent );
+          }, event, parentWidget );
 
       }else{
 
@@ -73,7 +75,7 @@ function SSList( scriptVer, parent ){
             '!Rename Set': showRenameUI,
             '!Duplicate Set': duplicateSet,
             '!Delete Set': deleteItem,
-          }, event, parent );
+          }, event, parentWidget );
 
       }
 
@@ -83,7 +85,7 @@ function SSList( scriptVer, parent ){
       ContextMenu.showContextMenu({
           '!Create Group': createGroup,
           '!Refresh': refreshData,
-        }, event, parent );
+        }, event, parentWidget );
 
     }
 
@@ -122,14 +124,14 @@ function SSList( scriptVer, parent ){
   ///
   function updateList(){
     
-    var setsData = model.getSetsDataFromScene();
+    var setsData = model.getSetsDataFromScene() || [];
 
-    if( !setsData ){ // Create a default Selection Set group if there's no Selection sets groups in scene
+    // if( !setsData ){ // Create a default Selection Set group if there's no Selection sets groups in scene
 
-      model.createDataNode();
-      setsData = model.getSetsDataFromScene();
+    //   model.createDataNode();
+    //   setsData = model.getSetsDataFromScene();
 
-    }
+    // }
 
     /*
     MessageLog.trace('>>>>>>>>>>>> updateList >>>>>>>>>>>>');
@@ -312,7 +314,11 @@ function SSList( scriptVer, parent ){
     var dlg = new Dialog();
     dlg.title = title;
 
-    var groupList = SelectionUtils.filterNodesByType( 'Top', 'GROUP', true );
+    var groupList = SelectionUtils.filterNodesByType( 'Top', 'GROUP', true )
+      .filter(function(_node){ // To avoid a mess, only the root group and its first children are accepted in the group list.
+        return !_node.match(/.*\/.*\/.*/g);
+      })
+    ;
 
     // Parent node
     var groupNodeInput = new ComboBox();
@@ -471,21 +477,25 @@ function SSList( scriptVer, parent ){
   }
 
 
+  //
+  function setFocusOnMainWindow(){
+  
+    parentWidget.setFocusOnMainWindow();
 
-
+  }
 
   // PREFERENCES >>>
   var prefsName = 'PS_SelectionSets_Prefs';
   // MessageLog.trace('AAA'+preferences.getString( prefsName, '{"width":200,"height":200}' ) );
   var prefs = this.prefs = JSON.parse( preferences.getString( prefsName, '{}' ) );
   if( prefs.windowWidth ){
-    parent.resize( prefs.windowWidth, prefs.windowHeight );
+    parentWidget.resize( prefs.windowWidth, prefs.windowHeight );
   }
 
   this.savePrefs = function(){
     preferences.setString( prefsName, JSON.stringify(prefs) );
+  
   }
-
 
 }
 
