@@ -310,17 +310,19 @@ function Model( scriptVer ){
 
 
   //
-  this.addNodesToItem = function( itemData, nodes, replace ){
+  this.addNodesToItem = function( setData, nodes, replace ){
     
     if( !nodes ) return;
 
-    itemData.nodes = ( (replace ? [] : itemData.nodes ) || [] ).concat( nodes );
-    itemData.nodes = itemData.nodes.filter(function(_node, pos) {
-        return itemData.nodes.indexOf(_node) == pos;
+    setData.nodes = ( (replace ? [] : setData.nodes ) || [] ).concat( nodes );
+    setData.nodes = setData.nodes.filter(function(_node, pos) {
+        return setData.nodes.indexOf(_node) == pos;
       })
     ;
 
-    this.saveGroupData( itemData );
+    setData.updateVisibilityCellState( true );
+
+    this.saveGroupData( setData );
 
   }
 
@@ -373,8 +375,7 @@ function Model( scriptVer ){
       node.setEnable( _node, enable );
     });
 
-    itemData.nodesVisibilityState = enable ? 'visible' : 'hidden';
-    itemData.updateVisibilityCellState();
+    itemData.updateVisibilityCellState( true );
 
   }
 

@@ -148,6 +148,7 @@ var TreeView = function( parent, resourcesPath ){
   }
 
 
+  //
   this.refresh = function(){
     // treeView.dataChanged.emit(new QModelIndex(), new QModelIndex());
     // MessageLog.trace('!!!!'+treeView.toString() );
@@ -156,6 +157,7 @@ var TreeView = function( parent, resourcesPath ){
   }
 
 
+  // -------------------------------------------------
   ///
   function addItem( itemData, parent, id ){
     
@@ -181,7 +183,9 @@ var TreeView = function( parent, resourcesPath ){
 
     if( !itemData.isGroup ) {
 
-      itemData.updateVisibilityCellState = function(){
+      itemData.updateVisibilityCellState = function( updateNodes ){
+
+        if( updateNodes ) checkVisibilityState( itemData );
 
         switch( itemData.nodesVisibilityState ){
           
@@ -211,7 +215,7 @@ var TreeView = function( parent, resourcesPath ){
 
     }
 
-    itemData.updateVisibilityCellState(); 
+    itemData.updateVisibilityCellState( true ); 
 
 
     // Counter Item
@@ -234,6 +238,30 @@ var TreeView = function( parent, resourcesPath ){
 
   }
 
+  //
+  function checkVisibilityState( setData ){
+
+    // Update nodes state
+    var nodesVisibilityState;
+
+    setData.nodes.forEach(function(_node,i){
+
+      if( !node.type(_node) ){ // Node not exists
+        // MessageLog.trace('Node in Selection Set "'+dataNode+'" not found "'+_node+'"');
+        MessageLog.trace('Node in Selection Set not found "'+_node+'"');
+        return;
+      }
+
+      if( i===0 ) nodesVisibilityState = node.getEnable(_node);
+      else if( nodesVisibilityState !== 'mixed' && nodesVisibilityState !== node.getEnable(_node) ) nodesVisibilityState = 'mixed';
+
+    });
+
+    setData.nodesVisibilityState = nodesVisibilityState === 'mixed' ? 'mixed' : ( nodesVisibilityState ? 'visible' : 'hidden' );
+
+  }
+
+
   function _addItem( text, id, rowItems ){
 
     var item = new QStandardItem();
@@ -251,6 +279,7 @@ var TreeView = function( parent, resourcesPath ){
     item = index ? model.itemFromIndex(index) : null;
     return item ? dataByItemId[item.whatsThis()] : null;
   }
+
 
 }
 

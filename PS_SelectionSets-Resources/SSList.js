@@ -212,11 +212,16 @@ function SSList( scriptVer, parentWidget ){
 
   //
   function selectGroupDataNode(){
+    
     var _node = currentItemData.dataNode;
     if(!_node) return;
+    
     // MessageLog.trace( 'selectGroupDataNode: '+_node );
     selection.clearSelection();
     selection.addNodeToSelection(_node);
+    
+    setFocusOnMainWindow();
+
   }
 
 
