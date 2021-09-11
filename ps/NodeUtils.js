@@ -112,9 +112,18 @@ function getUnusedName( _node, nameOnly ){
 
 }
 
+
 //
 function getValidNodeName( nodeName ){
   return nodeName ? nodeName.replace(/\s/gi,'_').replace(/[^a-zA-Z0-9_-]+/gi,'') : undefined;
+}
+
+
+//
+function getNodeParent( _node ){
+  if( !_node ) return;
+  var parentNode = _node.match(/(.*)\//);
+  return ( parentNode && parentNode[1] ) ? parentNode[1] : undefined;
 }
 
 
@@ -163,4 +172,5 @@ exports = {
   getUnusedName: getUnusedName,
   getValidNodeName: getValidNodeName,
   getNodesBounds: getNodesBounds,
+  getNodeParent: getNodeParent,
 }
