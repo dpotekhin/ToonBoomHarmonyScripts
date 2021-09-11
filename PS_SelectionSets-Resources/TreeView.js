@@ -3,7 +3,11 @@ Author: D.Potekhin (d@peppers-studio.ru)
 Version: 0.210905
 */
 
-var TreeView = function( parent ){
+var TreeView = function( parent, resourcesPath ){
+
+  var visibleIcon = new QIcon( resourcesPath + 'visible.png' );
+  var hiddenIcon = new QIcon( resourcesPath + 'hidden.png' );
+  var mixedVisibilityIcon = new QIcon( resourcesPath + 'mixedVisibility.png' );
 
   var _this = this;
   var rootItem;
@@ -13,6 +17,8 @@ var TreeView = function( parent ){
   treeView.headerHidden = true;
   // MessageLog.trace('indentation '+ treeView.wordWrap  );
   treeView.indentation = 10;
+
+  // MessageLog.trace('H: '+Object.getOwnPropertyNames(treeView).join('\n') );
 
   var model = this.model = new QStandardItemModel();
   treeView.setModel(model);
@@ -61,9 +67,18 @@ var TreeView = function( parent ){
 
     currentItemData = getItemDataByIndex( index );
 
-    // MessageLog.trace('CLICKED'+currentItemData);
+    // MessageLog.trace('CLICKED: '+index.column()+': '+currentItemData );
     
-    clickTimer.start(6);
+    switch( index.column() ){
+
+      case 0:
+        clickTimer.start(6);
+        break;
+
+      case 2:
+        if( _this.onItemVisibilityClick ) _this.onItemVisibilityClick( currentItemData );
+        break;
+    }
 
   });
 
@@ -76,34 +91,6 @@ var TreeView = function( parent ){
     if( _isRightButtonClick === undefined ) clickTimerComplete();
 
   });
-
-  
-  /*
-  treeView.mouseReleaseEvent = function(event){
-    // MessageLog.trace('MOUSE CLICK: '+JSON.stringify(event,true,'  ') );
-    try{
-
-    var index = treeView.indexAt(event.pos());
-    var item = index ? model.itemFromIndex(index) : null;
-    var currentItemData = item ? dataByItemId[item.whatsThis()] : null;
-
-    // MessageLog.trace('clicked: "'+item.text()+'" > '+item.whatsThis()+' > '+currentItemData );
-
-    if( event.button() === Qt.RightButton ){ // Right mouse button
-      // MessageLog.trace('RIGHT');
-      if( _this.onItemContextMenu ) _this.onItemContextMenu( event, currentItemData );
-    }else{ // Other mouse buttons
-      // MessageLog.trace('LEFT');
-      if( currentItemData && _this.onItemClick ) _this.onItemClick( event, currentItemData );
-    }
-
-    // treeView.clearSelection();
-
-    }catch(err){MessageLog.trace('err:'+err)}
-    
-
-  }
-*/
   
   //
   treeView.collapsed.connect(function(index){
@@ -146,6 +133,8 @@ var TreeView = function( parent ){
 
     });
 
+    this.treeView.resizeColumnToContents(1);
+    this.treeView.resizeColumnToContents(2);
     // this.treeView.expandAll();
 
   }
@@ -162,20 +151,87 @@ var TreeView = function( parent ){
   ///
   function addItem( itemData, parent, id ){
     
-    var item = new QStandardItem(itemData.name);
-    item.setEditable(false);
-    
-    var counterItem = new QStandardItem();
-    if( !itemData.isGroup ) counterItem.setText( itemData.nodes ? itemData.nodes.length : 0 );
-    counterItem.setEditable(false);
+    var rowItems = [];
+
+    // Item
+    var item = itemData.modelItem = _addItem(
+      itemData.name,
+      itemData.id,
+      rowItems
+    );
+
+    if( itemData.isGroup ){
+      item.setToolTip( itemData.dataNode );
+    }
+
+    // Counter Item
+    var counterItem = itemData.counterItem = _addItem(
+      !itemData.isGroup ? (itemData.nodes ? itemData.nodes.length : 0) : undefined,
+      undefined,
+      rowItems
+    );
+
+    counterItem.setToolTip( 'Number of nodes in this Selection Set' );
+
+    // Visibility Item
+    var visibilityItem = itemData.visibilityItem = _addItem(
+      undefined,
+      !itemData.isGroup ? itemData.id : undefined,
+      rowItems
+    );
+
+    visibilityItem.setToolTip( 'Click to toggle visibility of the Selection Set nodes' );
+
+    if( !itemData.isGroup ) {
+
+      itemData.updateVisibilityCellState = function(){
+
+        switch( itemData.nodesVisibilityState ){
+          
+          case 'visible':
+          case true:
+            visibilityItem.setIcon( visibleIcon );
+
+            break;
+
+          case 'hidden':
+          case false:
+            visibilityItem.setIcon( hiddenIcon );
+            break;
+
+          case 'mixed':
+          case undefined:
+            visibilityItem.setIcon( mixedVisibilityIcon );
+            break;
+
+        }
+
+      }
+
+    }else{
+        
+      itemData.updateVisibilityCellState = function(){};
+
+    }
+
+    itemData.updateVisibilityCellState();    
 
     // if( !isGroup ) item.setTextAlignment(Qt.AlignRight);
-    ( parent===true ? rootItem : parent ).appendRow([item,counterItem]);
-    item.setWhatsThis(itemData.id);
-    itemData.modelItem = item;
-    itemData.counterItem = counterItem;
+    ( parent===true ? rootItem : parent ).appendRow( rowItems );
+
     dataByItemId[itemData.id] = itemData;
 
+    return item;
+
+  }
+
+  function _addItem( text, id, rowItems ){
+
+    var item = new QStandardItem();
+    if( text !== undefined ) item.setText( text );
+    item.setEditable(false);
+    item.setWhatsThis(id);
+    rowItems.push( item );
     return item;
 
   }

@@ -36,8 +36,27 @@ function Model( scriptVer ){
         groupData.dataNode = dataNode;
 
         groupData.items.forEach(function(setData){
+          
           setData.id = Utils.createUid();
           setData.groupId = groupData.id;
+
+          // Update nodes state
+          var nodesVisibilityState;
+
+          setData.nodes.forEach(function(_node,i){
+            
+            if( !node.type(_node) ){ // Node not exists
+              MessageLog.trace('Node in Selection Set "'+dataNode+'" not found "'+_node+'"');
+              return;
+            }
+
+            if( i===0 ) nodesVisibilityState = node.getEnable(_node);
+            else if( nodesVisibilityState !== 'mixed' && nodesVisibilityState !== node.getEnable(_node) ) nodesVisibilityState = 'mixed';
+
+          });
+
+          setData.nodesVisibilityState = nodesVisibilityState === 'mixed' ? 'mixed' : ( nodesVisibilityState ? 'visible' : 'hidden' );
+
         });
 
         dataNodes.push(groupData);
@@ -336,6 +355,9 @@ function Model( scriptVer ){
       if( enable === undefined ) enable = !node.getEnable( _node );
       node.setEnable( _node, enable );
     });
+
+    itemData.nodesVisibilityState = enable ? 'visible' : 'hidden';
+    itemData.updateVisibilityCellState();
 
   }
 

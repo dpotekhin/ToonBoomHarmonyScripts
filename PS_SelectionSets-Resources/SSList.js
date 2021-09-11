@@ -11,16 +11,17 @@ var SelectionUtils = require(fileMapper.toNativePath(specialFolders.userScripts+
 ///
 function SSList( scriptVer, parent ){
 
+  var resourcesPath = fileMapper.toNativePath(specialFolders.userScripts+"/PS_SelectionSets-Resources/icons/");
   var ContextMenu = _ContextMenu;
 
   var currentItemData;
 
   var model = new Model( scriptVer );
 
-  var treeView = new TreeView( parent );
+  var treeView = new TreeView( parent, resourcesPath );
 
   //
-  treeView.onItemClick = function( itemData, event ){
+  treeView.onItemClick = function( itemData ){
 
     // MessageLog.trace('clicked:'+JSON.stringify(itemData,true,'  '));
     
@@ -90,7 +91,13 @@ function SSList( scriptVer, parent ){
     
   }
 
-  
+  //
+  treeView.onItemVisibilityClick = function( itemData ){
+    
+    toggleSetNodes( itemData );
+
+  }
+
   //
   treeView.onCollapsed = function( itemData, index ){
     if( !itemData ) return;
@@ -442,11 +449,11 @@ function SSList( scriptVer, parent ){
 
 
   //
-  function toggleSetNodes(){
+  function toggleSetNodes( itemData ){
 
     scene.beginUndoRedoAccum('Toggle Set Nodes');
 
-    model.toggleSetNodes( currentItemData );
+    model.toggleSetNodes( itemData || currentItemData );
 
     scene.endUndoRedoAccum();
 
