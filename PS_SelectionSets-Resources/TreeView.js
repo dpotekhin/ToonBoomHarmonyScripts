@@ -75,7 +75,7 @@ var TreeView = function( parent, resourcesPath ){
         clickTimer.start(6);
         break;
 
-      case 2:
+      case 1:
         if( _this.onItemVisibilityClick ) _this.onItemVisibilityClick( currentItemData );
         break;
     }
@@ -162,15 +162,6 @@ var TreeView = function( parent, resourcesPath ){
 
     item.setToolTip( itemData.description || ( itemData.isGroup ? itemData.dataNode : '' ) );
 
-    // Counter Item
-    var counterItem = itemData.counterItem = _addItem(
-      !itemData.isGroup ? (itemData.nodes ? itemData.nodes.length : 0) : undefined,
-      undefined,
-      rowItems
-    );
-
-    counterItem.setToolTip( 'Number of nodes in this Selection Set' );
-
     // Visibility Item
     var visibilityItem = itemData.visibilityItem = _addItem(
       undefined,
@@ -212,8 +203,20 @@ var TreeView = function( parent, resourcesPath ){
 
     }
 
-    itemData.updateVisibilityCellState();    
+    itemData.updateVisibilityCellState(); 
 
+
+    // Counter Item
+    var counterItem = itemData.counterItem = _addItem(
+      !itemData.isGroup ? (itemData.nodes ? itemData.nodes.length : 0) : undefined,
+      undefined,
+      rowItems
+    );
+
+    counterItem.setToolTip( 'Number of nodes in this Selection Set' );
+
+       
+    //
     // if( !isGroup ) item.setTextAlignment(Qt.AlignRight);
     ( parent===true ? rootItem : parent ).appendRow( rowItems );
 
