@@ -179,9 +179,9 @@ var TreeView = function( parent, resourcesPath ){
       rowItems
     );
 
-    visibilityItem.setToolTip( 'Click to toggle visibility of the Selection Set nodes.\nOr Click + Alt on a Selection Set Name.' );
-
     if( !itemData.isGroup ) {
+
+      visibilityItem.setToolTip( 'Click to toggle visibility of the Selection Set nodes.\nOr Click + Alt on a Selection Set Name.' );
 
       itemData.updateVisibilityCellState = function( updateNodes ){
 
@@ -209,14 +209,13 @@ var TreeView = function( parent, resourcesPath ){
 
       }
 
+      itemData.updateVisibilityCellState( true );
+
     }else{
         
       itemData.updateVisibilityCellState = function(){};
 
     }
-
-    itemData.updateVisibilityCellState( true ); 
-
 
     // Counter Item
     var counterItem = itemData.counterItem = _addItem(
@@ -258,6 +257,7 @@ var TreeView = function( parent, resourcesPath ){
     });
 
     setData.nodesVisibilityState = nodesVisibilityState === 'mixed' ? 'mixed' : ( nodesVisibilityState ? 'visible' : 'hidden' );
+    // item.setBackground( new QBrush( new QColor('#ff0000') ) );
 
   }
 
