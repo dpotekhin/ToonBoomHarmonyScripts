@@ -160,9 +160,7 @@ var TreeView = function( parent, resourcesPath ){
       rowItems
     );
 
-    if( itemData.isGroup ){
-      item.setToolTip( itemData.dataNode );
-    }
+    item.setToolTip( itemData.description || ( itemData.isGroup ? itemData.dataNode : '' ) );
 
     // Counter Item
     var counterItem = itemData.counterItem = _addItem(

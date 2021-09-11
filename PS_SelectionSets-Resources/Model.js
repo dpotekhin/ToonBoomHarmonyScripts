@@ -261,6 +261,23 @@ function Model( scriptVer ){
 
   }
 
+  
+  //
+  this.editItemDescription = function( id, description ){
+
+    var itemData = this.getItemDataById(id);
+    if( !itemData ) {
+      MessageLog.trace('renameItem: item not found');
+      return;
+    }
+
+    itemData.description = description;
+
+    this.saveGroupData( itemData );
+
+  }
+
+
 
   //
   this.createSetInGroup = function( groupId, setName, nodes ){
@@ -407,11 +424,13 @@ function Model( scriptVer ){
       name: data.name,
       id: data.id,
       isExpanded: data.isExpanded,
+      description: data.description,
       items: data.items.map(function(setData){
         return {
           name: setData.name,
           id: setData.id,
           nodes: setData.nodes,
+          description: setData.description
         }
       })
     };

@@ -54,14 +54,19 @@ function SSList( scriptVer, parentWidget ){
             '!Rename Group': showRenameUI,
             '!Duplicate Group': duplicateGroup,
             '!Delete Group': deleteItem,
+            '!Edit Description': editItemDescription,
             '-1': 1,
             '!Create Group': createGroup,
+            '-2': 1,
             '!Create Selection Set from Selection': function(){ showCreateSetUI(true) },
             '!Create Empty Selection Set': showCreateSetUI,
-            '-2': 1,
+            '-3': 1,
             '!Select Group Data Node': selectGroupDataNode,
             '!Refresh': refreshData,
-          }, event, parentWidget );
+          },
+          event,
+          parentWidget
+        );
 
       }else{
 
@@ -75,7 +80,11 @@ function SSList( scriptVer, parentWidget ){
             '!Rename Set': showRenameUI,
             '!Duplicate Set': duplicateSet,
             '!Delete Set': deleteItem,
-          }, event, parentWidget );
+            '!Edit Description': editItemDescription,
+          },
+          event,
+          parentWidget
+        );
 
       }
 
@@ -85,7 +94,10 @@ function SSList( scriptVer, parentWidget ){
       ContextMenu.showContextMenu({
           '!Create Group': createGroup,
           '!Refresh': refreshData,
-        }, event, parentWidget );
+        },
+        event,
+        parentWidget
+      );
 
     }
 
@@ -178,6 +190,22 @@ function SSList( scriptVer, parentWidget ){
 
     model.renameItem( currentItemData.id, newName );
     currentItemData.modelItem.setText( newName );
+
+  }
+
+
+  //
+  function editItemDescription(){
+    var description = Input.getText(
+      'Description',
+      currentItemData.description,
+      ''
+    );
+    description = description.trim();
+    if( !description || description === currentItemData.description ) return;
+
+    model.editItemDescription( currentItemData.id, description );
+    currentItemData.modelItem.setToolTip( description );
 
   }
 
@@ -489,7 +517,7 @@ function SSList( scriptVer, parentWidget ){
   var prefs = this.prefs = JSON.parse( preferences.getString( prefsName, '{}' ) );
 
   this.savePrefs = function(){
-    
+
     preferences.setString( prefsName, JSON.stringify(prefs) );
   
   }
