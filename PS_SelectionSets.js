@@ -9,7 +9,7 @@ var SSList = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_Sel
 ///
 function PS_SelectionSets(){
   
-  MessageLog.clearLog();
+  // MessageLog.clearLog();
 
   var scriptName = 'Selection Sets';
   var scriptVer = '0.210821';
@@ -36,10 +36,21 @@ function PS_SelectionSets(){
 
   ui.resizeEvent = function(e){
     // MessageLog.trace('RESIZE '+ui.width );
+    saveWindowSettings();
+    // QWidget.resizeEvent( e );
+  }
+
+  ui.moveEvent = function(e){
+    // MessageLog.trace('moveEvent: '+ui.x);
+    saveWindowSettings();
+  }
+
+  function saveWindowSettings(){
+    sSList.prefs.windowX = ui.x;
+    sSList.prefs.windowY = ui.y;
     sSList.prefs.windowWidth = ui.width;
     sSList.prefs.windowHeight = ui.height;
     sSList.savePrefs();
-    // QWidget.resizeEvent( e );
   }
 
   /*
@@ -50,6 +61,22 @@ function PS_SelectionSets(){
   */
 
   // ui.mainLayout.addStretch();
+
+  var SSListPrefs = sSList.prefs;
+  // MessageLog.trace('prefs: '+JSON.stringify( sSList,true,' ') );
+  if( SSListPrefs.windowWidth ){
+    
+    var screenBox = QApplication.desktop().screenGeometry();
+    var screenWidth = screenBox.width();
+    var screenHeight = screenBox.height();
+    var screenBorderOffset = 100;
+
+    ui.move(
+      Math.max( Math.min( SSListPrefs.windowX, screenWidth - screenBorderOffset ), screenBorderOffset ),
+      Math.max( Math.min( SSListPrefs.windowY, screenHeight - screenBorderOffset ), screenBorderOffset )
+    );
+    ui.resize( SSListPrefs.windowWidth, SSListPrefs.windowHeight );
+  }
 
   modal.show();
 

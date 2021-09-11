@@ -486,13 +486,10 @@ function SSList( scriptVer, parentWidget ){
 
   // PREFERENCES >>>
   var prefsName = 'PS_SelectionSets_Prefs';
-  // MessageLog.trace('AAA'+preferences.getString( prefsName, '{"width":200,"height":200}' ) );
   var prefs = this.prefs = JSON.parse( preferences.getString( prefsName, '{}' ) );
-  if( prefs.windowWidth ){
-    parentWidget.resize( prefs.windowWidth, prefs.windowHeight );
-  }
 
   this.savePrefs = function(){
+    
     preferences.setString( prefsName, JSON.stringify(prefs) );
   
   }
