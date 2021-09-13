@@ -9,7 +9,7 @@ var TreeView = function( parent, resourcesPath ){
   var hiddenIcon = new QIcon( resourcesPath + 'hidden.png' );
   var mixedVisibilityIcon = new QIcon( resourcesPath + 'mixedVisibility.png' );
 
-  var normalBackgroundBrush = new QBrush( new QColor('#000000') );
+  var normalBackgroundBrush = new QBrush( new QColor('#151515') );
   var warningBackgroundBrush = new QBrush( new QColor('#400000') );
 
   var _this = this;
