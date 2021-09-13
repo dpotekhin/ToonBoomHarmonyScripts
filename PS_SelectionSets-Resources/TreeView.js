@@ -1,6 +1,6 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version: 0.210905
+Version: 0.210913
 */
 
 var TreeView = function( parent, resourcesPath ){

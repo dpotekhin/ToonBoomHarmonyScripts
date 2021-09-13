@@ -1,6 +1,6 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version: 0.210905
+Version: 0.210913
 */
 
 //
@@ -443,6 +443,70 @@ function Model( scriptVer ){
     _this.saveGroupData( itemData );
 
     return color;
+
+  }
+
+
+  //
+  this.arrangeSet = function( setData, arrangeMode ){
+
+    var groupData = this.getItemDataById( setData.groupId );
+    if( !groupData ) return;
+
+    var itemsCount = groupData.items.length;
+    if( itemsCount < 2 ) return;
+
+    var setIndex = -1;
+
+    groupData.items.every(function(_setData,i){
+      if( _setData.id !== setData.id ) return true;
+      setIndex = i;
+    });
+    // MessageLog.trace('setIndex: '+arrangeMode+' >> '+setIndex);
+    if( setIndex < 0 ) return;
+
+    var isMoved;
+
+    switch( arrangeMode ){
+      
+      case 'top':
+        if( setIndex === 0 ) return;
+        groupData.items.splice( setIndex, 1 );
+        groupData.items.unshift( setData );
+        isMoved = true;
+        break;
+
+      case 'up':
+        if( setIndex === 0 ) return;
+        groupData.items.splice( setIndex, 1 );
+        groupData.items.splice( setIndex-1, 0, setData );
+        isMoved = true;
+        break;
+
+      case 'down':
+        if( setIndex === itemsCount-1 ) return;
+        groupData.items.splice( setIndex, 1 );
+        groupData.items.splice( setIndex+1, 0, setData );
+        isMoved = true;
+        break;
+
+      case 'bottom':
+        if( setIndex === itemsCount-1 ) return;
+        groupData.items.splice( setIndex, 1 );
+        groupData.items.push( setData );
+        isMoved = true;
+        break;
+
+    }
+
+    if( isMoved ){
+
+      // MessageLog.trace('APPLIED: '+JSON.stringify(groupData.items,true,' ') );
+      
+      _this.saveGroupData( groupData );
+
+      return true;
+    }
 
   }
 

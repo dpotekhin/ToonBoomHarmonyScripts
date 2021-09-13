@@ -1,6 +1,6 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version: 0.210905
+Version: 0.210913
 */
 
 var _ContextMenu = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/ContextMenu.js"));
@@ -82,6 +82,12 @@ function SSList( scriptVer, parentWidget ){
             '!Rename Set': showRenameUI,
             '!Duplicate Set': duplicateSet,
             '!Delete Set': deleteItem,
+            '-2': 1,
+            '!Move to Top': function(){ arrangeSet('top') },
+            '!Move Up': function(){ arrangeSet('up') },
+            '!Move Down': function(){ arrangeSet('down') },
+            '!Move to Bottom': function(){ arrangeSet('bottom') },
+            '-3': 1,
             '!Edit Description': editItemDescription,
             '!Change Color': changeItemColor,
             '!Reset Color': resetItemColor,
@@ -239,6 +245,20 @@ function SSList( scriptVer, parentWidget ){
 
     model.setItemColor( currentItemData );
     currentItemData.updateColor();
+
+  }
+
+
+  //
+  function arrangeSet( arrangeMode ){
+
+    // MessageLog.trace('arrangeSet: '+arrangeMode+' >> '+currentItemData );
+
+    scene.beginUndoRedoAccum('Move Selection Set');
+
+    if( model.arrangeSet( currentItemData, arrangeMode ) ) updateList();
+
+    scene.endUndoRedoAccum();
 
   }
 
