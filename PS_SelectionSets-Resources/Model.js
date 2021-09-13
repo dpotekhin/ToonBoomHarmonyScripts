@@ -426,6 +426,27 @@ function Model( scriptVer ){
   }
 
 
+  //
+  this.setItemColor = function( itemData, color ){
+    
+    if( color ){
+      
+      color = typeof color === 'string' ? color : '#'+Utils.rgbToHex( color.red(), color.green(), color.blue() );
+      itemData.color = color;
+
+    }else{
+      
+      delete itemData.color;
+
+    }
+    
+    _this.saveGroupData( itemData );
+
+    return color;
+
+  }
+
+
   ///
   this.saveGroupData = function( itemData ){
     // check Data Node is available
@@ -460,15 +481,18 @@ function Model( scriptVer ){
       name: data.name,
       id: data.id,
       isExpanded: data.isExpanded,
-      description: data.description,
+      color: data.color,
       dataNode: data.dataNode,
       dataNodeParent: data.dataNodeParent,
       originalDataNodeParent: data.originalDataNodeParent || data.dataNodeParent,
+      description: data.description,
+
       items: data.items.map(function(setData){
         return {
           name: setData.name,
           id: setData.id,
           nodes: setData.nodes,
+          color: setData.color,
           description: setData.description
         }
       })

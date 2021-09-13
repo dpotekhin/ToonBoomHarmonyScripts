@@ -175,6 +175,27 @@ var TreeView = function( parent, resourcesPath ){
 
     item.setToolTip( itemData.description || ( itemData.isGroup ? itemData.dataNode : '' ) );
 
+    itemData.updateColor = function(){
+
+      var itemBg = item.background();
+      // MessageLog.trace('updateColor: '+itemData.color+' >> '+itemBg );
+
+      if( itemData.color ){
+
+        var color = new QColor(itemData.color);
+        color.setAlpha(70);
+        item.setBackground( new QBrush( color ) );
+
+      }else if( itemBg.style() === Qt.SolidPattern ){
+        
+        item.setBackground( new QBrush() );
+        // MessageLog.trace('reset item color');
+      }
+
+      // MessageLog.trace('@2: '+item.background()+' >> '+item.background().style() );
+
+    }
+
     // Visibility Item
     var visibilityItem = itemData.visibilityItem = _addItem(
       undefined,
@@ -188,7 +209,7 @@ var TreeView = function( parent, resourcesPath ){
 
       itemData.updateVisibilityCellState = function( updateNodes ){
 
-        if( updateNodes ) checkVisibilityState( itemData );
+        if( updateNodes ) checkItemState( itemData );
 
         switch( itemData.nodesVisibilityState ){
           
@@ -241,7 +262,8 @@ var TreeView = function( parent, resourcesPath ){
        
     //
     // if( !isGroup ) item.setTextAlignment(Qt.AlignRight);
-    
+  
+    itemData.updateColor();    
     itemData.updateVisibilityCellState( true );
 
     ( parent===true ? rootItem : parent ).appendRow( rowItems );
@@ -252,8 +274,9 @@ var TreeView = function( parent, resourcesPath ){
 
   }
 
+
   //
-  function checkVisibilityState( setData ){
+  function checkItemState( setData ){
 
     // Update nodes state
     var nodesVisibilityState;

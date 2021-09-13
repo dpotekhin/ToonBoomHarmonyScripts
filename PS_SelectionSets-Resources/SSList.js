@@ -55,6 +55,8 @@ function SSList( scriptVer, parentWidget ){
             '!Duplicate Group': duplicateGroup,
             '!Delete Group': deleteItem,
             '!Edit Description': editItemDescription,
+            '!Change Color': changeItemColor,
+            '!Reset Color': resetItemColor,
             '-1': 1,
             '!Create Group': createGroup,
             '-2': 1,
@@ -81,6 +83,8 @@ function SSList( scriptVer, parentWidget ){
             '!Duplicate Set': duplicateSet,
             '!Delete Set': deleteItem,
             '!Edit Description': editItemDescription,
+            '!Change Color': changeItemColor,
+            '!Reset Color': resetItemColor,
           },
           event,
           parentWidget
@@ -156,13 +160,11 @@ function SSList( scriptVer, parentWidget ){
     setsData.forEach(function(setGroupData){
       dataForTreeView.push(setGroupData);      
     });
-    
-    // MessageLog.trace(JSON.stringify(dataForTreeView,true,'  '));
 
     treeView.setData( dataForTreeView );
-    
-
+  
   }
+
 
   ///
   function fakeAction(){
@@ -206,6 +208,37 @@ function SSList( scriptVer, parentWidget ){
 
     model.editItemDescription( currentItemData.id, description );
     currentItemData.modelItem.setToolTip( description );
+
+  }
+
+  //
+  function changeItemColor(){
+
+    var newColor;
+
+    var dialog = new QColorDialog();
+    dialog.colorSelected.connect( dialog, function(_newColor){
+        newColor = _newColor;
+    });
+
+    if ( !dialog.exec() || !newColor )
+    {
+        // MessageBox.warning( "Please select a Color.",0,0,0,"Error");
+        return;
+    }
+    
+    // MessageLog.trace('newColor: '+newColor+': '+newColor.red()+','+newColor.alpha());
+
+    newColor = model.setItemColor( currentItemData, newColor );
+    currentItemData.updateColor();
+
+  }
+
+
+  function resetItemColor(){
+
+    model.setItemColor( currentItemData );
+    currentItemData.updateColor();
 
   }
 
