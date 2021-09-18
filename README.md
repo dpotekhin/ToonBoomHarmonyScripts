@@ -28,8 +28,20 @@ A small helper for batch renaming of nodes.
 Three scripts to universal (pegs and deformers) reset of transformations, save transformation state and remove that state.
 
 
+## [PS_SelectionSets](ps_build/PS_SelectionSets)
+This script lets you to save and use groups of node selection sets (SS).
+
+
 ## [PS_SetPlaybackRange](ps_build/PS_SetPlaybackRange)
 This script sets the playback range relative to the selected frames.
+
+
+## [PS_SetSceneDurationToSoundLength](ps_build/PS_SetSceneDurationToSoundLength)
+This script quickly sets the duration of the Scene to the duration of a Sound layer.
+
+
+## [PS_SoundAmplitudeToKeyframes](ps_build/PS_SoundAmplitudeToKeyframes)
+This script quickly sets the Scene duration to the selected Sound layer duration.
 
 
 ## [PS_SwapNodes](ps_build/PS_SwapNodes)

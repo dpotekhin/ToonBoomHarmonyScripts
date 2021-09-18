@@ -1,6 +1,9 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version 0.1
+Version 0.210811
+
+TODO:
+- Move backup script to a separate file
 */
 
 
@@ -104,14 +107,11 @@ function PS_BackupScene(mode) {
 
     // Windows
     var projectParentDir = projectPath.split('\\');
-    var diskName = projectParentDir[0];
+    // var diskName = projectParentDir[0];
     var projectFolder = projectParentDir.pop();
     projectParentDir = projectParentDir.join('\\');
     var backupFolderName = '_backup';
     var backupFolderPath = projectParentDir+ '\\' + backupFolderName;
-    var backupFileName = sceneName + '_' + Utils.getTimestamp() +'_'+ about.getUserName() + '.zip';
-    var backupFullPath =  backupFolderPath +'\\'+ backupFileName;
-    var fileDirCheck = FileSystem.checkFileDir(backupFullPath, true);
 
     if (KeyModifiers.IsShiftPressed() || mode == exports.MODE_OPEN_ONLY) {
         // MessageLog.trace('command: '+backupFolderPath);
@@ -119,19 +119,28 @@ function PS_BackupScene(mode) {
         return;
     }
 
-    var command = 'cmd /K ' + diskName + ' && cd "' + projectParentDir + '" && zip -r "' + backupFullPath + '" "' + projectFolder + '" -x "*.*~" "./*/frames/**"';
+    var batPath = specialFolders.userScripts+'\\PS_SceneHelper-Resources\\Backup-TBH-Scene.bat';
+    var command = '"'+batPath +'" "'+projectPath+'"';
+    MessageLog.trace('PS_BackupScene command: '+command);
 
-    var proc = new Process2(command);
-    var result = proc.launchAndDetach();
+    var proc = new QProcess();
+    proc.start(command);
+    proc.waitForFinished();
 
-    if (result != 0) {
-        MessageLog.trace('Backup Error: ' + result + ': ' + proc.errorMessage() + ', ' + command);
+    var result = proc.exitCode();
+    var backupFullPath = ((proc.readAllStandardOutput() || '').toString().replace(/\r|\n/gi,' ').match(/<:<(.*)>:>/) || []).pop();
+    
+    proc.close();
+
+    if ( result != 0) {
+        MessageLog.trace('Backup Error: ' + result + ': ' + command);
         return;
     }
 
-    MessageLog.trace('PS_BackupScene: ' + command);
+    MessageLog.trace( 'Backup file: '+ backupFullPath );
 
     if (KeyModifiers.IsControlPressed() || mode == exports.MODE_SHOW_FOLDER_ON_COMPLETE) {
+        // MessageLog.trace( 'backupFolderPath: '+ backupFolderPath );
         FileSystem.openFolder(backupFolderPath);
     } else {
         MessageBox.information("Scene is archived to: " + backupFullPath);

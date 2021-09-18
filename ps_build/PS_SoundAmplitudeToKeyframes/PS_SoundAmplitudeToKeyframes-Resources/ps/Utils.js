@@ -158,38 +158,6 @@ function eachAnimatableAttr( _node, callback ){
     });
 }
 
-//
-function createUid(){
-  return QUuid.createUuid().toString().replace(/{|}/g, '');
-}
-
-
-///
-function componentToHex(c) {
-  var hex = c.toString(16);
-  return hex.length == 1 ? "0" + hex : hex;
-}
-
-//
-function rgbToHex(r, g, b, a) {
-  // return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
-  var result = componentToHex(r) + componentToHex(g) + componentToHex(b);
-  if( a !== undefined && !ignoreAlpha ) result += componentToHex(a);
-  return result;
-}
-
-
-//
-function hexToRgb(hex) {
-  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})?$/i.exec(hex);
-  if( !result ) return null;
-  return {
-    r: parseInt(result[1], 16),
-    g: parseInt(result[2], 16),
-    b: parseInt(result[3], 16),
-    a: parseInt(result[4], 16)
-  };
-}
 
 //
 exports = {
@@ -205,8 +173,5 @@ exports = {
     getFullAttributeList: getFullAttributeList,
     isFunction: isFunction,
     getAnimatableAttrs: getAnimatableAttrs,
-    eachAnimatableAttr: eachAnimatableAttr,
-    createUid: createUid,
-    rgbToHex: rgbToHex,
-    hexToRgb: hexToRgb,
+    eachAnimatableAttr: eachAnimatableAttr
 };

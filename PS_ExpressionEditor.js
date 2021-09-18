@@ -67,7 +67,7 @@ function PS_ExpressionEditor( _node ){
   var listJustUpdated = true;
 
   //
-  var modal = editor.modal = new pModal( scriptName + " v" + scriptVer, 600, 400, false );  
+  var modal = editor.modal = new pModal( scriptName + " v" + scriptVer, 600, 360, false );  
   if( !modal.ui ){
     return;
   }

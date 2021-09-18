@@ -518,8 +518,8 @@ function PS_ScriptPacker(){
 	function copyDir( src, dest ){
 		var command = 'robocopy "'+src+'" "'+dest+'" /E';
 		var proc = new QProcess();
-  		proc.start(command);
-  		proc.waitForFinished();
+		proc.start(command);
+		proc.waitForFinished();
 		proc.close();
 	}
 
