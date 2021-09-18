@@ -39,7 +39,7 @@ You can create a SS by RMB click on SSG in which you want to create a SS and sel
 
 */
 
-var pModal = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/pModal.js"));
+var pModal = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_SelectionSets-Resources/ps/pModal.js"));
 var SSList = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_SelectionSets-Resources/SSList.js"));
 
 ///
