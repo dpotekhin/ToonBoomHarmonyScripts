@@ -33,7 +33,7 @@ This script sets the playback range relative to the selected frames.
 
 
 ## [PS_SetSceneDurationToSoundLength](ps_build/PS_SetSceneDurationToSoundLength)
-This script quickly sets the Scene duration to the selected Sound layer duration.
+This script quickly sets the duration of the Scene to the duration of a Sound layer.
 
 
 ## [PS_SoundAmplitudeToKeyframes](ps_build/PS_SoundAmplitudeToKeyframes)

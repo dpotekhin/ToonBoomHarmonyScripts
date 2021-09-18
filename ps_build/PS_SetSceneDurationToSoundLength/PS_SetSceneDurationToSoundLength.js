@@ -2,14 +2,15 @@
 Author: D.Potekhin (d@peppers-studio.ru)
 
 [Name: PS_SetSceneDurationToSoundLength :]
-[Version: 0.210821 :]
+[Version: 0.210918 :]
 
 [Description:
-This script quickly sets the Scene duration to the selected Sound layer duration.
+This script quickly sets the duration of the Scene to the duration of a Sound layer.
 :]
 
 [Usage:
-* Select a Sound layer and click the script button.
+Select a Sound layer and click the script button.
+The first Sound layer will be used as duration source if no layers are selected.
 :]
 
 TODO:
@@ -18,14 +19,22 @@ TODO:
 
 function PS_SetSceneDurationToSoundLength(){
     
-    MessageLog.clearLog();
+    // MessageLog.clearLog();
 
     var columnName;
 
-    if ( Timeline.selIsColumn(0) ) {
+    // MessageLog.trace('PS_SetSceneDurationToSoundLength: numLayerSel: '+Timeline.numLayerSel+', numLayers: '+Timeline.numLayers ); // numLayers ()
+
+    if( !Timeline.numLayerSel ){
+
+        columnName = getSoundColumn();
+        if( columnName ) MessageLog.trace('No layer selected. Used the first Sound layer "'+columnName+'"');
+
+    }else{
 
         columnName = Timeline.selToColumn(0);
         if( column.type(columnName) !== 'SOUND' ) columnName = undefined;
+
     }
 
     if( !columnName ){
@@ -49,10 +58,29 @@ function PS_SetSceneDurationToSoundLength(){
 
     MessageLog.trace( 'Sound Length In Frames:' + maxFrame+' ('+durationDiff+')'  );
     
+    scene.beginUndoRedoAccum('Set Scene Duration To Sound Length');
+
     if ( durationDiff > 0 ) {
         frame.insert(frame.numberOf(), durationDiff );
     }else if ( durationDiff < 0 ) {
         frame.remove(frame.numberOf(), -durationDiff );
+    }
+
+    scene.endUndoRedoAccum();
+
+
+    ///
+    function getSoundColumn(){
+
+        for( var i = 0; i < Timeline.numLayers; i++ ){
+
+            if ( Timeline.layerIsColumn(i) ){
+                var _columnName = Timeline.layerToColumn(i);
+                if( column.type(_columnName) === 'SOUND' ) return _columnName;
+            }
+
+        }
+
     }
 
 }
