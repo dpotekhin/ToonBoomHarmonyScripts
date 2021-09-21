@@ -6,32 +6,32 @@ A set of scene helper scripts.
 
 ### Usage
 #### PS_ReopenScene
-Closes and opens the current scene.
+Closes and opens the current scene.  
 Package adds the Main Menu item: File / Reopen Scene
 
 #### PS_OpenSceneFolder
-Opens scene folder in file explorer.
+Opens scene folder in file explorer.  
 Package adds the Main Menu item: File / Open Scene Folder
 
 #### PS_BackupScene
-Archives the current scene to ../_backup/\<SCENE-NAME>\_\<YYYYMMDD>\_\<HHMM>\_\<USER-NAME>.zip
-Package adds the Main Menu item: File / Backup / Backup Scene
+Archives the current scene to ../_backup/\<SCENE-NAME>\_\<YYYYMMDD>\_\<HHMM>\_\<USER-NAME>.zip  
+Package adds the Main Menu item: File / Backup / Backup Scene  
 ( Click + Ctrl to open _backup folder on archiving complete )
 
 #### PS_OpenBackupFolder
-Opens the Backup folder ../_backup
+Opens the Backup folder ../_backup  
 Package adds the Main Menu item: File / Backup / Open Backup Folder
 
 #### PS_OpenScriptsFolder
-Opens Harmony User scripts folder
+Opens Harmony User scripts folder  
 Package adds the Main Menu item: File / Resources / Open User Scripts Folder
 
 #### PS_OpenTemplateFolder
-Opens a folder of the selected template in the Library window
+Opens a folder of the selected template in the Library window  
 Package adds the Main Menu item: File / Resources / Open Selected Library Template Folder 
 
 #### PS_OpenPencilTextureFolder
-Opens the default Pencil Texture folder
+Opens the default Pencil Texture folder  
 Package adds the Main Menu item: File / Resources / Open Pencil Texture Folder
 
 ### Installation:
