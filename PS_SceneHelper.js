@@ -16,10 +16,11 @@ var Utils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/Ut
 var MODE_OPEN_ONLY = 'mode-open-only';
 
 exports = {
+    PS_ReopenScene: PS_ReopenScene,
     PS_OpenSceneFolder: PS_OpenSceneFolder,
     PS_BackupScene: PS_BackupScene,
-    PS_OpenPencilTextureFolder: PS_OpenPencilTextureFolder,
     PS_OpenBackupFolder: PS_OpenBackupFolder,
+    PS_OpenPencilTextureFolder: PS_OpenPencilTextureFolder,
     PS_OpenTemplateFolder: PS_OpenTemplateFolder,
     PS_OpenScriptsFolder: PS_OpenScriptsFolder,
     MODE_OPEN_ONLY: MODE_OPEN_ONLY,
@@ -27,6 +28,14 @@ exports = {
 };
 
 
+/*
+Reopen Scene
+*/
+function PS_ReopenScene(){
+    var scenePath = fileMapper.toNativePath( scene.currentProjectPath() +'/'+ scene.currentScene()+'.xstage' );
+    // MessageLog.trace('PS_ReopenScene: '+scenePath );
+    scene.closeSceneAndOpenOffline( scenePath );
+}
 
 /*
 Open Scene folder

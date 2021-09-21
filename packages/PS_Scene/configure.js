@@ -8,6 +8,34 @@ function configure(packageFolder, packageName)
 
 
   // = = = = = = = = = = = = = = = = = = = = = = = = = = =
+  // Reopen Scene
+  // - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  var reopenSceneAction = {
+      id: "ru.peppers-studio.reopenSceneDisplay",
+      text: "Reopen Scene ",
+      // icon: "PS_BackupScene.png",
+      checkable: false,
+      isEnabled: true,
+      onTrigger: SceneHelper.PS_ReopenScene
+  };
+
+
+  // - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ScriptManager.addAction(reopenSceneAction);
+
+  ScriptManager.addMenuItem({
+      targetMenuId: "File",
+      id: reopenSceneAction.id,
+      text: reopenSceneAction.text,
+      action: reopenSceneAction.id
+      //action: 'reopenSceneAction.onTrigger in ./configure.js'
+  });
+  // = = = = = = = = = = = = = = = = = = = = = = = = = = =
+
+
+
+
+  // = = = = = = = = = = = = = = = = = = = = = = = = = = =
   // Open Scene Folder
   // - - - - - - - - - - - - - - - - - - - - - - - - - - -
   var openSceneFolderAction = {
