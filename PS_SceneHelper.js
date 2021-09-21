@@ -19,7 +19,7 @@ Opens scene folder in file explorer.
 Package adds the Main Menu item: File / Open Scene Folder
 
 #### PS_BackupScene
-Archives the current scene to ../_backup/\<SCENE-NAME>_\<YYYYMMDD>_\<HHMM>_\<USER-NAME>.zip
+Archives the current scene to ../_backup/\<SCENE-NAME>\_\<YYYYMMDD>\_\<HHMM>\_\<USER-NAME>.zip
 Package adds the Main Menu item: File / Backup / Backup Scene
 ( Click + Ctrl to open _backup folder on archiving complete )
 
