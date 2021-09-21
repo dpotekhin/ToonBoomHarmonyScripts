@@ -28,6 +28,10 @@ A small helper for batch renaming of nodes.
 Three scripts to universal (pegs and deformers) reset of transformations, save transformation state and remove that state.
 
 
+## [PS_SceneHelper](ps_build/PS_SceneHelper)
+A set of scene helper scripts.
+
+
 ## [PS_SelectionSets](ps_build/PS_SelectionSets)
 This script lets you to save and use groups of node selection sets (SS).
 
