@@ -32,7 +32,7 @@ function PS_SoundAmplitudeToKeyframes(){
 	MessageLog.clearLog();
 
 	var Utils = _Utils;
-	
+
 	//
   	var scriptName = 'Sound Amplitude To Keyframes';
   	var scriptVer = '0.210922';
@@ -147,15 +147,15 @@ function PS_SoundAmplitudeToKeyframes(){
 
 	//
 	var createButton = modal.addButton('Create Keyframes', ui, undefined, undefined, undefined, function(){
-
+		
     	// Retrieve waveform data
     	var medianData = getSoundMedianData( selectedSoundColumnName );
-    	var firstFrame = parseInt(firstFrameInput.text) || 1;
-    	var lastFrame = parseInt(lastFrameInput.text) || frame.numberOf();
-    	var mapMin = parseFloat(remapMinInput.text) || 0;
-    	var mapMax = parseFloat(remapMaxInput.text) || 1;
+    	var firstFrame = Utils.getNumber(firstFrameInput.text) || 1;
+    	var lastFrame = Utils.getNumber(lastFrameInput.text) || frame.numberOf();
+    	var mapMin = Utils.getNumber(remapMinInput.text) || 0;
+    	var mapMax = Utils.getNumber(remapMaxInput.text) || 1;
     	var mapRange = mapMax - mapMin;
-
+    	
     	MessageLog.trace('Create keyframes.\ncolumnName:"'+attrColumnName+'", isNew:'+attrColumnIsNew+', firstFrame:'+firstFrame+', lastFrame:'+lastFrame+', mapMin:'+mapMin+', mapMax:'+mapMax );
 
     	scene.beginUndoRedoAccum('Generate Sound Amplitude Keys');
@@ -296,7 +296,6 @@ function PS_SoundAmplitudeToKeyframes(){
 			minMaxRange: max - min
 		};
 	}
-
 
 	//
 	function getAverage(values){
