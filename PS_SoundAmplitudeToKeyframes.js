@@ -104,7 +104,7 @@ function PS_SoundAmplitudeToKeyframes(){
 	var columnNameInputSkipChenged;
 	var attrColumnIsNew;
 
-	var modal = new pModal( scriptName + " v" + scriptVer, 280, 230, false );  
+	var modal = new pModal( scriptName + " v" + scriptVer, 280, 280, false );  
 	if( !modal.ui ){return;}
 	var ui = modal.ui;
 
@@ -145,18 +145,30 @@ function PS_SoundAmplitudeToKeyframes(){
 	addLabel( 'Remap Max to:', valuesGroup, 2, 1 );
 	var remapMaxInput = addInput( valuesGroup, 1, 3, 1, true );
 
+	// Sample processing method
+	var sampleProcessingMethodGroup = modal.addGroup('Sample Processing Method:', ui, true  );
+
+	var averageMethodRadioButton = new QRadioButton("Average", modal);
+	averageMethodRadioButton.checked = true;
+	sampleProcessingMethodGroup.mainLayout.addWidget( averageMethodRadioButton, 0, 0 );
+
+	var medianMethodRadioButton = new QRadioButton("Median", modal);
+	sampleProcessingMethodGroup.mainLayout.addWidget( medianMethodRadioButton, 0, 0 );
+
 	//
 	var createButton = modal.addButton('Create Keyframes', ui, undefined, undefined, undefined, function(){
 		
     	// Retrieve waveform data
-    	var medianData = getSoundMedianData( selectedSoundColumnName );
+    	var sampleProcessingMethod = averageMethodRadioButton.checked ? getAverage : getMedian;
+    	var medianData = getSoundMedianData( selectedSoundColumnName, sampleProcessingMethod );
     	var firstFrame = Utils.getNumber(firstFrameInput.text) || 1;
     	var lastFrame = Utils.getNumber(lastFrameInput.text) || frame.numberOf();
     	var mapMin = Utils.getNumber(remapMinInput.text) || 0;
     	var mapMax = Utils.getNumber(remapMaxInput.text) || 1;
     	var mapRange = mapMax - mapMin;
-    	
+
     	MessageLog.trace('Create keyframes.\ncolumnName:"'+attrColumnName+'", isNew:'+attrColumnIsNew+', firstFrame:'+firstFrame+', lastFrame:'+lastFrame+', mapMin:'+mapMin+', mapMax:'+mapMax );
+    	//MessageLog.trace(JSON.stringify( medianData, true, ' ') );
 
     	scene.beginUndoRedoAccum('Generate Sound Amplitude Keys');
 
@@ -170,10 +182,32 @@ function PS_SoundAmplitudeToKeyframes(){
 
     	node.linkAttr( selectedNode, selectedAttrName, attrColumnName );
 
+    	var prevEntry;
+
     	for( var _frame=firstFrame-1; _frame < lastFrame-1 && _frame < medianData.values.length; _frame++ ){
 
+    		var __frame = _frame+1;
     		var mappedValue = mapMin + ( (medianData.values[_frame] - medianData.min) / medianData.minMaxRange ) * mapRange;
-    		column.setEntry( attrColumnName, 1, _frame+1, mappedValue );
+    		// MessageLog.trace(__frame+') '+ mappedValue +' > '+ column.isKeyFrame( attrColumnName, 1, __frame ) ); // !!!
+
+    		if( mappedValue !== prevEntry ){
+    			
+    			column.setEntry( attrColumnName, 1, __frame, mappedValue );
+
+    			if( _frame !== 0 && !column.isKeyFrame( attrColumnName, 1, _frame ) ) {
+    				
+    				column.setEntry( attrColumnName, 1, _frame, prevEntry );
+
+    			}
+
+    			prevEntry = mappedValue;
+
+    		}else if( column.isKeyFrame( attrColumnName, 1, __frame ) ){
+    			
+    			column.clearKeyFrame( attrColumnName, __frame );
+
+    		} 		
+    		
 
     	}
     	
@@ -266,7 +300,7 @@ function PS_SoundAmplitudeToKeyframes(){
 	}
 	
 	//
-	function getSoundMedianData( columnName ){
+	function getSoundMedianData( columnName, sampleProcessingMethod ){
 		var soundColumn = column.soundColumn( columnName );
 		// MessageLog.trace(' >> '+JSON.stringify(soundColumn,true,'  '));
 		// MessageLog.trace(' >>> '+Object.getOwnPropertyNames(soundColumn).join('\n'));
@@ -281,8 +315,7 @@ function PS_SoundAmplitudeToKeyframes(){
 		do{
 			var frameForm = waveForm.splice(0, 15);
 			waveFormChannels.push( frameForm );
-			// var medianValue = getAverage(frameForm);
-			var medianValue = getMedian(frameForm);
+			var medianValue = sampleProcessingMethod(frameForm);
 			medianValues.push(medianValue);
 			if( min > medianValue ) min = medianValue;
 			if( max < medianValue ) max = medianValue;
