@@ -2,14 +2,15 @@
 Author: D.Potekhin (d@peppers-studio.ru)
 
 [Name: PS_SoundAmplitudeToKeyframes :]
-[Version: 0.210830 :]
+[Version: 0.210922 :]
 
 [Description:
 This script quickly sets the Scene duration to the selected Sound layer duration.
 :]
 
 [Usage:
-Select one sound layer as the source of wave form amplitude and one layer in which to generate keyframes and then click on the script.
+Select one sound layer as the source of wave form amplitude and one layer in which to generate keyframes and then click on the script.  
+If no Sound layer is selected - the script finds the first one.
 
 In the window that appears you can:
 * select an attribute to generate keyframes in it
@@ -23,52 +24,70 @@ TODO:
 */
 
 var pModal = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/pModal.js"));
-var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
+var _Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
 
 //
 function PS_SoundAmplitudeToKeyframes(){
 
-	// MessageLog.clearLog();
+	MessageLog.clearLog();
 
+	var Utils = _Utils;
+	
 	//
   	var scriptName = 'Sound Amplitude To Keyframes';
-  	var scriptVer = '0.210830';
+  	var scriptVer = '0.210922';
 
   	//
+	var selectedLayers = Utils.getSelectedLayers( true );
 	var selectedNode;
 	var selectedSoundColumnName;
 
-	MessageLog.trace('--------- '+Timeline.numLayerSel+' --------');
+	MessageLog.trace('PS_SoundAmplitudeToKeyframes: Selected Layers:'+JSON.stringify(selectedLayers,true,' ') );
 
-	// for( var i=0; i<Timeline.numLayerSel; i++){
-	// 	MessageLog.trace(i+') '+Timeline.selIsNode(i)+', '+Timeline.selToNode(i)+', '+Timeline.selIsColumn(i) );
-	// }
+	if( selectedLayers.length ){
 
-	// MessageLog.trace('-----------------');
+		var firstNode = selectedLayers[0];
 
-	[0,Timeline.numLayerSel-1].forEach(function(i){
-		
-		// MessageLog.trace(i+') '+Timeline.selIsNode(i)+', '+Timeline.selToNode(i)+', '+Timeline.selIsColumn(i) );
+	    if( selectedLayers.length === 1 ){ // if only one layer is selected
 
-		if ( !selectedNode && Timeline.selIsNode(i) ){
-			
-			selectedNode = Timeline.selToNode(i);
-		
-		}else  if ( Timeline.selIsColumn(i) ){
-			
-			selectedSoundColumnName = Timeline.selToColumn(i);
-        	if( column.type(selectedSoundColumnName) !== 'SOUND' ) selectedSoundColumnName = undefined;
+	        if( firstNode.layerType === 'node' ) {
+	        	
+	        	selectedNode = firstNode.node;
+
+	        	selectedSoundColumnName = Utils.getSoundColumns(1).pop(); // Get First Sound layer
+
+	        }
+
+	    }else{
+
+
+			selectedLayers.forEach(function( layerData ){
+				
+				// MessageLog.trace(i+') '+Timeline.selIsNode(i)+', '+Timeline.selToNode(i)+', '+Timeline.selIsColumn(i) );
+
+				if ( layerData.layerType === 'node' && !selectedNode ){
+					
+					selectedNode = layerData.node;
+				
+				}
+
+				if ( layerData.layerType === 'column' && layerData.columnType === 'SOUND' && !selectedSoundColumnName ){
+					
+					selectedSoundColumnName = layerData.column;
+
+				}
+
+			});
 
 		}
 
-	});
-
+	}
 
    	MessageLog.trace('selectedNode: "'+selectedNode+'"');
    	MessageLog.trace('selectedSoundColumnName: "'+selectedSoundColumnName+'"');
    	
    	if( !selectedNode || !selectedSoundColumnName ){
-   		MessageBox.warning('Please select one Sound layer and one Layer wich has keyable attributes.',0,0,0,'Error');
+   		MessageBox.warning('Please select one Layer with an animatable attribute and one Sound layer.',0,0,0,'Error');
    		return;
    	}
 
@@ -85,13 +104,15 @@ function PS_SoundAmplitudeToKeyframes(){
 	var columnNameInputSkipChenged;
 	var attrColumnIsNew;
 
-	var modal = new pModal( scriptName + " v" + scriptVer, 280, 210, false );  
+	var modal = new pModal( scriptName + " v" + scriptVer, 280, 230, false );  
 	if( !modal.ui ){return;}
 	var ui = modal.ui;
 
+	modal.addLabel( 'Sound: '+selectedSoundColumnName, ui );
+
 	// Selected Node
 	// modal.addLabel( "Create Keyframes to:", ui);
-	var nodeNameLabel = modal.addLabel( selectedNode, ui);
+	var nodeNameLabel = modal.addLabel( 'Layer: '+selectedNode, ui);
 	nodeNameLabel.setStyleSheet('font-weight:bold;');
 
 	// Node keyable attributes
