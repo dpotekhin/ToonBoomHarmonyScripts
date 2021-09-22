@@ -29,7 +29,7 @@ var _Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Uti
 //
 function PS_SoundAmplitudeToKeyframes(){
 
-	MessageLog.clearLog();
+	// MessageLog.clearLog();
 
 	var Utils = _Utils;
 
@@ -42,7 +42,7 @@ function PS_SoundAmplitudeToKeyframes(){
 	var selectedNode;
 	var selectedSoundColumnName;
 
-	MessageLog.trace('PS_SoundAmplitudeToKeyframes: Selected Layers:'+JSON.stringify(selectedLayers,true,' ') );
+	// MessageLog.trace('PS_SoundAmplitudeToKeyframes: Selected Layers:'+JSON.stringify(selectedLayers,true,' ') );
 
 	if( selectedLayers.length ){
 

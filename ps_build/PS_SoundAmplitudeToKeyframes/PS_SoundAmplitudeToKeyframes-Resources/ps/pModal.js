@@ -13,6 +13,7 @@ function pModal( title, width, height, unique ){
 //
 pModal.prototype.create = function( title, width, height, unique ){
 
+    var _this = this;
 
     if( unique ){
       var modalIsCreated = false;
@@ -51,7 +52,9 @@ pModal.prototype.create = function( title, width, height, unique ){
     // ui.setStyleSheet( 'QWidget{ position: absolute; margin: 0; padding: 0; }' );
 
     ui.mainLayout = new QVBoxLayout( ui );
-
+    ui.setFocusOnMainWindow = function(){
+      _this.setFocusOnMainWindow();
+    }
     //ui.mainLayout.setAlignment( ui, Qt.AlignTop );
 
     /*
