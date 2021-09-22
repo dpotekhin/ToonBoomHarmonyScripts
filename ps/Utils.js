@@ -4,10 +4,17 @@ Version: 0.1
 */
 
 //
+function getNumber(v){
+    if( typeof v !== 'string' ) return v;
+    return parseFloat( v.replace(',','.') );
+}
+
+
+//
 function getTimestamp(){
     var date = new Date();
     return date.getFullYear() + getZeroLeadingString(date.getMonth()+1) + getZeroLeadingString(date.getDate())+'_'+getZeroLeadingString(date.getHours())+getZeroLeadingString(date.getMinutes());
-};
+}
 
 
 //
@@ -158,6 +165,79 @@ function eachAnimatableAttr( _node, callback ){
     });
 }
 
+
+//
+function getSelectedLayers( onlyFirstAndLast ){
+    
+    var selectedLayers = {};
+    var numSelLayers = Timeline.numLayerSel;
+    var layerName;
+    
+    for ( var i = 0; i < numSelLayers; i++ ){
+
+        if ( Timeline.selIsNode( i ) ){
+            
+            layerName = Timeline.selToNode(i);
+            if( !selectedLayers[layerName] ) selectedLayers[layerName] = {
+                name: node.getName(layerName),
+                node: layerName,
+                index: i,
+                layerType: 'node',
+            };
+
+        }else if ( Timeline.selIsColumn( i ) ){
+            
+            layerName = Timeline.selToColumn(i);
+            if( !selectedLayers[layerName] ) selectedLayers[layerName] = {
+                name: layerName,
+                index: i,
+                layerType: 'column',
+                columnType:  column.type(layerName),
+                column: layerName
+            };
+        }
+
+    }
+
+    var layerKeys = Object.keys(selectedLayers);
+    var result = [];
+
+    if( !layerKeys.length ) return result;
+
+    layerKeys.forEach(function( layerName, i ){
+        if( onlyFirstAndLast && !( i === 0 || i === layerKeys.length-1 ) ) return;
+        result.push( selectedLayers[layerName] );
+    });
+
+    return result;
+
+}
+
+
+
+//
+function getSoundColumns( count ){
+
+    if( count === undefined ) count = 99999;
+    var soundColumns = [];
+
+    for( var i = 0; i < Timeline.numLayers && soundColumns.length < count; i++ ){
+
+        if ( Timeline.layerIsColumn(i) ){
+            var _columnName = Timeline.layerToColumn(i);
+            if( column.type(_columnName) === 'SOUND' ) {
+                soundColumns.push(_columnName);
+            }
+        }
+
+    }
+
+    return soundColumns;
+
+}
+
+
+
 //
 function createUid(){
   return QUuid.createUuid().toString().replace(/{|}/g, '');
@@ -209,4 +289,7 @@ exports = {
     createUid: createUid,
     rgbToHex: rgbToHex,
     hexToRgb: hexToRgb,
+    getSelectedLayers: getSelectedLayers,
+    getSoundColumns: getSoundColumns,
+    getNumber: getNumber,
 };
