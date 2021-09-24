@@ -7,7 +7,7 @@
 /USR_*
 
 #
-!/ps/*
+!/ps/**
 !/PS_**
 
 script-icons/*

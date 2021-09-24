@@ -2,14 +2,15 @@
 Author: D.Potekhin (d@peppers-studio.ru)
 
 [Name: PS_SoundAmplitudeToKeyframes :]
-[Version: 0.210830 :]
+[Version: 0.210922 :]
 
 [Description:
 This script quickly sets the Scene duration to the selected Sound layer duration.
 :]
 
 [Usage:
-Select one sound layer as the source of wave form amplitude and one layer in which to generate keyframes and then click on the script.
+Select one sound layer as the source of wave form amplitude and one layer in which to generate keyframes and then click on the script.  
+If no Sound layer is selected - the script finds the first one.
 
 In the window that appears you can:
 * select an attribute to generate keyframes in it
@@ -23,52 +24,70 @@ TODO:
 */
 
 var pModal = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/pModal.js"));
-var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
+var _Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
 
 //
 function PS_SoundAmplitudeToKeyframes(){
 
 	// MessageLog.clearLog();
 
+	var Utils = _Utils;
+
 	//
   	var scriptName = 'Sound Amplitude To Keyframes';
-  	var scriptVer = '0.210830';
+  	var scriptVer = '0.210922';
 
   	//
+	var selectedLayers = Utils.getSelectedLayers( true );
 	var selectedNode;
 	var selectedSoundColumnName;
 
-	MessageLog.trace('--------- '+Timeline.numLayerSel+' --------');
+	// MessageLog.trace('PS_SoundAmplitudeToKeyframes: Selected Layers:'+JSON.stringify(selectedLayers,true,' ') );
 
-	// for( var i=0; i<Timeline.numLayerSel; i++){
-	// 	MessageLog.trace(i+') '+Timeline.selIsNode(i)+', '+Timeline.selToNode(i)+', '+Timeline.selIsColumn(i) );
-	// }
+	if( selectedLayers.length ){
 
-	// MessageLog.trace('-----------------');
+		var firstNode = selectedLayers[0];
 
-	[0,Timeline.numLayerSel-1].forEach(function(i){
-		
-		// MessageLog.trace(i+') '+Timeline.selIsNode(i)+', '+Timeline.selToNode(i)+', '+Timeline.selIsColumn(i) );
+	    if( selectedLayers.length === 1 ){ // if only one layer is selected
 
-		if ( !selectedNode && Timeline.selIsNode(i) ){
-			
-			selectedNode = Timeline.selToNode(i);
-		
-		}else  if ( Timeline.selIsColumn(i) ){
-			
-			selectedSoundColumnName = Timeline.selToColumn(i);
-        	if( column.type(selectedSoundColumnName) !== 'SOUND' ) selectedSoundColumnName = undefined;
+	        if( firstNode.layerType === 'node' ) {
+	        	
+	        	selectedNode = firstNode.node;
+
+	        	selectedSoundColumnName = Utils.getSoundColumns(1).pop(); // Get First Sound layer
+
+	        }
+
+	    }else{
+
+
+			selectedLayers.forEach(function( layerData ){
+				
+				// MessageLog.trace(i+') '+Timeline.selIsNode(i)+', '+Timeline.selToNode(i)+', '+Timeline.selIsColumn(i) );
+
+				if ( layerData.layerType === 'node' && !selectedNode ){
+					
+					selectedNode = layerData.node;
+				
+				}
+
+				if ( layerData.layerType === 'column' && layerData.columnType === 'SOUND' && !selectedSoundColumnName ){
+					
+					selectedSoundColumnName = layerData.column;
+
+				}
+
+			});
 
 		}
 
-	});
-
+	}
 
    	MessageLog.trace('selectedNode: "'+selectedNode+'"');
    	MessageLog.trace('selectedSoundColumnName: "'+selectedSoundColumnName+'"');
    	
    	if( !selectedNode || !selectedSoundColumnName ){
-   		MessageBox.warning('Please select one Sound layer and one Layer wich has keyable attributes.',0,0,0,'Error');
+   		MessageBox.warning('Please select one Layer with an animatable attribute and one Sound layer.',0,0,0,'Error');
    		return;
    	}
 
@@ -85,13 +104,15 @@ function PS_SoundAmplitudeToKeyframes(){
 	var columnNameInputSkipChenged;
 	var attrColumnIsNew;
 
-	var modal = new pModal( scriptName + " v" + scriptVer, 280, 210, false );  
+	var modal = new pModal( scriptName + " v" + scriptVer, 280, 320, false );  
 	if( !modal.ui ){return;}
 	var ui = modal.ui;
 
+	modal.addLabel( 'Sound: '+selectedSoundColumnName, ui );
+
 	// Selected Node
 	// modal.addLabel( "Create Keyframes to:", ui);
-	var nodeNameLabel = modal.addLabel( selectedNode, ui);
+	var nodeNameLabel = modal.addLabel( 'Layer: '+selectedNode, ui);
 	nodeNameLabel.setStyleSheet('font-weight:bold;');
 
 	// Node keyable attributes
@@ -124,18 +145,43 @@ function PS_SoundAmplitudeToKeyframes(){
 	addLabel( 'Remap Max to:', valuesGroup, 2, 1 );
 	var remapMaxInput = addInput( valuesGroup, 1, 3, 1, true );
 
+	addLabel( 'Smoothing:', valuesGroup, 0, 2 );
+	var smoothingInput = addInput( valuesGroup, 0, 1, 2, true );
+
+	// Sample processing method
+	var sampleProcessingMethodGroup = modal.addGroup('Sample Processing Method:', ui, true  );
+
+	var averageMethodRadioButton = new QRadioButton("Average", modal);
+	averageMethodRadioButton.checked = true;
+	sampleProcessingMethodGroup.mainLayout.addWidget( averageMethodRadioButton, 0, 0 );
+
+	var medianMethodRadioButton = new QRadioButton("Median", modal);
+	sampleProcessingMethodGroup.mainLayout.addWidget( medianMethodRadioButton, 0, 0 );
+
 	//
 	var createButton = modal.addButton('Create Keyframes', ui, undefined, undefined, undefined, function(){
-
+		
     	// Retrieve waveform data
-    	var medianData = getSoundMedianData( selectedSoundColumnName );
-    	var firstFrame = parseInt(firstFrameInput.text) || 1;
-    	var lastFrame = parseInt(lastFrameInput.text) || frame.numberOf();
-    	var mapMin = parseFloat(remapMinInput.text) || 0;
-    	var mapMax = parseFloat(remapMaxInput.text) || 1;
-    	var mapRange = mapMax - mapMin;
+    	var sampleProcessingMethod = averageMethodRadioButton.checked ? getAverage : getMedian;
+    	
+    	var medianData = getSoundMedianData( selectedSoundColumnName, sampleProcessingMethod );
+    	
+    	var _firstFrame = validateFrame( Utils.getNumber(firstFrameInput.text) || 1 );    	
+    	var _lastFrame = validateFrame( Utils.getNumber(lastFrameInput.text) || frame.numberOf() );
+    	var firstFrame = Math.max( Math.min( _firstFrame, _lastFrame ), 1 );
+    	var lastFrame = Math.min( Math.max( _firstFrame, _lastFrame ), frame.numberOf() );
+    	firstFrameInput.setText( firstFrame );
+    	lastFrameInput.setText( lastFrame );
 
-    	MessageLog.trace('Create keyframes.\ncolumnName:"'+attrColumnName+'", isNew:'+attrColumnIsNew+', firstFrame:'+firstFrame+', lastFrame:'+lastFrame+', mapMin:'+mapMin+', mapMax:'+mapMax );
+    	var mapMin = Utils.getNumber(remapMinInput.text) || 0;
+    	var mapMax = Utils.getNumber(remapMaxInput.text) || 1;
+    	var mapRange = mapMax - mapMin;
+    	
+    	var smoothing = Math.round( Utils.getNumber(smoothingInput.text) || 0 );
+    	smoothingInput.setText( smoothing );
+
+    	MessageLog.trace('Create keyframes.\ncolumnName:"'+attrColumnName+'", isNew:'+attrColumnIsNew+', firstFrame:'+firstFrame+', lastFrame:'+lastFrame+', mapMin:'+mapMin+', mapMax:'+mapMax+', smoothing:'+smoothing );
+    	//MessageLog.trace(JSON.stringify( medianData, true, ' ') );
 
     	scene.beginUndoRedoAccum('Generate Sound Amplitude Keys');
 
@@ -149,10 +195,33 @@ function PS_SoundAmplitudeToKeyframes(){
 
     	node.linkAttr( selectedNode, selectedAttrName, attrColumnName );
 
-    	for( var _frame=firstFrame-1; _frame < lastFrame-1 && _frame < medianData.values.length; _frame++ ){
+    	var prevEntry;
+    	var soundData = smoothing ? smoothArray( medianData.values, smoothing ) : medianData.values;
 
-    		var mappedValue = mapMin + ( (medianData.values[_frame] - medianData.min) / medianData.minMaxRange ) * mapRange;
-    		column.setEntry( attrColumnName, 1, _frame+1, mappedValue );
+    	for( var _frame=firstFrame-1; _frame < lastFrame-1 && _frame < soundData.length; _frame++ ){
+
+    		var __frame = _frame+1;
+    		var mappedValue = mapMin + ( (soundData[_frame] - medianData.min) / medianData.minMaxRange ) * mapRange;
+    		// MessageLog.trace(__frame+') '+ mappedValue +' > '+ column.isKeyFrame( attrColumnName, 1, __frame ) ); // !!!
+
+    		if( mappedValue !== prevEntry ){
+    			
+    			column.setEntry( attrColumnName, 1, __frame, mappedValue );
+
+    			if( _frame !== 0 && !column.isKeyFrame( attrColumnName, 1, _frame ) ) {
+    				
+    				column.setEntry( attrColumnName, 1, _frame, prevEntry );
+
+    			}
+
+    			prevEntry = mappedValue;
+
+    		}else if( column.isKeyFrame( attrColumnName, 1, __frame ) ){
+    			
+    			column.clearKeyFrame( attrColumnName, __frame );
+
+    		} 		
+    		
 
     	}
     	
@@ -243,9 +312,15 @@ function PS_SoundAmplitudeToKeyframes(){
 		}
 		return _input;
 	}
+
+	//
+	function validateFrame( fr ) {
+		return Math.min( frame.numberOf(), Math.max( 1, ~~fr ) );
+	}
+
 	
 	//
-	function getSoundMedianData( columnName ){
+	function getSoundMedianData( columnName, sampleProcessingMethod ){
 		var soundColumn = column.soundColumn( columnName );
 		// MessageLog.trace(' >> '+JSON.stringify(soundColumn,true,'  '));
 		// MessageLog.trace(' >>> '+Object.getOwnPropertyNames(soundColumn).join('\n'));
@@ -260,8 +335,7 @@ function PS_SoundAmplitudeToKeyframes(){
 		do{
 			var frameForm = waveForm.splice(0, 15);
 			waveFormChannels.push( frameForm );
-			// var medianValue = getAverage(frameForm);
-			var medianValue = getMedian(frameForm);
+			var medianValue = sampleProcessingMethod(frameForm);
 			medianValues.push(medianValue);
 			if( min > medianValue ) min = medianValue;
 			if( max < medianValue ) max = medianValue;
@@ -275,7 +349,6 @@ function PS_SoundAmplitudeToKeyframes(){
 			minMaxRange: max - min
 		};
 	}
-
 
 	//
 	function getAverage(values){
@@ -300,5 +373,34 @@ function PS_SoundAmplitudeToKeyframes(){
 
 	  return (values[half - 1] + values[half]) / 2.0;
 	}
+
+
+	//
+	function smoothArray( arr, windowSize ) {
+	  
+		var result = [];
+
+		arr.forEach(function( val, i ){
+
+			var leftOffset = i - windowSize;
+			var from = leftOffset >= 0 ? leftOffset : 0;
+			var to = i + windowSize + 1;
+
+			var count = 0;
+			var sum = 0;
+
+			for( var j = from; j < to && j < arr.length; j ++ ) {
+				sum += arr[j];
+				count += 1;
+			}
+
+			result[i] = sum / count;
+
+		});
+
+		return result;
+
+	}
+		
 
 }

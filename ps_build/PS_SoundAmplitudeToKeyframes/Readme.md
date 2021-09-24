@@ -1,11 +1,12 @@
 ## PS_SoundAmplitudeToKeyframes
-v0.210830
+v0.210922
 
 ### Description
 This script quickly sets the Scene duration to the selected Sound layer duration.
 
 ### Usage
-Select one sound layer as the source of wave form amplitude and one layer in which to generate keyframes and then click on the script.
+Select one sound layer as the source of wave form amplitude and one layer in which to generate keyframes and then click on the script.  
+If no Sound layer is selected - the script finds the first one.
 
 In the window that appears you can:
 * select an attribute to generate keyframes in it

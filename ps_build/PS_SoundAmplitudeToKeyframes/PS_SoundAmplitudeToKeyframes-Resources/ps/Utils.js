@@ -4,10 +4,17 @@ Version: 0.1
 */
 
 //
+function getNumber(v){
+    if( typeof v !== 'string' ) return v;
+    return parseFloat( v.replace(',','.') );
+}
+
+
+//
 function getTimestamp(){
     var date = new Date();
     return date.getFullYear() + getZeroLeadingString(date.getMonth()+1) + getZeroLeadingString(date.getDate())+'_'+getZeroLeadingString(date.getHours())+getZeroLeadingString(date.getMinutes());
-};
+}
 
 
 //
@@ -160,6 +167,111 @@ function eachAnimatableAttr( _node, callback ){
 
 
 //
+function getSelectedLayers( onlyFirstAndLast ){
+    
+    var selectedLayers = {};
+    var numSelLayers = Timeline.numLayerSel;
+    var layerName;
+    
+    for ( var i = 0; i < numSelLayers; i++ ){
+
+        if ( Timeline.selIsNode( i ) ){
+            
+            layerName = Timeline.selToNode(i);
+            if( !selectedLayers[layerName] ) selectedLayers[layerName] = {
+                name: node.getName(layerName),
+                node: layerName,
+                index: i,
+                layerType: 'node',
+            };
+
+        }else if ( Timeline.selIsColumn( i ) ){
+            
+            layerName = Timeline.selToColumn(i);
+            if( !selectedLayers[layerName] ) selectedLayers[layerName] = {
+                name: layerName,
+                index: i,
+                layerType: 'column',
+                columnType:  column.type(layerName),
+                column: layerName
+            };
+        }
+
+    }
+
+    var layerKeys = Object.keys(selectedLayers);
+    var result = [];
+
+    if( !layerKeys.length ) return result;
+
+    layerKeys.forEach(function( layerName, i ){
+        if( onlyFirstAndLast && !( i === 0 || i === layerKeys.length-1 ) ) return;
+        result.push( selectedLayers[layerName] );
+    });
+
+    return result;
+
+}
+
+
+
+//
+function getSoundColumns( count ){
+
+    if( count === undefined ) count = 99999;
+    var soundColumns = [];
+
+    for( var i = 0; i < Timeline.numLayers && soundColumns.length < count; i++ ){
+
+        if ( Timeline.layerIsColumn(i) ){
+            var _columnName = Timeline.layerToColumn(i);
+            if( column.type(_columnName) === 'SOUND' ) {
+                soundColumns.push(_columnName);
+            }
+        }
+
+    }
+
+    return soundColumns;
+
+}
+
+
+
+//
+function createUid(){
+  return QUuid.createUuid().toString().replace(/{|}/g, '');
+}
+
+
+///
+function componentToHex(c) {
+  var hex = c.toString(16);
+  return hex.length == 1 ? "0" + hex : hex;
+}
+
+//
+function rgbToHex(r, g, b, a) {
+  // return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+  var result = componentToHex(r) + componentToHex(g) + componentToHex(b);
+  if( a !== undefined && !ignoreAlpha ) result += componentToHex(a);
+  return result;
+}
+
+
+//
+function hexToRgb(hex) {
+  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})?$/i.exec(hex);
+  if( !result ) return null;
+  return {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16),
+    a: parseInt(result[4], 16)
+  };
+}
+
+//
 exports = {
     gridWidth: gridWidth,
     getTimestamp: getTimestamp,
@@ -173,5 +285,11 @@ exports = {
     getFullAttributeList: getFullAttributeList,
     isFunction: isFunction,
     getAnimatableAttrs: getAnimatableAttrs,
-    eachAnimatableAttr: eachAnimatableAttr
+    eachAnimatableAttr: eachAnimatableAttr,
+    createUid: createUid,
+    rgbToHex: rgbToHex,
+    hexToRgb: hexToRgb,
+    getSelectedLayers: getSelectedLayers,
+    getSoundColumns: getSoundColumns,
+    getNumber: getNumber,
 };
