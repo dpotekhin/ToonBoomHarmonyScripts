@@ -16,6 +16,10 @@ This is a script to quickly create and fitting backdrops.
 
 This script allows you to copy and paste a hexadecimal value of the selected Color.
 
+## [PS_KeysToKeyExposures](ps_build/PS_KeysToKeyExposures)
+This Script converts Node Attribute Animation to Drawing Node Exposure Keys.
+
+
 ## [PS_PathTools](ps_build/PS_PathTools)
 
 The script provides tools for aligning, mirroring and modifying strokes.
