@@ -1,7 +1,33 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
 
-Version: 0.210924
+[Name: PS_KeysToKeyExposures :]
+[Version: 0.210924 :]
+
+[Description:
+This Script converts Node Attribute Animation to Drawing Node Exposure Keys.
+:]
+
+[Usage:
+Select two nodes in Node View:
+- The node from the attribute of which the animation data will be taken
+- The Drawing Node in which the Exposure Keys will be generated
+(Using a Drawing Node as animation source is not recommended)
+
+If all goes well You'll see a modal with the fields described below:
+- Drawing: the path to used Drawing Node
+- Source: the path to used Animation Source Node
+- Source Node Attribute Name: pick an animated attribute as an animation values source
+- First Frame: The first frame from which Exposure Keys will be generated
+- Last Frame: the last frame of creating Exposure Keys range
+- Value Offset: the offset of animation source frame relative to the current frame to implement a Key Exposure delay
+- Min Exposure: minimum Key Exposure duration in frames
+- Key Exposures Mapping: here you need to specify which range of values the Exposure Keys correspond to. An example format will be generated the first time the script is applying to a Drawing Node.
+
+Once configured, click the "Create Key Exposures" button. Voila!
+
+The Key Exposures Mapping and other Script parameters related to a specific Drawing Node are stored in a Custom Attribute of that Node and will be used when the script is reapplied to that Drawing.
+:]
 */
 
 var pModal = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/pModal.js"));
@@ -9,15 +35,15 @@ var _Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Uti
 var SelectionUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/SelectionUtils.js"));
 
 ///
-function PS_KeysToDrawingSubstitutions(){
+function PS_KeysToKeyExposures(){
 	
 	// MessageLog.clearLog();
 
 	var Utils = _Utils;
-	var CUSTOM_ATTR_NAME = '_PS_KTDS_Settings';
+	var CUSTOM_ATTR_NAME = '_PS_KTKE_Settings';
 	//
-  	var scriptName = 'Keys To Drawing Substitutions';
-  	var scriptVer = '0.210923';
+  	var scriptName = 'Keys To Key Exposures';
+  	var scriptVer = '0.210924';
 
   	var drawingNode;
   	var valueSourceNode;
@@ -139,9 +165,9 @@ function PS_KeysToDrawingSubstitutions(){
 	applySavedModalParams(drawingNode);
 
 	//
-	var createButton = modal.addButton('Convert Keys to Substitutions', ui, undefined, undefined, undefined, function(){
+	var createButton = modal.addButton('Create Key Exposures', ui, undefined, undefined, undefined, function(){
 
-		scene.beginUndoRedoAccum('Convert Keys to Substitutions');
+		scene.beginUndoRedoAccum('Keys to Key Exposures');
 
 		convertKeysToSubs();
 
