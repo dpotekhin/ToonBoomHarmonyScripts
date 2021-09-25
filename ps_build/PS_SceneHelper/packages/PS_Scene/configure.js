@@ -8,27 +8,27 @@ function configure(packageFolder, packageName)
 
 
   // = = = = = = = = = = = = = = = = = = = = = = = = = = =
-  // Reopen Scene
+  // Reload Scene
   // - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  var reopenSceneAction = {
-      id: "ru.peppers-studio.reopenSceneDisplay",
-      text: "Reopen Scene ",
+  var reloadSceneAction = {
+      id: "ru.peppers-studio.reloadSceneDisplay",
+      text: "Reload Scene ",
       // icon: "PS_BackupScene.png",
       checkable: false,
       isEnabled: true,
-      onTrigger: SceneHelper.PS_ReopenScene
+      onTrigger: SceneHelper.PS_ReloadScene
   };
 
 
   // - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  ScriptManager.addAction(reopenSceneAction);
+  ScriptManager.addAction(reloadSceneAction);
 
   ScriptManager.addMenuItem({
       targetMenuId: "File",
-      id: reopenSceneAction.id,
-      text: reopenSceneAction.text,
-      action: reopenSceneAction.id
-      //action: 'reopenSceneAction.onTrigger in ./configure.js'
+      id: reloadSceneAction.id,
+      text: reloadSceneAction.text,
+      action: reloadSceneAction.id
+      //action: 'reloadSceneAction.onTrigger in ./configure.js'
   });
   // = = = = = = = = = = = = = = = = = = = = = = = = = = =
 

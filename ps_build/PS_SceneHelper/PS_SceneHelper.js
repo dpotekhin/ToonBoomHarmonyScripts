@@ -10,7 +10,7 @@ A set of scene helper scripts.
 
 
 [Usage:
-#### PS_ReopenScene
+#### PS_ReloadScene
 Closes and opens the current scene.  
 Package adds the Main Menu item: File / Reopen Scene
 
@@ -60,7 +60,7 @@ var Utils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/Ut
 var MODE_OPEN_ONLY = 'mode-open-only';
 
 exports = {
-    PS_ReopenScene: PS_ReopenScene,
+    PS_ReloadScene: PS_ReloadScene,
     PS_OpenSceneFolder: PS_OpenSceneFolder,
     PS_BackupScene: PS_BackupScene,
     PS_OpenBackupFolder: PS_OpenBackupFolder,
@@ -75,9 +75,9 @@ exports = {
 /*
 Reopen Scene
 */
-function PS_ReopenScene(){
+function PS_ReloadScene(){
     var scenePath = fileMapper.toNativePath( scene.currentProjectPath() +'/'+ scene.currentScene()+'.xstage' );
-    // MessageLog.trace('PS_ReopenScene: '+scenePath );
+    // MessageLog.trace('PS_ReloadScene: '+scenePath );
     scene.closeSceneAndOpenOffline( scenePath );
 }
 
