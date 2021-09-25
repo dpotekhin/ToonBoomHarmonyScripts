@@ -5,7 +5,7 @@ v0.210921
 A set of scene helper scripts.
 
 ### Usage
-#### PS_ReopenScene
+#### PS_ReloadScene
 Closes and opens the current scene.  
 Package adds the Main Menu item: File / Reopen Scene
 
@@ -36,5 +36,5 @@ Package adds the Main Menu item: File / Resources / Open Pencil Texture Folder
 
 ### Installation:
 Copy all files from this folder to [Harmony User Scripts directory](https://docs.toonboom.com/help/harmony-20/premium/scripting/import-script.html).\
-Add scripts "PS_ReopenScene", "PS_OpenSceneFolder", "PS_OpenTemplateFolder", "PS_OpenScriptsFolder", "PS_OpenPencilTextureFolder", "PS_BackupScene", "PS_OpenBackupFolder" to a panel.  
+Add scripts "PS_ReloadScene", "PS_OpenSceneFolder", "PS_OpenTemplateFolder", "PS_OpenScriptsFolder", "PS_OpenPencilTextureFolder", "PS_BackupScene", "PS_OpenBackupFolder" to a panel.  
 Don't copy folder "packages" if you don't want to add items to the Main Menu.
