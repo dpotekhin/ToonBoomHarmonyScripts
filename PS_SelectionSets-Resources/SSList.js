@@ -23,7 +23,7 @@ function SSList( scriptVer, parentWidget ){
   //
   treeView.onItemClick = function( itemData ){
 
-    // MessageLog.trace('clicked:'+JSON.stringify(itemData,true,'  '));
+    // MessageLog.trace('onItemClick:'+JSON.stringify(itemData,true,'  '));
     
     currentItemData = itemData;
 
@@ -36,6 +36,17 @@ function SSList( scriptVer, parentWidget ){
 
     // MessageLog.trace('-->'+itemData.modelItem.text()+', '+itemData.id );
   }
+
+  //
+  treeView.onItemDoubleClick = function( itemData ) {
+
+    // MessageLog.trace('onItemDoubleClick:'+JSON.stringify(itemData,true,'  '));
+
+    currentItemData = itemData;
+    showRenameUI();
+
+  }
+
 
   //
   treeView.onItemContextMenu = function( itemData, event ){
@@ -193,6 +204,7 @@ function SSList( scriptVer, parentWidget ){
       currentItemData.name,
       'Enter Group Name'
     );
+    if( !newName ) return;
     newName = newName.trim();
     if( !newName || newName === currentItemData.name ) return;
 
