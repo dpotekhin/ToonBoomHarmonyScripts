@@ -2,7 +2,7 @@
 Author: D.Potekhin (d@peppers-studio.ru)
 
 [Name: PS_SelectionSets :]
-[Version: 0.210918 :]
+[Version: 0.210927 :]
 
 [Description:
 This script lets you to save and use groups of node selection sets (SS).
@@ -48,7 +48,7 @@ function PS_SelectionSets(){
   // MessageLog.clearLog();
 
   var scriptName = 'Selection Sets';
-  var scriptVer = '0.210821';
+  var scriptVer = '0.210927';
 
   var modalWidthMin = 100;
   var modalWidthMax = 400;

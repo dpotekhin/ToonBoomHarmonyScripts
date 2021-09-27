@@ -1,6 +1,6 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version: 0.210913
+Version: 0.210927
 */
 
 var TreeView = function( parent, resourcesPath ){
@@ -18,6 +18,7 @@ var TreeView = function( parent, resourcesPath ){
 
   var treeView = this.treeView = new QTreeView(this);
   treeView.headerHidden = true;
+  treeView.expandsOnDoubleClick = false;
   // MessageLog.trace('indentation '+ treeView.wordWrap  );
   treeView.indentation = 10;
 
@@ -32,22 +33,36 @@ var TreeView = function( parent, resourcesPath ){
   /// Events
 
   var isRightButtonClick;
+  var isDoubleClick;
   var currentItemData;
   var clickedPoint;
 
   var clickTimer = new QTimer(treeView);
 
   function clearClickTimerData(){
-
+    // MessageLog.trace('clearClickTimerData: ');
     isRightButtonClick = undefined;
+    isDoubleClick = undefined;
     currentItemData = undefined;
+    clickTimer.stop();
 
   }
 
   function clickTimerComplete(){
     
-    // MessageLog.trace('CLICK TIMER ' +isRightButtonClick );
-     clickTimer.stop();
+    try{
+
+    // MessageLog.trace('CLICK TIMER: isRightButtonClick:' +isRightButtonClick+', isDoubleClick:'+isDoubleClick );
+    clickTimer.stop();
+
+    if( isDoubleClick ) {
+
+      if( currentItemData && _this.onItemDoubleClick ) _this.onItemDoubleClick( currentItemData );
+      clearClickTimerData();
+      return;
+    }
+
+    // MessageLog.trace('CLICK TIMER @2:');
 
     if( isRightButtonClick ){
 
@@ -65,24 +80,36 @@ var TreeView = function( parent, resourcesPath ){
 
     clearClickTimerData();
 
+    }catch(err){MessageLog.trace('clickTimerComplete: Error: '+err)}
+
   }
 
   clickTimer.timeout.connect(clickTimerComplete);
+
+  //
+  treeView.doubleClicked.connect( function(index){
+    
+    // MessageLog.trace('doubleClicked: '+ index );
+    isDoubleClick = true;
+
+  });
 
   //
   treeView.clicked.connect( function(index){
     
     clickTimer.stop();
     isRightButtonClick = false;
+    if( isDoubleClick === undefined ) isDoubleClick = false;
 
     currentItemData = getItemDataByIndex( index );
 
     // MessageLog.trace('CLICKED: '+index.column()+': '+currentItemData );
+    // MessageLog.trace('CLICKED: isRightButtonClick:'+isRightButtonClick+', isDoubleClick:'+isDoubleClick );
     
     switch( index.column() ){
 
       case 0:
-        clickTimer.start(6);
+        clickTimer.start(150);
         break;
 
       case 1:

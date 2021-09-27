@@ -1,6 +1,6 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version: 0.210913
+Version: 0.210927
 */
 
 //
@@ -66,9 +66,7 @@ function Model( scriptVer ){
         dataNodes.push(groupData);
 
         // MessageLog.trace('>>'+JSON.stringify(text,true,'  '));
-      }catch(err){
-        MessageLog.trace('Error while Selection Set data parsing in node "'+dataNode+'".\n'+err);
-      }
+      }catch(err){ MessageLog.trace('Error while Selection Set data parsing in node "'+dataNode+'".\n'+err);}
       // 
     });
 
@@ -324,7 +322,7 @@ function Model( scriptVer ){
     var groupData = this.getItemDataById(groupId);
     // MessageLog.trace('createSetInGroup'+JSON.stringify(groupData,true,'  '));
     if( !groupData || !groupData.isGroup ) {
-      MessageLog.trace('createSetInGroup: groupId not recqived '+groupData.name);
+      MessageLog.trace('createSetInGroup: groupId not received '+groupData.name);
       return;
     }
 
@@ -405,9 +403,27 @@ function Model( scriptVer ){
     var enable;
 
     itemData.nodes.forEach(function(_node){
-      if( !node.type(_node) ) return;
+      
+      var nodeType = node.type(_node);
+      if( !nodeType ) return;
+      // MessageLog.trace('toggleSetNodes: '+ _node+', '+nodeType );
       if( enable === undefined ) enable = !node.getEnable( _node );
       node.setEnable( _node, enable );
+
+      switch( nodeType ){
+        /*
+        case 'CurveModule':
+        case 'OffsetModule':
+          MessageLog.trace('Toggle deformers: '+enable+' > '+_node );
+          if( enable ) Action.perform("onActionShowDeformer(String)","miniPegModuleResponder", _node );
+          else Action.perform("onActionHideDeformer(String)","miniPegModuleResponder", _node );
+          break;
+        */
+        case 'MasterController':        
+          node.showControls( _node, enable );
+          break;
+      }
+
     });
 
     itemData.updateVisibilityCellState( true );

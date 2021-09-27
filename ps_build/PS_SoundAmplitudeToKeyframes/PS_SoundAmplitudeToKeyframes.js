@@ -129,7 +129,7 @@ function PS_SoundAmplitudeToKeyframes(){
 
 	// addLabel( 'Column Name:', ui, 0, 0 );
 	var columnNameLabel = modal.addLabel( '', ui );
-	var columnNameInput = modal.addLineEdit('',ui, undefined, undefined, onColumnNameChanged );
+	var columnNameInput = modal.addLineEdit('',ui, undefined, undefined, undefined, onColumnNameChanged );
 
 	var valuesGroup = modal.addGroup('',ui,'grid',true);
 
@@ -166,10 +166,11 @@ function PS_SoundAmplitudeToKeyframes(){
     	
     	var medianData = getSoundMedianData( selectedSoundColumnName, sampleProcessingMethod );
     	
-    	var firstFrame = validateFrame( Utils.getNumber(firstFrameInput.text) || 1 );
+    	var _firstFrame = validateFrame( Utils.getNumber(firstFrameInput.text) || 1 );    	
+    	var _lastFrame = validateFrame( Utils.getNumber(lastFrameInput.text) || frame.numberOf() );
+    	var firstFrame = Math.max( Math.min( _firstFrame, _lastFrame ), 1 );
+    	var lastFrame = Math.min( Math.max( _firstFrame, _lastFrame ), frame.numberOf() );
     	firstFrameInput.setText( firstFrame );
-    	
-    	var lastFrame = validateFrame( Utils.getNumber(lastFrameInput.text) || frame.numberOf() );
     	lastFrameInput.setText( lastFrame );
 
     	var mapMin = Utils.getNumber(remapMinInput.text) || 0;
