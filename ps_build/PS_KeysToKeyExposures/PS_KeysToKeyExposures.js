@@ -336,7 +336,7 @@ function PS_KeysToKeyExposures(){
 					return subsVariant.trim();
 				})
 				if( !subsVariants.length ) return;
-				return [ value, subsVariants ];
+				return [ parseFloat(value), subsVariants ];
 			})
 			.filter(function(line){
 				return line;
@@ -381,7 +381,7 @@ function PS_KeysToKeyExposures(){
     		var valueFrame = _frame + frameOffset;
     		if( valueFrame < 1 || valueFrame > sceneFrames ) continue;
 
-    		var currentValue = column.getEntry( valueSourceColumnId, 1, valueFrame );
+    		var currentValue = parseFloat(column.getEntry( valueSourceColumnId, 1, valueFrame ) || '0');
 
 			var drawingSubsListStepIndex = 0;
 			drawingSubsList.every(function(_step,i){
