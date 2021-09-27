@@ -259,6 +259,7 @@ function PS_SoundAmplitudeToKeyframes(){
   		// MessageLog.trace('onAttrNameChanged: '+i+', selectedAttrName:'+selectedAttrName+', linkedColumnName:'+linkedColumnName+', columnName:'+columnName );
 
   		columnNameInput.text = columnName;
+  		onColumnNameChanged();
   		// }catch(err){MessageLog.trace('Error:'+err)}
   	}
 
