@@ -129,7 +129,7 @@ function PS_SoundAmplitudeToKeyframes(){
 
 	// addLabel( 'Column Name:', ui, 0, 0 );
 	var columnNameLabel = modal.addLabel( '', ui );
-	var columnNameInput = modal.addLineEdit('',ui, undefined, undefined, onColumnNameChanged );
+	var columnNameInput = modal.addLineEdit('',ui, undefined, undefined, undefined, onColumnNameChanged );
 
 	var valuesGroup = modal.addGroup('',ui,'grid',true);
 
