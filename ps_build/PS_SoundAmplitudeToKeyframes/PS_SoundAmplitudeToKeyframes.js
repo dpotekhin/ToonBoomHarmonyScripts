@@ -81,6 +81,12 @@ function PS_SoundAmplitudeToKeyframes(){
 
 		}
 
+	}else{
+
+		MessageLog.trace('No layer Selected. Get a selected node in Node View.');
+		selectedNode = selection.selectedNode(0);
+		selectedSoundColumnName = Utils.getSoundColumns(1).pop();
+
 	}
 
    	MessageLog.trace('selectedNode: "'+selectedNode+'"');
