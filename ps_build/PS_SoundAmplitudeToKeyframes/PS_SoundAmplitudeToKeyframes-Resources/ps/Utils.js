@@ -75,7 +75,7 @@ function isFunction(functionToCheck) {
 }
 
 //
-function getAttributes(attribute, attributeList)
+function getAttributes( attribute, attributeList )
 {
   attributeList.push(attribute);
   var subAttrList = attribute.getSubAttributes();
@@ -92,7 +92,7 @@ function getFullAttributeList( nodePath, frame, onlyNames ){
   var topAttributeList = node.getAttrList(nodePath, frame);
   for (var i = 0; i < topAttributeList.length; ++i)
   {
-    getAttributes(topAttributeList[i], attributeList);
+    getAttributes( topAttributeList[i], attributeList );
   }
   if( onlyNames ){
     attributeList = attributeList.map(function(attr){
@@ -103,6 +103,18 @@ function getFullAttributeList( nodePath, frame, onlyNames ){
 }
 
 
+//
+function getLinkedAttributeNames( _node ){
+  var linkedAttrs = [];
+  getFullAttributeList( _node, 1, true ).forEach(function( attrName, i ){
+    var _column = node.linkedColumn( _node, attrName );
+    // MessageLog.trace( i+') '+attrName+', '+_column  );
+    if( _column ) linkedAttrs.push( attrName );
+  });
+  return linkedAttrs;
+}
+
+//
 function getAnimatableAttrs( _node ){
 
     function getAnimatableAttrs( argNode, validAttrList, parAttrName, col )
@@ -285,6 +297,7 @@ exports = {
     getFullAttributeList: getFullAttributeList,
     isFunction: isFunction,
     getAnimatableAttrs: getAnimatableAttrs,
+    getLinkedAttributeNames: getLinkedAttributeNames,
     eachAnimatableAttr: eachAnimatableAttr,
     createUid: createUid,
     rgbToHex: rgbToHex,
