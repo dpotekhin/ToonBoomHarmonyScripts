@@ -2,7 +2,7 @@
 Author: D.Potekhin (d@peppers-studio.ru)
 
 [Name: PS_SelectionSets :]
-[Version: 0.210918 :]
+[Version: 0.210927 :]
 
 [Description:
 This script lets you to save and use groups of node selection sets (SS).
