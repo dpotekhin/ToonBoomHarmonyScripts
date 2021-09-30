@@ -5,8 +5,8 @@
 Script lets to adjust the color of the selected node.
 
 ## [PS_ExpressionEditor](ps_build/PS_ExpressionEditor)
-
 Simple implementation of an expression editor.
+
 
 ## [PS_FitBackdrop](ps_build/PS_FitBackdrop)
 
@@ -29,8 +29,6 @@ The script provides tools for aligning, mirroring and modifying strokes.
 A small helper for batch renaming of nodes.
 
 ## [PS_ResetTransformation](ps_build/PS_ResetTransformation)
-
-Three scripts to universal (pegs and deformers) reset of transformations, save transformation state and remove that state.
 
 ## [PS_SceneHelper](ps_build/PS_SceneHelper)
 
