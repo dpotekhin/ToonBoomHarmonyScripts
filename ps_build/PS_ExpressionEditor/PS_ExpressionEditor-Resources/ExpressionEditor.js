@@ -527,7 +527,7 @@ function ExpressionEditor(){
 
     //
     this.resolveExpressionName = function(name){
-        return (name || '').trim().replace(/\s/gi,'_').replace(/[^0-9\w]/gi,'');
+        return (name || '').trim().replace(/\s/gi,'_').replace(/[^-0-9\w]/gi,'');
     }
 
 

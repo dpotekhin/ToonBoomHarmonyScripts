@@ -13,6 +13,7 @@ function pModal( title, width, height, unique ){
 //
 pModal.prototype.create = function( title, width, height, unique ){
 
+    var _this = this;
 
     if( unique ){
       var modalIsCreated = false;
@@ -51,7 +52,9 @@ pModal.prototype.create = function( title, width, height, unique ){
     // ui.setStyleSheet( 'QWidget{ position: absolute; margin: 0; padding: 0; }' );
 
     ui.mainLayout = new QVBoxLayout( ui );
-
+    ui.setFocusOnMainWindow = function(){
+      _this.setFocusOnMainWindow();
+    }
     //ui.mainLayout.setAlignment( ui, Qt.AlignTop );
 
     /*
@@ -98,7 +101,11 @@ pModal.prototype.addGroup = function( title, parent, layoutType, style ){
 
   groupBox.setLayout( groupBoxLayout );   
   if( style ) {
-    groupBox.setStyleSheet( style === true ? 'QGroupBox{ border:none; margin: 0; padding: 0; }' : style );
+    if( style === true ){
+      this.removeElementMargins( groupBox );
+    }else{
+      groupBox.setStyleSheet( style );
+    }
   }
   parent.mainLayout.addWidget( groupBox, 0, 0 );
   return groupBox;
@@ -157,10 +164,12 @@ pModal.prototype.addButton = function( title, parent, width, height, icon, onRel
 
   if( width ){
     btn.setFixedSize( width, height );
-  }else{
+  }
+/*
+  else{
     btn.setMaximumSize( width, height );
   }
-
+*/
   if( toolTip ) btn.toolTip = toolTip;
 
   //
@@ -182,11 +191,15 @@ pModal.prototype.addButton = function( title, parent, width, height, icon, onRel
 
 
 //
-pModal.prototype.addLineEdit = function( text, parent, width, height ){
+pModal.prototype.addLineEdit = function( text, parent, width, height, onChanged, onEdited ){
   var line = new QLineEdit();
   line.text = text;
-  line.setMaximumSize( width, height );
+  if(width){
+    line.setMaximumSize( width, height );
+  }
   parent.mainLayout.addWidget( line, 0, 0 );
+  if( onChanged ) line.textChanged.connect( line, onChanged );
+  if( onEdited ) line.editingFinished.connect( line, onEdited );
   return line;
 }
 
@@ -241,6 +254,14 @@ pModal.prototype.getParentWidget = function(){
   return "";
 
 };
+
+
+//
+pModal.prototype.removeElementMargins = function( group ){
+  group.setStyleSheet('QGroupBox{ border:none; margin: 0; padding: 0; }' );
+  ( group.mainLayout || group ).setContentsMargins(0,0,0,0);
+}
+
 
 pModal.prototype.setFocusOnMainWindow = function(){
 
