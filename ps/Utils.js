@@ -226,6 +226,27 @@ function getSelectedLayers( onlyFirstAndLast ){
 }
 
 
+//
+function eachAnimatedAttributeOfSelectedLayers( _action ){
+
+  var selectedlayers = getSelectedLayers();
+  // MessageLog.trace('selectedlayers: '+JSON.stringify(selectedlayers,true,' '));
+
+  selectedlayers.forEach(function( _layer, i ){
+    
+    var _node = _layer.node;
+    var attributes = getLinkedAttributeNames( _node );
+    // MessageLog.trace(i+') '+_node+': '+JSON.stringify(attributes,true,' '));
+    
+    attributes.forEach(function( _attrName ){
+      _action( _node, _attrName );
+    });
+
+  });
+
+}
+
+
 
 //
 function getSoundColumns( count ){
@@ -305,4 +326,5 @@ exports = {
     getSelectedLayers: getSelectedLayers,
     getSoundColumns: getSoundColumns,
     getNumber: getNumber,
+    eachAnimatedAttributeOfSelectedLayers: eachAnimatedAttributeOfSelectedLayers,
 };
