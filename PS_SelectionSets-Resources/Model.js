@@ -117,7 +117,7 @@ function Model( scriptVer ){
 
 
   //
-  this.createDataNode = function( parentNode, nodeName ){
+  this.createDataNode = function( parentNode, nodeName, data ){
 
     if( !parentNode ) parentNode = 'Top';
     var dataNodeName = nodeName || parentNode.split('/').pop();
@@ -138,13 +138,15 @@ function Model( scriptVer ){
     node.setCoord( dataNode, nodesBounds.x.center, nodesBounds.y.top - 50 );
 
     // Node data
-    var data = {
-      isGroup: true,
-      dataNode: dataNode,
-      name: dataNodeName,
-      id: Utils.createUid(),
-      items: []
-    };
+    if( !data ) {
+        data = {
+        isGroup: true,
+        dataNode: dataNode,
+        name: dataNodeName,
+        items: []
+      };
+    }
+    data.id = Utils.createUid();
 
     node.setTextAttr( dataNode, 'text', 1, this.getItemDataText(data) );
 
@@ -542,7 +544,7 @@ function Model( scriptVer ){
 
     if( !node.type(itemData.dataNode) ) {
       MessageLog.trace('Data node is not available "'+itemData.dataNode+'"');
-      MessageBox.warning('Unable to save Selection Set data to Data Node "'+itemData.dataNode+'".\nProbably it was just deleted, renamed or removed.\nYou can try to press Refresh button in context menu.',0,0,0,'Saving Error')
+      MessageBox.warning('Unable to save Selection Set data to Data Node "'+itemData.dataNode+'".\nProbably it was just deleted, renamed or removed.\nYou can try to press Refresh button in context menu.',0,0,0,'Saving Error');
       return;
     }
 
@@ -554,10 +556,9 @@ function Model( scriptVer ){
 
 
   //
-  this.getItemDataText = function( data ){
-    
-    // Cleanup data
-    data = {
+  this.getClearItemData = function( data ) {
+
+    return {
       name: data.name,
       id: data.id,
       isExpanded: data.isExpanded,
@@ -578,7 +579,69 @@ function Model( scriptVer ){
       })
     };
 
+  }
+
+  //
+  this.getItemDataText = function( data ){
+    
+    // Cleanup data
+    data = this.getClearItemData( data );
+
     return '%%PS_SelectionSets|v'+scriptVer+'%%\n'+JSON.stringify(data,true,'  ');
+
+  }
+
+  //
+  this.saveGroupDataToFile = function( itemData ){
+
+    var _this = this;
+
+    if( !itemData ){
+      itemData = {
+        PS_SelectionSets: this.dataNodes.map( function( groupData ) { return _this.getClearItemData( groupData); })
+      };
+    }
+    
+
+    // MessageLog.trace('saveGroupDataToFile: '+JSON.stringify(itemData,true,'  '));
+
+    var filePath = FileDialog.getSaveFileName('*.json');
+
+    if( !filePath ) return;
+
+    MessageLog.trace('File: '+filePath );
+
+    try {
+      var file = new File(filePath);
+      file.open(2); // write only
+      file.write( JSON.stringify(itemData,true,'  ') );
+      file.close();
+    } catch (err) { return; }
+
+  }
+
+
+  //
+  this.loadGroupDataFromFile = function() {
+  
+    var _this = this;    
+
+    var filePath = FileDialog.getOpenFileName('*.json');
+
+    if( !filePath ) return;
+
+    var file = new File(filePath);
+    var loadedData;
+
+    try {
+      if (file.exists) {
+        file.open(1) // read only
+        loadedData = file.read();
+        file.close();
+        
+        return JSON.parse( loadedData )['PS_SelectionSets'];
+      }
+    }catch(err){ return; }
 
   }
 
