@@ -1,6 +1,6 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version: 0.210927
+Version: 0.211006
 */
 
 //
@@ -592,7 +592,7 @@ function Model( scriptVer ){
   }
 
   //
-  this.saveGroupDataToFile = function( itemData ){
+  this.exportGroupDataToFile = function( itemData ){
 
     var _this = this;
 
@@ -603,7 +603,7 @@ function Model( scriptVer ){
     }
     
 
-    // MessageLog.trace('saveGroupDataToFile: '+JSON.stringify(itemData,true,'  '));
+    // MessageLog.trace('exportGroupDataToFile: '+JSON.stringify(itemData,true,'  '));
 
     var filePath = FileDialog.getSaveFileName('*.json');
 
@@ -622,7 +622,7 @@ function Model( scriptVer ){
 
 
   //
-  this.loadGroupDataFromFile = function() {
+  this.importGroupDataFromFile = function() {
   
     var _this = this;    
 
