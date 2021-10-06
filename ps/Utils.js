@@ -270,6 +270,24 @@ function getSoundColumns( count ){
 }
 
 
+//
+function getUnusedColumnName( name ){
+
+    name = name ? name.replace(/\s/gi,'_').replace(/[^a-zA-Z0-9_-]+/gi,'') : undefined;
+    if( !name ) return;
+
+    if( !column.type( name ) ) return name;
+
+    for( var i = 1; i < 999; i++ ){
+
+        var _name = name+'_'+i;
+        if( !column.type( _name ) ) return _name;
+
+    }
+
+}
+
+
 
 //
 function createUid(){
@@ -325,6 +343,7 @@ exports = {
     hexToRgb: hexToRgb,
     getSelectedLayers: getSelectedLayers,
     getSoundColumns: getSoundColumns,
+    getUnusedColumnName: getUnusedColumnName,
     getNumber: getNumber,
     eachAnimatedAttributeOfSelectedLayers: eachAnimatedAttributeOfSelectedLayers,
 };
