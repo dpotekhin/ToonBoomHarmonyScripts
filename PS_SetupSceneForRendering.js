@@ -1,7 +1,7 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
 
-Version: 0.210825
+Version: 0.211007
 
 Description: 
 This script lets you to set up all the Write nodes of a scene for frame sequences rendering.
@@ -16,15 +16,19 @@ If the scene name pattern is not found in the path, then the file name will be l
 
 Scene resolution is exposed: 3840x2160
 
+If you run the script with Composite nodes selected it automaticaly creates Write nodes to that Composites if them not exists.
+If a Write node is linked to a Composite the script fixes its name.
+
+If you run the script with Write nodes selected their names will be fixed.
+
 Script output can be found in Message Log panel (Windows / Message Log)
 
 ToDo:
-- Automatic creation of Write nodes for the selected Composite nodes if they hasn't them
 - Ability to change the default resolution
 */
 
 
-function PS_SetupSceneToRender(){
+function PS_SetupSceneForRendering(){
 	
 	MessageLog.clearLog();
 
@@ -67,6 +71,75 @@ function PS_SetupSceneToRender(){
 
 	MessageLog.trace('framePrefix: "'+ framePrefix +'"');
 
+	scene.beginUndoRedoAccum('Setup the Scene For Rendering');
+	// Check or create Write nodes is there's selection
+
+	try{
+	selection.selectedNodes().forEach(function(_node,i){
+		
+		MessageLog.trace( i+') '+_node+' > '+node.type(_node) );
+
+		var parentNodeName = node.getName(_node);
+		var writeNode = node.type(_node) === 'WRITE' ? _node : undefined;
+
+		if( node.type(_node) === 'COMPOSITE' ){ // Get connected Write node
+
+			var numOutput = node.numberOfOutputPorts( _node );
+  			for(var ii=0; ii<numOutput; ii++){
+			    var childNode = node.dstNode(_node, ii, 0);
+			    if( node.type(childNode) === 'WRITE' ) writeNode = childNode; break;
+			}
+			
+			if( !writeNode ){ // create a Write node and link it to the Composite 
+
+				MessageLog.trace('Create Write node: '+parentNodeName );
+				var x = ~~( node.coordX(_node) + node.width(_node) / 4 );
+				var y = ~~( node.coordY(_node) + node.height(_node) * 3 );
+				writeNode = node.add( node.parentNode(_node), ''+parentNodeName, 'WRITE', x, y, 0 );
+				node.link( _node, 0, writeNode, 0 );
+
+			}
+
+		}
+
+		if( !writeNode ) return;
+
+		node.setColor( writeNode, new ColorRGBA(255, 0 , 0, 255) )
+
+		var fixedWriteNodeName = node.getName( writeNode );
+
+		if( fixedWriteNodeName.indexOf('Write-') === -1 ){
+			fixedWriteNodeName = fixedWriteNodeName.replace(/[-_]?write?[-_]?/gi,'');
+		}
+
+		fixedWriteNodeName = fixedWriteNodeName
+			.replace(/^Write-/,'')
+			.replace(/_\d$/,'')
+			.replace(/[-_]?composite[-_]?/gi,'')
+			.replace(/-cmp|_cmp$/gi,'')
+			.replace(/-com|_com$/gi,'')
+		;
+		
+		if( !fixedWriteNodeName ) fixedWriteNodeName = 'NAME-IS-NOT-DEFINED';
+
+		fixedWriteNodeName = 'Write-'+fixedWriteNodeName;
+
+		if( fixedWriteNodeName !== node.getName( writeNode ) ){
+			
+			MessageLog.trace('Rename Write node '+node.getName( writeNode )+' >> '+fixedWriteNodeName );
+			if( !node.rename( writeNode, fixedWriteNodeName ) ) node.rename( writeNode, fixedWriteNodeName+'_1' );
+
+		}
+
+		MessageLog.trace(' >> '+ writeNode );
+
+	});
+	
+	}catch(err){MessageLog.trace('Error: '+err)}
+	
+
+
+	// Configure Write Nodes
 	node.getNodes(['WRITE']).forEach(function(n,i){
 		var nn = node.getName(n);
 		MessageLog.trace((i+1)+') "'+nn+'", "'+n+'"');
@@ -85,9 +158,14 @@ function PS_SetupSceneToRender(){
 		MessageLog.trace('++ Frame name: "'+frameName+'"');
 	});
 
-	// Scene settings
+
+
+
+	// // Scene settings
 	scene.setDefaultResolution( 3840, 2160, 41.112 );
 	MessageLog.trace('Scene Resolution: '+scene.defaultResolutionX()+' x '+scene.defaultResolutionY() );
+
+	scene.endUndoRedoAccum();
 
 }
 
