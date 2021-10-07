@@ -31,6 +31,7 @@ function PS_SetupSceneToRender(){
 	var framePrefix = '';
 
 	if( !KeyModifiers.IsShiftPressed() ){
+
 		var scenePath = scene.currentProjectPath().split('/');
 		MessageLog.trace('scenePath: '+scenePath);
 
@@ -74,7 +75,7 @@ function PS_SetupSceneToRender(){
 			MessageLog.trace('-- Disabled');
 			return;
 		}
-		var ncn = nn.replace('Write-','').replace('_Write','');
+		var ncn = nn.replace('Write-','').replace(/_Write|-Write/i,''); // Remove all "write" entries from the sequence name
 		node.setEnable(n,true);
 		node.setTextAttr(n,'EXPORT_TO_MOVIE',1,'Output Drawings');
 		node.setTextAttr(n,'DRAWING_TYPE',1,'PNG4');
