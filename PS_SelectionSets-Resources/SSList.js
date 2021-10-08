@@ -1,6 +1,6 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version: 0.210927
+Version: 0.211006
 */
 
 var _ContextMenu = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/ContextMenu.js"));
@@ -116,8 +116,8 @@ function SSList( scriptVer, parentWidget ){
           '!Create Group': createGroup,
           '!Refresh': refreshData,
           '-': 0,
-          '!Save All Groups To File': saveAllGroupsToFile,
-          '!Load Groups From File': loadGroupsFromFile,
+          '!Export All Groups': exportAllGroupsToFile,
+          '!Import Groups': importGroupsFromFile,
         },
         event,
         parentWidget
@@ -265,22 +265,22 @@ function SSList( scriptVer, parentWidget ){
 
 
   //
-  function saveAllGroupsToFile() {
-    model.saveGroupDataToFile();
+  function exportAllGroupsToFile() {
+    model.exportGroupDataToFile();
   }
 
 
   //
-  function loadGroupsFromFile() {
+  function importGroupsFromFile() {
 
-    var loadedData = model.loadGroupDataFromFile();
+    var loadedData = model.importGroupDataFromFile();
 
     if( !loadedData ){
       MessageBox.warning('Selection Sets Data is Not Valid.',0,0,0,'Load Data Error');
       return;
     }
 
-    // MessageLog.trace( 'loadGroupDataFromFile: \n'+JSON.stringify(loadedData,true,'  '));
+    // MessageLog.trace( 'importGroupDataFromFile: \n'+JSON.stringify(loadedData,true,'  '));
 
     scene.beginUndoRedoAccum('Load Selection Set Group Data');
 
