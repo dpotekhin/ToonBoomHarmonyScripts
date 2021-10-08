@@ -3,6 +3,8 @@ Author: D.Potekhin (d@peppers-studio.ru)
 Version: 0.210810
 */
 
+var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
+
 //
 function showContextMenu( menuData, event, parentWidget ){
 
@@ -59,15 +61,27 @@ function createSubmenu( menu, submenuData, submenuFlatList ){
 
         var submenuItems = submenuItemData();
 
-        if( submenuItems && Object.keys(submenuItems).length ){
+        if( submenuItems ){
 
-          var submenuObject = {};
-          submenuObject[submenuItemName] = submenuItems;
-          createSubmenu( menu, submenuObject, submenuFlatList );
+          if(  Utils.isFunction(submenuItems) ){ // Add conditional menu item
+
+             // MessageLog.trace('Add Menu item');
+            // var submenu = menu.addAction( submenuItems );
+            menu.addAction(submenuItemName);
+            submenuFlatList[submenuItemName] = submenuItems;
+
+          }else if( Object.keys(submenuItems).length ){ // Add conditional submenu
+
+            var submenuObject = {};
+            submenuObject[submenuItemName] = submenuItems;
+            createSubmenu( menu, submenuObject, submenuFlatList );
+
+          }
 
         }else{
           
-          var submenu = menu.addMenu( submenuItemName );
+          // var submenu = menu.addMenu( submenuItemName );
+          var submenu = menu.addAction( submenuItemName );
           submenu.enabled = false;
 
         }
