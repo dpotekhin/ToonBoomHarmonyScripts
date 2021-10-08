@@ -82,7 +82,7 @@ function PS_SetupSceneForRendering(){
 		var parentNodeName = node.getName(_node);
 		var writeNode = node.type(_node) === 'WRITE' ? _node : undefined;
 
-		if( node.type(_node) === 'COMPOSITE' ){ // Get connected Write node
+		if( ['COMPOSITE','READ','GROUP'].indexOf(node.type(_node)) !== -1 ){ // Get connected Write node
 
 			var numOutput = node.numberOfOutputPorts( _node );
   			for(var ii=0; ii<numOutput; ii++){
@@ -116,8 +116,9 @@ function PS_SetupSceneForRendering(){
 			.replace(/^Write-/,'')
 			.replace(/_\d$/,'')
 			.replace(/[-_]?composite[-_]?/gi,'')
-			.replace(/-cmp|_cmp$/gi,'')
-			.replace(/-com|_com$/gi,'')
+			.replace(/-.?cmp|_.?cmp$/gi,'')
+			.replace(/-.?com|_.?com$/gi,'')
+			.replace(/-rig|_rig/gi,'')
 		;
 		
 		if( !fixedWriteNodeName ) fixedWriteNodeName = 'NAME-IS-NOT-DEFINED';

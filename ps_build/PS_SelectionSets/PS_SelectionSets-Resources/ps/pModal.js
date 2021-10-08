@@ -191,7 +191,7 @@ pModal.prototype.addButton = function( title, parent, width, height, icon, onRel
 
 
 //
-pModal.prototype.addLineEdit = function( text, parent, width, height, onChanged ){
+pModal.prototype.addLineEdit = function( text, parent, width, height, onChanged, onEdited ){
   var line = new QLineEdit();
   line.text = text;
   if(width){
@@ -199,6 +199,7 @@ pModal.prototype.addLineEdit = function( text, parent, width, height, onChanged 
   }
   parent.mainLayout.addWidget( line, 0, 0 );
   if( onChanged ) line.textChanged.connect( line, onChanged );
+  if( onEdited ) line.editingFinished.connect( line, onEdited );
   return line;
 }
 

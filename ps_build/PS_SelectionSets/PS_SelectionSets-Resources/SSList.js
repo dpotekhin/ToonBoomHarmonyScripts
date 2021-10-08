@@ -1,6 +1,6 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version: 0.210927
+Version: 0.211006
 */
 
 var _ContextMenu = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_SelectionSets-Resources/ps/ContextMenu.js"));
@@ -115,6 +115,11 @@ function SSList( scriptVer, parentWidget ){
       ContextMenu.showContextMenu({
           '!Create Group': createGroup,
           '!Refresh': refreshData,
+          '-1': 0,
+          'Delete All Groups': getDeleteAllGroupsMenuItem,
+          '-2': 0,
+          'Export All Groups': getexportAllGroupsToFileMenuItem,
+          '!Import Groups': importGroupsFromFile,
         },
         event,
         parentWidget
@@ -257,6 +262,82 @@ function SSList( scriptVer, parentWidget ){
 
     model.setItemColor( currentItemData );
     currentItemData.updateColor();
+
+  }
+
+
+  //
+  function getexportAllGroupsToFileMenuItem(){
+
+    return model.hasDataNodes() ? exportAllGroupsToFile : undefined;
+
+  }
+
+  //
+  function exportAllGroupsToFile() {
+
+    model.exportGroupDataToFile();
+
+  }
+
+
+  //
+  function importGroupsFromFile() {
+
+    var loadedData = model.importGroupDataFromFile();
+
+    if( !loadedData ){
+      MessageBox.warning('Selection Sets Data is Not Valid.',0,0,0,'Load Data Error');
+      return;
+    }
+
+    // MessageLog.trace( 'importGroupDataFromFile: \n'+JSON.stringify(loadedData,true,'  '));
+
+    scene.beginUndoRedoAccum('Load Selection Set Group Data');
+
+    loadedData.forEach(function(groupData){
+
+      if( !node.type( groupData.dataNodeParent ) ){ // If there's no such parent node in the Scene suggest the user to choose a group node
+
+        var dlg = new Dialog();
+        dlg.title = 'Select a parent node';
+
+        var txt = new Label();
+        txt.text = 'The parent node: "'+groupData.dataNodeParent+'"\nfor the Selection Set: "'+groupData.name+'" not found.\nPlease select a group node for it. Or skip this Selection Set.';
+        dlg.add( txt );
+
+        var groupNodeInput = createSceneGroupsDropdown( groupData.dataNodeParent, "Parent Data Node to:" );
+        dlg.add( groupNodeInput );
+
+        if( !dlg.exec() ) return;
+
+        var parentNode = groupNodeInput.currentItem;
+        if( !parentNode ) return;
+
+        groupData.dataNodeParent = parentNode;
+
+      }
+
+      // If there's a Data node with the same name in the Scene
+      if( node.type( groupData.dataNode ) ){
+        
+        var answer = MessageBox.warning("The Data Node with name \""+groupData.dataNode+"\" already exists in the Scene.\nOverwrite its data?",1,2,0,'Warning');
+        // MessageLog.trace('answer: '+answer);
+        if( answer === 1 ) {
+          // TODO: Overwrite data node
+          return;
+        }
+
+        return;
+      }
+
+      var groupData = model.createDataNode( groupData.dataNodeParent, groupData.name, groupData );      
+
+    });
+
+    updateList();
+
+    scene.endUndoRedoAccum();
 
   }
 
@@ -406,29 +487,42 @@ function SSList( scriptVer, parentWidget ){
 
   }
 
+  
+  function getSceneGroups(){
+
+    return SelectionUtils.filterNodesByType( 'Top', 'GROUP', true )
+      .filter(function(_node){ // To avoid a mess, only the root group and its first children are accepted in the group list.
+        return !_node.match(/.*\/.*\/.*/g);
+      })
+    ;
+  }
+
+  function createSceneGroupsDropdown( dataNode, text ){
+
+    var groupList = getSceneGroups();
+
+    // Parent node
+    var groupNodeInput = new ComboBox();
+    groupNodeInput.label = text || "Parent Group:";
+    if( dataNode ){
+
+      var parentNode = (dataNode.match(/(.*)\//) || [])[1];
+      if( parentNode ) groupNodeInput.currentItemPos = groupList.indexOf( parentNode );
+    }
+    // groupNodeInput.editable = true;
+    groupNodeInput.itemList = groupList;
+    
+    return groupNodeInput;
+
+  }
+
 
   function showCreateGroupUI( title, groupData ){
 
     var dlg = new Dialog();
     dlg.title = title;
 
-    var groupList = SelectionUtils.filterNodesByType( 'Top', 'GROUP', true )
-      .filter(function(_node){ // To avoid a mess, only the root group and its first children are accepted in the group list.
-        return !_node.match(/.*\/.*\/.*/g);
-      })
-    ;
-
-    // Parent node
-    var groupNodeInput = new ComboBox();
-    groupNodeInput.label = "Parent Group:"
-    if( groupData ){
-      var groupDataParentNode = groupData.dataNode.split('/');
-      groupDataParentNode.pop();
-      groupDataParentNode = groupDataParentNode.join('/');
-      groupNodeInput.currentItemPos = groupList.indexOf( groupDataParentNode );
-    }
-    // groupNodeInput.editable = true;
-    groupNodeInput.itemList = groupList;
+    var groupNodeInput = createSceneGroupsDropdown( groupData ? groupData.dataNode : undefined );
     dlg.add( groupNodeInput );
 
     // SS group Name
@@ -464,6 +558,30 @@ function SSList( scriptVer, parentWidget ){
     scene.beginUndoRedoAccum('Delete Selection Set Group');
 
     model.deleteItemById( currentItemData.id );
+    
+    updateList();
+
+    scene.endUndoRedoAccum();
+
+  }
+
+
+  //
+  function getDeleteAllGroupsMenuItem(){
+
+    return model.hasDataNodes() ? deleteAllGroups : undefined;
+
+  }
+
+
+  //
+  function deleteAllGroups(){
+
+    // MessageLog.trace('deleteItem');
+    
+    scene.beginUndoRedoAccum('Delete All Selection Set Groups');
+
+    model.deleteAllGroups();
     
     updateList();
 

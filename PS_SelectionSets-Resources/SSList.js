@@ -115,8 +115,10 @@ function SSList( scriptVer, parentWidget ){
       ContextMenu.showContextMenu({
           '!Create Group': createGroup,
           '!Refresh': refreshData,
-          '-': 0,
-          '!Export All Groups': exportAllGroupsToFile,
+          '-1': 0,
+          'Delete All Groups': getDeleteAllGroupsMenuItem,
+          '-2': 0,
+          'Export All Groups': getexportAllGroupsToFileMenuItem,
           '!Import Groups': importGroupsFromFile,
         },
         event,
@@ -265,8 +267,17 @@ function SSList( scriptVer, parentWidget ){
 
 
   //
+  function getexportAllGroupsToFileMenuItem(){
+
+    return model.hasDataNodes() ? exportAllGroupsToFile : undefined;
+
+  }
+
+  //
   function exportAllGroupsToFile() {
+
     model.exportGroupDataToFile();
+
   }
 
 
@@ -547,6 +558,30 @@ function SSList( scriptVer, parentWidget ){
     scene.beginUndoRedoAccum('Delete Selection Set Group');
 
     model.deleteItemById( currentItemData.id );
+    
+    updateList();
+
+    scene.endUndoRedoAccum();
+
+  }
+
+
+  //
+  function getDeleteAllGroupsMenuItem(){
+
+    return model.hasDataNodes() ? deleteAllGroups : undefined;
+
+  }
+
+
+  //
+  function deleteAllGroups(){
+
+    // MessageLog.trace('deleteItem');
+    
+    scene.beginUndoRedoAccum('Delete All Selection Set Groups');
+
+    model.deleteAllGroups();
     
     updateList();
 
