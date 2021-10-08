@@ -1,5 +1,5 @@
 ## PS_SelectionSets
-v0.210927
+v0.211006
 
 ### Description
 This script lets you to save and use groups of node selection sets (SS).
