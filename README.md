@@ -1,12 +1,14 @@
 # Toon Boom Harmony Scripts
 
+## [PS_3DPathToSeparate](ps_build/PS_3DPathToSeparate)
+This script lets you to convert 3D Path position animation to Separate position functions.
+
+
 ## [PS_AdjustNodeColor](ps_build/PS_AdjustNodeColor)
 
 Script lets to adjust the color of the selected node.
 
 ## [PS_ExpressionEditor](ps_build/PS_ExpressionEditor)
-Simple implementation of an expression editor.
-
 
 ## [PS_FitBackdrop](ps_build/PS_FitBackdrop)
 
@@ -47,8 +49,6 @@ This script sets the playback range relative to the selected frames.
 This script quickly sets the duration of the Scene to the duration of a Sound layer.
 
 ## [PS_SoundAmplitudeToKeyframes](ps_build/PS_SoundAmplitudeToKeyframes)
-This script quickly sets the Scene duration to the selected Sound layer duration.
-
 
 ## [PS_SwapNodes](ps_build/PS_SwapNodes)
 
