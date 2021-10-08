@@ -78,6 +78,12 @@ function Model( scriptVer ){
 
   
   //
+  this.hasDataNodes = function() {
+    return this.dataNodes && this.dataNodes.length;
+  }
+
+
+  //
   this.fixNodesToNewDataNodeGroup = function( groupData ){
 
     var success = true;
@@ -264,6 +270,16 @@ function Model( scriptVer ){
     }
 
     return itemData;
+
+  }
+
+
+  //
+  this.deleteAllGroups = function() {
+    
+    this.dataNodes.forEach(function(itemData){
+      node.deleteNode(itemData.dataNode);
+    });
 
   }
 
