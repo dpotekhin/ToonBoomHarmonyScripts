@@ -13,7 +13,7 @@ Select a Peg node and click the Script button.
 :]
 
 */
-var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
+var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_3DPathToSeparate-Resources/ps/Utils.js"));
 
 //
 function PS_3DPathToSeparate(){
