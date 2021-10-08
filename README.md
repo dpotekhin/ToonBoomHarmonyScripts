@@ -9,6 +9,8 @@ This script lets you to convert 3D Path position animation to Separate position 
 Script lets to adjust the color of the selected node.
 
 ## [PS_ExpressionEditor](ps_build/PS_ExpressionEditor)
+Simple implementation of an expression editor.
+
 
 ## [PS_FitBackdrop](ps_build/PS_FitBackdrop)
 
