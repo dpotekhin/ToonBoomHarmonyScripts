@@ -195,8 +195,8 @@ function configure(packageFolder, packageName)
     // = = = = = = = = = = = = = = = = = = = = = = = = = = =
     // Open Backup Folder
     // - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    var openBackupFolderAction = {
-        id: "ru.peppers-studio.openBackupFolderDisplay",
+    var backupTBHSettingsAction = {
+        id: "ru.peppers-studio.backupTBHSettingsDisplay",
         text: "Open Backup Folder",
         icon: "PS_BackupScene.png",
         checkable: false,
@@ -206,14 +206,41 @@ function configure(packageFolder, packageName)
 
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ScriptManager.addAction(openBackupFolderAction);
+    ScriptManager.addAction(backupTBHSettingsAction);
 
     ScriptManager.addMenuItem({
         targetMenuId: "File/Backup",
-        id: openBackupFolderAction.id,
-        text: openBackupFolderAction.text,
-        action: openBackupFolderAction.id
-        //action: 'openBackupFolderAction.onTrigger in ./configure.js'
+        id: backupTBHSettingsAction.id,
+        text: backupTBHSettingsAction.text,
+        action: backupTBHSettingsAction.id
+        //action: 'backupTBHSettingsAction.onTrigger in ./configure.js'
+    });
+    // = = = = = = = = = = = = = = = = = = = = = = = = = = =
+
+
+
+     // = = = = = = = = = = = = = = = = = = = = = = = = = = =
+    // Backup User Settings
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    var backupTBHSettingsAction = {
+        id: "ru.peppers-studio.backupTBHSettingsDisplay",
+        text: "Backup User Settings",
+        icon: "PS_BackupScene.png",
+        checkable: false,
+        isEnabled: true,
+        onTrigger: SceneHelper.PS_BackupTBHSettings
+    };
+
+
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ScriptManager.addAction(backupTBHSettingsAction);
+
+    ScriptManager.addMenuItem({
+        targetMenuId: "File/Backup",
+        id: backupTBHSettingsAction.id,
+        text: backupTBHSettingsAction.text,
+        action: backupTBHSettingsAction.id
+        //action: 'backupTBHSettingsAction.onTrigger in ./configure.js'
     });
     // = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
