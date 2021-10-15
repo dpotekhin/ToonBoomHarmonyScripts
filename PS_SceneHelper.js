@@ -27,6 +27,10 @@ Package adds the Main Menu item: File / Backup / Backup Scene
 Opens the Backup folder ../_backup  
 Package adds the Main Menu item: File / Backup / Open Backup Folder
 
+#### PS_BackupTBHSettings
+Backups user Toon Boom Harmony settings
+Package adds the Main Menu item: File / Backup / Backup User Settings
+
 #### PS_OpenScriptsFolder
 Opens Harmony User scripts folder  
 Package adds the Main Menu item: File / Resources / Open User Scripts Folder
@@ -38,6 +42,7 @@ Package adds the Main Menu item: File / Resources / Open Selected Library Templa
 #### PS_OpenPencilTextureFolder
 Opens the default Pencil Texture folder  
 Package adds the Main Menu item: File / Resources / Open Pencil Texture Folder
+
 
 :]
 
@@ -67,6 +72,7 @@ exports = {
     PS_OpenPencilTextureFolder: PS_OpenPencilTextureFolder,
     PS_OpenTemplateFolder: PS_OpenTemplateFolder,
     PS_OpenScriptsFolder: PS_OpenScriptsFolder,
+    PS_BackupTBHSettings: PS_BackupTBHSettings,
     MODE_OPEN_ONLY: MODE_OPEN_ONLY,
     MODE_SHOW_FOLDER_ON_COMPLETE: 'mode-show-folder-on-complete',
 };
@@ -204,4 +210,38 @@ function PS_BackupScene(mode) {
 
 function PS_OpenBackupFolder(){
 	PS_BackupScene( MODE_OPEN_ONLY );
+}
+
+
+///
+function PS_BackupTBHSettings(){
+
+    MessageLog.clearLog();
+
+    var z7path = specialFolders.app + '/bin_3rdParty/7z.exe';
+
+    var settingsPath = specialFolders.userConfig.split('/');
+    settingsPath.pop();
+    settingsPath = settingsPath.join('/');
+    MessageLog.trace('Backup Settings:\n'+specialFolders.app+'\n> '+z7path+'\n>'+settingsPath );    
+    
+    var destFilePath = FileDialog.getSaveFileName('*.zip', 'Locate where to save the backup');
+    if( !destFilePath ){
+        return;
+    }
+
+    var command = '"'+z7path+'" a -tzip -ssw -mx1 -r0 -y  "'+destFilePath+'" "'+settingsPath+'"';
+    MessageLog.trace('command:\n'+ command );
+
+    var proc = new QProcess();
+    proc.start(command);
+    proc.waitForFinished();
+
+    MessageBox.information("User settings have been successfully copied to: " + destFilePath );
+
+    var destDirPath = destFilePath.split('/');
+    destDirPath.pop();
+    destDirPath = destDirPath.join('/');
+    FileSystem.openFolder( fileMapper.toNativePath(destDirPath) );
+    
 }

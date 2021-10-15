@@ -49,12 +49,12 @@ function PS_SetSceneDurationToSoundLength(){
 
     var sequences = soundColumn.sequences();
     sequences.forEach(function(sequence,i){
-        MessageLog.trace('Sequence '+i+' > '+sequence.startFrame+' - '+sequence.stopFrame );
+        MessageLog.trace('Sequence '+i+' > '+sequence.startFrame+'('+sequence.startTime+') - '+sequence.stopFrame+' ('+sequence.stopTime+')' );
         if( maxFrame < sequence.stopFrame ) maxFrame = sequence.stopFrame;
         // MessageLog.trace('>> '+Object.getOwnPropertyNames( sequence ).join('\n'));    
     });
     
-    var durationDiff = maxFrame - frame.numberOf();
+    var durationDiff = (maxFrame - 1) - frame.numberOf();
 
     MessageLog.trace( 'Sound Length In Frames:' + maxFrame+' ('+durationDiff+')'  );
     
