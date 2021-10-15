@@ -13,7 +13,7 @@ function getNumber(v){
 //
 function getTimestamp(){
     var date = new Date();
-    return date.getFullYear() + getZeroLeadingString(date.getMonth()+1) + getZeroLeadingString(date.getDate())+'_'+getZeroLeadingString(date.getHours())+getZeroLeadingString(date.getMinutes());
+    return date.getFullYear() +''+ getZeroLeadingString(date.getMonth()+1) + getZeroLeadingString(date.getDate())+'_'+getZeroLeadingString(date.getHours())+getZeroLeadingString(date.getMinutes());
 }
 
 
