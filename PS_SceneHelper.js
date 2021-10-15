@@ -178,6 +178,7 @@ function PS_BackupScene(mode) {
         return;
     }
 
+    /*
     var batPath = specialFolders.userScripts+'\\PS_SceneHelper-Resources\\Backup-TBH-Scene.bat';
     var command = '"'+batPath +'" "'+projectPath+'"';
     MessageLog.trace('PS_BackupScene command: '+command);
@@ -195,6 +196,15 @@ function PS_BackupScene(mode) {
         MessageLog.trace('Backup Error: ' + result + ': ' + command);
         return;
     }
+    */
+
+    
+
+    var backupFileName = sceneName + '_@' + Utils.getTimestamp() +'_'+ about.getUserName() + '.zip';
+    var backupFullPath =  backupFolderPath +'\\'+ backupFileName;
+    var fileDirCheck = FileSystem.checkFileDir(backupFullPath, true);
+
+    _sf.zip( projectPath, backupFullPath );
 
     MessageLog.trace( 'Backup file: '+ backupFullPath );
 
@@ -218,24 +228,19 @@ function PS_BackupTBHSettings(){
 
     MessageLog.clearLog();
 
-    var z7path = specialFolders.app + '/bin_3rdParty/7z.exe';
+    
 
     var settingsPath = specialFolders.userConfig.split('/');
     settingsPath.pop();
     settingsPath = settingsPath.join('/');
-    MessageLog.trace('Backup Settings:\n'+specialFolders.app+'\n> '+z7path+'\n>'+settingsPath );    
+    MessageLog.trace('Backup Settings:\n'+specialFolders.app+'\n>'+settingsPath );    
     
     var destFilePath = FileDialog.getSaveFileName('*.zip', 'Locate where to save the backup');
     if( !destFilePath ){
         return;
     }
 
-    var command = '"'+z7path+'" a -tzip -ssw -mx1 -r0 -y  "'+destFilePath+'" "'+settingsPath+'"';
-    MessageLog.trace('command:\n'+ command );
-
-    var proc = new QProcess();
-    proc.start(command);
-    proc.waitForFinished();
+    _sf.zip( settingsPath, destFilePath );
 
     MessageBox.information("User settings have been successfully copied to: " + destFilePath );
 
@@ -245,3 +250,25 @@ function PS_BackupTBHSettings(){
     FileSystem.openFolder( fileMapper.toNativePath(destDirPath) );
     
 }
+
+
+var _sf = {
+
+    get7ZipPath: function( destFilePath ){
+        return specialFolders.app + '/bin_3rdParty/7z.exe';
+    },
+
+    zip: function( srcPath, dstPath ) {
+        
+        var z7path = _sf.get7ZipPath();
+
+        var command = '"'+z7path+'" a -tzip -ssw -mx1 -r0 -y  "'+dstPath+'" "'+srcPath+'"';
+        MessageLog.trace('zip command:\n'+ command );
+
+        var proc = new QProcess();
+        proc.start(command);
+        proc.waitForFinished();
+
+    }
+
+};
