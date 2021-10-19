@@ -25,7 +25,7 @@ function PS_DrawingAttributesModal(){
   var btnHeight = 30;
   var listJustUpdated = true;
   var modalWidth = 400;
-  var modelHeight = 460;
+  var modelHeight = 600;
   var border = 20;
   var tableColumns = 4;
 
@@ -141,6 +141,35 @@ function PS_DrawingAttributesModal(){
 			type: 'number',
 			isUsedDefault: false
 		},
+		// READ_TRANSPARENCY			// <FLOAT>
+		{
+			separator: 'Bitmap File Options',
+			keyword: 'READ_TRANSPARENCY',
+			name: 'Transparency',
+			type: 'bool',
+			isUsedDefault: false
+		},
+		// APPLY_MATTE_TO_COLOR
+		{
+			keyword: 'APPLY_MATTE_TO_COLOR',
+			name: 'Transparency Type',
+			type: 'dropdown',
+			data: [
+				'Premultiplied with Black',
+				'Straight',
+				'Premultiplied with White',
+				'Clamp Colour to Alpha',
+			],
+			isUsedDefault: false
+		},
+		// OPACITY			// <FLOAT>
+		{
+			separator: 'Advanced',
+			keyword: 'OPACITY',
+			name: 'Opacity',
+			type: 'number',
+			isUsedDefault: false
+		},
 	];
 	_generateAttributes( attrsGroup, attributes );
 
@@ -159,8 +188,14 @@ function PS_DrawingAttributesModal(){
 
   modal.show();
 
-	//MessageLog.trace( node.getAllAttrKeywords(selection.selectedNodes()[0]).join('\n') );
-	// MessageLog.trace( node.getAllAttrNames(selection.selectedNodes()[0]).join('\n') );
+  // Debug the selected node attributes
+  var __node = selection.selectedNodes()[0];
+  if( __node ){
+	  node.getAllAttrKeywords(__node).forEach(function(attrName){
+	  	var _attr = node.getAttr( __node, frame.current(), attrName );
+		  MessageLog.trace('> '+attrName+' ('+_attr.typeName()+'): '+_attr.textValueAt(frame.current()) );
+	  });
+	}
   ////
   
   function _copyFromSelected(){
@@ -194,6 +229,13 @@ function PS_DrawingAttributesModal(){
 	  				value = _attr.boolValueAt(currentFrame);
 	  				attr.inputWidget.setCheckState( value ? Qt.Checked : Qt.Unchecked );
 	  				break;
+
+	  			case 'dropdown':
+	  				value = _attr.textValueAt(currentFrame);
+	  				MessageLog.trace('>>>'+value+') '+attr.data.indexOf(value)+' > '+_attr.intValue(currentFrame) );
+	  				attr.inputWidget.setCurrentIndex( attr.data.indexOf(value) );
+	  				break;
+
 	  		}
 	  		attr.value = attr;
 
@@ -243,8 +285,12 @@ function PS_DrawingAttributesModal(){
 
 					}else{ // Copy value
 
-						if( _attr ) _attr.setValueAt( attr.getValue(), currentFrame );
-
+						if( _attr ) {
+							var _val = attr.getValue();
+							MessageLog.trace('Set attr "'+_attr.name()+'" > "'+_val+'" > ');
+							// _attr.setValueAt( _val, currentFrame );
+							_attr.setValue( _val );
+						}
 					}
 
 				});
@@ -312,13 +358,23 @@ function PS_DrawingAttributesModal(){
 		  	case 'number':
 		  		inputField = new QLineEdit();
 		  		inputField.setValidator( new QDoubleValidator(inputField) );
-		  		attr.getValue = function(){ return parseFloat(inputField.text) || 0 };
+		  		attr.getValue = function(){ return parseFloat(inputField.text) || 0; };
 		  		break;
 
 		  	case 'bool':
 		  		inputField = new QCheckBox();
 		  		attr.getValue = function(){ return inputField.checkState() === Qt.Checked; };
 		  		break;
+
+		  	case 'dropdown':
+		  		inputField = new QComboBox();
+		  		inputField.addItems(attr.data);
+		  		attr.getValue = function(){
+		  			// return inputField.currentText || '';
+		  			return inputField.currentIndex || 0; // For GENERIC_ENUM
+		  		};
+		  		break;
+
 		  }
 		  
 		  if( inputField ){
