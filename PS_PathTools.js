@@ -2,7 +2,7 @@
 Author: D.Potekhin (d@peppers-studio.ru)
 
 [Name: PS_PathTools :]
-[Version: 0.210424 :]
+[Version: 0.211020 :]
 
 [Description:
 The script provides tools for aligning, mirroring and modifying strokes.
@@ -42,7 +42,7 @@ function PS_PathTools(){
 
   //
   var scriptName = 'Path Tools';
-  var scriptVer = '0.210424';
+  var scriptVer = '0.211020';
   //
 
   var SETTINGS_NAME = 'PS_PATH_TOOLS_SETTINGS';
@@ -157,6 +157,21 @@ function PS_PathTools(){
   var btnFlipVCenter = modal.addButton( '', flipGroup, btnHeight, btnHeight, iconPath+'flip-v.png',
     function(){ AlignPaths.FlipVCenter( currentSettings.centerY ) }, 'Vertical Flip' );
   
+
+  // Rotate
+  modal.addVLine( btnHeight, flipGroup );
+  var btnRotate = modal.addButton( '', flipGroup, btnHeight, btnHeight, iconPath+'rotate.png',
+    rotatePoints,
+    'Rotate curve points'
+  );
+  var rotateInput = modal.addNumberInput( '', flipGroup, btnHeight*1.5, btnHeight, 0, undefined, rotatePoints );
+
+  function rotatePoints(){
+    // MessageLog.trace('Rotate');
+    AlignPaths.Rotate( parseFloat( rotateInput.text ), currentSettings.centerX, currentSettings.centerY );
+
+  }
+
   flipGroup.mainLayout.addStretch();
 
   /// Relative to point
@@ -198,6 +213,21 @@ function PS_PathTools(){
     +'\nHold down the Control key to also merge the Control points'
   );
 
+  // Randomize
+  modal.addVLine( btnHeight, modifyGroup );
+
+  var btnRandomize = modal.addButton( '', modifyGroup, btnHeight, btnHeight, iconPath+'randomize.png',
+    randomizePoints,
+    'Randomize curve points'
+  );
+  var randomizeInput = modal.addNumberInput( '', modifyGroup, btnHeight*1.5, btnHeight, 0, undefined, randomizePoints, randomizePoints );
+
+  function randomizePoints(){
+    
+    AlignPaths.Randomize( parseFloat( randomizeInput.text ) );
+
+  }
+
 /*
   var btnSetPivot = modal.addButton( '', modifyGroup, btnHeight, btnHeight, iconPath+'pivot-to-selection.png',
     function (){
@@ -222,11 +252,11 @@ function PS_PathTools(){
 }
 
 
-function setPivot(){
+
+function test(){
 
   MessageLog.clearLog();
 
-  _AlignPaths.SetPivot();
-  Action.perform( 'onActionChooseSpRotateTool()', 'sceneUI');
+  _AlignPaths.Rotate( 45, 416.66666666666663, -312.5 );
 
 }
