@@ -25,8 +25,8 @@ This Script converts Node Attribute Animation to Drawing Node Exposure Keys.
 
 
 ## [PS_PathTools](ps_build/PS_PathTools)
-
 The script provides tools for aligning, mirroring and modifying strokes.
+
 
 ## [PS_RenameNodes](ps_build/PS_RenameNodes)
 

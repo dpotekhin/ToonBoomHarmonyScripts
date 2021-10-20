@@ -1,6 +1,6 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version: 0.31
+Version: 0.211020
 */
 
 //
@@ -28,8 +28,10 @@ var _exports = {
   FlipHCenter: FlipHCenter,
   FlipVCenter: FlipVCenter,
   Merge: Merge,
-  SetPivot: SetPivot
-}
+  SetPivot: SetPivot,
+  Rotate: Rotate,
+  Randomize: Randomize,
+};
 
 
 // Horizontal Align
@@ -438,6 +440,134 @@ function SetPivot( ){
 
 };
 
+
+//
+function Rotate( angle, centerX, centerY ){
+
+  // MessageLog.clearLog(); // !!!
+  MessageLog.trace('Rotate: '+angle+', '+centerX+', '+centerY);
+  scene.beginUndoRedoAccum("Set Pivot");
+
+  try{
+
+    var selectionData = getSelectionData();
+    if( !selectionData ) {
+      MessageLog.trace('No selection Data');
+      scene.endUndoRedoAccum();
+      return;
+    }
+
+    var selectedDrawing = selectionData.selectedDrawing;
+    var selectedStrokesLayers = selectionData.selectedStrokesLayers;
+    var box = selectionData.box;
+    var boxCenter = box.center;
+    var raxis = new Vector3d(0,0,-1);
+    var pointPos = new Vector3d();
+    // MessageLog.trace('boxCenter: '+JSON.stringify(boxCenter,true,'  ') );
+
+    selectedDrawing.iterateArts(function(art){
+
+      selectedDrawing.modifyArtStrokes( art, selectedStrokesLayers[art], function(_stroke){
+        
+        if( !_stroke.isSelected ) return;
+
+        var hasSelectedAnchors = !!_stroke.selectedAnchors;
+
+        _stroke.path.forEach(function(pathPoint){
+
+          if( hasSelectedAnchors && !pathPoint.isSelected && !pathPoint.isSelectedControl ) return;
+          
+          var difX = pathPoint.x - centerX;
+          var difY = pathPoint.y - centerY;
+
+          var mtrx = new Matrix4x4();
+          mtrx.rotateDegrees( angle, raxis );
+          mtrx.translate( difX, difY );
+         
+          var pos = mtrx.extractPosition();
+
+          pathPoint.x = centerX + pos.x;
+          pathPoint.y = centerY + pos.y;
+
+        });
+
+        return true;
+      });
+
+    });
+
+  } catch(err){
+    MessageLog.trace('Error: '+err );
+    scene.endUndoRedoAccum();
+    return;
+  }
+
+  //
+  selectedDrawing.restoreSelection();
+
+  scene.endUndoRedoAccum();
+
+}
+
+
+
+//
+function Randomize( amount ){
+
+
+  MessageLog.clearLog(); // !!!
+  MessageLog.trace('Randomize: '+amount);
+
+  scene.beginUndoRedoAccum("Randomize points");
+  var amountHalf = amount;
+  amount *= 2;
+
+  try{
+
+    var selectionData = getSelectionData();
+    if( !selectionData ) {
+      MessageLog.trace('No selection Data');
+      scene.endUndoRedoAccum();
+      return;
+    }
+
+    var selectedDrawing = selectionData.selectedDrawing;
+    var selectedStrokesLayers = selectionData.selectedStrokesLayers;
+
+    selectedDrawing.iterateArts(function(art){
+
+      selectedDrawing.modifyArtStrokes( art, selectedStrokesLayers[art], function(_stroke){
+        
+        if( !_stroke.isSelected ) return;
+
+        var hasSelectedAnchors = !!_stroke.selectedAnchors;
+
+        _stroke.path.forEach(function(pathPoint){
+
+          if( hasSelectedAnchors && !pathPoint.isSelected && !pathPoint.isSelectedControl ) return;
+          
+          pathPoint.x += Math.random()*amount - amountHalf;
+          pathPoint.y += Math.random()*amount - amountHalf;
+
+        });
+
+        return true;
+      });
+
+    });
+
+  } catch(err){
+    MessageLog.trace('Error: '+err );
+    scene.endUndoRedoAccum();
+    return;
+  }
+
+  //
+  selectedDrawing.restoreSelection();
+
+  scene.endUndoRedoAccum();
+
+}
 
 ///
 exports = _exports;
