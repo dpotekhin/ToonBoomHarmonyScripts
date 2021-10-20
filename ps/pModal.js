@@ -113,7 +113,7 @@ pModal.prototype.addGroup = function( title, parent, layoutType, style ){
 
 
 //
-pModal.prototype.addNumberInput = function( labelText, parent, width, height, defaultValue, onChange ){
+pModal.prototype.addNumberInput = function( labelText, parent, width, height, defaultValue, onChange, onReturnPressed ){
 
   if( labelText ){
     var label = new QLabel();
@@ -130,6 +130,10 @@ pModal.prototype.addNumberInput = function( labelText, parent, width, height, de
 
   if( onChange ){
     _input.textChanged.connect( _input, onChange );
+  }
+
+  if( onReturnPressed ){
+    _input.returnPressed.connect( _input, onReturnPressed );
   }
 
   return _input;
