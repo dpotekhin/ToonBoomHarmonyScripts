@@ -141,6 +141,8 @@ function PS_DrawingAttributesModal(){
 			type: 'number',
 			isUsedDefault: false
 		},
+
+		// - - - - - Bitmap File Options - - - - -
 		// READ_TRANSPARENCY			// <FLOAT>
 		{
 			separator: 'Bitmap File Options',
@@ -162,6 +164,8 @@ function PS_DrawingAttributesModal(){
 			],
 			isUsedDefault: false
 		},
+
+		// - - - - - Advanced - - - - -
 		// OPACITY			// <FLOAT>
 		{
 			separator: 'Advanced',
