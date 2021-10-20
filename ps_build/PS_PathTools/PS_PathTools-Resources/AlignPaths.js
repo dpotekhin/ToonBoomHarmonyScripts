@@ -444,6 +444,8 @@ function SetPivot( ){
 //
 function Rotate( angle, centerX, centerY ){
 
+  if( angle === undefined ) angle = 0;
+
   // MessageLog.clearLog(); // !!!
   MessageLog.trace('Rotate: '+angle+', '+centerX+', '+centerY);
   scene.beginUndoRedoAccum("Set Pivot");
@@ -461,6 +463,8 @@ function Rotate( angle, centerX, centerY ){
     var selectedStrokesLayers = selectionData.selectedStrokesLayers;
     var box = selectionData.box;
     var boxCenter = box.center;
+    if( centerX === undefined ) centerX = boxCenter.x;
+    if( centerY === undefined ) centerY = boxCenter.y;
     var raxis = new Vector3d(0,0,-1);
     var pointPos = new Vector3d();
     // MessageLog.trace('boxCenter: '+JSON.stringify(boxCenter,true,'  ') );
