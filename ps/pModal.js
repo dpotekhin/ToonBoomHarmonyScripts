@@ -1,6 +1,6 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version: 0.5
+Version: 0.211020
 */
 
 function pModal( title, width, height, unique ){
@@ -224,6 +224,7 @@ pModal.prototype.addLabel = function( text, parent, width, height, align ){
 pModal.prototype.addVLine = function( height, parent ){
   var line = new QWidget;
   line.setMinimumSize(2,height);
+  line.setMaximumSize(2,height);
   line.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed);
   line.setStyleSheet("background-color: #303030; border-left: 1px solid #303030; border-right: 1px solid #505050;");
   parent.mainLayout.addWidget(line,0,0);
