@@ -15,18 +15,37 @@ function showContextMenu( menuData, event, parentWidget ){
   var submenuFlatList = createSubmenu( menu, menuData );
 
   menu.triggered.connect(function(a){
-    // MessageLog.trace('clicked '+JSON.stringify(a,true,'  '));
+    // MessageLog.trace('clicked '+JSON.stringify(a,true,'  ')+'\n'+JSON.stringify( submenuFlatList,true,'  '));
     var action = submenuFlatList[a.text];
     if( action ) action();
   });
   
-  menu.exec( event.globalPos() );
+  menu.exec( event.globalPos ? event.globalPos() : event );
 
   delete menu;
   
   // }catch(err){MessageLog.trace(err)} // !!!
   
 }
+
+
+//
+function addMenuAction( menu, itemName ){
+  // 
+  var iconSeparatorIndex = itemName.indexOf('$');
+  if( iconSeparatorIndex !== -1 ){
+    var iconPath = itemName.substr( iconSeparatorIndex+1, itemName.length );
+    itemName = itemName.substr( 0, iconSeparatorIndex );
+    // MessageLog.trace('ICON: "'+itemName+'", "'+iconPath+'"');
+    menu.addAction( new QIcon(iconPath), itemName );
+    return itemName;
+  }
+
+  menu.addAction(itemName);
+  return itemName;
+
+}
+
 
 //
 function createSubmenu( menu, submenuData, submenuFlatList ){
@@ -47,14 +66,16 @@ function createSubmenu( menu, submenuData, submenuFlatList ){
 
       var _submenuItemName = submenuItemName.substr(1,submenuItemName.length);
       // MessageLog.trace('Action: "'+submenuItemName+'" '+_submenuItemName);
-      menu.addAction(_submenuItemName);
+      // menu.addAction(_submenuItemName);
+      _submenuItemName = addMenuAction( menu, _submenuItemName );
       submenuFlatList[_submenuItemName] = submenuItemData;
 
     }else{
 
       if( typeof submenuItemData === 'string' ){ // Add menu item
         
-        menu.addAction(submenuItemName);
+        // menu.addAction(submenuItemName);
+        submenuItemData = addMenuAction( menu, submenuItemName );
         submenuFlatList[submenuItemName] = submenuItemData;
 
       }else if( Utils.isFunction(submenuItemData) ){ // Dynamic items
@@ -67,7 +88,8 @@ function createSubmenu( menu, submenuData, submenuFlatList ){
 
              // MessageLog.trace('Add Menu item');
             // var submenu = menu.addAction( submenuItems );
-            menu.addAction(submenuItemName);
+            // menu.addAction(submenuItemName);
+            submenuItemName = addMenuAction( menu, submenuItemName );
             submenuFlatList[submenuItemName] = submenuItems;
 
           }else if( Object.keys(submenuItems).length ){ // Add conditional submenu
@@ -81,7 +103,8 @@ function createSubmenu( menu, submenuData, submenuFlatList ){
         }else{
           
           // var submenu = menu.addMenu( submenuItemName );
-          var submenu = menu.addAction( submenuItemName );
+          // var submenu = menu.addAction( submenuItemName );
+          submenuItemName = addMenuAction( menu, submenuItemName );
           submenu.enabled = false;
 
         }
