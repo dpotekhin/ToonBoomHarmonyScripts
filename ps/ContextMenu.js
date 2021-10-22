@@ -20,7 +20,7 @@ function showContextMenu( menuData, event, parentWidget ){
     if( action ) action();
   });
   
-  menu.exec( event.globalPos() );
+  menu.exec( event.globalPos ? event.globalPos() : event );
 
   delete menu;
   
