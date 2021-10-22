@@ -1,0 +1,237 @@
+{
+    "menu": [
+
+        {
+            "name": "Animation",
+            "type": "group",
+            "items": [
+
+                {
+                    "name": "PS Convert Keys To Key Exposures",
+                    "type": "script",
+                    "scriptFile": "PS_KeysToKeyExposures.js",
+                    "sriptFunction": "PS_KeysToKeyExposures",
+                    "icon": "~/PS_KeysToKeyExposures.png"
+                }
+
+            ]
+        },
+
+        {
+            "name": "Drawing",
+            "type": "group",
+            "items": [
+
+                {
+                    "name": "PS PathTools",
+                    "type": "script",
+                    "scriptFile": "PS_PathTools.js",
+                    "sriptFunction": "PS_PathTools",
+                    "icon": "~/PS_PathTools.png"
+                },
+
+                {
+                    "name": "PS Distribute Drawing Substitutions To Timeline",
+                    "type": "script",
+                    "scriptFile": "PS_DistributeDrawingSubstitutionsToTimeline.js",
+                    "sriptFunction": "PS_DistributeDrawingSubstitutionsToTimeline",
+                    "icon": "~/PS_DistributeDrawingSubstitutionsToTimeline.png"
+                },
+
+                {
+                    "name": "PS Adjust Multiple Drawing Attributes",
+                    "type": "script",
+                    "scriptFile": "PS_DrawingAttributes.js",
+                    "sriptFunction": "PS_DrawingAttributesModal",
+                    "icon": "~/PS_DrawingAttributesModal.png"
+                },
+
+                {
+                    "name": "PS Remove Cel Duplicates",
+                    "type": "script",
+                    "scriptFile": "PS_RemoveCelDuplicates.js",
+                    "sriptFunction": "PS_RemoveCelDuplicates",
+                    "icon": "~/PS_RemoveCelDuplicates.png"
+                }
+
+            ]
+        },
+
+        {
+            "name": "Node",
+            "type": "group",
+            "items": [
+
+                {
+                    "name": "PS Rename Nodes",
+                    "type": "script",
+                    "scriptFile": "PS_RenameNodes.js",
+                    "sriptFunction": "PS_RenameNodes",
+                    "icon": "~/PS_RenameNodes.png"
+                },
+
+                {
+                    "name": "PS Unlink Element Functions",
+                    "type": "script",
+                    "scriptFile": "PS_UnlinkElementFunctions.js",
+                    "sriptFunction": "PS_UnlinkElementFunctions",
+                    "icon": "~/PS_UnlinkElementFunctions.png"
+                },
+
+                {
+                    "name": "PS Fit Backdrop",
+                    "type": "script",
+                    "scriptFile": "PS_FitBackdrop.js",
+                    "sriptFunction": "PS_FitBackdrop",
+                    "icon": "~/PS_FitBackdrop.png"
+                },
+
+                {
+                    "name": "PS Adjust Node Color",
+                    "type": "script",
+                    "scriptFile": "PS_AdjustNodeColor.js",
+                    "sriptFunction": "PS_AdjustNodeColor",
+                    "icon": "~/PS_AdjustNodeColor.png"
+                },
+
+                {
+                    "name": "PS Align Node Vertically",
+                    "type": "script",
+                    "scriptFile": "PS_NodeAlign.js",
+                    "sriptFunction": "PS_AlignNodesVertically",
+                    "icon": "~/PS_AlignNodesVertically.png"
+                },
+
+                {
+                    "name": "PS Swap Nodes",
+                    "type": "script",
+                    "scriptFile": "PS_SwapNodes.js",
+                    "sriptFunction": "PS_SwapNodes",
+                    "icon": "~/PS_SwapNodes.png"
+                }
+
+            ]
+        },
+
+        {
+            "name": "Palette",
+            "type": "group",
+            "items": [
+
+                {
+                    "name": "PS Hex Palette Color",
+                    "type": "script",
+                    "scriptFile": "PS_HexPaletteColor.js",
+                    "sriptFunction": "PS_HexPaletteColor",
+                    "icon": "~/PS_HexPaletteColor.png"
+                }
+
+            ]
+        },
+
+        {
+            "name": "Scene",
+            "type": "group",
+            "items": [
+
+                {
+                    "name": "PS Setup Scene For Rendering",
+                    "type": "script",
+                    "scriptFile": "PS_SetupSceneForRendering.js",
+                    "sriptFunction": "PS_SetupSceneForRendering",
+                    "icon": "~/PS_SetupSceneForRendering.png"
+                }
+
+            ]
+        },
+
+        {
+            "name": "Sound",
+            "type": "group",
+            "items": [
+
+                {
+                    "name": "PS Sound Amplitude To Keyframes",
+                    "type": "script",
+                    "scriptFile": "PS_SoundAmplitudeToKeyframes.js",
+                    "sriptFunction": "PS_SoundAmplitudeToKeyframes",
+                    "icon": "~/PS_SoundAmplitudeToKeyframes.png"
+                }
+
+            ]
+        },
+
+        {
+            "name": "Timeline",
+            "type": "group",
+            "items": [
+
+                {
+                    "name": "PS Set Playback Range",
+                    "type": "script",
+                    "scriptFile": "PS_SetPlaybackRange.js",
+                    "sriptFunction": "PS_SetPlaybackRange",
+                    "icon": "~/PS_SetPlaybackRange.png"
+                },
+
+                {
+                    "name": "PS Set Scene Duration To Sound Length",
+                    "type": "script",
+                    "scriptFile": "PS_SetSceneDurationToSoundLength.js",
+                    "sriptFunction": "PS_SetSceneDurationToSoundLength",
+                    "icon": "~/PS_SetSceneDurationToSoundLength.png"
+                }
+
+            ]
+        },
+
+        {
+            "name": "Transformation",
+            "type": "group",
+            "items": [
+
+                {
+                    "name": "PS Reset Transformation",
+                    "type": "script",
+                    "scriptFile": "PS_ResetTransformation.js",
+                    "sriptFunction": "PS_ResetTransformation",
+                    "icon": "~/PS_ResetTransformation.png"
+                },
+
+                {
+                    "name": "PS Save Transformation",
+                    "type": "script",
+                    "scriptFile": "PS_SaveTransformation.js",
+                    "sriptFunction": "PS_SaveTransformation",
+                    "icon": "~/PS_SaveTransformation.png"
+                },
+
+                {
+                    "name": "PS Clear Saved Transformation",
+                    "type": "script",
+                    "scriptFile": "PS_ClearSavedTransformation.js",
+                    "sriptFunction": "PS_ClearSavedTransformation",
+                    "icon": "~/PS_ClearSavedTransformation.png"
+                }
+
+            ]
+        },
+
+        {
+            "name": "PS Expression Editor",
+            "type": "script",
+            "scriptFile": "PS_ExpressionEditor.js",
+            "sriptFunction": "PS_ExpressionEditor",
+            "icon": "~/PS_ExpressionEditor.png"
+        },
+
+        {
+            "name": "PS Selection Sets",
+            "type": "script",
+            "scriptFile": "PS_SelectionSets.js",
+            "sriptFunction": "PS_SelectionSets",
+            "icon": "~/PS_SelectionSets.png"
+        }
+
+    ]
+}
