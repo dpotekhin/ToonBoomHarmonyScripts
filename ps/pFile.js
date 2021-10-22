@@ -1,6 +1,6 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version: 0.1
+Version: 0.211010
 */
 
 function pFile(){
@@ -97,9 +97,15 @@ pFile.save = function( path, data ){
 
 //
 pFile.loadJSON = function( path, defaultData ){
-  var data = pFile.load( path );
-  if( !data ) return defaultData;
-  return JSON.parse(data);
+  
+  try{
+    var data = pFile.load( path );
+    if( !data ) return defaultData;
+    return JSON.parse(data);
+  }catch(err){
+    // MessageLog.trace('Save failed: '+err);
+  }
+
 }
 
 //
