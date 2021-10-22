@@ -1,6 +1,6 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version: 0.210810
+Version: 0.211022
 */
 
 var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
@@ -37,12 +37,14 @@ function addMenuAction( menu, itemName ){
     var iconPath = itemName.substr( iconSeparatorIndex+1, itemName.length );
     itemName = itemName.substr( 0, iconSeparatorIndex );
     // MessageLog.trace('ICON: "'+itemName+'", "'+iconPath+'"');
-    menu.addAction( new QIcon(iconPath), itemName );
-    return itemName;
+    var menuItem = menu.addAction( new QIcon(iconPath), itemName );
+    menuItem.itemName = itemName;
+    return menuItem;
   }
 
-  menu.addAction(itemName);
-  return itemName;
+  var menuItem = menu.addAction(itemName);
+  menuItem.itemName = itemName;
+  return menuItem;
 
 }
 
@@ -67,7 +69,7 @@ function createSubmenu( menu, submenuData, submenuFlatList ){
       var _submenuItemName = submenuItemName.substr(1,submenuItemName.length);
       // MessageLog.trace('Action: "'+submenuItemName+'" '+_submenuItemName);
       // menu.addAction(_submenuItemName);
-      _submenuItemName = addMenuAction( menu, _submenuItemName );
+      _submenuItemName = addMenuAction( menu, _submenuItemName ).itemName;
       submenuFlatList[_submenuItemName] = submenuItemData;
 
     }else{
@@ -75,7 +77,7 @@ function createSubmenu( menu, submenuData, submenuFlatList ){
       if( typeof submenuItemData === 'string' ){ // Add menu item
         
         // menu.addAction(submenuItemName);
-        submenuItemData = addMenuAction( menu, submenuItemName );
+        submenuItemData = addMenuAction( menu, submenuItemName ).itemName;
         submenuFlatList[submenuItemName] = submenuItemData;
 
       }else if( Utils.isFunction(submenuItemData) ){ // Dynamic items
@@ -89,7 +91,7 @@ function createSubmenu( menu, submenuData, submenuFlatList ){
              // MessageLog.trace('Add Menu item');
             // var submenu = menu.addAction( submenuItems );
             // menu.addAction(submenuItemName);
-            submenuItemName = addMenuAction( menu, submenuItemName );
+            submenuItemName = addMenuAction( menu, submenuItemName ).itemName;
             submenuFlatList[submenuItemName] = submenuItems;
 
           }else if( Object.keys(submenuItems).length ){ // Add conditional submenu
@@ -104,7 +106,7 @@ function createSubmenu( menu, submenuData, submenuFlatList ){
           
           // var submenu = menu.addMenu( submenuItemName );
           // var submenu = menu.addAction( submenuItemName );
-          submenuItemName = addMenuAction( menu, submenuItemName );
+          var submenu = addMenuAction( menu, submenuItemName );
           submenu.enabled = false;
 
         }
