@@ -9,20 +9,23 @@ var _SelectionUtils = require(fileMapper.toNativePath(specialFolders.userScripts
 var _Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
 var _NodeUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/NodeUtils.js"));
 var pModal = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/pModal.js"));
+var _ContextMenu = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/ContextMenu.js"));
 
-function PS_EditSelectedNodesAttributes(){
+
+function PS_SetPropertiesOnManyNodes(){
 	
 	//
   MessageLog.clearLog(); // !!!
 
   //
-  var scriptName = 'Edit Selected Nodes Attributes';
+  var scriptName = 'Set Properties On Many Nodes';
   var scriptVer = '0.211025';
   //
 
   var Utils = _Utils;
   var SelectionUtils = _SelectionUtils;
   var NodeUtils = _NodeUtils;
+  var ContextMenu = _ContextMenu;
 
   var btnHeight = 30;
   var listJustUpdated = true;
@@ -59,6 +62,46 @@ function PS_EditSelectedNodesAttributes(){
 	}
 
 
+	//
+	var attributeGroups = {
+
+		pivot: [
+			'PIVOT.X',
+			'PIVOT.Y',
+			'PIVOT.Z'
+		],
+
+		position: [
+			'POSITION.SEPARATE',
+			'POSITION.X',
+			'POSITION.Y',
+			'POSITION.Z',
+			'OFFSET.SEPARATE',
+			'OFFSET.X',
+			'OFFSET.Y',
+			'OFFSET.Z'
+		],
+
+		scale: [
+			'SCALE.SEPARATE',
+			'SCALE.X',
+			'SCALE.Y',
+			'SCALE.Z'
+		],
+
+		rotation: [
+			'ROTATION.SEPARATE',
+			'ROTATION.ANGLEX',
+			'ROTATION.ANGLEY',
+			'ROTATION.ANGLEZ',
+			'SKEW'
+		]
+
+	};
+
+	attributeGroups.transformation = attributeGroups.position.concat( attributeGroups.scale, attributeGroups.rotation );
+	attributeGroups.allTransformation = attributeGroups.transformation.concat( attributeGroups.pivot );
+
 
   //
   var modal = new pModal( scriptName + " v" + scriptVer, modalWidth, modalHeight, false );  
@@ -79,8 +122,6 @@ function PS_EditSelectedNodesAttributes(){
 
 
 	//// ATTRIBUTES
-  var attrsGroup = modal.addGroup( '', ui, 'grid', true );
-
 	var nodes = [];
 	var nodesType;
 
@@ -106,11 +147,7 @@ function PS_EditSelectedNodesAttributes(){
 			isUsedToolTip: 'Toggle applying all attributes bellow to the selection',
 			onIsUsedChange: function(v){
 				// MessageLog.trace('onIsUsedChange: '+v);
-				attributes.forEach(function(attrData){
-					var isUsedCheckbox = attrData.isUsedCheckbox;
-					if( !isUsedCheckbox || !attrData.name ) return;
-					isUsedCheckbox.setCheckState( v ? Qt.Checked : Qt.Unchecked );
-				});
+				_setIsUsedCheckboxes( function(){ return v } );
 			},
 			
 			useLinkToolTip: 'Toggle using connected columns instead of a values for all attributes below',
@@ -119,12 +156,12 @@ function PS_EditSelectedNodesAttributes(){
 				attributes.forEach(function(attrData){
 					var useLinkCheckbox = attrData.useLinkCheckbox;
 					if( !useLinkCheckbox || !attrData.name ) return;
-					useLinkCheckbox.setCheckState( v ? Qt.Checked : Qt.Unchecked );
+					useLinkCheckbox.setCheckState( v );
 				});
 			},
 
 			isUsedDefault: false
-			
+
 		}
 	];
 
@@ -141,10 +178,11 @@ function PS_EditSelectedNodesAttributes(){
 			keyword: keyword,
 			name: attrName,
 			type: type,
-			isUsedDefault: false
+			isUsedDefault: false,
+			useLinkDefault: false,
 		};
 
-		if( attributes.length === 1 ) attrData.separator = '-------';
+		// if( attributes.length === 1 ) attrData.separator = '-------';
 
 		switch( type ){
 			
@@ -153,6 +191,7 @@ function PS_EditSelectedNodesAttributes(){
 				break;
 
 			case 'DOUBLE':
+			case 'DOUBLEVB':
 				attrData.type = 'NUMBER';
 				attributes.push(attrData);
 				break;
@@ -169,7 +208,9 @@ function PS_EditSelectedNodesAttributes(){
 
 	});
 	
-	// return;
+	var attrsGroup = modal.addGroup( '', ui, 'grid', true );
+	attrsGroup.setStyleSheet( 'padding: 3;' );
+
 	_generateAttributes( attrsGroup, attributes );
 
 	var scrollGroup = modal.addGroup( '', ui, 'grid', true );
@@ -181,6 +222,38 @@ function PS_EditSelectedNodesAttributes(){
 	// scrollArea.setMinimumSize(modalWidthNoBorder,scrollableAreaHeight);
 	scrollArea.resize(modalWidthNoBorder,scrollableAreaHeight);
 	scrollArea.setWidget(attrsGroup);
+
+	function _setIsUsedCheckboxesByAttrList( attrGroupName ){
+		_setIsUsedCheckboxes(function(attrData){
+    	// MessageLog.trace('-> '+attrData.name+' ->'+attributeGroups.transformation.indexOf(attrData.name));
+    	return attributeGroups[attrGroupName].indexOf(attrData.name) !== -1;
+		});
+	}
+
+	scrollGroup.contextMenuEvent = function( event ){
+    try{
+
+      ContextMenu.showContextMenu({
+
+	      	'!Select Position': function(){ _setIsUsedCheckboxesByAttrList('position'); },
+	      	'!Select Rotation': function(){ _setIsUsedCheckboxesByAttrList('rotation'); },
+	      	'!Select Scale': function(){ _setIsUsedCheckboxesByAttrList('scale'); },
+	      	'!Select Pivot': function(){ _setIsUsedCheckboxesByAttrList('pivot'); },
+
+	        '!Select Transformation': function(){ _setIsUsedCheckboxesByAttrList('transformation'); },
+
+	        '!Select Transformation and Pivot': function(){ _setIsUsedCheckboxesByAttrList('allTransformation'); },
+
+        },
+        event,
+        scrollGroup
+      );
+
+    }catch(err){MessageLog.trace('Err:'+err)}
+
+  }
+
+
 
 	/// BUTTONS
   var buttonsGroup = modal.addGroup( '', ui, true, true ); // 'QGroupBox{border: none; padding: 0; margin: 0;}' );
@@ -324,16 +397,21 @@ function PS_EditSelectedNodesAttributes(){
 			
 			//
 			if( attr.separator ){
+
 				if( attr.separator === true ){
+
 					var line = new QWidget;
 				  line.setMinimumSize(modalWidth-50,1);
 				  line.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed);
 				  line.setStyleSheet("background-color: #303030; border-top: 1px solid #ffffff; border-bottom: 1px solid #505050;");
 				  groupWidget.mainLayout.addWidget( line, index, 0, 1, tableColumns, Qt.AlignCenter);
+
 			 	}else{
+
 				  var label = new QLabel();
 			  	groupWidget.mainLayout.addWidget( label, index, 0, 1, tableColumns, Qt.AlignCenter );
 			  	label.text = '--------------------&nbsp;&nbsp;&nbsp;&nbsp; <i><b>'+attr.separator+'</b></i> &nbsp;&nbsp;&nbsp;&nbsp;--------------------';
+				
 				}
 
 			  index++;
@@ -412,5 +490,18 @@ function PS_EditSelectedNodesAttributes(){
 		});
 
 	}
+
+
+	//
+	function _setIsUsedCheckboxes( condition ){
+
+		attributes.forEach(function(attrData){
+			var isUsedCheckbox = attrData.isUsedCheckbox;
+			if( !isUsedCheckbox || !attrData.name ) return;
+			isUsedCheckbox.setCheckState( condition(attrData) ? Qt.Checked : Qt.Unchecked );
+		});
+
+	}
+
 
 }

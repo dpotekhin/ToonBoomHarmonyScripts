@@ -71,6 +71,13 @@
                 },
 
                 {
+                    "name": "PS Fix Node Name",
+                    "type": "script",
+                    "scriptFile": "PS_FixNodeName.js",
+                    "sriptFunction": "PS_FixNodeName"
+                },
+
+                {
                     "name": "PS Unlink Element Functions",
                     "type": "script",
                     "scriptFile": "PS_UnlinkElementFunctions.js",
@@ -111,10 +118,10 @@
                 },
 
                 {
-                    "name": "PS Edit Selected Nodes Attributes",
+                    "name": "PS Set Properties On Many Nodes",
                     "type": "script",
-                    "scriptFile": "PS_EditSelectedNodesAttributes.js",
-                    "sriptFunction": "PS_EditSelectedNodesAttributes"
+                    "scriptFile": "PS_SetPropertiesOnManyNodes.js",
+                    "sriptFunction": "PS_SetPropertiesOnManyNodes"
                 }
 
             ]
