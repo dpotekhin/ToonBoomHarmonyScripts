@@ -108,6 +108,13 @@
                     "scriptFile": "PS_SwapNodes.js",
                     "sriptFunction": "PS_SwapNodes",
                     "icon": "~/PS_SwapNodes.png"
+                },
+
+                {
+                    "name": "PS Edit Selected Nodes Attributes",
+                    "type": "script",
+                    "scriptFile": "PS_EditSelectedNodesAttributes.js",
+                    "sriptFunction": "PS_EditSelectedNodesAttributes"
                 }
 
             ]
