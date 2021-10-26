@@ -12,6 +12,13 @@
                     "scriptFile": "PS_KeysToKeyExposures.js",
                     "sriptFunction": "PS_KeysToKeyExposures",
                     "icon": "~/PS_KeysToKeyExposures.png"
+                },
+
+                {
+                    "name": "PS Deform Tools",
+                    "type": "script",
+                    "scriptFile": "PS_DeformerTools.js",
+                    "sriptFunction": "PS_DeformerTools"
                 }
 
             ]
