@@ -12,6 +12,13 @@
                     "scriptFile": "PS_KeysToKeyExposures.js",
                     "sriptFunction": "PS_KeysToKeyExposures",
                     "icon": "~/PS_KeysToKeyExposures.png"
+                },
+
+                {
+                    "name": "PS Deform Tools",
+                    "type": "script",
+                    "scriptFile": "PS_DeformerTools.js",
+                    "sriptFunction": "PS_DeformerTools"
                 }
 
             ]
@@ -68,6 +75,13 @@
                     "scriptFile": "PS_RenameNodes.js",
                     "sriptFunction": "PS_RenameNodes",
                     "icon": "~/PS_RenameNodes.png"
+                },
+
+                {
+                    "name": "PS Copy Nodes Paths",
+                    "type": "script",
+                    "scriptFile": "PS_NodeHelper.js",
+                    "sriptFunction": "PS_CopyNodesPaths"
                 },
 
                 {
