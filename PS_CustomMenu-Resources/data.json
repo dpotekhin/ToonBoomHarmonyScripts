@@ -78,6 +78,13 @@
                 },
 
                 {
+                    "name": "PS Copy Nodes Paths",
+                    "type": "script",
+                    "scriptFile": "PS_NodeHelper.js",
+                    "sriptFunction": "PS_CopyNodesPaths"
+                },
+
+                {
                     "name": "PS Fix Node Name",
                     "type": "script",
                     "scriptFile": "PS_FixNodeName.js",
