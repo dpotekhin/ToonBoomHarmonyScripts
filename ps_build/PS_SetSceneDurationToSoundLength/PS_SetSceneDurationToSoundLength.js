@@ -46,17 +46,25 @@ function PS_SetSceneDurationToSoundLength(){
     MessageLog.trace( 'Sound Layer: "'+columnName+'"');
 
     var maxFrame = 0;
+    var minTime = 99999;
+    var maxTime = 0;
 
     var sequences = soundColumn.sequences();
     sequences.forEach(function(sequence,i){
-        MessageLog.trace('Sequence '+i+' > '+sequence.startFrame+'('+sequence.startTime+') - '+sequence.stopFrame+' ('+sequence.stopTime+')' );
+        // MessageLog.trace('Sequence '+i+' > '+sequence.startFrame+'('+sequence.startTime+') - '+sequence.stopFrame+' ('+sequence.stopTime+')' );
         if( maxFrame < sequence.stopFrame ) maxFrame = sequence.stopFrame;
+        if( sequence.startTime < minTime ) minTime = sequence.startTime;
+        if( sequence.stopTime > maxTime ) maxTime = sequence.stopTime;
         // MessageLog.trace('>> '+Object.getOwnPropertyNames( sequence ).join('\n'));    
     });
-    
-    var durationDiff = (maxFrame) - frame.numberOf();
 
-    MessageLog.trace( 'Sound Length In Frames:' + maxFrame+' ('+durationDiff+')'  );
+    var frameRate = scene.getFrameRate();
+    var maxFrame2 = Math.round(maxTime * frameRate);
+    // MessageLog.trace('Time range from Time >> '+minTime+' >> '+maxTime+' ('+maxFrame2+')');
+
+    var durationDiff = maxFrame2 - frame.numberOf();
+
+    MessageLog.trace( 'Sound Length In Frames:' + maxFrame2+' ('+durationDiff+')'  );
     
     scene.beginUndoRedoAccum('Set Scene Duration To Sound Length');
 
