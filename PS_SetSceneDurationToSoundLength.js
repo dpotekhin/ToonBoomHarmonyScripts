@@ -54,7 +54,7 @@ function PS_SetSceneDurationToSoundLength(){
         // MessageLog.trace('>> '+Object.getOwnPropertyNames( sequence ).join('\n'));    
     });
     
-    var durationDiff = (maxFrame - 1) - frame.numberOf();
+    var durationDiff = maxFrame - frame.numberOf();
 
     MessageLog.trace( 'Sound Length In Frames:' + maxFrame+' ('+durationDiff+')'  );
     
