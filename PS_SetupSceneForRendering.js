@@ -116,9 +116,9 @@ function PS_SetupSceneForRendering(){
 			.replace(/^Write-/,'')
 			.replace(/_\d$/,'')
 			.replace(/[-_]?composite[-_]?/gi,'')
-			.replace(/-.?cmp|_.?cmp$/gi,'')
-			.replace(/-.?com|_.?com$/gi,'')
-			.replace(/-rig|_rig/gi,'')
+			.replace(/-.?cmp$|_.?cmp$/gi,'')
+			.replace(/-.?com$|_.?com$/gi,'')
+			.replace(/-rig$|_rig$/gi,'')
 		;
 		
 		if( !fixedWriteNodeName ) fixedWriteNodeName = 'NAME-IS-NOT-DEFINED';
