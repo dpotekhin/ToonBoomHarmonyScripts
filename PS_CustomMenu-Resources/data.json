@@ -19,6 +19,13 @@
                     "type": "script",
                     "scriptFile": "PS_DeformerTools.js",
                     "sriptFunction": "PS_DeformerTools"
+                },
+
+                {
+                    "name": "PS Fix Rotation",
+                    "type": "script",
+                    "scriptFile": "PS_FixRotation.js",
+                    "sriptFunction": "PS_FixRotation"
                 }
 
             ]

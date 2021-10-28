@@ -110,7 +110,8 @@ function AlignShapes( mode, centerX, centerY ){
 
   scene.beginUndoRedoAccum("Align shape");
 
-  // try{
+  try{
+
     var selectionData = getSelectionData();
     if( !selectionData ) {
       scene.endUndoRedoAccum();
@@ -129,13 +130,20 @@ function AlignShapes( mode, centerX, centerY ){
       targetBox = new pBox2D( centerX || 0, centerY || 0 );
 
     }else{
+
       if( mode === _exports.MODE_ALIGN_LEFT || mode === _exports.MODE_ALIGN_H_CENTER || mode === _exports.MODE_ALIGN_RIGHT )
         targetBox = totalBox.maxWidthBox;
       else if( mode === _exports.MODE_ALIGN_TOP || mode === _exports.MODE_ALIGN_V_CENTER || mode === _exports.MODE_ALIGN_BOTTOM )
         targetBox = totalBox.maxHeightBox;
     }
-
+    
     MessageLog.trace('AlignShapes: '+ JSON.stringify(totalBox, true, '  ')+' targetBox:'+JSON.stringify(targetBox,true,'  ') );
+
+    if( !targetBox ){
+      MessageLog.trace('Error: targetBox is empty'); // TODO: why?
+      scene.endUndoRedoAccum();
+      return;
+    }
 
     function _getXOffset( box ){
 
@@ -215,9 +223,9 @@ function AlignShapes( mode, centerX, centerY ){
 
     });
 
-  // } catch(err){
-  //   MessageLog.trace('Error: '+err );
-  // }
+  } catch(err){
+    MessageLog.trace('Error: '+err );
+  }
 
   //
   selectedDrawing.restoreSelection();
