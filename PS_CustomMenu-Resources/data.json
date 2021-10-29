@@ -25,7 +25,8 @@
                     "name": "PS Rotation Euler Filter",
                     "type": "script",
                     "scriptFile": "PS_RotationEulerFilter.js",
-                    "sriptFunction": "PS_RotationEulerFilter"
+                    "sriptFunction": "PS_RotationEulerFilter",
+                    "icon": "~/PS_RotationEulerFilter.png"
                 }
 
             ]
