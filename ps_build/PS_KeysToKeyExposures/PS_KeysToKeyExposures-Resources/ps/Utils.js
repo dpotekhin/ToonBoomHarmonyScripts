@@ -13,7 +13,7 @@ function getNumber(v){
 //
 function getTimestamp(){
     var date = new Date();
-    return date.getFullYear() + getZeroLeadingString(date.getMonth()+1) + getZeroLeadingString(date.getDate())+'_'+getZeroLeadingString(date.getHours())+getZeroLeadingString(date.getMinutes());
+    return date.getFullYear() +''+ getZeroLeadingString(date.getMonth()+1) + getZeroLeadingString(date.getDate())+'_'+getZeroLeadingString(date.getHours())+getZeroLeadingString(date.getMinutes());
 }
 
 
@@ -178,54 +178,6 @@ function eachAnimatableAttr( _node, callback ){
 }
 
 
-//
-function getSelectedLayers( onlyFirstAndLast ){
-    
-    var selectedLayers = {};
-    var numSelLayers = Timeline.numLayerSel;
-    var layerName;
-    
-    for ( var i = 0; i < numSelLayers; i++ ){
-
-        if ( Timeline.selIsNode( i ) ){
-            
-            layerName = Timeline.selToNode(i);
-            if( !selectedLayers[layerName] ) selectedLayers[layerName] = {
-                name: node.getName(layerName),
-                node: layerName,
-                index: i,
-                layerType: 'node',
-            };
-
-        }else if ( Timeline.selIsColumn( i ) ){
-            
-            layerName = Timeline.selToColumn(i);
-            if( !selectedLayers[layerName] ) selectedLayers[layerName] = {
-                name: layerName,
-                index: i,
-                layerType: 'column',
-                columnType:  column.type(layerName),
-                column: layerName
-            };
-        }
-
-    }
-
-    var layerKeys = Object.keys(selectedLayers);
-    var result = [];
-
-    if( !layerKeys.length ) return result;
-
-    layerKeys.forEach(function( layerName, i ){
-        if( onlyFirstAndLast && !( i === 0 || i === layerKeys.length-1 ) ) return;
-        result.push( selectedLayers[layerName] );
-    });
-
-    return result;
-
-}
-
-
 
 //
 function getSoundColumns( count ){
@@ -245,6 +197,24 @@ function getSoundColumns( count ){
     }
 
     return soundColumns;
+
+}
+
+
+//
+function getUnusedColumnName( name ){
+
+    name = name ? name.replace(/\s/gi,'_').replace(/[^a-zA-Z0-9_-]+/gi,'') : undefined;
+    if( !name ) return;
+
+    if( !column.type( name ) ) return name;
+
+    for( var i = 1; i < 999; i++ ){
+
+        var _name = name+'_'+i;
+        if( !column.type( _name ) ) return _name;
+
+    }
 
 }
 
@@ -302,7 +272,7 @@ exports = {
     createUid: createUid,
     rgbToHex: rgbToHex,
     hexToRgb: hexToRgb,
-    getSelectedLayers: getSelectedLayers,
     getSoundColumns: getSoundColumns,
+    getUnusedColumnName: getUnusedColumnName,
     getNumber: getNumber,
 };
