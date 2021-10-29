@@ -1,6 +1,6 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version: 0.5
+Version: 0.211020
 */
 
 function pModal( title, width, height, unique ){
@@ -113,7 +113,7 @@ pModal.prototype.addGroup = function( title, parent, layoutType, style ){
 
 
 //
-pModal.prototype.addNumberInput = function( labelText, parent, width, height, defaultValue, onChange ){
+pModal.prototype.addNumberInput = function( labelText, parent, width, height, defaultValue, onChange, onReturnPressed ){
 
   if( labelText ){
     var label = new QLabel();
@@ -130,6 +130,10 @@ pModal.prototype.addNumberInput = function( labelText, parent, width, height, de
 
   if( onChange ){
     _input.textChanged.connect( _input, onChange );
+  }
+
+  if( onReturnPressed ){
+    _input.returnPressed.connect( _input, onReturnPressed );
   }
 
   return _input;
@@ -224,6 +228,7 @@ pModal.prototype.addLabel = function( text, parent, width, height, align ){
 pModal.prototype.addVLine = function( height, parent ){
   var line = new QWidget;
   line.setMinimumSize(2,height);
+  line.setMaximumSize(2,height);
   line.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed);
   line.setStyleSheet("background-color: #303030; border-left: 1px solid #303030; border-right: 1px solid #505050;");
   parent.mainLayout.addWidget(line,0,0);

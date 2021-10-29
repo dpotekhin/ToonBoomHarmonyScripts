@@ -55,8 +55,8 @@ This script quickly sets the duration of the Scene to the duration of a Sound la
 
 
 ## [PS_SoundAmplitudeToKeyframes](ps_build/PS_SoundAmplitudeToKeyframes)
-
 This script quickly sets the Scene duration to the selected Sound layer duration.
+
 
 ## [PS_SwapNodes](ps_build/PS_SwapNodes)
 
