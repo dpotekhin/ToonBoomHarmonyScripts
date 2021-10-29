@@ -25,6 +25,7 @@ TODO:
 
 var pModal = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/pModal.js"));
 var _Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
+var _SelectionUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/SelectionUtils.js"));
 
 //
 function PS_SoundAmplitudeToKeyframes(){
@@ -32,13 +33,14 @@ function PS_SoundAmplitudeToKeyframes(){
 	// MessageLog.clearLog();
 
 	var Utils = _Utils;
+	var SelectionUtils = _SelectionUtils;
 
 	//
   	var scriptName = 'Sound Amplitude To Keyframes';
   	var scriptVer = '0.210922';
 
   	//
-	var selectedLayers = Utils.getSelectedLayers( true );
+	var selectedLayers = SelectionUtils.getSelectedLayers( true );
 	var selectedNode;
 	var selectedSoundColumnName;
 

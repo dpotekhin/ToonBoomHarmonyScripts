@@ -72,11 +72,84 @@ function selectNodes( _nodes ){
 	else selection.addNodesToSelection(_nodes);
 }
 
+
 //
+function getSelectedLayers( onlyFirstAndLast ){
+    
+    var selectedLayers = {};
+    var numSelLayers = Timeline.numLayerSel;
+    var layerName;
+    
+    for ( var i = 0; i < numSelLayers; i++ ){
+
+        if ( Timeline.selIsNode( i ) ){
+            
+            layerName = Timeline.selToNode(i);
+            if( !selectedLayers[layerName] ) selectedLayers[layerName] = {
+                name: node.getName(layerName),
+                node: layerName,
+                index: i,
+                layerType: 'node',
+            };
+
+        }else if ( Timeline.selIsColumn( i ) ){
+            
+            layerName = Timeline.selToColumn(i);
+            if( !selectedLayers[layerName] ) selectedLayers[layerName] = {
+                name: layerName,
+                index: i,
+                layerType: 'column',
+                columnType:  column.type(layerName),
+                column: layerName
+            };
+        }
+
+    }
+
+    var layerKeys = Object.keys(selectedLayers);
+    var result = [];
+
+    if( !layerKeys.length ) return result;
+
+    layerKeys.forEach(function( layerName, i ){
+        if( onlyFirstAndLast && !( i === 0 || i === layerKeys.length-1 ) ) return;
+        result.push( selectedLayers[layerName] );
+    });
+
+    return result;
+
+}
+
+
+//
+function eachAnimatedAttributeOfSelectedLayers( _action ){
+
+  var selectedlayers = getSelectedLayers();
+  // MessageLog.trace('selectedlayers: '+JSON.stringify(selectedlayers,true,' '));
+
+  selectedlayers.forEach(function( _layer, i ){
+    
+    var _node = _layer.node;
+    var attributes = getLinkedAttributeNames( _node );
+    // MessageLog.trace(i+') '+_node+': '+JSON.stringify(attributes,true,' '));
+    
+    attributes.forEach(function( _attrName ){
+      _action( _node, _attrName );
+    });
+
+  });
+
+}
+
+
+
+///
 exports = {
 	eachNode: eachNode,
 	eachSelectedNode: eachSelectedNode,
 	filterNodesByType: filterNodesByType,
 	hasSelectedNodes: hasSelectedNodes,
-	selectNodes: selectNodes
+	selectNodes: selectNodes,
+	getSelectedLayers: getSelectedLayers,
+	eachAnimatedAttributeOfSelectedLayers: eachAnimatedAttributeOfSelectedLayers,
 }

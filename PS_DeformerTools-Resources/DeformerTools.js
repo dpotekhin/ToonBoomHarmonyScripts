@@ -1,3 +1,8 @@
+/*
+Author: D.Potekhin (d@peppers-studio.ru)
+Version 0.211029
+*/
+
 var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
 
 

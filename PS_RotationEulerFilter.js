@@ -4,6 +4,7 @@ Version 0.211028
 */
 
 var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
+var SelectionUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/SelectionUtils.js"));
 
 //
 function PS_RotationEulerFilter(){
@@ -26,7 +27,7 @@ function PS_RotationEulerFilter(){
 
 	try{
 
-	Utils.getSelectedLayers().forEach(function(nodeData,i){
+	SelectionUtils.getSelectedLayers().forEach(function(nodeData,i){
 		
 		var _node = nodeData.node;
 		
