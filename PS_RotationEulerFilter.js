@@ -41,6 +41,8 @@ function PS_RotationEulerFilter(){
 
 	try{
 
+	var processedNodes = 0;
+
 	SelectionUtils.getSelectedLayers().forEach(function(nodeData,i){
 		
 		var _node = nodeData.node;
@@ -57,6 +59,8 @@ function PS_RotationEulerFilter(){
 		});
 		if( !attrs.length ) return;
 		// MessageLog.trace(i+' > '+JSON.stringify(attrs,true,'  '));
+
+		processedNodes++;
 
 		attrs.forEach(function(attrName){
 
@@ -123,6 +127,8 @@ function PS_RotationEulerFilter(){
 			}
 		})
 	});
+
+	if( !processedNodes ) MessageBox.warning( "Please select layers with animated rotation or orientation attributes and time range in the timeline in wich you want to process keyframes.",0,0,0,"Error");
 
 	}catch(err){MessageLog.trace('Err: '+err);}
 
