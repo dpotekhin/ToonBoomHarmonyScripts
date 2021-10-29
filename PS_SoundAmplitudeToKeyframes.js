@@ -205,8 +205,9 @@ function PS_SoundAmplitudeToKeyframes(){
 
     	var prevEntry;
     	var soundData = smoothing ? smoothArray( medianData.values, smoothing ) : medianData.values;
+    	// MessageLog.trace( lastFrame+' >>>> '+ soundData.length);
 
-    	for( var _frame=firstFrame-1; _frame < lastFrame-1 && _frame < soundData.length; _frame++ ){
+    	for( var _frame=firstFrame-1; _frame < lastFrame && _frame <= soundData.length; _frame++ ){
 
     		var __frame = _frame+1;
     		var mappedValue = mapMin + ( (soundData[_frame] - medianData.min) / medianData.minMaxRange ) * mapRange;
