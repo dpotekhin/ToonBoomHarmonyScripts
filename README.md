@@ -33,6 +33,8 @@ The script provides tools for aligning, mirroring and modifying strokes.
 A small helper for batch renaming of nodes.
 
 ## [PS_ResetTransformation](ps_build/PS_ResetTransformation)
+Three scripts to universal (pegs and deformers) reset of transformations, save transformation state and remove that state.
+
 
 ## [PS_RotationEulerFilter](ps_build/PS_RotationEulerFilter)
 This script compensates for rotation attributes values change over 180 degrees between adjacent keyframes.
