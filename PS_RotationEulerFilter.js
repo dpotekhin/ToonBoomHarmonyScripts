@@ -1,6 +1,20 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version 0.211028
+
+[Name: PS_RotationEulerFilter :]
+[Version: 0.211028 :]
+
+[Description:
+This script compensates for rotation attributes values change over 180 degrees between adjacent keyframes.
+:]
+
+[Usage:
+Select the layers and time range on the Timeline and click the script button.
+If you don't select a time range, the entier Timeline will be used.
+
+#### Options:
+- Hold down the Control key to use 360 degrees as minimum rotation angle.
+:]
 */
 
 var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
@@ -14,14 +28,14 @@ function PS_RotationEulerFilter(){
 	var usedNodes = {};
 	var nodeTypes = ['PEG','READ','CurveModule','OffsetModule'];
 	var attrNames = /ROTATION.|orientation/i;
-
+	var useMinimumRotationAngle = !KeyModifiers.IsControlPressed();
 	var startFrame = Timeline.firstFrameSel;
 	var stopFrame = startFrame + Timeline.numFrameSel - 1;
 	if( startFrame === stopFrame ) {
 		startFrame = 1;
 		stopFrame = frame.numberOf();
 	}
-	MessageLog.trace(startFrame+', '+stopFrame);
+	// MessageLog.trace(startFrame+', '+stopFrame);
 
 	scene.beginUndoRedoAccum("Rotation Euler Filter");
 
@@ -61,20 +75,31 @@ function PS_RotationEulerFilter(){
 				// MessageLog.trace(_frame+' > '+val);
 				
 				if( prevValue !== undefined ){
-					var diff = val - prevValue;
-					if( Math.abs(diff) >= 360 ){
-						
-						var _val = val;
 
-						var leftHandleValue = func.pointHandleLeftY(column,i) - prevValue;
-						var rightHandleValue = func.pointHandleRightY(column,i) - prevValue;
+					var _val = val;
+					var diff = val - prevValue;
+					var leftHandleValue = func.pointHandleLeftY(column,i) - prevValue;
+					var rightHandleValue = func.pointHandleRightY(column,i) - prevValue;
+
+					// MessageLog.trace('diff: '+diff+'\nprevValue: '+prevValue+'\nval: '+val);
+
+					if( Math.abs(diff) >= 360 ){ // Euler filter
 						
-						val += 360 * ( val < prevValue );
+						val -= ~~( diff / 360 ) * 360;
+						diff = val - prevValue;
+
+					}
+
+					if( useMinimumRotationAngle && Math.abs(diff) > 180 ){ // Set a minimum angle
+
+						val -= diff > 0 ? 360 : -360;
+						// MessageLog.trace('Set a minimum angle!'+diff+' > '+prevValue+' > '+val);
+					}
+
+					if( val !== _val ){
+
 						var leftHandleCoef = (val - prevValue) / leftHandleValue;
 						var rightHandleCoef = (val - prevValue) / rightHandleValue;
-
-						// MessageLog.trace(diff+', '+prevValue+', '+_val+' > '+val);
-						// MessageLog.trace(leftHandleCoef+', '+rightHandleCoef);
 
 						func.setBezierPoint(column,
 							_frame,
@@ -88,7 +113,9 @@ function PS_RotationEulerFilter(){
 							func.pointConstSeg(column,i),
 							func.pointContinuity(column,i) 
 						);
+
 					}
+
 				}
 
 				prevValue = val;
