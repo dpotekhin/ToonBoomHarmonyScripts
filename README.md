@@ -34,6 +34,10 @@ A small helper for batch renaming of nodes.
 
 ## [PS_ResetTransformation](ps_build/PS_ResetTransformation)
 
+## [PS_RotationEulerFilter](ps_build/PS_RotationEulerFilter)
+This script compensates for rotation attributes values change over 180 degrees between adjacent keyframes.
+
+
 ## [PS_SceneHelper](ps_build/PS_SceneHelper)
 
 A set of scene helper scripts.
@@ -51,6 +55,8 @@ This script quickly sets the duration of the Scene to the duration of a Sound la
 
 
 ## [PS_SoundAmplitudeToKeyframes](ps_build/PS_SoundAmplitudeToKeyframes)
+This script quickly sets the Scene duration to the selected Sound layer duration.
+
 
 ## [PS_SwapNodes](ps_build/PS_SwapNodes)
 

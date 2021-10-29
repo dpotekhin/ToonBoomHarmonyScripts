@@ -1,10 +1,10 @@
-var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
+var SelectionUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/SelectionUtils.js"));
 
 function PS_DistributeDrawingSubstitutionsToTimeline(){
 
 	// MessageLog.clearLog(); // !!!
 
-	var selectedLayers = Utils.getSelectedLayers(true);
+	var selectedLayers = SelectionUtils.getSelectedLayers(true);
 	var selectedNode;
 	MessageLog.trace('selectedLayers: '+JSON.stringify( selectedLayers, true, '  ') );
 

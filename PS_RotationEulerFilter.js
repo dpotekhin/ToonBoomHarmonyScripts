@@ -1,32 +1,49 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version 0.211028
+
+[Name: PS_RotationEulerFilter :]
+[Version: 0.211028 :]
+
+[Description:
+This script compensates for rotation attributes values change over 180 degrees between adjacent keyframes.
+:]
+
+[Usage:
+Select the layers and time range on the Timeline and click the script button.
+If you don't select a time range, the entier Timeline will be used.
+
+#### Options:
+- Hold down the Control key to use 360 degrees as minimum rotation angle.
+:]
 */
 
 var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
+var SelectionUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/SelectionUtils.js"));
 
 //
-function PS_FixRotation(){
+function PS_RotationEulerFilter(){
 
 	MessageLog.clearLog(); // !!!
 
 	var usedNodes = {};
 	var nodeTypes = ['PEG','READ','CurveModule','OffsetModule'];
 	var attrNames = /ROTATION.|orientation/i;
-
+	var useMinimumRotationAngle = !KeyModifiers.IsControlPressed();
 	var startFrame = Timeline.firstFrameSel;
 	var stopFrame = startFrame + Timeline.numFrameSel - 1;
 	if( startFrame === stopFrame ) {
 		startFrame = 1;
 		stopFrame = frame.numberOf();
 	}
-	MessageLog.trace(startFrame+', '+stopFrame);
+	// MessageLog.trace(startFrame+', '+stopFrame);
 
-	scene.beginUndoRedoAccum("Fix Rotation");
+	scene.beginUndoRedoAccum("Rotation Euler Filter");
 
 	try{
 
-	Utils.getSelectedLayers().forEach(function(nodeData,i){
+	var processedNodes = 0;
+
+	SelectionUtils.getSelectedLayers().forEach(function(nodeData,i){
 		
 		var _node = nodeData.node;
 		
@@ -42,6 +59,8 @@ function PS_FixRotation(){
 		});
 		if( !attrs.length ) return;
 		// MessageLog.trace(i+' > '+JSON.stringify(attrs,true,'  '));
+
+		processedNodes++;
 
 		attrs.forEach(function(attrName){
 
@@ -60,20 +79,31 @@ function PS_FixRotation(){
 				// MessageLog.trace(_frame+' > '+val);
 				
 				if( prevValue !== undefined ){
-					var diff = val - prevValue;
-					if( Math.abs(diff) >= 360 ){
-						
-						var _val = val;
 
-						var leftHandleValue = func.pointHandleLeftY(column,i) - prevValue;
-						var rightHandleValue = func.pointHandleRightY(column,i) - prevValue;
+					var _val = val;
+					var diff = val - prevValue;
+					var leftHandleValue = func.pointHandleLeftY(column,i) - prevValue;
+					var rightHandleValue = func.pointHandleRightY(column,i) - prevValue;
+
+					// MessageLog.trace('diff: '+diff+'\nprevValue: '+prevValue+'\nval: '+val);
+
+					if( Math.abs(diff) >= 360 ){ // Euler filter
 						
-						val += 360 * ( val < prevValue );
+						val -= ~~( diff / 360 ) * 360;
+						diff = val - prevValue;
+
+					}
+
+					if( useMinimumRotationAngle && Math.abs(diff) > 180 ){ // Set a minimum angle
+
+						val -= diff > 0 ? 360 : -360;
+						// MessageLog.trace('Set a minimum angle!'+diff+' > '+prevValue+' > '+val);
+					}
+
+					if( val !== _val ){
+
 						var leftHandleCoef = (val - prevValue) / leftHandleValue;
 						var rightHandleCoef = (val - prevValue) / rightHandleValue;
-
-						// MessageLog.trace(diff+', '+prevValue+', '+_val+' > '+val);
-						// MessageLog.trace(leftHandleCoef+', '+rightHandleCoef);
 
 						func.setBezierPoint(column,
 							_frame,
@@ -87,7 +117,9 @@ function PS_FixRotation(){
 							func.pointConstSeg(column,i),
 							func.pointContinuity(column,i) 
 						);
+
 					}
+
 				}
 
 				prevValue = val;
@@ -95,6 +127,8 @@ function PS_FixRotation(){
 			}
 		})
 	});
+
+	if( !processedNodes ) MessageBox.warning( "Please select layers with animated rotation or orientation attributes and time range in the timeline in wich you want to process keyframes.",0,0,0,"Error");
 
 	}catch(err){MessageLog.trace('Err: '+err);}
 

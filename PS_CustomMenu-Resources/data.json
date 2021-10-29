@@ -22,10 +22,11 @@
                 },
 
                 {
-                    "name": "PS Fix Rotation",
+                    "name": "PS Rotation Euler Filter",
                     "type": "script",
-                    "scriptFile": "PS_FixRotation.js",
-                    "sriptFunction": "PS_FixRotation"
+                    "scriptFile": "PS_RotationEulerFilter.js",
+                    "sriptFunction": "PS_RotationEulerFilter",
+                    "icon": "~/PS_RotationEulerFilter.png"
                 }
 
             ]

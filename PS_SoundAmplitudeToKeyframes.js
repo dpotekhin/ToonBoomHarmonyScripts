@@ -25,6 +25,7 @@ TODO:
 
 var pModal = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/pModal.js"));
 var _Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
+var _SelectionUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/SelectionUtils.js"));
 
 //
 function PS_SoundAmplitudeToKeyframes(){
@@ -32,13 +33,14 @@ function PS_SoundAmplitudeToKeyframes(){
 	// MessageLog.clearLog();
 
 	var Utils = _Utils;
+	var SelectionUtils = _SelectionUtils;
 
 	//
   	var scriptName = 'Sound Amplitude To Keyframes';
   	var scriptVer = '0.210922';
 
   	//
-	var selectedLayers = Utils.getSelectedLayers( true );
+	var selectedLayers = SelectionUtils.getSelectedLayers( true );
 	var selectedNode;
 	var selectedSoundColumnName;
 
@@ -203,8 +205,9 @@ function PS_SoundAmplitudeToKeyframes(){
 
     	var prevEntry;
     	var soundData = smoothing ? smoothArray( medianData.values, smoothing ) : medianData.values;
+    	// MessageLog.trace( lastFrame+' >>>> '+ soundData.length);
 
-    	for( var _frame=firstFrame-1; _frame < lastFrame-1 && _frame < soundData.length; _frame++ ){
+    	for( var _frame=firstFrame-1; _frame < lastFrame && _frame <= soundData.length; _frame++ ){
 
     		var __frame = _frame+1;
     		var mappedValue = mapMin + ( (soundData[_frame] - medianData.min) / medianData.minMaxRange ) * mapRange;
