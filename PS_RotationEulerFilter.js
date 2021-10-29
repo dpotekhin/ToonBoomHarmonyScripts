@@ -6,7 +6,7 @@ Version 0.211028
 var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
 
 //
-function PS_FixRotation(){
+function PS_RotationEulerFilter(){
 
 	MessageLog.clearLog(); // !!!
 
@@ -22,7 +22,7 @@ function PS_FixRotation(){
 	}
 	MessageLog.trace(startFrame+', '+stopFrame);
 
-	scene.beginUndoRedoAccum("Fix Rotation");
+	scene.beginUndoRedoAccum("Rotation Euler Filter");
 
 	try{
 
