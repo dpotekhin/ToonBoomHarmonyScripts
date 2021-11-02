@@ -52,6 +52,10 @@ This script lets you to save and use groups of node selection sets (SS).
 
 This script sets the playback range relative to the selected frames.
 
+## [PS_SetPropertiesOnManyNodes](ps_build/PS_SetPropertiesOnManyNodes)
+The script allows to change the values of attributes of several nodes of the same type.
+
+
 ## [PS_SetSceneDurationToSoundLength](ps_build/PS_SetSceneDurationToSoundLength)
 This script quickly sets the duration of the Scene to the duration of a Sound layer.
 
