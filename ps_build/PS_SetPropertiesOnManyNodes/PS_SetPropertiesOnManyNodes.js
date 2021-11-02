@@ -16,11 +16,11 @@ Click the "Apply to Selection" button to apply the values of the checked attribu
 :]
 */
 
-var _SelectionUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/SelectionUtils.js"));
-var _Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
-var _NodeUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/NodeUtils.js"));
-var pModal = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/pModal.js"));
-var _ContextMenu = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/ContextMenu.js"));
+var _SelectionUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_SetPropertiesOnManyNodes-Resources/ps/SelectionUtils.js"));
+var _Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_SetPropertiesOnManyNodes-Resources/ps/Utils.js"));
+var _NodeUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_SetPropertiesOnManyNodes-Resources/ps/NodeUtils.js"));
+var pModal = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_SetPropertiesOnManyNodes-Resources/ps/pModal.js"));
+var _ContextMenu = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_SetPropertiesOnManyNodes-Resources/ps/ContextMenu.js"));
 
 
 function PS_SetPropertiesOnManyNodes(){
