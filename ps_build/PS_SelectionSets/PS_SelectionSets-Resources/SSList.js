@@ -11,6 +11,8 @@ var SelectionUtils = require(fileMapper.toNativePath(specialFolders.userScripts+
 ///
 function SSList( scriptVer, parentWidget ){
 
+  var _this = this;
+
   var resourcesPath = fileMapper.toNativePath(specialFolders.userScripts+"/PS_SelectionSets-Resources/icons/");
   var ContextMenu = _ContextMenu;
 
@@ -120,6 +122,7 @@ function SSList( scriptVer, parentWidget ){
           '-2': 0,
           'Export All Groups': getexportAllGroupsToFileMenuItem,
           '!Import Groups': importGroupsFromFile,
+          'Import Recent Group': getRecentPaths
         },
         event,
         parentWidget
@@ -282,14 +285,16 @@ function SSList( scriptVer, parentWidget ){
 
 
   //
-  function importGroupsFromFile() {
+  function importGroupsFromFile( path ) {
 
-    var loadedData = model.importGroupDataFromFile();
+    var loadedData = model.importGroupDataFromFile( path );
 
     if( !loadedData ){
       MessageBox.warning('Selection Sets Data is Not Valid.',0,0,0,'Load Data Error');
       return;
     }
+
+    addRecentImportPath( model.lastImportPath );
 
     // MessageLog.trace( 'importGroupDataFromFile: \n'+JSON.stringify(loadedData,true,'  '));
 
@@ -707,6 +712,29 @@ function SSList( scriptVer, parentWidget ){
     parentWidget.setFocusOnMainWindow();
 
   }
+
+
+  //
+  function getRecentPaths() {
+    if( !prefs.recentPaths || !prefs.recentPaths.length ) return;
+    var _data = {};
+    prefs.recentPaths.forEach(function(path){
+      _data['!'+path] = function(){
+        // MessageLog.trace('IMPORT: '+path);
+        importGroupsFromFile( path );
+      }
+    });
+    return _data;
+  }
+
+  function addRecentImportPath( path ){
+    if( !prefs.recentPaths ) prefs.recentPaths = [];
+    if( prefs.recentPaths.indexOf(path) !== -1 ) return;
+    prefs.recentPaths.unshift(path);
+    if( prefs.recentPaths.length > 8 ) prefs.recentPaths.length = 8;
+    _this.savePrefs();
+  }
+
 
   // PREFERENCES >>>
   var prefsName = 'PS_SelectionSets_Prefs';

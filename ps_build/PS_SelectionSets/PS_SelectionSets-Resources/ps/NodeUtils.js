@@ -76,6 +76,9 @@ function unlinkFunctions( _node, _columnTypes, _invertColumnTypes, keepCurrentVa
   }
 }
 
+
+
+
 var numberTypes = ['DOUBLEVB','DOUBLE','INT'];
 
 //
