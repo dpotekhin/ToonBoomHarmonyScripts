@@ -10,4 +10,4 @@ The first Sound layer will be used as duration source if no layers are selected.
 
 ### Installation:
 Copy all files from this folder to [Harmony User Scripts directory](https://docs.toonboom.com/help/harmony-20/premium/scripting/import-script.html).\
-Add script "PS_SetSceneDurationToSoundLength" to a panel.  
+Add the script "PS_SetSceneDurationToSoundLength" to a panel.  

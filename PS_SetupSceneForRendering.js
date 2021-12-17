@@ -32,6 +32,9 @@ function PS_SetupSceneForRendering(){
 	
 	MessageLog.clearLog();
 
+	// Preview mode sets FullHd resolution
+	var previewMode = KeyModifiers.IsAlternatePressed();
+	
 	var framePrefix = '';
 
 	if( !KeyModifiers.IsShiftPressed() ){
@@ -61,6 +64,7 @@ function PS_SetupSceneForRendering(){
 			scName = scName.split('_');
 			framePrefix = scName[0]+'_'+scName[2]+'-';
 		}
+
 	}
 
 	if( !KeyModifiers.IsControlPressed() ){
@@ -68,6 +72,7 @@ function PS_SetupSceneForRendering(){
 		framePrefix = Input.getText('Enter Scene prefix:', framePrefix, '');
 
 	}
+
 
 	MessageLog.trace('framePrefix: "'+ framePrefix +'"');
 
@@ -139,16 +144,20 @@ function PS_SetupSceneForRendering(){
 	}catch(err){MessageLog.trace('Error: '+err)}
 	
 
+	if( previewMode ) MessageLog.trace('PREVIEW MODE SETUP');
 
 	// Configure Write Nodes
 	node.getNodes(['WRITE']).forEach(function(n,i){
 		var nn = node.getName(n);
+
 		MessageLog.trace((i+1)+') "'+nn+'", "'+n+'"');
+
 		if( nn==='Write-Main' || nn.indexOf('Write_') !== -1 ) {
 			node.setEnable(n,false);
 			MessageLog.trace('-- Disabled');
 			return;
 		}
+
 		var ncn = nn.replace('Write-','').replace(/_Write|-Write/i,''); // Remove all "write" entries from the sequence name
 		node.setEnable(n,true);
 		node.setTextAttr(n,'EXPORT_TO_MOVIE',1,'Output Drawings');
@@ -157,13 +166,34 @@ function PS_SetupSceneForRendering(){
 		node.setTextAttr(n,'DRAWING_NAME',1,frameName);
 		MessageLog.trace('++ Enabled');
 		MessageLog.trace('++ Frame name: "'+frameName+'"');
+
+		/*
+		if( previewMode ){
+
+			if( nn==='Write-Main' ){
+				node.setEnable(n,true);
+			}else{
+				node.setEnable(n,false);
+			}
+		}
+		*/
+
 	});
 
 
 
 
 	// // Scene settings
-	scene.setDefaultResolution( 3840, 2160, 41.112 );
+	if( previewMode ){
+
+		scene.setDefaultResolution( 1920, 1080, 41.112 );
+
+	}else{
+
+		scene.setDefaultResolution( 3840, 2160, 41.112 );
+
+	}
+
 	MessageLog.trace('Scene Resolution: '+scene.defaultResolutionX()+' x '+scene.defaultResolutionY() );
 
 	scene.endUndoRedoAccum();
