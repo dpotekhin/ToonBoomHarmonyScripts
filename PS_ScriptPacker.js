@@ -425,7 +425,7 @@ function PS_ScriptPacker(){
 		// How to Install
 		var	howToInstallText = 'Copy all files from this folder to [Harmony User Scripts directory](https://docs.toonboom.com/help/harmony-20/premium/scripting/import-script.html).';
 		if( scriptData.functionNames.length ){
-			howToInstallText += '\\\nAdd script'+( scriptData.functionNames.length > 1 ? 's' : '')+' '+scriptData.functionNames.map(function(t){return '"'+t+'"';}).join(', ')+' to a panel.  \n'
+			howToInstallText += '\\\nAdd the script'+( scriptData.functionNames.length > 1 ? 's' : '')+' '+scriptData.functionNames.map(function(t){return '"'+t+'"';}).join(', ')+' to a panel.  \n'
 		}
 
 		howToInstallText += getContentFromScriptText( scriptText, 'Install') || '';

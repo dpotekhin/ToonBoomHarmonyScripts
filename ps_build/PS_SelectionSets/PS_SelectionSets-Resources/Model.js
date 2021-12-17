@@ -638,13 +638,16 @@ function Model( scriptVer ){
 
 
   //
-  this.importGroupDataFromFile = function() {
+  this.importGroupDataFromFile = function( path ) {
   
-    var _this = this;    
+    var _this = this;
 
-    var filePath = FileDialog.getOpenFileName('*.json');
-
+    var filePath = path || FileDialog.getOpenFileName('*.json');
+    MessageLog.trace('importGroupDataFromFile: '+path+'\n'+filePath);
+    
     if( !filePath ) return;
+    
+    this.lastImportPath = filePath;
 
     var file = new File(filePath);
     var loadedData;
