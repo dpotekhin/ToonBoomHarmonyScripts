@@ -2,6 +2,11 @@
 Author: D.Potekhin (d@peppers-studio.ru)
 Version: 0.1
 
+
+Options:
+- Hold down the Alt key to connect the created Drawing to the back of the linked Composite.
+- Hold down the Shift key to place the created Drawing on the left of the selected target node.
+
 ToDo:
 - to filter out not Latin letters from the entered name
 */
@@ -25,7 +30,12 @@ function PS_CreateDrawingNode(){
 	// Determine position of the new node
 	var _selection = selection.selectedNodes();
 	if( !_selection || !_selection[0] ){
-		MessageBox.warning('Please select a node for a position for the new Drawing creation.',0,0,0,'Error');
+		MessageBox.warning(
+			'Please select a node for a position for the new Drawing creation.'
+			+'\nOptions:\n'
+			+'\n- Hold down the Alt key to connect the created Drawing to the back of the linked Composite.'
+			+'\n- Hold down the Shift key to place the created Drawing on the left of the selected target node.'
+			,0,0,0,'Error');
    		return;	
 	}
 	/*
@@ -50,12 +60,13 @@ function PS_CreateDrawingNode(){
 		return;
 	}
 
+	var xNodeOffset = 50;
+	var pegTopOffset = 80;
+
 	var linkToCompOnTop = KeyModifiers.IsAlternatePressed();
-	var placeOnLeft = KeyModifiers.IsShiftPressed();
+	var placeOnLeftOfTarget = KeyModifiers.IsShiftPressed();
 
 	var _selectedNode = _selection[0];
-	var posX = node.coordX(_selectedNode) + node.width(_selectedNode) + 50;
-	var posY = node.coordY(_selectedNode);
 
 	var name;
 	var _name = Input.getText('Drawing Name', 'Drawing');
@@ -74,16 +85,14 @@ function PS_CreateDrawingNode(){
 	///
 	scene.beginUndoRedoAccum('Add Drawing');
 
-	var drawingNode = node.add( _group, name, 'READ', posX, posY, 0 );
+	var drawingNode = node.add( _group, name, 'READ', 0, 0, 0 );
 	if( !drawingNode ){
 		scene.cancelUndoRedoAccum();
 		return;
 	}
 
-	if( placeOnLeft ){
-		posX = node.coordX(_selectedNode) - node.width(drawingNode) - 50;
-	}
-
+	var posX = placeOnLeftOfTarget ? node.coordX(_selectedNode) + node.width(_selectedNode) + xNodeOffset : node.coordX(_selectedNode) - node.width(drawingNode) - xNodeOffset;
+	var posY = node.coordY(_selectedNode);
 	node.setCoord( drawingNode, posX, posY );
 	
 	// Switch off the Animate Using Animation Tools flag
@@ -118,7 +127,7 @@ function PS_CreateDrawingNode(){
 
 
 	// Add a Peg
-	var pegNode = node.add( _group, name+'-P', 'PEG', posX, posY-80, 0 );
+	var pegNode = node.add( _group, name+'-P', 'PEG', posX, posY-pegTopOffset, 0 );
 	node.link(pegNode, 0, drawingNode, 0);
 
 
