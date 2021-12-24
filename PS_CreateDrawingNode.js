@@ -9,6 +9,8 @@ ToDo:
 
 function PS_CreateDrawingNode(){
 
+	// try{
+
 	var _view = view.currentView();
 	var _type = view.type(_view);
 	// MessageLog.trace('_view:'+_view+', ['+_type+']');
@@ -22,9 +24,16 @@ function PS_CreateDrawingNode(){
 
 	// Determine position of the new node
 	var _selection = selection.selectedNodes();
+	if( !_selection || !_selection[0] ){
+		MessageBox.warning('Please select a node for a position for the new Drawing creation.',0,0,0,'Error');
+   		return;	
+	}
+	/*
 	if( !_selection || !_selection.length ) _selection = node.subNodes( _group );
 	var bounds = {x0:Number.MAX_VALUE,y0:Number.MAX_VALUE,x1:-Number.MAX_VALUE,y1:-Number.MAX_VALUE};
+	/*
 	_selection.forEach(function(_n){
+		MessageLog.trace( node.type(_n) );
 		var x = node.coordX(_n);
 		var y = node.coordY(_n);
 		if( x < bounds.x0 ) bounds.x0 = x;
@@ -34,11 +43,19 @@ function PS_CreateDrawingNode(){
 	});
 	var posX = (bounds.x1 - bounds.x0)/2 + bounds.x0;
 	var posY = (bounds.y1 - bounds.y0)/2 + bounds.y0;
+	*/
 
 	if(!_selection){
 		MessageBox.information('Selection required.',0,0,0);
 		return;
 	}
+
+	var linkToCompOnTop = KeyModifiers.IsAlternatePressed();
+	var placeOnLeft = KeyModifiers.IsShiftPressed();
+
+	var _selectedNode = _selection[0];
+	var posX = node.coordX(_selectedNode) + node.width(_selectedNode) + 50;
+	var posY = node.coordY(_selectedNode);
 
 	var name;
 	var _name = Input.getText('Drawing Name', 'Drawing');
@@ -57,34 +74,40 @@ function PS_CreateDrawingNode(){
 	///
 	scene.beginUndoRedoAccum('Add Drawing');
 
-	var _node = node.add( _group, name, 'READ', posX, posY, 0 );
-	if( !_node ){
+	var drawingNode = node.add( _group, name, 'READ', posX, posY, 0 );
+	if( !drawingNode ){
 		scene.cancelUndoRedoAccum();
 		return;
-	}	
+	}
+
+	if( placeOnLeft ){
+		posX = node.coordX(_selectedNode) - node.width(drawingNode) - 50;
+	}
+
+	node.setCoord( drawingNode, posX, posY );
 	
 	// Switch off the Animate Using Animation Tools flag
-	node.getAttr(_node,1,'CAN_ANIMATE').setValue( false );
+	node.getAttr(drawingNode,1,'CAN_ANIMATE').setValue( false );
 	// Set up the Separate flags
-	node.getAttr(_node,1,'OFFSET.SEPARATE').setValue( true );
-	node.getAttr(_node,1,'SCALE.SEPARATE').setValue( true );
+	node.getAttr(drawingNode,1,'OFFSET.SEPARATE').setValue( true );
+	node.getAttr(drawingNode,1,'SCALE.SEPARATE').setValue( true );
 
-	var columnName = _getAvailableColumnName( _node.split('/').pop() );
+	var columnName = _getAvailableColumnName( drawingNode.split('/').pop() );
 	if( !columnName ){
 		scene.endUndoRedoAccum();
 		return;
 	}
 
-	// MessageLog.trace( 'Created: '+_node+', ['+columnName+']' );
+	// MessageLog.trace( 'Created: '+drawingNode+', ['+columnName+']' );
 
 	var elementId = element.add(columnName, "COLOR", 12, "SCAN" , "TVG");
 	column.add(columnName, "DRAWING");
 	
 	column.setElementIdOfDrawing(columnName, elementId);
 
-	node.linkAttr(_node, "DRAWING.ELEMENT", columnName );
+	node.linkAttr(drawingNode, "DRAWING.ELEMENT", columnName );
 
-	// Drawing
+	// Create a Drawing
 	var exposure = 'Default';
 	Drawing.create(elementId, exposure, true);
 	column.setEntry(columnName, 1, 1, exposure);
@@ -92,25 +115,69 @@ function PS_CreateDrawingNode(){
 	
 	column.update();
 
-	// Select the created node
-	selection.clearSelection();
-	selection.addNodeToSelection( _node );
 
+
+	// Add a Peg
+	var pegNode = node.add( _group, name+'-P', 'PEG', posX, posY-80, 0 );
+	node.link(pegNode, 0, drawingNode, 0);
+
+
+	// Connect to a Composition
+	var targetCompose = _getLinkedComposite( _selectedNode );
+	// MessageLog.trace('targetCompose: '+targetCompose);
+	if( targetCompose ) {
+		var targetComposeNumInput = linkToCompOnTop ? node.numberOfInputPorts( targetCompose ) : 0;
+		node.link(drawingNode, 0, targetCompose, targetComposeNumInput);
+	}
+
+	// Select the created nodes
+	selection.clearSelection();
+	selection.addNodesToSelection( [pegNode,drawingNode] );
+
+
+
+	// }catch(err){MessageLog.trace('err: '+err);}
+	
 	///
 	scene.endUndoRedoAccum();
 
-}
 
-function _getAvailableColumnName(_name){
-	if(_checkColumnName(_name)) return _name;
-	for( var i=1; i<100; i++){
-		var __name = _name+'_'+i;
-		if(_checkColumnName(__name)) return __name;
+	function _getAvailableColumnName(_name){
+		if(_checkColumnName(_name)) return _name;
+		for( var i=1; i<100; i++){
+			var __name = _name+'_'+i;
+			if(_checkColumnName(__name)) return __name;
+		}
 	}
+
+	function _checkColumnName(_name){
+		var type = column.type(_name);
+		// MessageLog.trace('_checkColumnName: '+_name+', '+type);
+		return !type;
+	}
+
+	function _getLinkedComposite( _node ){
+		
+		var numOutput = node.numberOfOutputPorts( _node );
+		// MessageLog.trace(_node+': '+numOutput);
+		for( var o=0; o<numOutput; o++){
+			var numOutputLinks = node.numberOfOutputLinks(_node,o);
+			var destNodes = [];
+			for( var op=0; op<numOutputLinks; op++){
+				var destNode = node.dstNodeInfo(_node, o, op).node;
+				var nodeType = node.type(destNode);
+				if( nodeType == 'COMPOSITE' ) return destNode;
+				destNodes.push( destNode );
+				// MessageLog.trace(o+') '+op+') '+destNode+' > '+nodeType );
+			}
+			
+			for( var i=0; i<destNodes.length; i++ ){
+				var targetNode = _getLinkedComposite(destNodes[i]);
+				if( targetNode ) return targetNode;
+			}
+		}
+
+	}
+
 }
 
-function _checkColumnName(_name){
-	var type = column.type(_name);
-	// MessageLog.trace('_checkColumnName: '+_name+', '+type);
-	return !type;
-}
