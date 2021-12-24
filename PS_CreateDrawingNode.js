@@ -1,6 +1,6 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version: 0.1
+Version: 0.211224
 
 
 Options:
@@ -63,7 +63,7 @@ function PS_CreateDrawingNode(){
 	var xNodeOffset = 50;
 	var pegTopOffset = 80;
 
-	var linkToCompOnTop = KeyModifiers.IsAlternatePressed();
+	var linkToCompOnBack = KeyModifiers.IsAlternatePressed();
 	var placeOnLeftOfTarget = KeyModifiers.IsShiftPressed();
 
 	var _selectedNode = _selection[0];
@@ -135,7 +135,7 @@ function PS_CreateDrawingNode(){
 	var targetCompose = _getLinkedComposite( _selectedNode );
 	// MessageLog.trace('targetCompose: '+targetCompose);
 	if( targetCompose ) {
-		var targetComposeNumInput = linkToCompOnTop ? node.numberOfInputPorts( targetCompose ) : 0;
+		var targetComposeNumInput = linkToCompOnBack ? 0 : node.numberOfInputPorts( targetCompose );
 		node.link(drawingNode, 0, targetCompose, targetComposeNumInput);
 	}
 
