@@ -261,8 +261,8 @@ var _sf = {
     zip: function( srcPath, dstPath ) {
         
         var z7path = _sf.get7ZipPath();
-
-        var command = '"'+z7path+'" a -tzip -ssw -mx1 -r0 -y  "'+dstPath+'" "'+srcPath+'"';
+        var excludes = '-x!*-small.tga';
+        var command = '"'+z7path+'" a -tzip -ssw -mx1 -r0 -y  "'+dstPath+'" "'+srcPath+'" '+excludes;
         MessageLog.trace('zip command:\n'+ command );
 
         var proc = new QProcess();
