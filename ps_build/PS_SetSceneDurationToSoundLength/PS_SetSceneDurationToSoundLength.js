@@ -11,6 +11,9 @@ This script quickly sets the duration of the Scene to the duration of a Sound la
 [Usage:
 Select a Sound layer and click the script button.
 The first Sound layer will be used as duration source if no layers are selected.
+
+Options:
+- Hold down the Alt key to set the Scene length to the current frame of the playhead.
 :]
 
 TODO:
@@ -22,49 +25,24 @@ function PS_SetSceneDurationToSoundLength(){
     // MessageLog.clearLog();
 
     var columnName;
+    var setDurationToPlayhead = KeyModifiers.IsAlternatePressed();
 
-    // MessageLog.trace('PS_SetSceneDurationToSoundLength: numLayerSel: '+Timeline.numLayerSel+', numLayers: '+Timeline.numLayers ); // numLayers ()
+    var newSceneLength;
 
-    if( !Timeline.numLayerSel ){
+    if( setDurationToPlayhead ){
 
-        columnName = getSoundColumn();
-        if( columnName ) MessageLog.trace('No layer selected. Used the first Sound layer "'+columnName+'"');
+        newSceneLength = frame.current();
 
-    }else{
-
-        columnName = Timeline.selToColumn(0);
-        if( column.type(columnName) !== 'SOUND' ) columnName = undefined;
+    }else {
+        
+        newSceneLength = getSoundLength();
+        if( !newSceneLength ) return;
 
     }
 
-    if( !columnName ){
-        MessageBox.warning('Please select a Sound layer',0,0,0,'Error');
-        return;
-    }
+    var durationDiff = newSceneLength - frame.numberOf();
 
-    var soundColumn = column.soundColumn( columnName );
-    MessageLog.trace( 'Sound Layer: "'+columnName+'"');
-
-    var maxFrame = 0;
-    var minTime = 99999;
-    var maxTime = 0;
-
-    var sequences = soundColumn.sequences();
-    sequences.forEach(function(sequence,i){
-        // MessageLog.trace('Sequence '+i+' > '+sequence.startFrame+'('+sequence.startTime+') - '+sequence.stopFrame+' ('+sequence.stopTime+')' );
-        if( maxFrame < sequence.stopFrame ) maxFrame = sequence.stopFrame;
-        if( sequence.startTime < minTime ) minTime = sequence.startTime;
-        if( sequence.stopTime > maxTime ) maxTime = sequence.stopTime;
-        // MessageLog.trace('>> '+Object.getOwnPropertyNames( sequence ).join('\n'));    
-    });
-
-    var frameRate = scene.getFrameRate();
-    var maxFrame2 = Math.round(maxTime * frameRate);
-    // MessageLog.trace('Time range from Time >> '+minTime+' >> '+maxTime+' ('+maxFrame2+')');
-
-    var durationDiff = maxFrame2 - frame.numberOf();
-
-    MessageLog.trace( 'Sound Length In Frames:' + maxFrame2+' ('+durationDiff+')'  );
+    MessageLog.trace( 'Sound Length In Frames:' + newSceneLength+' ('+durationDiff+')'  );
     
     scene.beginUndoRedoAccum('Set Scene Duration To Sound Length');
 
@@ -88,6 +66,54 @@ function PS_SetSceneDurationToSoundLength(){
             }
 
         }
+
+    }
+
+
+    ///
+    function getSoundLength(){
+
+        if( !Timeline.numLayerSel ){
+
+            columnName = getSoundColumn();
+            if( columnName ) MessageLog.trace('No layer selected. Used the first Sound layer "'+columnName+'"');
+
+        }else{
+
+            columnName = Timeline.selToColumn(0);
+            if( column.type(columnName) !== 'SOUND' ) {
+                columnName = getSoundColumn();
+                if( column.type(columnName) !== 'SOUND' ) columnName = undefined;
+            }
+
+        }
+
+        if( !columnName ){
+            MessageBox.warning('Please select a Sound layer',0,0,0,'Error');
+            return;
+        }
+
+        var soundColumn = column.soundColumn( columnName );
+        MessageLog.trace( 'Sound Layer: "'+columnName+'"');
+
+        var maxFrame = 0;
+        var minTime = 99999;
+        var maxTime = 0;
+
+        var sequences = soundColumn.sequences();
+        sequences.forEach(function(sequence,i){
+            // MessageLog.trace('Sequence '+i+' > '+sequence.startFrame+'('+sequence.startTime+') - '+sequence.stopFrame+' ('+sequence.stopTime+')' );
+            if( maxFrame < sequence.stopFrame ) maxFrame = sequence.stopFrame;
+            if( sequence.startTime < minTime ) minTime = sequence.startTime;
+            if( sequence.stopTime > maxTime ) maxTime = sequence.stopTime;
+            // MessageLog.trace('>> '+Object.getOwnPropertyNames( sequence ).join('\n'));    
+        });
+
+        var frameRate = scene.getFrameRate();
+        var maxFrame2 = Math.round(maxTime * frameRate);
+        // MessageLog.trace('Time range from Time >> '+minTime+' >> '+maxTime+' ('+maxFrame2+')');
+        
+        return maxFrame2;
 
     }
 
