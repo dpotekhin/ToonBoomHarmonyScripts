@@ -195,8 +195,8 @@ function configure(packageFolder, packageName)
     // = = = = = = = = = = = = = = = = = = = = = = = = = = =
     // Open Backup Folder
     // - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    var backupTBHSettingsAction = {
-        id: "ru.peppers-studio.backupTBHSettingsDisplay",
+    var openBackupFolderAction = {
+        id: "ru.peppers-studio.openBackupFolderDisplay",
         text: "Open Backup Folder",
         icon: "PS_BackupScene.png",
         checkable: false,
@@ -206,14 +206,14 @@ function configure(packageFolder, packageName)
 
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ScriptManager.addAction(backupTBHSettingsAction);
+    ScriptManager.addAction(openBackupFolderAction);
 
     ScriptManager.addMenuItem({
         targetMenuId: "File/Backup",
-        id: backupTBHSettingsAction.id,
-        text: backupTBHSettingsAction.text,
-        action: backupTBHSettingsAction.id
-        //action: 'backupTBHSettingsAction.onTrigger in ./configure.js'
+        id: openBackupFolderAction.id,
+        text: openBackupFolderAction.text,
+        action: openBackupFolderAction.id
+        //action: 'openBackupFolderAction.onTrigger in ./configure.js'
     });
     // = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
