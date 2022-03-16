@@ -55,6 +55,7 @@ function filterNodesByType( nodes, typeList, useGroups ){
 	}
 	// MessageLog.trace("filterNodesByType "+nodes+' ; '+typeList );
 	if( !nodes || !nodes.length ) return false;
+	if( !typeList ) return nodes;
 	var filtered = [];
 	eachNode( nodes, function(_node){ filtered.push(_node); }, useGroups, typeList );
 	return filtered;
