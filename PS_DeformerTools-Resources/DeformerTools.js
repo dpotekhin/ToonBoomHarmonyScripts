@@ -50,6 +50,7 @@ Version 0.211029
 var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
 var SelectionUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/SelectionUtils.js"));
 var NodeUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/NodeUtils.js"));
+var pBox2D = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/pBox2D.js"));
 
 
 ///
@@ -61,7 +62,8 @@ var _exports = {
 	orientControlPoints: orientControlPoints,
 	distributeControlPoints: distributeControlPoints,
 	generateCircleDeformer: generateCircleDeformer,
-	generateRectDeformer: generateRectDeformer
+	generateRectDeformer: generateRectDeformer,
+	generateLineArtDeformer: generateLineArtDeformer,
 }
 
 var restingAttrNames = {
@@ -72,6 +74,8 @@ var restingAttrNames = {
 	orientation0: "restingOrientation0",
 	orientation1: "restingOrientation1",
 };
+
+var LINEART = 2;
 
 //
 function alignVertically( side ){
@@ -105,15 +109,15 @@ function alignHorizontally( side ){
 }
 
 //
-function orientControlPoints(){
+function orientControlPoints( _nodes ){
 
 	_exec( 'Orient Control Points', function(){
 	
-		var _nodes = getSelectedDeformers();
-		if(!_nodes) return;
+		if( !_nodes ) _nodes = getSelectedDeformers();
+		if( !_nodes ) return;
 
 		_nodes.forEach(function(_node){
-
+			
 			if( isOffsetNode(_node) ){
 
 			}else{
@@ -133,7 +137,7 @@ function orientControlPoints(){
 
 				// MessageLog.trace('-> SF: '+_node+'('+pos.x+','+pos.y+')' );
 				// MessageLog.trace('-> PR: '+parentNode+' ('+parentPos.x+','+parentPos.y+')' );
-				// MessageLog.trace(ang);
+				MessageLog.trace(ang);
 				// MessageLog.trace('--> '+node.getAllAttrKeywords(_node).join('\n') );
 
 			}
@@ -146,11 +150,11 @@ function orientControlPoints(){
 
 
 //
-function distributeControlPoints(){
+function distributeControlPoints( _nodes ){
 
-	_exec( 'Distribute Control Points', function(){
+	_exec( 'Distribute Control Points', function( ){
 	
-		var _nodes = getSelectedDeformers();
+		if( !_nodes ) _nodes = getSelectedDeformers();
 		if(!_nodes) return;
 
 		_nodes.forEach(function(_node){
@@ -394,6 +398,11 @@ function generateRectDeformer(){
 	generateDeformer('rectangle');
 }
 
+//
+function generateLineArtDeformer(){
+	generateDeformer('lineart');
+}
+
 ///
 function generateDeformer( mode ){
 
@@ -416,23 +425,24 @@ function generateDeformer( mode ){
 		var shapeInfo = {drawing  : {node : curDrawing, frame : fr}, art : at};
 		var box = Drawing.query.getBox(shapeInfo);
 		// MessageLog.trace('> '+ JSON.stringify( box ) );
+		if( mode === 'lineart' && at !== LINEART ) continue;
 
 		if (box == false || "empty" in box)
 			continue;
 		
 		else if (!("x" in corners[0])) // if corners array is empty
 		{	
-			corners[0].x = box.x0 /1875;
-			corners[0].y = box.y0 /1875;			
-			corners[1].x = box.x1 /1875;
-			corners[1].y = box.y1 /1875;
+			corners[0].x = box.x0;
+			corners[0].y = box.y0;			
+			corners[1].x = box.x1;
+			corners[1].y = box.y1;
 		}
 		else
 		{	
-			corners[0].x = Math.min(box.x0 /1875, corners[0].x);
-			corners[0].y = Math.min(box.y0 /1875, corners[0].y);			
-			corners[1].x = Math.max(box.x1 /1875, corners[1].x);
-			corners[1].y = Math.max(box.y1 /1875, corners[1].y);
+			corners[0].x = Math.min(box.x0, corners[0].x);
+			corners[0].y = Math.min(box.y0, corners[0].y);			
+			corners[1].x = Math.max(box.x1, corners[1].x);
+			corners[1].y = Math.max(box.y1, corners[1].y);
 		}
 	}
 
@@ -444,8 +454,8 @@ function generateDeformer( mode ){
 		return;
 	}
 
-	var btmL_local_OGL = Point2d(corners[0].x, corners[0].y);	
-	var topR_local_OGL = Point2d(corners[1].x, corners[1].y);		
+	var btmL_local_OGL = Point2d( corners[0].x /1875, corners[0].y /1875 );	
+	var topR_local_OGL = Point2d( corners[1].x /1875, corners[1].y /1875 );		
 	var center_local_OGL = midPointAt(btmL_local_OGL, topR_local_OGL, 0.5);
 	center_local_OGL.x = scene.fromOGLX(center_local_OGL.x);
 	center_local_OGL.y = scene.fromOGLY(center_local_OGL.y);
@@ -479,9 +489,33 @@ function generateDeformer( mode ){
 			case 'rectangle':
 				deformers = getRectangleDeformerData( curDrawing, parentNode, offsetDest, center_local_OGL, wh, hh );
 				break;
+
+			case 'lineart':
+				deformers = getLineArtDeformerData( curDrawing, parentNode, offsetDest, center_local_OGL, wh, hh );
+				break;
 		}
 
-		if( deformers ) generateDeformersNodes( curDrawing, parentNode, offsetDest, groupPosition.x, groupPosition.y, deformers );
+		if( deformers ) {
+		
+			generateDeformersNodes( curDrawing, parentNode, offsetDest, groupPosition.x, groupPosition.y, deformers );
+
+			if( mode === 'lineart' ){
+				var _nodes = deformers.map(function(i){ return i.node; });
+				distributeControlPoints( _nodes );
+				orientControlPoints( _nodes );
+			}
+
+			var groupNode = node.createGroup( deformers.map(function(deformerData){ return deformerData.node; }).join(), node.getName(curDrawing)+'-DFM' );
+
+			// MessageLog.trace('groupNode: ', groupNode );
+			if(groupNode){
+				node.setCoord( groupNode,
+				  node.coordX(curDrawing) + node.width(curDrawing)/2 - node.width(groupNode)/2,
+				  node.coordY(curDrawing) - (offsetDest ? (node.coordY(curDrawing) - node.coordY(offsetDest))/2 : 40 )
+				);
+			}
+
+		}
 
 	}catch(err){MessageLog.trace('Error:'+err)}
 
@@ -670,11 +704,120 @@ function getCircleDeformerData( curDrawing, parentNode, offsetDest, center, wh, 
 
 
 //
+function getLineArtDeformerData( curDrawing, parentNode, offsetDest, center, wh, hh ) {
+
+	var settings = Tools.getToolSettings();
+	if (!settings.currentDrawing) return;
+	var fr = frame.current();
+	var config = {
+		drawing: {node : curDrawing, frame : fr},
+		art: LINEART
+	};
+	var strokes = Drawing.query.getStrokes(config);
+	if( !strokes ){
+		return;
+	}
+	// MessageLog.trace('STROKES:\n'+JSON.stringify(strokes,true,'  '));
+	var points = [];
+	var bounds = new pBox2D();
+	strokes.layers.forEach(function(layerData){
+		layerData.joints.forEach(function(jointData,i){
+			// MessageLog.trace(i+') '+jointData.x+', '+jointData.y);
+			var p = {
+				x: scene.fromOGLX(jointData.x /1875),
+				y: scene.fromOGLY(jointData.y /1875),
+			};
+			var dx = p.x - center.x;
+			var dy = p.y - center.y;
+			p.angleToCenter = Math.atan2( dy, dx );
+			p.distToCenter = Math.sqrt( dx * dx + dy * dy );
+			// bounds.addPoint( p.x, p.y );
+			points.push(p);
+		});
+	});
+	
+	points = points.sort(function(a, b) {return a.angleToCenter - b.angleToCenter;}); // Sort all points around the center
+
+	points.forEach(function(pointData,i){
+		var prevPointData = i===0 ? points[points.length-1] : points[i-1];
+		var dx = prevPointData.x - pointData.x;
+		var dy = prevPointData.y - pointData.y;
+		var dist = Math.sqrt( dx * dx + dy * dy );
+		MessageLog.trace( dist );
+		if( dist <= .5 ){
+			// MessageLog.trace('!!!');
+			if( prevPointData.distToCenter > pointData.distToCenter ) pointData.remove = true;
+			else prevPointData.remove = true;
+		}
+	});
+
+	points = points.filter(function(pointData){ return !pointData.remove });
+
+	// MessageLog.trace('>> '+JSON.stringify(center,true,'  '));
+	// MessageLog.trace(points.length+' >> '+JSON.stringify(points,true,'  '));
+
+	points.forEach(function(pointData,i){
+		
+
+		if( i===0 ){
+			pointData.name = 'Offset';
+			pointData.type = 'OffsetModule';
+			pointData.src = offsetDest;
+			pointData.attrs = {
+				SEPARATE: true,
+				localReferential: false,
+				"offset.x": pointData.x,
+				"offset.y": pointData.y,
+			};
+
+		}else{
+
+			pointData.name = 'Curve',
+			pointData.type = 'CurveModule',
+			pointData.attrs = {
+				SEPARATE: true,
+				localReferential: false,
+				"offset.x": pointData.x,
+				"offset.y": pointData.y,
+				Length0: 1,
+				Length1: 1,
+			};
+
+		}
+
+	});
+
+	points.push({
+		name: 'Curve',
+		type: 'CurveModule',
+		dest: curDrawing,
+		attrs: {
+			SEPARATE: true,
+			localReferential: false,
+			closePath: true,
+			"offset.x": points[0].x,
+			"offset.y": points[0].y,
+			Length0: 1,
+			Length1: 1,
+		}
+	});
+
+	/*
+	MessageLog.trace('BOUNDS: '+JSON.stringify(bounds,true,'  '));
+	MessageLog.trace('>> '+JSON.stringify(bounds.center,true,'  '));
+	*/
+
+	return points;
+}
+
+
+//
 function generateDeformersNodes( curDrawing, parentNode, offsetDest, nodeViewX, nodeViewY, deformers ){
 
 	var nodeViewYStep = 40;
 
 	deformers.forEach( function( deformerData, i ){
+
 		deformerData.node = NodeUtils.createNode(
 			parentNode,
 			deformerData.name,
@@ -684,26 +827,15 @@ function generateDeformersNodes( curDrawing, parentNode, offsetDest, nodeViewX, 
 			i==0 ? deformerData.src : deformers[i-1].node,
 			deformerData.dest
 		);
+
 		Object.keys(deformerData.attrs).forEach(function(attrName){
 			node.setTextAttr( deformerData.node, attrName, 1, deformerData.attrs[attrName] );
 			var restingAttrName = restingAttrNames[attrName];
 			if( restingAttrName )
 				node.setTextAttr( deformerData.node, restingAttrName, 1, deformerData.attrs[attrName] );
 		});
+
 	});
-
-	//
-	var groupNode = node.createGroup( deformers.map(function(deformerData){ return deformerData.node; }).join(), node.getName(curDrawing)+'-DFM' );
-
-	// MessageLog.trace('groupNode: ', groupNode );
-	if(groupNode){
-		node.setCoord( groupNode,
-			node.coordX(curDrawing) + node.width(curDrawing)/2 - node.width(groupNode)/2,
-			node.coordY(curDrawing) - (offsetDest ? (node.coordY(curDrawing) - node.coordY(offsetDest))/2 : 40 )
-		);
-	}
-
-	return groupNode;
 
 }
 

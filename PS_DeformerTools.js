@@ -126,7 +126,8 @@ function PS_DeformerTools(){
 
   // Generate deformers
   var gdGroup = modal.addGroup( 'Generate:', ui, true, hGroupStyle);
-  modal.addButton( 'O', gdGroup, btnHeight, btnHeight,
+  
+  modal.addButton( 'C', gdGroup, btnHeight, btnHeight,
     // iconPath+'align-left.png',
     undefined,
     function(){
@@ -134,6 +135,7 @@ function PS_DeformerTools(){
     },
     'Generate Circle Deformer'
   );
+
   modal.addButton( 'R', gdGroup, btnHeight, btnHeight,
     // iconPath+'align-left.png',
     undefined,
@@ -141,6 +143,15 @@ function PS_DeformerTools(){
       DeformerTools.generateRectDeformer();
     },
     'Generate Rectangle Deformer'
+  );
+
+  modal.addButton( 'L', gdGroup, btnHeight, btnHeight,
+    // iconPath+'align-left.png',
+    undefined,
+    function(){
+      DeformerTools.generateLineArtDeformer();
+    },
+    'Generate Deformer on Line Art'
   );
 
   gdGroup.mainLayout.addStretch();
@@ -160,6 +171,7 @@ function PS_DeformerTools_TEST() {
   
   // _DeformerTools.generateCircleDeformer();
   // _DeformerTools.generateRectDeformer();
+  _DeformerTools.generateLineArtDeformer();
   
   /*
   // !!!
