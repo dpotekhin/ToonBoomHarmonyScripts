@@ -3,7 +3,53 @@ Author: D.Potekhin (d@peppers-studio.ru)
 Version 0.211029
 */
 
+/*
+=== OffsetModule ===
+"localReferential",
+"restingOffset",
+"restingOffset.SEPARATE",
+"restingOffset.X",
+"restingOffset.Y",
+"restingOrientation",
+"offset",
+"offset.SEPARATE",
+"offset.X",
+"offset.Y",
+"offset.2DPOINT",
+"orientation"
+
+=== CurveModule  ===
+"localReferential",
+"influenceType",
+"influenceFade",
+"symmetric",
+"transversalRadius",
+"transversalRadiusRight",
+"longitudinalRadiusBegin",
+"longitudinalRadius",
+"closePath",
+"restLength0",
+"restingOrientation0",
+"restingOffset",
+"restingOffset.SEPARATE",
+"restingOffset.X",
+"restingOffset.Y",
+"restLength1",
+"restingOrientation1",
+"Length0",
+"orientation0",
+"offset",
+"offset.SEPARATE",
+"offset.X",
+"offset.Y",
+"offset.2DPOINT",
+"Length1",
+"orientation1"
+*/
+
 var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
+var SelectionUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/SelectionUtils.js"));
+var NodeUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/NodeUtils.js"));
 
 
 ///
@@ -14,8 +60,18 @@ var _exports = {
 	alignHorizontally: alignHorizontally,
 	orientControlPoints: orientControlPoints,
 	distributeControlPoints: distributeControlPoints,
+	generateCircleDeformer: generateCircleDeformer,
+	generateRectDeformer: generateRectDeformer
 }
 
+var restingAttrNames = {
+	"offset.x": "restingOffset.x",
+	"offset.y": "restingOffset.y",
+	Length0: "restLength0",
+	Length1: "restLength1",
+	orientation0: "restingOrientation0",
+	orientation1: "restingOrientation1",
+};
 
 //
 function alignVertically( side ){
@@ -293,41 +349,7 @@ function getCurveNodes( _node, curveList, _frame ){
 }
 
 
-/*
-Offset
-
-localReferential
-restingOffset
-restingOrientation
-offset
-orientation
-*/
-
-
-/*
-Curve
-
-localReferential
-influenceType
-influenceFade
-symmetric
-transversalRadius
-transversalRadiusRight
-longitudinalRadiusBegin
-longitudinalRadius
-closePath
-restLength0
-restingOrientation0
-restingOffset
-restLength1
-restingOrientation1
-Length0
-orientation0
-offset
-Length1
-orientation1
-*/
-
+//
 function getCurveData( _node, _frame ){
 
 	var data = {
@@ -356,6 +378,332 @@ function strightenBezier( _nodes ){
 		MessageLog.trace(node.getAllAttrNames(_node).join('\n'));
 
 	});
+
+}
+
+
+
+/// =====================================================
+//
+function generateCircleDeformer(){
+	generateDeformer('circle');
+}
+
+//
+function generateRectDeformer(){
+	generateDeformer('rectangle');
+}
+
+///
+function generateDeformer( mode ){
+
+	MessageLog.clearLog();
+
+	var curDrawing = SelectionUtils.filterNodesByType( true, ['READ'] );
+	if (!curDrawing){
+		MessageBox.information("Please select at least one drawing node before running this script.");
+		return;
+	}
+
+	
+	// MessageLog.trace('curDrawing: '+ curDrawing );
+
+	var fr = frame.current();	
+	var corners = [ {},{},{} ];
+
+	for(var at = 0; at < 4; at++)
+	{
+		var shapeInfo = {drawing  : {node : curDrawing, frame : fr}, art : at};
+		var box = Drawing.query.getBox(shapeInfo);
+		// MessageLog.trace('> '+ JSON.stringify( box ) );
+
+		if (box == false || "empty" in box)
+			continue;
+		
+		else if (!("x" in corners[0])) // if corners array is empty
+		{	
+			corners[0].x = box.x0 /1875;
+			corners[0].y = box.y0 /1875;			
+			corners[1].x = box.x1 /1875;
+			corners[1].y = box.y1 /1875;
+		}
+		else
+		{	
+			corners[0].x = Math.min(box.x0 /1875, corners[0].x);
+			corners[0].y = Math.min(box.y0 /1875, corners[0].y);			
+			corners[1].x = Math.max(box.x1 /1875, corners[1].x);
+			corners[1].y = Math.max(box.y1 /1875, corners[1].y);
+		}
+	}
+
+	MessageLog.trace('>> '+ JSON.stringify( corners ) );
+
+	if (!("x" in corners[0])) // if corners array is still empty
+	{
+		MessageLog.trace(curDrawing + " is empty at frame " + fr + ". Quit.");
+		return;
+	}
+
+	var btmL_local_OGL = Point2d(corners[0].x, corners[0].y);	
+	var topR_local_OGL = Point2d(corners[1].x, corners[1].y);		
+	var center_local_OGL = midPointAt(btmL_local_OGL, topR_local_OGL, 0.5);
+	center_local_OGL.x = scene.fromOGLX(center_local_OGL.x);
+	center_local_OGL.y = scene.fromOGLY(center_local_OGL.y);
+	var wh = scene.fromOGLX(topR_local_OGL.x - btmL_local_OGL.x)/2;
+	var hh = scene.fromOGLY(topR_local_OGL.y - btmL_local_OGL.y)/2;
+	//
+	scene.beginUndoRedoAccum("Generate Deformer");
+
+	try{
+
+		// Create group
+		var parentNode = node.parentNode(curDrawing);
+		
+		// MessageLog.trace('parentNode: ', parentNode );
+		var groupPosition = {
+			x: node.coordX(curDrawing),
+			y: node.coordY(curDrawing) - 20
+		}
+		var offsetDest = node.srcNode( curDrawing, 0);
+
+		// node.add( parentNode, node.getName(curDrawing)+'-Deformation', 'GROUP', groupPosition.x, groupPosition.y, 0 );
+		
+		var deformers;
+		
+		switch( mode ){
+
+			case 'circle':
+				deformers = getCircleDeformerData( curDrawing, parentNode, offsetDest, center_local_OGL, wh, hh );
+				break;
+
+			case 'rectangle':
+				deformers = getRectangleDeformerData( curDrawing, parentNode, offsetDest, center_local_OGL, wh, hh );
+				break;
+		}
+
+		if( deformers ) generateDeformersNodes( curDrawing, parentNode, offsetDest, groupPosition.x, groupPosition.y, deformers );
+
+	}catch(err){MessageLog.trace('Error:'+err)}
+
+	//
+	scene.endUndoRedoAccum("");
+
+
+}
+
+
+//
+function midPointAt(p1, p2, t)
+{
+	var x = (p1.x *(1 -t) + p2.x *t);
+	var y = (p1.y *(1 -t) + p2.y *t);
+	return Point2d(parseFloat(x.toFixed(20)), parseFloat(y.toFixed(20)));
+}
+
+
+
+//
+function getRectangleDeformerData( curDrawing, parentNode, offsetDest, center, wh, hh ) {
+	
+	var lengthW = wh * 2 * .333;
+	var lengthH = hh * 2 * .333;
+
+	var deformers = [
+		{
+			name: 'Offset',
+			type: 'OffsetModule',
+			src: offsetDest,
+			attrs:{
+				SEPARATE: true,
+				localReferential: false,
+				"offset.x": center.x - wh,
+				"offset.y": center.y + hh,
+			}
+		},
+		{
+			name: 'Curve',
+			type: 'CurveModule',
+			attrs:{
+				SEPARATE: true,
+				localReferential: false,
+				"offset.x": center.x + wh,
+				"offset.y": center.y + hh,
+				Length0: lengthW,
+				Length1: lengthW,
+				orientation0: 0,
+				orientation1: 0
+			}
+		},
+		{
+			name: 'Curve',
+			type: 'CurveModule',
+			attrs:{
+				SEPARATE: true,
+				localReferential: false,
+				"offset.x": center.x + wh,
+				"offset.y": center.y - hh,
+				Length0: lengthH,
+				Length1: lengthH,
+				orientation0: -90,
+				orientation1: -90
+			}
+		},
+		{
+			name: 'Curve',
+			type: 'CurveModule',
+			dest: curDrawing,
+			attrs:{
+				SEPARATE: true,
+				localReferential: false,
+				"offset.x": center.x - wh,
+				"offset.y": center.y - hh,
+				Length0: lengthW,
+				Length1: lengthW,
+				orientation0: -180,
+				orientation1: 180
+			}
+		},
+		{
+			name: 'Curve',
+			type: 'CurveModule',
+			dest: curDrawing,
+			attrs:{
+				SEPARATE: true,
+				localReferential: false,
+				closePath: true,
+				"offset.x": center.x - wh,
+				"offset.y": center.y + hh,
+				Length0: lengthH,
+				Length1: lengthH,
+				orientation0: 90,
+				orientation1: 90
+			}
+		}
+	];
+
+	return deformers;
+}
+
+
+//
+function getCircleDeformerData( curDrawing, parentNode, offsetDest, center, wh, hh ){
+
+	var lengthW = wh * .55;
+	var lengthH = hh * .55;
+
+	var deformers = [
+		{
+			name: 'Offset',
+			type: 'OffsetModule',
+			src: offsetDest,
+			attrs:{
+				SEPARATE: true,
+				localReferential: false,
+				"offset.x": center.x,
+				"offset.y": center.y + hh,
+			}
+		},
+		{
+			name: 'Curve',
+			type: 'CurveModule',
+			attrs:{
+				SEPARATE: true,
+				localReferential: false,
+				"offset.x": center.x + wh,
+				"offset.y": center.y,
+				Length0: lengthW,
+				Length1: lengthH,
+				orientation0: 0,
+				orientation1: -90
+			}
+		},
+		{
+			name: 'Curve',
+			type: 'CurveModule',
+			attrs:{
+				SEPARATE: true,
+				localReferential: false,
+				"offset.x": center.x,
+				"offset.y": center.y - hh,
+				Length0: lengthH,
+				Length1: lengthW,
+				orientation0: -90,
+				orientation1: -180
+			}
+		},
+		{
+			name: 'Curve',
+			type: 'CurveModule',
+			dest: curDrawing,
+			attrs:{
+				SEPARATE: true,
+				localReferential: false,
+				"offset.x": center.x - wh,
+				"offset.y": center.y,
+				Length0: lengthW,
+				Length1: lengthH,
+				orientation0: -180,
+				orientation1: 90
+			}
+		},
+		{
+			name: 'Curve',
+			type: 'CurveModule',
+			dest: curDrawing,
+			attrs:{
+				SEPARATE: true,
+				localReferential: false,
+				closePath: true,
+				"offset.x": center.x,
+				"offset.y": center.y + hh,
+				Length0: lengthH,
+				Length1: lengthW,
+				orientation0: 90,
+				orientation1: 0
+			}
+		}
+	];
+
+	return deformers;
+
+}
+
+
+//
+function generateDeformersNodes( curDrawing, parentNode, offsetDest, nodeViewX, nodeViewY, deformers ){
+
+	var nodeViewYStep = 40;
+
+	deformers.forEach( function( deformerData, i ){
+		deformerData.node = NodeUtils.createNode(
+			parentNode,
+			deformerData.name,
+			deformerData.type,
+			nodeViewX,
+			nodeViewY+=nodeViewYStep,
+			i==0 ? deformerData.src : deformers[i-1].node,
+			deformerData.dest
+		);
+		Object.keys(deformerData.attrs).forEach(function(attrName){
+			node.setTextAttr( deformerData.node, attrName, 1, deformerData.attrs[attrName] );
+			var restingAttrName = restingAttrNames[attrName];
+			if( restingAttrName )
+				node.setTextAttr( deformerData.node, restingAttrName, 1, deformerData.attrs[attrName] );
+		});
+	});
+
+	//
+	var groupNode = node.createGroup( deformers.map(function(deformerData){ return deformerData.node; }).join(), node.getName(curDrawing)+'-DFM' );
+
+	// MessageLog.trace('groupNode: ', groupNode );
+	if(groupNode){
+		node.setCoord( groupNode,
+			node.coordX(curDrawing) + node.width(curDrawing)/2 - node.width(groupNode)/2,
+			node.coordY(curDrawing) - (offsetDest ? (node.coordY(curDrawing) - node.coordY(offsetDest))/2 : 40 )
+		);
+	}
+
+	return groupNode;
 
 }
 

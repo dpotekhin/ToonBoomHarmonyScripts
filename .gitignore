@@ -18,3 +18,4 @@ packages/*
 !/packages/PS_**.js
 
 !/ps_build/**
+*.js.bak
