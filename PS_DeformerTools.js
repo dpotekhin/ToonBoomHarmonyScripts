@@ -134,6 +134,14 @@ function PS_DeformerTools(){
     },
     'Generate Circle Deformer'
   );
+  modal.addButton( 'R', gdGroup, btnHeight, btnHeight,
+    // iconPath+'align-left.png',
+    undefined,
+    function(){
+      DeformerTools.generateRectDeformer();
+    },
+    'Generate Rectangle Deformer'
+  );
 
   gdGroup.mainLayout.addStretch();
 
@@ -150,7 +158,8 @@ function PS_DeformerTools(){
 // !!!
 function PS_DeformerTools_TEST() {
   
-  _DeformerTools.generateCircleDeformer();
+  // _DeformerTools.generateCircleDeformer();
+  // _DeformerTools.generateRectDeformer();
   
   /*
   // !!!

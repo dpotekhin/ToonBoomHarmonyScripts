@@ -166,6 +166,19 @@ function getNodesBounds( _nodes ){
 
 }
 
+//
+//
+function createNode( parentNode, name, type, x, y, src, dest ){
+  var createdNode = node.add( parentNode, name, type, x, y, 0 );
+  if( src ) node.link( src, 0, createdNode, 0 );
+  if( dest ) {
+    node.unlink( dest, 0 );
+    node.link( createdNode, 0, dest, 0 );
+  }
+  // MessageLog.trace('?? '+dest);
+  return createdNode;
+}
+
 
 ///
 exports = {
@@ -176,4 +189,5 @@ exports = {
   getValidNodeName: getValidNodeName,
   getNodesBounds: getNodesBounds,
   getNodeParent: getNodeParent,
+  createNode: createNode,
 }
