@@ -75,6 +75,7 @@ var restingAttrNames = {
 	orientation1: "restingOrientation1",
 };
 
+var COLORART = 1;
 var LINEART = 2;
 
 //
@@ -416,36 +417,9 @@ function generateDeformer( mode ){
 
 	
 	// MessageLog.trace('curDrawing: '+ curDrawing );
-
-	var fr = frame.current();	
-	var corners = [ {},{},{} ];
-
-	for(var at = 0; at < 4; at++)
-	{
-		var shapeInfo = {drawing  : {node : curDrawing, frame : fr}, art : at};
-		var box = Drawing.query.getBox(shapeInfo);
-		// MessageLog.trace('> '+ JSON.stringify( box ) );
-		if( mode === 'lineart' && at !== LINEART ) continue;
-
-		if (box == false || "empty" in box)
-			continue;
-		
-		else if (!("x" in corners[0])) // if corners array is empty
-		{	
-			corners[0].x = box.x0;
-			corners[0].y = box.y0;			
-			corners[1].x = box.x1;
-			corners[1].y = box.y1;
-		}
-		else
-		{	
-			corners[0].x = Math.min(box.x0, corners[0].x);
-			corners[0].y = Math.min(box.y0, corners[0].y);			
-			corners[1].x = Math.max(box.x1, corners[1].x);
-			corners[1].y = Math.max(box.y1, corners[1].y);
-		}
-	}
-
+	var corners = getCorners( curDrawing, mode, LINEART );
+	if (!("x" in corners[0])) corners = getCorners( curDrawing, mode, COLORART );
+	
 	MessageLog.trace('>> '+ JSON.stringify( corners ) );
 
 	if (!("x" in corners[0])) // if corners array is still empty
@@ -534,6 +508,41 @@ function midPointAt(p1, p2, t)
 	return Point2d(parseFloat(x.toFixed(20)), parseFloat(y.toFixed(20)));
 }
 
+//
+function getCorners( curDrawing, mode, layerIndex ) {
+
+	var fr = frame.current();	
+	var corners = [ {},{},{} ];
+
+	for(var at = 0; at < 4; at++)
+	{
+		var shapeInfo = {drawing  : {node : curDrawing, frame : fr}, art : at};
+		var box = Drawing.query.getBox(shapeInfo);
+		// MessageLog.trace('> '+ JSON.stringify( box ) );
+		if( mode === 'lineart' && at !== layerIndex ) continue;
+
+		if (box == false || "empty" in box)
+			continue;
+		
+		else if (!("x" in corners[0])) // if corners array is empty
+		{	
+			corners[0].x = box.x0;
+			corners[0].y = box.y0;			
+			corners[1].x = box.x1;
+			corners[1].y = box.y1;
+		}
+		else
+		{	
+			corners[0].x = Math.min(box.x0, corners[0].x);
+			corners[0].y = Math.min(box.y0, corners[0].y);			
+			corners[1].x = Math.max(box.x1, corners[1].x);
+			corners[1].y = Math.max(box.y1, corners[1].y);
+		}
+	}
+
+	return corners;
+
+}
 
 
 //
