@@ -51,11 +51,16 @@ var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Util
 var SelectionUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/SelectionUtils.js"));
 var NodeUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/NodeUtils.js"));
 
+///
+var COLORART = 1;
+var LINEART = 2;
 
 ///
 exports = {
 	RESTING: 1,
 	CURRENT: 2,
+	COLORART: COLORART,
+	LINEART: LINEART,
 	alignVertically: alignVertically,
 	alignHorizontally: alignHorizontally,
 	orientControlPoints: orientControlPoints,
@@ -75,8 +80,7 @@ var restingAttrNames = {
 	orientation1: "restingOrientation1",
 };
 
-var COLORART = 1;
-var LINEART = 2;
+
 
 
 /*
@@ -133,11 +137,11 @@ function alignHorizontally( side ){
 */
 
 //
-function orientControlPoints( _nodes ){
+function orientControlPoints( _nodes, useEntireChain ){
 
 	_exec( 'Orient Control Points', function(){
 	
-		if( !_nodes ) _nodes = KeyModifiers.IsControlPressed() ? getDeformersChain() : getSelectedDeformers();
+		if( !_nodes ) _nodes = useEntireChain ? getDeformersChain() : getSelectedDeformers();
 		if( !_nodes ) return;
 
 		_nodes.forEach(function(_node){
@@ -183,11 +187,11 @@ function orientControlPoints( _nodes ){
 
 
 //
-function distributeControlPoints( _nodes ){
+function distributeControlPoints( _nodes, useEntireChain ){
 
 	_exec( 'Distribute Control Points', function( ){
 	
-		if( !_nodes ) _nodes = KeyModifiers.IsControlPressed() ? getDeformersChain() : getSelectedDeformers();
+		if( !_nodes ) _nodes = useEntireChain ? getDeformersChain() : getSelectedDeformers();
 		if(!_nodes) return;
 
 		_nodes.forEach(function(_node){
@@ -248,46 +252,44 @@ function distributeControlPoints( _nodes ){
  ██████  ███████ ██   ████ ███████ ██   ██ ██   ██    ██     ██████  ██   ██ ███████ 
  */
 //
-function generateCircleDeformer(){
+function generateCircleDeformer( artIndex ){
 	_exec( 'Generate Circle Deformer', function(){
-		generateDeformer('circle');
+		generateDeformer( 'circle', artIndex );
 	});
 }
 
 //
-function generateRectDeformer(){
+function generateRectDeformer( artIndex ){
 	_exec( 'Generate Rectangle Deformer', function(){
-		generateDeformer('rectangle');
+		generateDeformer( 'rectangle', artIndex );
 	});
 }
 
 //
-function generateArtDeformer(){
+function generateArtDeformer( artIndex ){
 	_exec( 'Generate Deformer on Art layer', function(){
-		generateDeformer('art');
+		generateDeformer( 'art', artIndex );
 	});
 }
 
 ///
-function generateDeformer( mode ){
-
-	MessageLog.clearLog();
+function generateDeformer( mode, artIndex ){
 
 	var curDrawing = SelectionUtils.filterNodesByType( true, ['READ'] );
 	if (!curDrawing){
 		MessageBox.information("Please select at least one drawing node before running this script.");
 		return;
 	}
-
 	
-	// MessageLog.trace('curDrawing: '+ curDrawing );
-	var currentArtIndex = LINEART;
-	var corners = getCorners( curDrawing, mode, currentArtIndex );
-	if (!("x" in corners[0])) {
+	MessageLog.trace('curDrawing: '+ curDrawing+' >> '+artIndex );
+	var currentArtIndex = artIndex !== undefined ? artIndex : LINEART;
+	var corners = getCorners( curDrawing, currentArtIndex );
+	if ( !("x" in corners[0]) && currentArtIndex !== COLORART ) {
 		currentArtIndex = COLORART;
-		corners = getCorners( curDrawing, mode, currentArtIndex );
+		corners = getCorners( curDrawing, currentArtIndex );
 	}
 	
+	// MessageLog.trace('>> '+ currentArtIndex );
 	// MessageLog.trace('>> '+ JSON.stringify( corners ) );
 
 	if (!("x" in corners[0])) // if corners array is still empty
@@ -1015,17 +1017,17 @@ function midPointAt(p1, p2, t)
 
 
 //
-function getCorners( curDrawing, mode, layerIndex ) {
+function getCorners( curDrawing, artIndex ) {
 
 	var fr = frame.current();	
 	var corners = [ {},{},{} ];
-
+	// MessageLog.trace('>>>>> '+artIndex);
 	for(var at = 0; at < 4; at++)
 	{
 		var shapeInfo = {drawing  : {node : curDrawing, frame : fr}, art : at};
 		var box = Drawing.query.getBox(shapeInfo);
-		// MessageLog.trace('> '+ JSON.stringify( box ) );
-		if( mode === 'art' && at !== layerIndex ) continue;
+		// MessageLog.trace('> '+ JSON.stringify( box, true, '  ' ) );
+		if( artIndex !== undefined && at !== artIndex ) continue;
 
 		if (box == false || "empty" in box)
 			continue;

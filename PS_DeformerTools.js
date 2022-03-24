@@ -111,19 +111,19 @@ function PS_DeformerTools(){
   modal.addButton( '', cpGroup, btnHeight, btnHeight,
   	iconPath+'orient-points.png',
     function(){
-      DeformerTools.orientControlPoints();
+      DeformerTools.orientControlPoints( undefined, KeyModifiers.IsControlPressed() );
     },
     'Orient control points to oposite points.'
-    +'\nHold down the Control key to use whole deformation chain.'
+    +'\nHold down the Control key to use entire chain of deformation.'
   );
 
   modal.addButton( '', cpGroup, btnHeight, btnHeight,
   	iconPath+'points-on-thirds.png',
     function(){
-      DeformerTools.distributeControlPoints();
+      DeformerTools.distributeControlPoints( undefined, KeyModifiers.IsControlPressed() );
     },
     'Distribute control points on thirds.'
-    +'\nHold down the Control key to use whole deformation chain.'
+    +'\nHold down the Control key to use entire chain of deformation.'
   );
 
   modal.addButton( '', cpGroup, btnHeight, btnHeight,
@@ -154,25 +154,31 @@ function PS_DeformerTools(){
   modal.addButton( '', gdGroup, btnHeight, btnHeight,
     iconPath+'generate-circle.png',
     function(){
-      DeformerTools.generateCircleDeformer();
+      var artIndex = KeyModifiers.IsControlPressed() ? DeformerTools.COLORART : undefined;
+      DeformerTools.generateCircleDeformer( artIndex );
     },
-    'Generate Circle Deformer'
+    'Generate Circle Deformer.'
+    +'\nHold down the Control key to use Color Art as a source.'
   );
 
   modal.addButton( '', gdGroup, btnHeight, btnHeight,
     iconPath+'generate-rectangle.png',
     function(){
-      DeformerTools.generateRectDeformer();
+      var artIndex = KeyModifiers.IsControlPressed() ? DeformerTools.COLORART : undefined;
+      DeformerTools.generateRectDeformer( artIndex );
     },
-    'Generate Rectangle Deformer'
+    'Generate Rectangle Deformer from Line Art.'
+    +'\nHold down the Control key to use Color Art as a source.'
   );
 
   modal.addButton( '', gdGroup, btnHeight, btnHeight,
     iconPath+'generate-on-art.png',
     function(){
-      DeformerTools.generateArtDeformer();
+      var artIndex = KeyModifiers.IsControlPressed() ? DeformerTools.COLORART : undefined;
+      DeformerTools.generateArtDeformer( artIndex );
     },
-    'Generate Deformer on Art'
+    'Generate Deformer on Art.'
+    +'\nHold down the Control key to use Color Art as a source.'
   );
 
   gdGroup.mainLayout.addStretch();
