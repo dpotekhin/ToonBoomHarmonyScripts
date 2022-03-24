@@ -18,7 +18,8 @@
                     "name": "PS Deform Tools",
                     "type": "script",
                     "scriptFile": "PS_DeformerTools.js",
-                    "sriptFunction": "PS_DeformerTools"
+                    "sriptFunction": "PS_DeformerTools",
+                    "icon": "~/PS_DeformerTools.png"
                 },
 
                 {

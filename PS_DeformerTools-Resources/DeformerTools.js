@@ -118,12 +118,26 @@ function alignHorizontally( side ){
 
 }
 
+
+
+
+
+
+// =====================================================================
+/*
+ ██████  ██████  ███    ██ ████████ ██████   ██████  ██          ██████   ██████  ██ ███    ██ ████████ ███████ 
+██      ██    ██ ████   ██    ██    ██   ██ ██    ██ ██          ██   ██ ██    ██ ██ ████   ██    ██    ██      
+██      ██    ██ ██ ██  ██    ██    ██████  ██    ██ ██          ██████  ██    ██ ██ ██ ██  ██    ██    ███████ 
+██      ██    ██ ██  ██ ██    ██    ██   ██ ██    ██ ██          ██      ██    ██ ██ ██  ██ ██    ██         ██ 
+ ██████  ██████  ██   ████    ██    ██   ██  ██████  ███████     ██       ██████  ██ ██   ████    ██    ███████ 
+*/
+
 //
 function orientControlPoints( _nodes ){
 
 	_exec( 'Orient Control Points', function(){
 	
-		if( !_nodes ) _nodes = getSelectedDeformers();
+		if( !_nodes ) _nodes = KeyModifiers.IsControlPressed() ? getDeformersChain() : getSelectedDeformers();
 		if( !_nodes ) return;
 
 		_nodes.forEach(function(_node){
@@ -132,12 +146,20 @@ function orientControlPoints( _nodes ){
 
 			}else{
 
-				var parentNode = getParentNode(_node);
-				if( !parentNode || !(isOffsetNode(_node) || isDefNode(_node)) ) return;
+				var targetNode = getParentNode(_node);
+				if( !targetNode || !(isOffsetNode(_node) || isDefNode(_node)) ) return;
+				// if node is the last of a closed deformer
+				// MessageLog.trace( '>-> '+node.getTextAttr( _node, 1, 'closePath' ) );
+				
+				var srcNode = _node;
+				if( node.getTextAttr( _node, 1, 'closePath' ) === 'Y' ){
+					srcNode = (getDeformersChain( _node ) || [])[0];
+					if( !srcNode ) return;
+				}
 
-				var parentPos = getPointPosition(parentNode);
-				var pos = getPointPosition(_node);
-				var ang = Math.atan2( pos.y - parentPos.y, pos.x - parentPos.x ) / Math.PI * 180;
+				var targetPos = getPointPosition(targetNode);
+				var pos = getPointPosition(srcNode);
+				var ang = Math.atan2( pos.y - targetPos.y, pos.x - targetPos.x ) / Math.PI * 180;
 				
 				applyAttrValue( _node, 'restingOrientation0', ang );
 				applyAttrValue( _node, 'restingOrientation1', ang );
@@ -146,8 +168,9 @@ function orientControlPoints( _nodes ){
 				applyAttrValue( _node, 'orientation1', ang );
 
 				// MessageLog.trace('-> SF: '+_node+'('+pos.x+','+pos.y+')' );
-				// MessageLog.trace('-> PR: '+parentNode+' ('+parentPos.x+','+parentPos.y+')' );
-				MessageLog.trace(ang);
+				// MessageLog.trace('-> PR: '+targetNode+' ('+targetPos.x+','+targetPos.y+')' );
+				// MessageLog.trace('->: '+(pos.y - targetPos.y)+' > '+ (pos.x - targetPos.x) +' >> '+Math.atan2( pos.y - targetPos.y, pos.x - targetPos.x ));
+				// MessageLog.trace(ang);
 				// MessageLog.trace('--> '+node.getAllAttrKeywords(_node).join('\n') );
 
 			}
@@ -164,7 +187,7 @@ function distributeControlPoints( _nodes ){
 
 	_exec( 'Distribute Control Points', function( ){
 	
-		if( !_nodes ) _nodes = getSelectedDeformers();
+		if( !_nodes ) _nodes = KeyModifiers.IsControlPressed() ? getDeformersChain() : getSelectedDeformers();
 		if(!_nodes) return;
 
 		_nodes.forEach(function(_node){
@@ -173,13 +196,19 @@ function distributeControlPoints( _nodes ){
 
 			}else{
 
-				var parentNode = getParentNode(_node);
-				if( !parentNode || !(isOffsetNode(_node) || isDefNode(_node)) ) return;
+				var targetNode = getParentNode(_node);
+				if( !targetNode || !(isOffsetNode(_node) || isDefNode(_node)) ) return;
 
-				var parentPos = getPointPosition(parentNode);
-				var pos = getPointPosition(_node);
-				var dx = pos.x - parentPos.x;
-				var dy = pos.y - parentPos.y;
+				var srcNode = _node;
+				if( node.getTextAttr( _node, 1, 'closePath' ) === 'Y' ){
+					srcNode = (getDeformersChain( _node ) || [])[0];
+					if( !srcNode ) return;
+				}
+
+				var targetPos = getPointPosition(targetNode);
+				var pos = getPointPosition(srcNode);
+				var dx = pos.x - targetPos.x;
+				var dy = pos.y - targetPos.y;
 				var hypo = Math.sqrt( dx*dx + dy*dy );
 				var length = hypo / 3;
 
@@ -190,7 +219,7 @@ function distributeControlPoints( _nodes ){
 				applyAttrValue( _node, 'length1', length );
 
 				// MessageLog.trace('-> SF: '+_node+'('+pos.x+','+pos.y+')' );
-				// MessageLog.trace('-> PR: '+parentNode+' ('+parentPos.x+','+parentPos.y+')' );
+				// MessageLog.trace('-> PR: '+targetNode+' ('+targetPos.x+','+targetPos.y+')' );
 				// MessageLog.trace('-> length: '+length+' ( '+hypo );
 
 			}
@@ -927,6 +956,7 @@ function getCenter( _nodes, side, attrName ){
 function getDeformersChain( _nodes ){
 
 	if( !_nodes ) _nodes = getSelectedDeformers();
+	if( typeof _nodes === 'string' ) _nodes = [_nodes];
 	if( !_nodes || !_nodes.length ) return;
 
 	var offsetNode;
