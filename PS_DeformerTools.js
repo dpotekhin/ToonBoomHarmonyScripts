@@ -1,6 +1,6 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version 0.211026
+Version 0.220324
 */
 
 
@@ -17,7 +17,7 @@ function PS_DeformerTools(){
 
   //
   var scriptName = 'Deformer Tools';
-  var scriptVer = '0.211026';
+  var scriptVer = '0.220324';
   //
 
   // var SETTINGS_NAME = 'PS_DEFORMER_TOOLS_SETTINGS';
@@ -41,6 +41,9 @@ function PS_DeformerTools(){
 
   ui.setStyleSheet( ui.styleSheet +' QPushButton{ border: none; }' );
 
+
+
+  // ==========================================================
   // ALIGN
   var alignGroup = modal.addGroup( 'Align Points:', ui, true, hGroupStyle);
 
@@ -100,47 +103,74 @@ function PS_DeformerTools(){
   alignGroup.mainLayout.addStretch();
 
 
+
+  // ==========================================================
   // CONTROL POINTS
   var cpGroup = modal.addGroup( 'Control points:', ui, true, hGroupStyle);
 
-  modal.addButton( 'O', cpGroup, btnHeight, btnHeight,
-  	// iconPath+'align-left.png',
-  	undefined,
+  modal.addButton( '', cpGroup, btnHeight, btnHeight,
+  	iconPath+'orient-points.png',
     function(){
       DeformerTools.orientControlPoints();
     },
     'Orient control points to oposite points'
   );
 
-  modal.addButton( 'D', cpGroup, btnHeight, btnHeight,
-  	// iconPath+'align-left.png',
-  	undefined,
+  modal.addButton( '', cpGroup, btnHeight, btnHeight,
+  	iconPath+'points-on-thirds.png',
     function(){
       DeformerTools.distributeControlPoints();
     },
     'Distribute control points on thirds'
   );
 
+  modal.addButton( '', cpGroup, btnHeight, btnHeight,
+    iconPath+'move-around-left.png',
+    function(){
+      DeformerTools.moveDeformersAround('left');
+    },
+    'Move deformers around to the left'
+  );
+
+  modal.addButton( '', cpGroup, btnHeight, btnHeight,
+    iconPath+'move-around-right.png',
+    function(){
+      DeformerTools.moveDeformersAround('right');
+    },
+    'Move deformers around to the right'
+  );
 
   cpGroup.mainLayout.addStretch();
 
+
+
+
+  // ==========================================================
   // Generate deformers
   var gdGroup = modal.addGroup( 'Generate:', ui, true, hGroupStyle);
-  modal.addButton( 'O', gdGroup, btnHeight, btnHeight,
-    // iconPath+'align-left.png',
-    undefined,
+  
+  modal.addButton( '', gdGroup, btnHeight, btnHeight,
+    iconPath+'generate-circle.png',
     function(){
       DeformerTools.generateCircleDeformer();
     },
     'Generate Circle Deformer'
   );
-  modal.addButton( 'R', gdGroup, btnHeight, btnHeight,
-    // iconPath+'align-left.png',
-    undefined,
+
+  modal.addButton( '', gdGroup, btnHeight, btnHeight,
+    iconPath+'generate-rectangle.png',
     function(){
       DeformerTools.generateRectDeformer();
     },
     'Generate Rectangle Deformer'
+  );
+
+  modal.addButton( '', gdGroup, btnHeight, btnHeight,
+    iconPath+'generate-on-art.png',
+    function(){
+      DeformerTools.generateArtDeformer();
+    },
+    'Generate Deformer on Art'
   );
 
   gdGroup.mainLayout.addStretch();
@@ -160,6 +190,9 @@ function PS_DeformerTools_TEST() {
   
   // _DeformerTools.generateCircleDeformer();
   // _DeformerTools.generateRectDeformer();
+  // _DeformerTools.generateArtDeformer();
+  // _DeformerTools.moveDeformersAround('left');
+  // _DeformerTools.moveDeformersAround('right');
   
   /*
   // !!!
