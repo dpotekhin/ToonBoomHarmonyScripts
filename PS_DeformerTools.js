@@ -1,6 +1,6 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version 0.211026
+Version 0.220324
 */
 
 
@@ -127,31 +127,28 @@ function PS_DeformerTools(){
   // Generate deformers
   var gdGroup = modal.addGroup( 'Generate:', ui, true, hGroupStyle);
   
-  modal.addButton( 'C', gdGroup, btnHeight, btnHeight,
-    // iconPath+'align-left.png',
-    undefined,
+  modal.addButton( '', gdGroup, btnHeight, btnHeight,
+    iconPath+'generate-circle.png',
     function(){
       DeformerTools.generateCircleDeformer();
     },
     'Generate Circle Deformer'
   );
 
-  modal.addButton( 'R', gdGroup, btnHeight, btnHeight,
-    // iconPath+'align-left.png',
-    undefined,
+  modal.addButton( '', gdGroup, btnHeight, btnHeight,
+    iconPath+'generate-rectangle.png',
     function(){
       DeformerTools.generateRectDeformer();
     },
     'Generate Rectangle Deformer'
   );
 
-  modal.addButton( 'L', gdGroup, btnHeight, btnHeight,
-    // iconPath+'align-left.png',
-    undefined,
+  modal.addButton( '', gdGroup, btnHeight, btnHeight,
+    iconPath+'generate-on-art.png',
     function(){
-      DeformerTools.generateLineArtDeformer();
+      DeformerTools.generateArtDeformer();
     },
-    'Generate Deformer on Line Art'
+    'Generate Deformer on Art'
   );
 
   gdGroup.mainLayout.addStretch();
@@ -171,7 +168,7 @@ function PS_DeformerTools_TEST() {
   
   // _DeformerTools.generateCircleDeformer();
   // _DeformerTools.generateRectDeformer();
-  _DeformerTools.generateLineArtDeformer();
+  _DeformerTools.generateArtDeformer();
   
   /*
   // !!!

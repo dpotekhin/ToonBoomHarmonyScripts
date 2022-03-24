@@ -1,6 +1,6 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version 0.211029
+Version 0.220324
 */
 
 /*
@@ -63,7 +63,7 @@ var _exports = {
 	distributeControlPoints: distributeControlPoints,
 	generateCircleDeformer: generateCircleDeformer,
 	generateRectDeformer: generateRectDeformer,
-	generateLineArtDeformer: generateLineArtDeformer,
+	generateArtDeformer: generateArtDeformer,
 }
 
 var restingAttrNames = {
@@ -400,7 +400,7 @@ function generateRectDeformer(){
 }
 
 //
-function generateLineArtDeformer(){
+function generateArtDeformer(){
 	generateDeformer('lineart');
 }
 
@@ -746,6 +746,7 @@ function getLineArtDeformerData( curDrawing, parentNode, offsetDest, center, wh,
 	});
 	
 	points = points.sort(function(a, b) {return a.angleToCenter - b.angleToCenter;}); // Sort all points around the center
+	MessageLog.trace('POINTS: '+points.length+' >> '+JSON.stringify(points,true,'  '));
 
 	points.forEach(function(pointData,i){
 		var prevPointData = i===0 ? points[points.length-1] : points[i-1];
@@ -763,7 +764,11 @@ function getLineArtDeformerData( curDrawing, parentNode, offsetDest, center, wh,
 	points = points.filter(function(pointData){ return !pointData.remove });
 
 	// MessageLog.trace('>> '+JSON.stringify(center,true,'  '));
-	// MessageLog.trace(points.length+' >> '+JSON.stringify(points,true,'  '));
+	MessageLog.trace('FILTERED POINTS: '+points.length+' >> '+JSON.stringify(points,true,'  '));
+	if( points.length < 2 ){
+		MessageLog.trace('Not enough points to generate a deformer.');
+		return;
+	}
 
 	points.forEach(function(pointData,i){
 		
