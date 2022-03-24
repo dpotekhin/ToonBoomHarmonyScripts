@@ -113,7 +113,8 @@ function PS_DeformerTools(){
     function(){
       DeformerTools.orientControlPoints();
     },
-    'Orient control points to oposite points'
+    'Orient control points to oposite points.'
+    +'\nHold down the Control key to use whole deformation chain.'
   );
 
   modal.addButton( '', cpGroup, btnHeight, btnHeight,
@@ -121,7 +122,8 @@ function PS_DeformerTools(){
     function(){
       DeformerTools.distributeControlPoints();
     },
-    'Distribute control points on thirds'
+    'Distribute control points on thirds.'
+    +'\nHold down the Control key to use whole deformation chain.'
   );
 
   modal.addButton( '', cpGroup, btnHeight, btnHeight,
@@ -188,6 +190,7 @@ function PS_DeformerTools(){
 // !!!
 function PS_DeformerTools_TEST() {
   
+  _DeformerTools.orientControlPoints();
   // _DeformerTools.generateCircleDeformer();
   // _DeformerTools.generateRectDeformer();
   // _DeformerTools.generateArtDeformer();
