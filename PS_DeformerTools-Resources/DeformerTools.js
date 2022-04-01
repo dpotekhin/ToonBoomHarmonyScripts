@@ -1,6 +1,6 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version 0.220324
+Version 0.220401
 */
 
 /*
@@ -68,7 +68,8 @@ exports = {
 	generateCircleDeformer: generateCircleDeformer,
 	generateRectDeformer: generateRectDeformer,
 	generateArtDeformer: generateArtDeformer,
-	moveDeformersAround: moveDeformersAround
+	moveDeformersAround: moveDeformersAround,
+	insertControlPoint: insertControlPoint
 }
 
 var restingAttrNames = {
@@ -338,7 +339,7 @@ function generateDeformer( mode, artIndex ){
 
 	if( deformers ) {
 	
-		generateDeformersNodes( curDrawing, parentNode, offsetDest, groupPosition.x, groupPosition.y, deformers );
+		generateDeformersNodes( parentNode, groupPosition.x, groupPosition.y, deformers );
 
 		if( mode === 'art' ){
 			var _nodes = deformers.map(function(i){ return i.node; });
@@ -589,7 +590,7 @@ function getArtDeformerData( curDrawing, parentNode, offsetDest, center, wh, hh,
 	points = points.filter(function(pointData){ return !pointData.remove });
 
 	// MessageLog.trace('>> '+JSON.stringify(center,true,'  '));
-	MessageLog.trace('FILTERED POINTS: '+points.length+' >> '+JSON.stringify(points,true,'  '));
+	// MessageLog.trace('FILTERED POINTS: '+points.length+' >> '+JSON.stringify(points,true,'  '));
 	if( points.length < 2 ){
 		MessageLog.trace('Not enough points to generate a deformer.');
 		return;
@@ -662,6 +663,12 @@ function getArtDeformerData( curDrawing, parentNode, offsetDest, center, wh, hh,
 ██      ██  ██████    ████   ███████     ██   ██ ██   ██  ██████   ██████  ██   ████ ██████  
 */
 
+/*
+TODO:
+- add the ability to not change the binding state
+- take into account the inheritance of parent transformations
+*/
+
 function moveDeformersAround( direction ){
 
 	_exec( 'Move Deformers Around', function(){
@@ -717,6 +724,82 @@ function moveDeformersAround( direction ){
 }
 
 
+
+/*
+██╗███╗   ██╗███████╗███████╗██████╗ ████████╗     ██████╗██████╗ 
+██║████╗  ██║██╔════╝██╔════╝██╔══██╗╚══██╔══╝    ██╔════╝██╔══██╗
+██║██╔██╗ ██║███████╗█████╗  ██████╔╝   ██║       ██║     ██████╔╝
+██║██║╚██╗██║╚════██║██╔══╝  ██╔══██╗   ██║       ██║     ██╔═══╝ 
+██║██║ ╚████║███████║███████╗██║  ██║   ██║       ╚██████╗██║     
+╚═╝╚═╝  ╚═══╝╚══════╝╚══════╝╚═╝  ╚═╝   ╚═╝        ╚═════╝╚═╝     
+*/
+
+/*
+TODO:
+- to place the new CP on the deformer curve and set the length and oriantation up to the original deformer curve
+- take into account the inheritance of parent transformations
+*/
+
+function insertControlPoint(){
+
+
+	_exec( 'Insert a Control point to the Deformer', function(){
+
+		var _deformers = getSelectedDeformers();
+		if( !_deformers.length ){
+			MessageLog.trace('The Script requires at least one selected deformer.');
+			return;
+		}
+
+		// MessageLog.trace( JSON.stringify(_deformers,true,'  '));
+
+		_deformers.forEach(function(deformerNode,i){
+
+			if( isOffsetNode(deformerNode) ){
+				MessageLog.trace('Unable to insert a Control point in the Offset.');
+				return;
+			}
+
+			var parentNode = getParentNode( deformerNode );
+			MessageLog.trace(i+') ' + deformerNode+' > '+parentNode );
+
+			var deformerPos = getPointPosition(deformerNode);
+			var parentPos = getPointPosition(parentNode);
+
+			var newDeformerData = [{
+				name: 'Curve',
+				type: 'CurveModule',
+				src: parentNode,
+				dest: deformerNode,
+				attrs:{
+					SEPARATE: true,
+					localReferential: false,
+					"offset.x": deformerPos.x + (parentPos.x - deformerPos.x)/2,
+					"offset.y": deformerPos.y + (parentPos.y - deformerPos.y)/2,
+					Length0: 1,
+					Length1: 1,
+					orientation0: 0,
+					orientation1: 0
+				}
+			}];
+			
+			generateDeformersNodes(
+				NodeUtils.getNodeParent(deformerNode),
+				node.coordX(deformerNode) + 15,
+				node.coordY(deformerNode) - ( node.coordY(deformerNode) - node.coordY(parentNode) + node.height(deformerNode) )/2,
+				newDeformerData
+			);
+
+			var _nodes = newDeformerData.map(function(i){ return i.node; });
+			_nodes.push(deformerNode);
+			distributeControlPoints( _nodes );
+			orientControlPoints( _nodes );
+
+		});
+
+	});
+
+}
 
 
 
@@ -1054,7 +1137,7 @@ function getCorners( curDrawing, artIndex ) {
 
 
 //
-function generateDeformersNodes( curDrawing, parentNode, offsetDest, nodeViewX, nodeViewY, deformers ){
+function generateDeformersNodes( parentNode, nodeViewX, nodeViewY, deformers ){
 
 	var nodeViewYStep = 40;
 	var currentFrame = frame.current();

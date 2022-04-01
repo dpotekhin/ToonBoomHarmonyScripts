@@ -1,6 +1,6 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version 0.220324
+Version 0.220401
 */
 
 
@@ -17,7 +17,7 @@ function PS_DeformerTools(){
 
   //
   var scriptName = 'Deformer Tools';
-  var scriptVer = '0.220324';
+  var scriptVer = '0.220401';
   //
 
   // var SETTINGS_NAME = 'PS_DEFORMER_TOOLS_SETTINGS';
@@ -142,6 +142,14 @@ function PS_DeformerTools(){
     'Move deformers around to the right'
   );
 
+  modal.addButton( '', cpGroup, btnHeight, btnHeight,
+    iconPath+'insert-cp.png',
+    function(){
+      DeformerTools.insertControlPoint();
+    },
+    'Insert a Control point to the Deformer'
+  );
+
   cpGroup.mainLayout.addStretch();
 
 
@@ -196,12 +204,13 @@ function PS_DeformerTools(){
 // !!!
 function PS_DeformerTools_TEST() {
   
-  _DeformerTools.orientControlPoints();
+  // _DeformerTools.orientControlPoints();
   // _DeformerTools.generateCircleDeformer();
   // _DeformerTools.generateRectDeformer();
   // _DeformerTools.generateArtDeformer();
   // _DeformerTools.moveDeformersAround('left');
   // _DeformerTools.moveDeformersAround('right');
+  // _DeformerTools.insertControlPoint();
   
   /*
   // !!!
