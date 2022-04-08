@@ -1,5 +1,5 @@
 ## PS_ResetTransformation
-v0.210630
+v0.220408
 
 ### Description
 Three scripts to universal (pegs and deformers) reset of transformations, save transformation state and remove that state.
@@ -28,4 +28,4 @@ Removes custom attributes with the Default state of transformation of selected P
 
 ### Installation:
 Copy all files from this folder to [Harmony User Scripts directory](https://docs.toonboom.com/help/harmony-20/premium/scripting/import-script.html).\
-Add scripts "PS_ResetTransformation", "PS_SaveTransformation", "PS_ClearSavedTransformation" to a panel.  
+Add the scripts "PS_ResetTransformation", "PS_SaveTransformation", "PS_ClearSavedTransformation" to a panel.  
