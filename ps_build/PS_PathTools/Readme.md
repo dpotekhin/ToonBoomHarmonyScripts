@@ -1,5 +1,5 @@
 ## PS_PathTools
-v0.211020
+v0.220425
 
 ### Description
 The script provides tools for aligning, mirroring and modifying strokes.
@@ -12,4 +12,4 @@ By default, the center of the selected strokes is used as the center of transfor
 
 ### Installation:
 Copy all files from this folder to [Harmony User Scripts directory](https://docs.toonboom.com/help/harmony-20/premium/scripting/import-script.html).\
-Add script "PS_PathTools" to a panel.  
+Add the script "PS_PathTools" to a panel.  

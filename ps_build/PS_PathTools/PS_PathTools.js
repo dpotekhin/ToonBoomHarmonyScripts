@@ -2,7 +2,7 @@
 Author: D.Potekhin (d@peppers-studio.ru)
 
 [Name: PS_PathTools :]
-[Version: 0.211020 :]
+[Version: 0.220425 :]
 
 [Description:
 The script provides tools for aligning, mirroring and modifying strokes.
@@ -42,7 +42,7 @@ function PS_PathTools(){
 
   //
   var scriptName = 'Path Tools';
-  var scriptVer = '0.211020';
+  var scriptVer = '0.220425';
   //
 
   var SETTINGS_NAME = 'PS_PATH_TOOLS_SETTINGS';
@@ -88,7 +88,7 @@ function PS_PathTools(){
 
 
   //
-  var modal = new pModal( scriptName + " v" + scriptVer, modalWidth, 260, forceWindowInstances ? false : true );  
+  var modal = new pModal( scriptName + " v" + scriptVer, modalWidth, 300, forceWindowInstances ? false : true );  
   if( !modal.ui ){
     return;
   }
@@ -202,7 +202,48 @@ function PS_PathTools(){
   //
   modal.addHLine( modalWidth, ui );
 
-  // Modify
+
+
+
+  /// Size Group
+  var sizeGroup = modal.addGroup( 'Size', ui, true, hGroupStyle );
+
+  // Width
+  var btnSetWidth = modal.addButton( '', sizeGroup, btnHeight, btnHeight, iconPath+'set-width.png',
+    setWidth,
+    'Set width'
+  );
+  var setWidthInput = modal.addNumberInput( '', sizeGroup, btnHeight*1.5, btnHeight, 0, undefined, setWidth, setWidth );
+  function setWidth () {
+    AlignPaths.setWidth( parseFloat( setWidthInput.text ) );
+  }
+
+  // Width
+  var btnSetHeight = modal.addButton( '', sizeGroup, btnHeight, btnHeight, iconPath+'set-height.png',
+    setHeight,
+    'Set width'
+  );
+  var setHeightInput = modal.addNumberInput( '', sizeGroup, btnHeight*1.5, btnHeight, 0, undefined, setHeight, setHeight );
+  function setHeight () {
+    AlignPaths.setHeight( parseFloat( setHeightInput.text ) );
+  }
+
+  //
+   modal.addButton( '', sizeGroup, btnHeight, btnHeight, iconPath+'set-size.png',
+    setSize,
+    'Set size'
+  );
+  function setSize () {
+    AlignPaths.setSize( parseFloat( setWidthInput.text ), parseFloat( setHeightInput.text ) );
+  }
+
+  //
+  sizeGroup.mainLayout.addStretch();
+
+
+
+
+  /// Modify
   var modifyGroup = modal.addGroup( 'Modify:', ui, true, hGroupStyle );
 
   var btnCollapse = modal.addButton( '', modifyGroup, btnHeight, btnHeight, iconPath+'merge.png',
@@ -228,6 +269,11 @@ function PS_PathTools(){
 
   }
 
+  //
+  modifyGroup.mainLayout.addStretch();
+
+  
+
 /*
   var btnSetPivot = modal.addButton( '', modifyGroup, btnHeight, btnHeight, iconPath+'pivot-to-selection.png',
     function (){
@@ -239,7 +285,7 @@ function PS_PathTools(){
   );
 */
 
-  modifyGroup.mainLayout.addStretch();
+  
 
   //
   ui.mainLayout.addStretch();

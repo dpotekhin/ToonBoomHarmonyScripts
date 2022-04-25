@@ -1,6 +1,6 @@
 /*
 Author: D.Potekhin (d@peppers-studio.ru)
-Version: 0.211020
+Version: 0.220425
 */
 
 //
@@ -31,6 +31,9 @@ var _exports = {
   SetPivot: SetPivot,
   Rotate: Rotate,
   Randomize: Randomize,
+  setSize: setSize,
+  setWidth: setWidth,
+  setHeight: setHeight,
 };
 
 
@@ -110,7 +113,8 @@ function AlignShapes( mode, centerX, centerY ){
 
   scene.beginUndoRedoAccum("Align shape");
 
-  // try{
+  try{
+
     var selectionData = getSelectionData();
     if( !selectionData ) {
       scene.endUndoRedoAccum();
@@ -129,13 +133,20 @@ function AlignShapes( mode, centerX, centerY ){
       targetBox = new pBox2D( centerX || 0, centerY || 0 );
 
     }else{
+
       if( mode === _exports.MODE_ALIGN_LEFT || mode === _exports.MODE_ALIGN_H_CENTER || mode === _exports.MODE_ALIGN_RIGHT )
         targetBox = totalBox.maxWidthBox;
       else if( mode === _exports.MODE_ALIGN_TOP || mode === _exports.MODE_ALIGN_V_CENTER || mode === _exports.MODE_ALIGN_BOTTOM )
         targetBox = totalBox.maxHeightBox;
     }
+    
+    // MessageLog.trace('AlignShapes: '+ JSON.stringify(totalBox, true, '  ')+' targetBox:'+JSON.stringify(targetBox,true,'  ') );
 
-    MessageLog.trace('AlignShapes: '+ JSON.stringify(totalBox, true, '  ')+' targetBox:'+JSON.stringify(targetBox,true,'  ') );
+    if( !targetBox ){
+      MessageLog.trace('Error: targetBox is empty'); // TODO: why?
+      scene.endUndoRedoAccum();
+      return;
+    }
 
     function _getXOffset( box ){
 
@@ -215,9 +226,9 @@ function AlignShapes( mode, centerX, centerY ){
 
     });
 
-  // } catch(err){
-  //   MessageLog.trace('Error: '+err );
-  // }
+  } catch(err){
+    MessageLog.trace('Error: '+err );
+  }
 
   //
   selectedDrawing.restoreSelection();
@@ -552,6 +563,86 @@ function Randomize( amount ){
           
           pathPoint.x += Math.random()*amount - amountHalf;
           pathPoint.y += Math.random()*amount - amountHalf;
+
+        });
+
+        return true;
+      });
+
+    });
+
+  } catch(err){
+    MessageLog.trace('Error: '+err );
+    scene.endUndoRedoAccum();
+    return;
+  }
+
+  //
+  selectedDrawing.restoreSelection();
+
+  scene.endUndoRedoAccum();
+
+}
+
+
+
+
+//
+function setWidth( w ){
+
+  setSize( w, undefined, 'Set Width' );  
+
+}
+
+//
+function setHeight( h ){
+  setSize( undefined, h, 'Set Height' );
+}
+
+//
+function setSize( w, h, title ){
+
+  scene.beginUndoRedoAccum( title || "Set Size");
+
+  try{
+
+    var selectionData = getSelectionData();
+    if( !selectionData ) {
+      MessageLog.trace('No selection Data');
+      scene.endUndoRedoAccum();
+      return;
+    }
+
+    var selectedDrawing = selectionData.selectedDrawing;
+    var selectedStrokesLayers = selectionData.selectedStrokesLayers;
+    var box = selectionData.box;
+    var boxCenter = box.center;
+
+    var widthCoef, heightCoef;
+
+    var boxWidth = box.x1-box.x0;
+    if( w !== undefined ) widthCoef = Utils.gridToPixelsX(w) / boxWidth;
+    var boxHeight = box.y1-box.y0;
+    if( h !== undefined ) heightCoef = Utils.gridToPixelsY(h) / boxHeight;
+    // MessageLog.trace('boxCenter: '+JSON.stringify(box,true,'  ')+' > '+JSON.stringify(boxCenter,true,'  ') );
+    // MessageLog.trace('boxWidth: '+boxWidth+', '+Utils.gridToPixelsX(w) +' > '+widthCoef);
+    // MessageLog.trace('boxHeight: '+boxHeight+', '+Utils.gridToPixelsY(h) +' > '+heightCoef );
+    // return; // !!!
+
+    selectedDrawing.iterateArts(function(art){
+
+      selectedDrawing.modifyArtStrokes( art, selectedStrokesLayers[art], function(_stroke){
+        
+        if( !_stroke.isSelected ) return;
+
+        var hasSelectedAnchors = !!_stroke.selectedAnchors;
+
+        _stroke.path.forEach(function(pathPoint){
+
+          if( hasSelectedAnchors && !pathPoint.isSelected && !pathPoint.isSelectedControl ) return;
+          
+          if( widthCoef !== undefined ) pathPoint.x = (pathPoint.x - box.center.x) * widthCoef + box.center.x;
+          if( heightCoef !== undefined ) pathPoint.y = (pathPoint.y - box.center.y) * heightCoef + box.center.y;
 
         });
 
