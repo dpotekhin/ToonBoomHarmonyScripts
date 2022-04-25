@@ -295,7 +295,7 @@ function generateDeformer( mode, artIndex ){
 
 	if (!("x" in corners[0])) // if corners array is still empty
 	{
-		MessageLog.trace(curDrawing + " is empty at frame " + fr + ". Quit.");
+		MessageLog.trace(curDrawing + " is empty at frame " + frame.current() + ". Quit.");
 		return;
 	}
 

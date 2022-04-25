@@ -199,7 +199,7 @@ function getOutputNodes( _node ){
 //
 function getAllChildNodes( nodes, typeFilter ){
 
-  if( typeof nodes === 'string' ) nodes = [];
+  if( typeof nodes === 'string' ) nodes = [nodes];
   
   var _nodes = [];
   var _typeFilter = new RegExp(typeFilter);
