@@ -1,5 +1,5 @@
 /*
-Author: D.Potekhin (d@peppers-studio.ru)
+Author: Dima Potekhin (skinion.onn@gmail.com)
 Version: 0.210731
 
 Utility script for assembling other PS scripts into separate packages
