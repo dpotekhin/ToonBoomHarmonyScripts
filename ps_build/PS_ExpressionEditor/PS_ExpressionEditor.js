@@ -1,5 +1,5 @@
 /*
-Author: D.Potekhin (d@peppers-studio.ru)
+Author: Dima Potekhin (skinion.onn@gmail.com)
 
 [Name: PS_ExpressionEditor :]
 [Version: 0.210728 :]

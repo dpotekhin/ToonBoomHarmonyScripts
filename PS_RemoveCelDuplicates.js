@@ -1,5 +1,5 @@
 /*
-Author: D.Potekhin (d@peppers-studio.ru)
+Author: Dima Potekhin (skinion.onn@gmail.com)
 Version 0.2
 
 A Harmony script to remove duplicate cels of the selected layer.
