@@ -1,4 +1,7 @@
 //
+var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
+
+//
 function eachNode( nodes, callback, useGroups, nodeTypeFilter ){
 	
 	// MessageLog.trace('eachNode: '+nodes +'; '+ callback +'; '+ useGroups +'; '+ nodeTypeFilter);
@@ -131,11 +134,11 @@ function eachAnimatedAttributeOfSelectedLayers( _action ){
   selectedlayers.forEach(function( _layer, i ){
     
     var _node = _layer.node;
-    var attributes = getLinkedAttributeNames( _node );
+    var attributes = Utils.getLinkedAttributeNames( _node );
     // MessageLog.trace(i+') '+_node+': '+JSON.stringify(attributes,true,' '));
     
     attributes.forEach(function( _attrName ){
-      _action( _node, _attrName );
+      	_action( _node, _attrName );
     });
 
   });
