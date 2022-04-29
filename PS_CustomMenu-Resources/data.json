@@ -146,6 +146,14 @@
                     "scriptFile": "PS_SetPropertiesOnManyNodes.js",
                     "sriptFunction": "PS_SetPropertiesOnManyNodes",
                     "icon": "~/PS_SetPropertiesOnManyNodes.png"
+                },
+
+                {
+                    "name": "PS Focus On Parent Group",
+                    "type": "script",
+                    "scriptFile": "PS_FocusOnParentGroup.js",
+                    "sriptFunction": "PS_FocusOnParentGroup",
+                    "icon": "~/PS_FocusOnParentGroup.png"
                 }
 
             ]
@@ -218,6 +226,14 @@
                     "scriptFile": "PS_SetSceneDurationToSoundLength.js",
                     "sriptFunction": "PS_SetSceneDurationToSoundLength",
                     "icon": "~/PS_SetSceneDurationToSoundLength.png"
+                },
+
+                {
+                    "name": "PS Select Layer With Keys",
+                    "type": "script",
+                    "scriptFile": "PS_SelectLayerWithKeys.js",
+                    "sriptFunction": "PS_SelectLayerWithKeys",
+                    "icon": "~/PS_SelectLayerWithKeys.png"
                 }
 
             ]
