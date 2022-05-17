@@ -15,6 +15,7 @@ Resets transformation of selected Pegs, Drawings and Deformation nodes to their 
 - Hold the Shift key to reset only the Position of the selected node
 - Hold the Control key to reset only the Scale of the selected node
 - Hold the Alt key to reset only the Rotation of the selected node
+- Hold the Shift + Control + Alt keys to reset all transformations of child elements
 
 ### 2) PS_SaveTransformation
 Saves current transformation of selected Pegs, Drawings and Deformation nodes to their custom attributes as the Default state with options:
@@ -23,7 +24,7 @@ Saves current transformation of selected Pegs, Drawings and Deformation nodes to
 - Hold the Control key to save only the Scale of the selected node
 - Hold the Alt key to save only the Rotation of the selected node
 
-### 3) PS_ClearSavedTransformation
+### 3) PS_ClearSavedTransformationСC
 Removes custom attributes with the Default state of transformation of selected Pegs, Drawings and Deformation nodes with options:
 - Clears all saved transformations - Position, Rotation and Scale by default
 - Hold the Shift key to clear only the saved Position of the selected node
@@ -38,6 +39,7 @@ Removes custom attributes with the Default state of transformation of selected P
 
 
 var Utils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/Utils.js"));
+var NodeUtils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/NodeUtils.js"));
 
 //
 function _getCommonData(){
@@ -50,13 +52,6 @@ function _getCommonData(){
 	var usePosition = KeyModifiers.IsShiftPressed();
 	var useScale = KeyModifiers.IsControlPressed();
 	var useRotation = KeyModifiers.IsAlternatePressed();
-
-	// get content of groups
-	var nodeList = [];
-	selectedNodes.forEach(function(_node){
-		if( node.type(_node) !== 'GROUP' ){ nodeList.push(_node); }
-		else nodeList = nodeList.concat( node.subNodes(_node) );
-	});
 
 	//
 	var nodeTemplates = {
@@ -98,12 +93,27 @@ function _getCommonData(){
 	};
 	
 	var nodeTemplatesByNodeName = {};
+	var nodeTypes = [];
 	Object.keys(nodeTemplates).forEach(function(_nodeName){
 		_nodeName.split(',').forEach(function(__nodeName){
+			nodeTypes.push(__nodeName);
 			nodeTemplatesByNodeName[__nodeName] = nodeTemplates[_nodeName];
 		});
 	});
 
+
+	//
+	if( usePosition && useScale && useRotation ) {
+		selectedNodes = NodeUtils.getAllChildNodes( selectedNodes, nodeTypes.join('|') );
+		MessageLog.trace('Reset all children:\n'+selectedNodes.join('\n') );
+	}
+
+	// get content of groups
+	var nodeList = [];
+	selectedNodes.forEach(function(_node){
+		if( node.type(_node) !== 'GROUP' ){ nodeList.push(_node); }
+		else nodeList = nodeList.concat( node.subNodes(_node) );
+	});
 
 	//
 	function getOutputNode( _node ){
@@ -113,7 +123,6 @@ function _getCommonData(){
 	     listOfDestinationNodes.push(node.dstNode(_node, i, 0));
 	   return listOfDestinationNodes[0];
 	}
-
 
 	//
 	function getNodeAttr( _node, attrName, currentFrame, createIfNotExist, returnNodeAndAttr ){
@@ -190,7 +199,7 @@ function _getCommonData(){
 		usePosition: usePosition,
 		useScale: useScale,
 		useRotation: useRotation,
-		useAll: !(usePosition || useRotation || useScale),
+		useAll: !(usePosition || useRotation || useScale)
 	};
 
 }
@@ -209,6 +218,7 @@ function PS_ResetTransformation(){
 			+'\n- Hold the Shift key to reset only the Position of the selected node'
 			+'\n- Hold the Control key to reset only the Scale of the selected node'
 			+'\n- Hold the Alt key to reset only the Rotation of the selected node'
+			+'\n- Hold the Shift + Control + Alt keys to reset all transformations of child elements'
 		,0,0,0);
 		return;
 	}
@@ -240,28 +250,30 @@ function PS_ResetTransformation(){
 				MessageLog.trace('Dynamic Attr "' + customAttributeName + '" = ' + val );
 			}
 
-			if( attrName.indexOf("3DPATH") !== -1 ){
+			// 3d Path attribute
+			if( attrName.indexOf("3DPATH") !== -1 ){ // TODO: reset 3d path values to custom values
+
 			 	var columnName = node.linkedColumn( _node, attrName );
 			 	if( columnName !== "" ){
-					MessageLog.trace('Reset 3DPATH');
-					column.setEntry(columnName, 1, _commonData.currentFrame, 0 ); // TODO: reset 3d path values to custom values
+					MessageLog.trace('Reset 3DPATH: '+attrName+' > '+_node);
+					column.setEntry(columnName, 1, _commonData.currentFrame, 0 ); 
 					column.setEntry(columnName, 2, _commonData.currentFrame, 0 );
 					column.setEntry(columnName, 3, _commonData.currentFrame, 0 );
 					column.setEntry(columnName, 4, _commonData.currentFrame, 0 );
 				}
-			}
 
-			// Standard attr
-			var attr = _commonData.getNodeAttr( _node, attrName, _commonData.currentFrame );
-			if( !attr ){
-				MessageLog.trace('Attribute not found "'+attrName+'"');
-				continue;
+			}else{ // Standard attr
+
+				var attr = _commonData.getNodeAttr( _node, attrName, _commonData.currentFrame );
+				if( !attr ){
+					MessageLog.trace('Attribute not found "'+attrName+'"');
+					continue;
+				}
+
+				attr.setValueAt( val, _commonData.currentFrame );	
 			}
 			
-			MessageLog.trace( attrName+' => '+val+' ('+_val+') = '+attr.doubleValueAt( _commonData.currentFrame ) );
-
-			attr.setValueAt( val, _commonData.currentFrame );
-			// MessageLog.trace('>>>> "'+attrName+'" ==> '+attr.doubleValueAt( _commonData.currentFrame ) );
+			// MessageLog.trace( attrName+' => '+val+' ('+_val+') = '+attr.doubleValueAt( _commonData.currentFrame ) );
 
 		}
 
