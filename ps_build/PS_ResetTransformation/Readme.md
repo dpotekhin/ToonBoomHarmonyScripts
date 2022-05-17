@@ -11,6 +11,7 @@ Resets transformation of selected Pegs, Drawings and Deformation nodes to their 
 - Hold the Shift key to reset only the Position of the selected node
 - Hold the Control key to reset only the Scale of the selected node
 - Hold the Alt key to reset only the Rotation of the selected node
+- Hold the Shift + Control + Alt keys to reset all transformations of child elements
 
 ### 2) PS_SaveTransformation
 Saves current transformation of selected Pegs, Drawings and Deformation nodes to their custom attributes as the Default state with options:
