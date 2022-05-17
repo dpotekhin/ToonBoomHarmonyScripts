@@ -2,7 +2,7 @@
 Author: Dima Potekhin (skinion.onn@gmail.com)
 Version: 0.220429
 
-The script selects layer with keys in the current frame.
+The script selects layer with keys in the current frame on the Timeline.
 
 Options:
 - Hold the Shift key in the second time you run script to select the next layer with keys in the current frame

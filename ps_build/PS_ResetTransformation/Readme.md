@@ -19,7 +19,7 @@ Saves current transformation of selected Pegs, Drawings and Deformation nodes to
 - Hold the Control key to save only the Scale of the selected node
 - Hold the Alt key to save only the Rotation of the selected node
 
-### 3) PS_ClearSavedTransformation
+### 3) PS_ClearSavedTransformationСC
 Removes custom attributes with the Default state of transformation of selected Pegs, Drawings and Deformation nodes with options:
 - Clears all saved transformations - Position, Rotation and Scale by default
 - Hold the Shift key to clear only the saved Position of the selected node

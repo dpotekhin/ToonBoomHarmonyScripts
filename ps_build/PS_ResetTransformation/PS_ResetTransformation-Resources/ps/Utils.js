@@ -233,8 +233,14 @@ function componentToHex(c) {
 }
 
 //
-function rgbToHex(r, g, b, a) {
+function rgbToHex(r, g, b, a) { // alternate params: ColorRGBA, useAlpha
   // return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+  if( b === undefined ){
+    g = r.g;
+    b = r.b;
+    if( g ) a = r.a;
+    r = r.r;
+  }
   var result = componentToHex(r) + componentToHex(g) + componentToHex(b);
   if( a !== undefined && !ignoreAlpha ) result += componentToHex(a);
   return result;
