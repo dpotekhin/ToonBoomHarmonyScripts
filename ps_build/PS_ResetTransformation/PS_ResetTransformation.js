@@ -63,6 +63,7 @@ function _getCommonData(){
 				],
 			rotation: [
 				'ROTATION.ANGLEX',0,'ROTATION.ANGLEY',0,'ROTATION.ANGLEZ',0,
+				'ROTATION.QUATERNIONPATH',0,
 				'ANGLE',0,'SKEW',0
 			],
 			scale: [
@@ -251,11 +252,11 @@ function PS_ResetTransformation(){
 			}
 
 			// 3d Path attribute
-			if( attrName.indexOf("3DPATH") !== -1 ){ // TODO: reset 3d path values to custom values
+			if( attrName.indexOf("3DPATH") !== -1 || attrName.indexOf("QUATERNIONPATH") !== -1 ){ // TODO: reset 3d path values to custom values
 
 			 	var columnName = node.linkedColumn( _node, attrName );
 			 	if( columnName !== "" ){
-					MessageLog.trace('Reset 3DPATH: '+attrName+' > '+_node);
+					MessageLog.trace('Reset column attr "'+attrName+'": '+attrName+' > '+_node);
 					column.setEntry(columnName, 1, _commonData.currentFrame, 0 ); 
 					column.setEntry(columnName, 2, _commonData.currentFrame, 0 );
 					column.setEntry(columnName, 3, _commonData.currentFrame, 0 );
