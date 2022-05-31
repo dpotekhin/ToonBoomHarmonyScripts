@@ -8,6 +8,11 @@ This script lets you to convert 3D Path position animation to Separate position 
 
 Script lets to adjust the color of the selected node.
 
+## [PS_DeformerTools](ps_build/PS_DeformerTools)
+A set of tools for working with deformers.
+Some tools has options - check out for tooltips on tool buttons.
+
+
 ## [PS_ExpressionEditor](ps_build/PS_ExpressionEditor)
 Simple implementation of an expression editor.
 

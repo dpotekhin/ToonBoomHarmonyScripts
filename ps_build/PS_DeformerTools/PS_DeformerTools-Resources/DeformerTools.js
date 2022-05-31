@@ -47,9 +47,9 @@ Version 0.220531
 "orientation1"
 */
 
-var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
-var SelectionUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/SelectionUtils.js"));
-var NodeUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/NodeUtils.js"));
+var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_DeformerTools-Resources/ps/Utils.js"));
+var SelectionUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_DeformerTools-Resources/ps/SelectionUtils.js"));
+var NodeUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_DeformerTools-Resources/ps/NodeUtils.js"));
 
 ///
 var COLORART = 1;

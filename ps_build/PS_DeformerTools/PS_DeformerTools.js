@@ -11,9 +11,9 @@ Some tools has options - check out for tooltips on tool buttons.
 */
 
 var _DeformerTools = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_DeformerTools-Resources/DeformerTools.js"));
-var _Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
-var pModal = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/pModal.js"));
-var SelectionUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/SelectionUtils.js"));
+var _Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_DeformerTools-Resources/ps/Utils.js"));
+var pModal = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_DeformerTools-Resources/ps/pModal.js"));
+var SelectionUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_DeformerTools-Resources/ps/SelectionUtils.js"));
 
 ///
 function PS_DeformerTools(){
