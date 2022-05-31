@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version 0.220401
+Version 0.220531
 */
 
 /*
@@ -93,30 +93,30 @@ var restingAttrNames = {
 */
 
 //
-function alignVertically( side ){
+function alignVertically( side, applyToResting ){
 
 	_exec( 'Align Deformer Points Vertically', function(){
 	
 		var _nodes = getSelectedDeformers();
 		if(!_nodes) return;
 
-		var center = getCenter( _nodes, side, 'restingOffset.X' );
-		applyAttrValue( _nodes, 'restingOffset.X', center );
+		var center = getCenter( _nodes, side, 'offset.X' );
+		if( applyToResting ) applyAttrValue( _nodes, 'restingOffset.X', center );
 		applyAttrValue( _nodes, 'offset.X', center );
 
 	});
 }
 
 //
-function alignHorizontally( side ){
+function alignHorizontally( side, applyToResting ){
 
 	_exec( 'Align Deformer Points Horizontally', function(){
 	
 		var _nodes = getSelectedDeformers();
 		if(!_nodes) return;
 
-		var center = getCenter( _nodes, side, 'restingOffset.Y' );
-		applyAttrValue( _nodes, 'restingOffset.Y', center );
+		var center = getCenter( _nodes, side, 'offset.Y' );
+		if( applyToResting ) applyAttrValue( _nodes, 'restingOffset.Y', center );
 		applyAttrValue( _nodes, 'offset.Y', center );
 
 	});
@@ -138,7 +138,7 @@ function alignHorizontally( side ){
 */
 
 //
-function orientControlPoints( _nodes, useEntireChain ){
+function orientControlPoints( _nodes, applyToResting, useEntireChain ){
 
 	_exec( 'Orient Control Points', function(){
 	
@@ -165,9 +165,11 @@ function orientControlPoints( _nodes, useEntireChain ){
 				var targetPos = getPointPosition(targetNode);
 				var pos = getPointPosition(srcNode);
 				var ang = Math.atan2( pos.y - targetPos.y, pos.x - targetPos.x ) / Math.PI * 180;
-				
-				applyAttrValue( _node, 'restingOrientation0', ang );
-				applyAttrValue( _node, 'restingOrientation1', ang );
+
+				if( applyToResting ){
+					applyAttrValue( _node, 'restingOrientation0', ang );
+					applyAttrValue( _node, 'restingOrientation1', ang );
+				}
 
 				applyAttrValue( _node, 'orientation0', ang );
 				applyAttrValue( _node, 'orientation1', ang );
@@ -188,7 +190,7 @@ function orientControlPoints( _nodes, useEntireChain ){
 
 
 //
-function distributeControlPoints( _nodes, useEntireChain ){
+function distributeControlPoints( _nodes, applyToResting, useEntireChain ){
 
 	_exec( 'Distribute Control Points', function( ){
 	
@@ -217,8 +219,10 @@ function distributeControlPoints( _nodes, useEntireChain ){
 				var hypo = Math.sqrt( dx*dx + dy*dy );
 				var length = hypo / 3;
 
-				applyAttrValue( _node, 'restLength0', length );
-				applyAttrValue( _node, 'restLength1', length );
+				if( applyToResting ){
+					applyAttrValue( _node, 'restLength0', length );
+					applyAttrValue( _node, 'restLength1', length );
+				}
 
 				applyAttrValue( _node, 'length0', length );
 				applyAttrValue( _node, 'length1', length );
@@ -973,11 +977,29 @@ function getChildNodes( _node )
 
 
 //
-function getPointPosition( _node ){
-	return{
-		x: node.getAttr(_node, 1, 'restingOffset.X' ).doubleValue(),
-		y: node.getAttr(_node, 1, 'restingOffset.Y' ).doubleValue(),
+function getAttrValue( _node, attrName ){
+
+	var attr = node.getAttr(_node, currentFrame, attrName );
+	if( !attr ) return null;
+
+	var currentFrame = frame.current();
+	var val = attr.doubleValueAt(currentFrame);
+	var columnName = node.linkedColumn(_node, attrName);
+	if( columnName ){
+		val = column.getEntry(columnName,0,currentFrame);
 	}
+
+	return val;
+}
+
+//
+function getPointPosition( _node ){
+
+	return{
+		x: getAttrValue( _node, 'offset.X' ),
+		y: getAttrValue( _node, 'offset.Y' ),
+	}
+
 }
 
 
@@ -991,8 +1013,11 @@ function applyAttrValue( _nodes, attrName, value ) {
 
 		var attr = node.getAttr(_node, currentFrame, attrName);
 		if(!attr) return;
-
-		attr.setValueAt( value, currentFrame );
+		// MessageLog.trace('=>'+ _node+', '+attrName+', '+value );
+		var columnName = node.linkedColumn(_node, attrName);
+		if( columnName ){
+			val = column.setEntry(columnName,0,currentFrame,value);
+		}else attr.setValueAt( value, currentFrame );
 
 	});
 }
@@ -1011,18 +1036,18 @@ function setAttrValues( _node, attrs, _frame ){
 //
 function getCenter( _nodes, side, attrName ){
 
-	// MessageLog.trace('getCenter: '+side );
+	MessageLog.trace('getCenter: '+side+' >> '+attrName );
 	var currentFrame = frame.current();
 	var center = side > 0 ? -999999 : 999999;
 	var centers = [];
 
 	_nodes.forEach(function(_node){
 		// MessageLog.trace('--> '+node.getAllAttrKeywords(_node).join('\n') );
-		var attr = node.getAttr(_node, currentFrame, attrName);
-		if(!attr) return;
 
-		var val = attr.doubleValueAt( currentFrame );
-		// MessageLog.trace('--> '+val+' ? '+center+' >>> '+node.getTextAttr(_node,currentFrame,attrName) );
+		var val = getAttrValue( _node, attrName );
+		if( val === null ) return;
+
+		MessageLog.trace('--> '+val+' ? '+center+' >>> '+node.getTextAttr(_node,currentFrame,attrName) );
 		switch(side){
 			case -1: if( val < center ) center = val; break;
 			case 0: centers.push(val); break;
@@ -1030,8 +1055,9 @@ function getCenter( _nodes, side, attrName ){
 		}
 	});
 
+	MessageLog.trace('Centers: '+centers);
 	if( side === 0 ) center = centers.reduce(function add(acc, a){return acc + a;},0) / centers.length;
-
+	MessageLog.trace('Center: '+center);
 	return center;
 
 }

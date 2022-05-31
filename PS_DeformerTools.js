@@ -1,8 +1,14 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version 0.220401
-*/
 
+[Name: PS_SelectionSets :]
+[Version: 0.220531 :]
+
+[Description:
+A set of tools for working with deformers.
+Some tools has options - check out for tooltips on tool buttons.
+:]
+*/
 
 var _DeformerTools = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_DeformerTools-Resources/DeformerTools.js"));
 var _Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
@@ -50,25 +56,28 @@ function PS_DeformerTools(){
   modal.addButton( '', alignGroup, btnHeight, btnHeight,
   	iconPath+'align-left.png',
     function(){
-      DeformerTools.alignVertically(-1);
+      DeformerTools.alignVertically( -1, KeyModifiers.IsShiftPressed() );
     },
-    'Align points to the left'
+    'Align points to the left.'
+    +'\n- Hold down the Shift key to change the resting attributes.'
   );
 
   modal.addButton( '', alignGroup, btnHeight, btnHeight,
   	iconPath+'align-h-center.png',
     function(){
-      DeformerTools.alignVertically(0);
+      DeformerTools.alignVertically( 0, KeyModifiers.IsShiftPressed() );
     },
-    'Align points to the horizontal center'
+    'Align points to the horizontal center.'
+    +'\n- Hold down the Shift key to change the resting attributes.'
   );
 
   modal.addButton( '', alignGroup, btnHeight, btnHeight,
   	iconPath+'align-right.png',
     function(){
-      DeformerTools.alignVertically(1);
+      DeformerTools.alignVertically( 1, KeyModifiers.IsShiftPressed() );
     },
-    'Align points to the right'
+    'Align points to the right.'
+    +'\n- Hold down the Shift key to change the resting attributes.'
   );
 
 	//
@@ -78,25 +87,28 @@ function PS_DeformerTools(){
   modal.addButton( '', alignGroup, btnHeight, btnHeight,
   	iconPath+'align-top.png',
     function(){
-      DeformerTools.alignHorizontally(1);
+      DeformerTools.alignHorizontally( 1, KeyModifiers.IsShiftPressed() );
     },
-    'Align points to the top'
+    'Align points to the top.'
+    +'\n- Hold down the Shift key to change the resting attributes.'
    );
 
 	modal.addButton( '', alignGroup, btnHeight, btnHeight,
   	iconPath+'align-v-center.png',
     function(){
-      DeformerTools.alignHorizontally(0);
+      DeformerTools.alignHorizontally( 0, KeyModifiers.IsShiftPressed() );
     },
-    'Align points to the center'
+    'Align points to the center.'
+    +'\n- Hold down the Shift key to change the resting attributes.'
    );
 
   modal.addButton( '', alignGroup, btnHeight, btnHeight,
   	iconPath+'align-bottom.png',
     function(){
-      DeformerTools.alignHorizontally(-1);
+      DeformerTools.alignHorizontally( -1, KeyModifiers.IsShiftPressed() );
     },
-    'Align points to the bottom'
+    'Align points to the bottom.'
+    +'\n- Hold down the Shift key to change the resting attributes.'
    );  
 
   ///
@@ -111,19 +123,21 @@ function PS_DeformerTools(){
   modal.addButton( '', cpGroup, btnHeight, btnHeight,
   	iconPath+'orient-points.png',
     function(){
-      DeformerTools.orientControlPoints( undefined, KeyModifiers.IsControlPressed() );
+      DeformerTools.orientControlPoints( undefined, KeyModifiers.IsShiftPressed(), KeyModifiers.IsControlPressed() );
     },
     'Orient control points to oposite points.'
-    +'\nHold down the Control key to use entire chain of deformation.'
+    +'\n- Hold down the Shift key to change the resting attributes.'
+    +'\n- Hold down the Control key to use entire chain of deformation.'
   );
 
   modal.addButton( '', cpGroup, btnHeight, btnHeight,
   	iconPath+'points-on-thirds.png',
     function(){
-      DeformerTools.distributeControlPoints( undefined, KeyModifiers.IsControlPressed() );
+      DeformerTools.distributeControlPoints( undefined, KeyModifiers.IsShiftPressed(), KeyModifiers.IsControlPressed() );
     },
     'Distribute control points on thirds.'
-    +'\nHold down the Control key to use entire chain of deformation.'
+    +'\n- Hold down the Shift key to change the resting attributes.'
+    +'\n- Hold down the Control key to use entire chain of deformation.'
   );
 
   modal.addButton( '', cpGroup, btnHeight, btnHeight,
@@ -166,7 +180,7 @@ function PS_DeformerTools(){
       DeformerTools.generateCircleDeformer( artIndex );
     },
     'Generate Circle Deformer.'
-    +'\nHold down the Control key to use Color Art as a source.'
+    +'\n- Hold down the Control key to use Color Art as a source.'
   );
 
   modal.addButton( '', gdGroup, btnHeight, btnHeight,
@@ -176,7 +190,7 @@ function PS_DeformerTools(){
       DeformerTools.generateRectDeformer( artIndex );
     },
     'Generate Rectangle Deformer from Line Art.'
-    +'\nHold down the Control key to use Color Art as a source.'
+    +'\n- Hold down the Control key to use Color Art as a source.'
   );
 
   modal.addButton( '', gdGroup, btnHeight, btnHeight,
@@ -186,7 +200,7 @@ function PS_DeformerTools(){
       DeformerTools.generateArtDeformer( artIndex );
     },
     'Generate Deformer on Art.'
-    +'\nHold down the Control key to use Color Art as a source.'
+    +'\n- Hold down the Control key to use Color Art as a source.'
   );
 
   gdGroup.mainLayout.addStretch();
