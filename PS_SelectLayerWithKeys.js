@@ -5,7 +5,7 @@ Version: 0.220429
 The script selects layer with keys in the current frame on the Timeline.
 
 Options:
-- Hold the Shift key in the second time you run script to select the next layer with keys in the current frame
+- Hold the Control key in the second time you run script to select the next layer with keys in the current frame
 */
 
 ///
