@@ -4,6 +4,9 @@ v0.220602
 ### Description
 A tiny helper for working with scene markers.
 
+### Usage
+Just click on the script button.
+
 Options:
 - LMB: Toggle adds / removes a Scene marker at the current frame.
 - LMB + Ctrl: to move all Scene Markers to the Right of the current frame or select a range of frames to remove markers within it).

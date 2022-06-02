@@ -6,6 +6,10 @@ Author: Dima Potekhin (skinion.onn@gmail.com)
 
 [Description:
 A tiny helper for working with scene markers.
+:]
+
+[Usage:
+Just click on the script button.
 
 Options:
 - LMB: Toggle adds / removes a Scene marker at the current frame.

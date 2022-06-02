@@ -32,15 +32,6 @@ This Script converts Node Attribute Animation to Drawing Node Exposure Keys.
 ## [PS_Markers](ps_build/PS_Markers)
 A tiny helper for working with scene markers.
 
-Options:
-- LMB: Toggle adds / removes a Scene marker at the current frame.
-- LMB + Ctrl: to move all Scene Markers to the Right of the current frame or select a range of frames to remove markers within it).
-- LMB + Shift: to move all Scene Markers to the Left of the current frame or select a range of frames to remove markers within it).
-- LMB + Alt: to remove all Scene Markers (select a range of frames to remove markers within it).
-- LMB + Alt + Ctrl: to remove all Scene Markers to the Right of the current frame.
-- LMB + Alt + Shift: to remove all Scene Markers to the Left of the current frame.
-- LMB + Ctrl + Alt + Shift: show the dropdown menu.
-
 
 ## [PS_PathTools](ps_build/PS_PathTools)
 The script provides tools for aligning, mirroring and modifying strokes.
