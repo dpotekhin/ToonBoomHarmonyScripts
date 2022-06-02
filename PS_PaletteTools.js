@@ -25,7 +25,7 @@ function PS_PaletteTools() {
     MessageLog.clearLog();
 
     //
-    var scriptName = 'Deformer Tools';
+    var scriptName = 'Palette Tools';
     var scriptVer = '0.220401';
     //
 
