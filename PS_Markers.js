@@ -22,7 +22,9 @@ Options:
 :]
 */
 
-function PS_Markers() {
+function PS_Markers( _mode ) {
+
+    MessageLog.trace('_mode: '+_mode);
 
     var markers = TimelineMarker.getAllMarkers();
 
@@ -39,14 +41,14 @@ function PS_Markers() {
     // 
     var modeActions = { 0: actionToggleMarker };
 
-    modeActions[ RIGHT ] = function() { actionMove('Right') };
-    modeActions[ LEFT ] = function() { actionMove('Left') };
+    modeActions[ RIGHT ] = function() { actionMove('Right') }; // mode: 1
+    modeActions[ LEFT ] = function() { actionMove('Left') }; // mode: 2
 
-    modeActions[ REMOVE ] =  actionRemove;
-	modeActions[ REMOVE + RIGHT ] = function() { actionRemove('Right') };
-	modeActions[ REMOVE + LEFT ] = function() { actionRemove('Left') };
+    modeActions[ REMOVE ] =  actionRemove; // mode: 4
+	modeActions[ REMOVE + RIGHT ] = function() { actionRemove('Right') }; // mode: 5
+	modeActions[ REMOVE + LEFT ] = function() { actionRemove('Left') }; // mode: 6
 
-    modeActions[ REMOVE + RIGHT + LEFT ] = actionShowContextMenu;
+    modeActions[ REMOVE + RIGHT + LEFT ] = actionShowContextMenu; // mode: 
 
     var directions = {
         Right: 1,
@@ -54,6 +56,7 @@ function PS_Markers() {
     };
 
     (modeActions[
+        _mode !== undefined ? _mode :
     	Number(KeyModifiers.IsControlPressed() * RIGHT) +
     	Number(KeyModifiers.IsShiftPressed() * LEFT) +
     	Number(KeyModifiers.IsAlternatePressed() * REMOVE)

@@ -10,7 +10,7 @@
                     "name": "PS Convert Keys To Key Exposures",
                     "type": "script",
                     "scriptFile": "PS_KeysToKeyExposures.js",
-                    "sriptFunction": "PS_KeysToKeyExposures",
+                    "scriptFunction": "PS_KeysToKeyExposures",
                     "icon": "~/PS_KeysToKeyExposures.png"
                 },
 
@@ -18,7 +18,7 @@
                     "name": "PS Deform Tools",
                     "type": "script",
                     "scriptFile": "PS_DeformerTools.js",
-                    "sriptFunction": "PS_DeformerTools",
+                    "scriptFunction": "PS_DeformerTools",
                     "icon": "~/PS_DeformerTools.png"
                 },
 
@@ -26,7 +26,7 @@
                     "name": "PS Rotation Euler Filter",
                     "type": "script",
                     "scriptFile": "PS_RotationEulerFilter.js",
-                    "sriptFunction": "PS_RotationEulerFilter",
+                    "scriptFunction": "PS_RotationEulerFilter",
                     "icon": "~/PS_RotationEulerFilter.png"
                 }
 
@@ -42,7 +42,7 @@
                     "name": "PS PathTools",
                     "type": "script",
                     "scriptFile": "PS_PathTools.js",
-                    "sriptFunction": "PS_PathTools",
+                    "scriptFunction": "PS_PathTools",
                     "icon": "~/PS_PathTools.png"
                 },
 
@@ -50,7 +50,7 @@
                     "name": "PS Distribute Drawing Substitutions To Timeline",
                     "type": "script",
                     "scriptFile": "PS_DistributeDrawingSubstitutionsToTimeline.js",
-                    "sriptFunction": "PS_DistributeDrawingSubstitutionsToTimeline",
+                    "scriptFunction": "PS_DistributeDrawingSubstitutionsToTimeline",
                     "icon": "~/PS_DistributeDrawingSubstitutionsToTimeline.png"
                 },
 
@@ -58,7 +58,7 @@
                     "name": "PS Adjust Multiple Drawing Attributes",
                     "type": "script",
                     "scriptFile": "PS_DrawingAttributes.js",
-                    "sriptFunction": "PS_DrawingAttributesModal",
+                    "scriptFunction": "PS_DrawingAttributesModal",
                     "icon": "~/PS_DrawingAttributesModal.png"
                 },
 
@@ -66,7 +66,7 @@
                     "name": "PS Remove Cel Duplicates",
                     "type": "script",
                     "scriptFile": "PS_RemoveCelDuplicates.js",
-                    "sriptFunction": "PS_RemoveCelDuplicates",
+                    "scriptFunction": "PS_RemoveCelDuplicates",
                     "icon": "~/PS_RemoveCelDuplicates.png"
                 }
 
@@ -82,7 +82,7 @@
                     "name": "PS Rename Nodes",
                     "type": "script",
                     "scriptFile": "PS_RenameNodes.js",
-                    "sriptFunction": "PS_RenameNodes",
+                    "scriptFunction": "PS_RenameNodes",
                     "icon": "~/PS_RenameNodes.png"
                 },
 
@@ -90,21 +90,21 @@
                     "name": "PS Copy Nodes Paths",
                     "type": "script",
                     "scriptFile": "PS_NodeHelper.js",
-                    "sriptFunction": "PS_CopyNodesPaths"
+                    "scriptFunction": "PS_CopyNodesPaths"
                 },
 
                 {
                     "name": "PS Fix Node Name",
                     "type": "script",
                     "scriptFile": "PS_FixNodeName.js",
-                    "sriptFunction": "PS_FixNodeName"
+                    "scriptFunction": "PS_FixNodeName"
                 },
 
                 {
                     "name": "PS Unlink Element Functions",
                     "type": "script",
                     "scriptFile": "PS_UnlinkElementFunctions.js",
-                    "sriptFunction": "PS_UnlinkElementFunctions",
+                    "scriptFunction": "PS_UnlinkElementFunctions",
                     "icon": "~/PS_UnlinkElementFunctions.png"
                 },
 
@@ -112,7 +112,7 @@
                     "name": "PS Fit Backdrop",
                     "type": "script",
                     "scriptFile": "PS_FitBackdrop.js",
-                    "sriptFunction": "PS_FitBackdrop",
+                    "scriptFunction": "PS_FitBackdrop",
                     "icon": "~/PS_FitBackdrop.png"
                 },
 
@@ -120,7 +120,7 @@
                     "name": "PS Adjust Node Color",
                     "type": "script",
                     "scriptFile": "PS_AdjustNodeColor.js",
-                    "sriptFunction": "PS_AdjustNodeColor",
+                    "scriptFunction": "PS_AdjustNodeColor",
                     "icon": "~/PS_AdjustNodeColor.png"
                 },
 
@@ -128,7 +128,7 @@
                     "name": "PS Align Node Vertically",
                     "type": "script",
                     "scriptFile": "PS_NodeAlign.js",
-                    "sriptFunction": "PS_AlignNodesVertically",
+                    "scriptFunction": "PS_AlignNodesVertically",
                     "icon": "~/PS_AlignNodesVertically.png"
                 },
 
@@ -136,7 +136,7 @@
                     "name": "PS Swap Nodes",
                     "type": "script",
                     "scriptFile": "PS_SwapNodes.js",
-                    "sriptFunction": "PS_SwapNodes",
+                    "scriptFunction": "PS_SwapNodes",
                     "icon": "~/PS_SwapNodes.png"
                 },
 
@@ -144,7 +144,7 @@
                     "name": "PS Set Properties On Many Nodes",
                     "type": "script",
                     "scriptFile": "PS_SetPropertiesOnManyNodes.js",
-                    "sriptFunction": "PS_SetPropertiesOnManyNodes",
+                    "scriptFunction": "PS_SetPropertiesOnManyNodes",
                     "icon": "~/PS_SetPropertiesOnManyNodes.png"
                 },
 
@@ -152,7 +152,7 @@
                     "name": "PS Focus On Parent Group",
                     "type": "script",
                     "scriptFile": "PS_FocusOnParentGroup.js",
-                    "sriptFunction": "PS_FocusOnParentGroup",
+                    "scriptFunction": "PS_FocusOnParentGroup",
                     "icon": "~/PS_FocusOnParentGroup.png"
                 }
 
@@ -168,8 +168,16 @@
                     "name": "PS Hex Palette Color",
                     "type": "script",
                     "scriptFile": "PS_HexPaletteColor.js",
-                    "sriptFunction": "PS_HexPaletteColor",
+                    "scriptFunction": "PS_HexPaletteColor",
                     "icon": "~/PS_HexPaletteColor.png"
+                },
+
+                {
+                    "name": "PS Palette Tools",
+                    "type": "script",
+                    "scriptFile": "PS_PaletteTools.js",
+                    "scriptFunction": "PS_PaletteTools",
+                    "icon": "~/PS_PaletteTools.png"
                 }
 
             ]
@@ -184,7 +192,7 @@
                     "name": "PS Setup Scene For Rendering",
                     "type": "script",
                     "scriptFile": "PS_SetupSceneForRendering.js",
-                    "sriptFunction": "PS_SetupSceneForRendering",
+                    "scriptFunction": "PS_SetupSceneForRendering",
                     "icon": "~/PS_SetupSceneForRendering.png"
                 }
 
@@ -200,7 +208,7 @@
                     "name": "PS Sound Amplitude To Keyframes",
                     "type": "script",
                     "scriptFile": "PS_SoundAmplitudeToKeyframes.js",
-                    "sriptFunction": "PS_SoundAmplitudeToKeyframes",
+                    "scriptFunction": "PS_SoundAmplitudeToKeyframes",
                     "icon": "~/PS_SoundAmplitudeToKeyframes.png"
                 }
 
@@ -216,7 +224,7 @@
                     "name": "PS Set Playback Range",
                     "type": "script",
                     "scriptFile": "PS_SetPlaybackRange.js",
-                    "sriptFunction": "PS_SetPlaybackRange",
+                    "scriptFunction": "PS_SetPlaybackRange",
                     "icon": "~/PS_SetPlaybackRange.png"
                 },
 
@@ -224,7 +232,7 @@
                     "name": "PS Set Scene Duration To Sound Length",
                     "type": "script",
                     "scriptFile": "PS_SetSceneDurationToSoundLength.js",
-                    "sriptFunction": "PS_SetSceneDurationToSoundLength",
+                    "scriptFunction": "PS_SetSceneDurationToSoundLength",
                     "icon": "~/PS_SetSceneDurationToSoundLength.png"
                 },
 
@@ -232,12 +240,78 @@
                     "name": "PS Select Layer With Keys",
                     "type": "script",
                     "scriptFile": "PS_SelectLayerWithKeys.js",
-                    "sriptFunction": "PS_SelectLayerWithKeys",
+                    "scriptFunction": "PS_SelectLayerWithKeys",
                     "icon": "~/PS_SelectLayerWithKeys.png"
                 }
 
             ]
         },
+
+
+        {
+
+            "name": "Markers",
+            "type": "group",
+            "items": [
+
+                 {
+                    "name": "Toggle Marker",
+                    "type": "script",
+                    "scriptFile": "PS_Markers.js",
+                    "scriptFunction": "PS_Markers",
+                    "scriptParams": [ 0 ],
+                    "icon": "~/PS_Markers.png"
+                },
+
+                {
+                    "name": "Move to the Right",
+                    "type": "script",
+                    "scriptFile": "PS_Markers.js",
+                    "scriptFunction": "PS_Markers",
+                    "scriptParams": [ 1 ],
+                    "icon": "@/PS_Markers-move-right.png"
+                },
+
+                {
+                    "name": "Move to the Left",
+                    "type": "script",
+                    "scriptFile": "PS_Markers.js",
+                    "scriptFunction": "PS_Markers",
+                    "scriptParams": [ 2 ],
+                    "icon": "@/PS_Markers-move-left.png"
+                },
+
+                {
+                    "name": "Remove all Markers",
+                    "type": "script",
+                    "scriptFile": "PS_Markers.js",
+                    "scriptFunction": "PS_Markers",
+                    "scriptParams": [ 4 ],
+                    "icon": "@/PS_Markers-remove-all.png"
+                },
+
+                 {
+                    "name": "Remove all Markers on the Right",
+                    "type": "script",
+                    "scriptFile": "PS_Markers.js",
+                    "scriptFunction": "PS_Markers",
+                    "scriptParams": [ 5 ],
+                    "icon": "@/PS_Markers-remove-right.png"
+                },
+
+                {
+                    "name": "Remove all Markers on the Left",
+                    "type": "script",
+                    "scriptFile": "PS_Markers.js",
+                    "scriptFunction": "PS_Markers",
+                    "scriptParams": [ 6 ],
+                    "icon": "@/PS_Markers-remove-left.png"
+                }
+
+            ]
+        },
+
+
 
         {
             "name": "Transformation",
@@ -248,7 +322,7 @@
                     "name": "PS Reset Transformation",
                     "type": "script",
                     "scriptFile": "PS_ResetTransformation.js",
-                    "sriptFunction": "PS_ResetTransformation",
+                    "scriptFunction": "PS_ResetTransformation",
                     "icon": "~/PS_ResetTransformation.png"
                 },
 
@@ -256,7 +330,7 @@
                     "name": "PS Save Transformation",
                     "type": "script",
                     "scriptFile": "PS_SaveTransformation.js",
-                    "sriptFunction": "PS_SaveTransformation",
+                    "scriptFunction": "PS_SaveTransformation",
                     "icon": "~/PS_SaveTransformation.png"
                 },
 
@@ -264,7 +338,7 @@
                     "name": "PS Clear Saved Transformation",
                     "type": "script",
                     "scriptFile": "PS_ClearSavedTransformation.js",
-                    "sriptFunction": "PS_ClearSavedTransformation",
+                    "scriptFunction": "PS_ClearSavedTransformation",
                     "icon": "~/PS_ClearSavedTransformation.png"
                 }
 
@@ -275,7 +349,7 @@
             "name": "PS Expression Editor",
             "type": "script",
             "scriptFile": "PS_ExpressionEditor.js",
-            "sriptFunction": "PS_ExpressionEditor",
+            "scriptFunction": "PS_ExpressionEditor",
             "icon": "~/PS_ExpressionEditor.png"
         },
 
@@ -283,7 +357,7 @@
             "name": "PS Selection Sets",
             "type": "script",
             "scriptFile": "PS_SelectionSets.js",
-            "sriptFunction": "PS_SelectionSets",
+            "scriptFunction": "PS_SelectionSets",
             "icon": "~/PS_SelectionSets.png"
         }
 

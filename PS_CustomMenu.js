@@ -91,36 +91,43 @@ var _sf = {
       //
       case 'script':
         
-        if( !menuItem.sriptFunction || !menuItem.scriptFile ) {
+        if( !menuItem.scriptFunction || !menuItem.scriptFile ) {
           MessageLog.trace('Wrong data for the script menu item "'+menuItem.name+'"');
           return;
         }
 
-        // MessageLog.trace('---> add Script Item: '+menuItem.name+', '+menuItem.sriptFunction+" in "+menuItem.scriptFile);
+        // MessageLog.trace('---> add Script Item: '+menuItem.name+', '+menuItem.scriptFunction+" in "+menuItem.scriptFile);
 
         var menuItemName = menuItem.name;
 
         if( menuItem.icon ){
-            menuItemName += '$'+menuItem.icon.replace('~/',fileMapper.toNativePath(specialFolders.userScripts+'/'+'script-icons/'));
+            var iconPath = menuItem.icon
+              .replace(/^~\//,fileMapper.toNativePath(specialFolders.userScripts+'/script-icons/'))
+              .replace(/^@\//,fileMapper.toNativePath(specialFolders.userScripts+'/PS_CustomMenu-Resources/icons/'))
+              .replace(/^\//,fileMapper.toNativePath(specialFolders.userScripts))
+            ;
+            // MessageLog.trace('iconPath: '+menuItem.icon+' >> '+iconPath);
+            menuItemName += '$'+iconPath;
         }
 
         menuData['!'+menuItemName] = function(){
 
-          MessageLog.trace('Execute Script: '+menuItem.sriptFunction+' in '+menuItem.scriptFile );
+          MessageLog.trace('Execute Script: '+menuItem.scriptFunction+' in '+menuItem.scriptFile );
 
           try{
 
-          // Action.perform("onActonExecuteScriptWithValidator(QString,AC_ActionInfo*)", "scriptResponder", menuItem.sriptFunction+" in "+menuItem.scriptFile );
+          // Action.perform("onActonExecuteScriptWithValidator(QString,AC_ActionInfo*)", "scriptResponder", menuItem.scriptFunction+" in "+menuItem.scriptFile );
 
-          // Action.perform('onActonExecuteScript("'+menuItem.sriptFunction+" in "+menuItem.scriptFile+'")', "scriptResponder" );
+          // Action.perform('onActonExecuteScript("'+menuItem.scriptFunction+" in "+menuItem.scriptFile+'")', "scriptResponder" );
 
-          // Action.perform('onActonExecuteScript()', "scriptResponder", menuItem.sriptFunction+" in "+menuItem.scriptFile );
+          // Action.perform('onActonExecuteScript()', "scriptResponder", menuItem.scriptFunction+" in "+menuItem.scriptFile );
           // Action.perform("onActionEditProperties()", "scene");
 
           var scriptPath = fileMapper.toNativePath(specialFolders.userScripts+'/'+menuItem.scriptFile);
+          var scriptParams = menuItem.scriptParams || [];
           // MessageLog.trace( scriptPath );
           include( scriptPath );
-          eval( menuItem.sriptFunction )();
+          eval( menuItem.scriptFunction )( scriptParams[0], scriptParams[1], scriptParams[2], scriptParams[3], scriptParams[4] );
 
           }catch(err){MessageLog.trace('Error while the Script executing: '+err);}
 
