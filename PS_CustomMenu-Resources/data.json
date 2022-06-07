@@ -170,6 +170,14 @@
                     "scriptFile": "PS_HexPaletteColor.js",
                     "scriptFunction": "PS_HexPaletteColor",
                     "icon": "~/PS_HexPaletteColor.png"
+                },
+
+                {
+                    "name": "PS Palette Tools",
+                    "type": "script",
+                    "scriptFile": "PS_PaletteTools.js",
+                    "scriptFunction": "PS_PaletteTools",
+                    "icon": "~/PS_PaletteTools.png"
                 }
 
             ]
