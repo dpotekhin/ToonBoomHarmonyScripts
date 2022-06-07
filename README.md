@@ -80,4 +80,4 @@ Swapping nodes between different groups is also supported.
 
 ## [PS_UnlinkElementFunctions](ps_build/PS_UnlinkElementFunctions)
 
-This script alows to unlink animation functions and expressions from selected nodes.
+This script allows to unlink animation functions and expressions from selected nodes.

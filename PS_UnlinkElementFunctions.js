@@ -5,7 +5,7 @@ Author: Dima Potekhin (skinion.onn@gmail.com)
 [Version: 0.210501 :]
 
 [Description:
-This script alows to unlink animation functions and expressions from selected nodes.
+This script allows to unlink animation functions and expressions from selected nodes.
 :]
 
 [Usage:

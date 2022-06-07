@@ -2,7 +2,7 @@
 v0.210501
 
 ### Description
-This script alows to unlink animation functions and expressions from selected nodes.
+This script allows to unlink animation functions and expressions from selected nodes.
 
 ### Usage
 * Select nodes in Node View and click the Script button to unlink all animation functions linked to them.
