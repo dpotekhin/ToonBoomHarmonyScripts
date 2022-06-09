@@ -30,7 +30,7 @@ function showOutput(v, type) {
         outputText.toolTip = v || '';
         outputText.setStyleSheet("QLabel { color : " + (labelColors[type || 0]) + "; }");
     }
-    if (v) MessageLog.trace('Palette Tools: ' + v);
+    if (v) MessageLog.trace('Drawing Tools: ' + v);
 }
 
 function setOutputText(_outputText) {
@@ -45,6 +45,7 @@ exports = {
 
     removeUnusedDrawingColumns: removeUnusedDrawingColumns,
     expandExposure: expandExposure,
+    removeExposureOutsideRange: removeExposureOutsideRange,
 
 }
 
@@ -57,7 +58,7 @@ function removeUnusedDrawingColumns(colorId) {
     ColumnUtils.eachDrawingColumn(function(displayName, columnName, elementId, columnI) {
         MessageLog.trace(columnI + ') ' + displayName + ', ' + columnName + ', ' + elementId);
         if (displayName === '<unused>') {
-            MessageLog.trace('Delete column: "'+columnName+'"' );
+            MessageLog.trace('Delete column: "' + columnName + '"');
             var _node = node.add('Top', '__' + column.generateAnonymousName(), 'READ', 0, 0, 0);
             node.linkAttr(_node, "DRAWING.ELEMENT", columnName);
             var result = node.deleteNode(_node, true, true);
@@ -65,47 +66,73 @@ function removeUnusedDrawingColumns(colorId) {
         }
     });
 
-    if (deletedColumnsCount) showOutput('Drawing Columns deleted: ' + deletedColumnsCount+'.\nSee Message Log for details.', SUCCESS);
+    if (deletedColumnsCount) showOutput('Drawing Columns deleted: ' + deletedColumnsCount + '.\nSee Message Log for details.', SUCCESS);
     else showOutput("All existing columns is exposed on the Timeline.  There's nothing to delete.", WARNING);
 
 }
 
 
 //
-function expandExposure( useAllTimeline ) {
-	
-	var currentFrame = frame.current();
+function expandExposure(useAllTimeline) {
 
-	SelectionUtils.getSelectedLayers().forEach(function(nodeData){
-		
-		var _node = nodeData.node; 
-		if( node.type(_node) !== 'READ' ) return;
-		// MessageLog.trace(JSON.stringify(nodeData));
-		var drawingColumnName = ColumnUtils.getDrawingColumnOfNode(_node);
-		var entries = ColumnUtils.getColumnEntries( drawingColumnName );
-		if( !entries.length ) return;
+    var currentFrame = frame.current();
 
-		// MessageLog.trace('entries: '+_node+' > '+JSON.stringify(entries,true,' '))
+    SelectionUtils.getSelectedLayers().forEach(function(nodeData) {
 
-		var firstEntry = entries[0];
-		var lastEntry = entries[entries.length-1];
+        var _node = nodeData.node;
+        if (node.type(_node) !== 'READ') return;
+        // MessageLog.trace(JSON.stringify(nodeData));
+        var drawingColumnName = ColumnUtils.getDrawingColumnOfNode(_node);
+        var entries = ColumnUtils.getColumnEntries(drawingColumnName);
+        if (!entries.length) return;
 
-		if( useAllTimeline ) currentFrame = 1;
-		if( currentFrame < firstEntry.firstFrame ){ // expand to the left
+        // MessageLog.trace('entries: '+_node+' > '+JSON.stringify(entries,true,' '))
 
-			column.setEntry( drawingColumnName, 1, currentFrame, firstEntry.entry );
-			column.fillEmptyCels( drawingColumnName, currentFrame, firstEntry.firstFrame );
-			column.removeKeyDrawingExposureAt( drawingColumnName, firstEntry.firstFrame );
-			
-		}
+        var firstEntry = entries[0];
+        var lastEntry = entries[entries.length - 1];
 
-		if( useAllTimeline ) currentFrame = frame.numberOf();
-		if( currentFrame > lastEntry.lastFrame ){
+        if (useAllTimeline) currentFrame = 1;
+        if (currentFrame < firstEntry.firstFrame) { // expand to the left
 
-			// column.setEntry( drawingColumnName, 1, current, lastEntry[0].entry );
-			column.fillEmptyCels( drawingColumnName, firstEntry.lastFrame, currentFrame  );
-		}
+            column.setEntry(drawingColumnName, 1, currentFrame, firstEntry.entry);
+            column.fillEmptyCels(drawingColumnName, currentFrame, firstEntry.firstFrame);
+            column.removeKeyDrawingExposureAt(drawingColumnName, firstEntry.firstFrame);
 
-	});
+        }
+
+        if (useAllTimeline) currentFrame = frame.numberOf();
+        if (currentFrame > lastEntry.lastFrame) {
+
+            // column.setEntry( drawingColumnName, 1, current, lastEntry[0].entry );
+            column.fillEmptyCels(drawingColumnName, firstEntry.lastFrame, currentFrame + 1);
+        }
+
+    });
+
+}
+
+
+//
+function removeExposureOutsideRange() {
+
+    var rangeFirstFrame = Timeline.firstFrameSel;
+    var rangeLastFrame = rangeFirstFrame + Timeline.numFrameSel;
+    var totalFrames = frame.numberOf() + 100;
+
+    SelectionUtils.getSelectedLayers().forEach(function(nodeData) {
+
+        var _node = nodeData.node;
+        if (node.type(_node) !== 'READ') return;
+        // MessageLog.trace(JSON.stringify(nodeData));
+        var drawingColumnName = ColumnUtils.getDrawingColumnOfNode(_node);
+        var entries = ColumnUtils.getColumnEntries(drawingColumnName);
+        // MessageLog.trace(JSON.stringify(entries));
+        if (!entries.length) return;
+
+        column.addKeyDrawingExposureAt(drawingColumnName, rangeFirstFrame);
+        ColumnUtils.clearExposures(drawingColumnName, 1, rangeFirstFrame - 1);
+        ColumnUtils.clearExposures(drawingColumnName, rangeLastFrame, totalFrames);
+
+    });
 
 }
