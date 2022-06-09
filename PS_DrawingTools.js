@@ -22,7 +22,7 @@ function PS_DrawingTools() {
 
     //
     var scriptName = 'Drawing Tools';
-    var scriptVer = '0.220401';
+    var scriptVer = '0.220609';
     //
 
     // var SETTINGS_NAME = 'PS_DEFORMER_TOOLS_SETTINGS';
@@ -52,6 +52,23 @@ function PS_DrawingTools() {
     ui.setStyleSheet(ui.styleSheet + ' QPushButton{ border: none; }');
 
 
+    // ==========================================================
+    var colGroup = modal.addGroup('Exposure:', ui, true, hGroupStyle);
+
+    modal.addButton('', colGroup, btnHeight, btnHeight,
+        iconPath + 'expand-exposure.png',
+        function() {
+            _exec( 'Expand exposure to the current frame',
+                function(){
+                	DrawingTools.expandExposure( KeyModifiers.IsControlPressed() );
+                });
+        },
+        'Remove unused Drawing columns.'
+        +'\nHold down Ctrl key to expand to all Timeline.'
+    );
+
+    ///
+    colGroup.mainLayout.addStretch();
 
     // ==========================================================
     var colGroup = modal.addGroup('Cleanup:', ui, true, hGroupStyle);

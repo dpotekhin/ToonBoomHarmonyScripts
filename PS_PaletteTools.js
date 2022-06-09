@@ -2,7 +2,7 @@
 Author: Dima Potekhin (skinion.onn@gmail.com)
 
 [Name: PS_PaletteTools :]
-[Version: 0.220602 :]
+[Version: 0.220609 :]
 
 [Description:
 A set of tools for working with palettes.
@@ -22,7 +22,7 @@ function PS_PaletteTools() {
 
     //
     var scriptName = 'Palette Tools';
-    var scriptVer = '0.220401';
+    var scriptVer = '0.220609';
     //
 
     // var SETTINGS_NAME = 'PS_DEFORMER_TOOLS_SETTINGS';

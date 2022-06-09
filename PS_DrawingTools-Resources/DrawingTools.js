@@ -44,6 +44,7 @@ exports = {
     setOutputText: setOutputText,
 
     removeUnusedDrawingColumns: removeUnusedDrawingColumns,
+    expandExposure: expandExposure,
 
 }
 
@@ -66,5 +67,45 @@ function removeUnusedDrawingColumns(colorId) {
 
     if (deletedColumnsCount) showOutput('Drawing Columns deleted: ' + deletedColumnsCount+'.\nSee Message Log for details.', SUCCESS);
     else showOutput("All existing columns is exposed on the Timeline.  There's nothing to delete.", WARNING);
+
+}
+
+
+//
+function expandExposure( useAllTimeline ) {
+	
+	var currentFrame = frame.current();
+
+	SelectionUtils.getSelectedLayers().forEach(function(nodeData){
+		
+		var _node = nodeData.node; 
+		if( node.type(_node) !== 'READ' ) return;
+		// MessageLog.trace(JSON.stringify(nodeData));
+		var drawingColumnName = ColumnUtils.getDrawingColumnOfNode(_node);
+		var entries = ColumnUtils.getColumnEntries( drawingColumnName );
+		if( !entries.length ) return;
+
+		// MessageLog.trace('entries: '+_node+' > '+JSON.stringify(entries,true,' '))
+
+		var firstEntry = entries[0];
+		var lastEntry = entries[entries.length-1];
+
+		if( useAllTimeline ) currentFrame = 1;
+		if( currentFrame < firstEntry.firstFrame ){ // expand to the left
+
+			column.setEntry( drawingColumnName, 1, currentFrame, firstEntry.entry );
+			column.fillEmptyCels( drawingColumnName, currentFrame, firstEntry.firstFrame );
+			column.removeKeyDrawingExposureAt( drawingColumnName, firstEntry.firstFrame );
+			
+		}
+
+		if( useAllTimeline ) currentFrame = frame.numberOf();
+		if( currentFrame > lastEntry.lastFrame ){
+
+			// column.setEntry( drawingColumnName, 1, current, lastEntry[0].entry );
+			column.fillEmptyCels( drawingColumnName, firstEntry.lastFrame, currentFrame  );
+		}
+
+	});
 
 }

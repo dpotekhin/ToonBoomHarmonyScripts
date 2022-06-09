@@ -6,9 +6,17 @@ Version 0.220609
 
 ///
 exports = {
+	getDrawingColumnOfNode: getDrawingColumnOfNode,
     eachDrawingColumn: eachDrawingColumn,
     eachDrawingColumnKey: eachDrawingColumnKey,
+    getColumnEntries: getColumnEntries,
 }
+
+//
+function getDrawingColumnOfNode( _node ){
+	return node.linkedColumn(_node, "DRAWING.ELEMENT");
+}
+
 
 //
 function eachDrawingColumn( _cb ){
@@ -40,4 +48,32 @@ function eachDrawingColumnKey( _cb ) {
         }
     });
         
+}
+
+//
+function getColumnEntries( columnName ){
+	
+	var totalFrames = frame.numberOf();
+	var entries = [];
+	var prevEntry;
+	var prevFrame;
+
+	for( var f=1; f<totalFrames; f++){
+		var entry = column.getEntry( columnName, 1, f );
+		// MessageLog.trace(f+') '+entry );
+		if( entry !== prevEntry ){
+			if( prevEntry ){
+				entries.push({
+					firstFrame: prevFrame,
+					lastFrame: f-1,
+					entry: prevEntry
+				});
+			}
+			prevEntry = entry;
+			prevFrame = f;
+		}
+	}
+
+	return entries;
+
 }
