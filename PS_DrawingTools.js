@@ -52,6 +52,7 @@ function PS_DrawingTools() {
     ui.setStyleSheet(ui.styleSheet + ' QPushButton{ border: none; }');
 
 
+
     // ==========================================================
     var colGroup = modal.addGroup('Exposure:', ui, true, hGroupStyle);
 
@@ -63,12 +64,26 @@ function PS_DrawingTools() {
                 	DrawingTools.expandExposure( KeyModifiers.IsControlPressed() );
                 });
         },
-        'Remove unused Drawing columns.'
-        +'\nHold down Ctrl key to expand to all Timeline.'
+        'Expand exposure to the current frame.'
+        +'\n- Hold down Ctrl key to expand to all Timeline.'
+    );
+
+    modal.addButton('', colGroup, btnHeight, btnHeight,
+        iconPath + 'remove-exposure-outside-range.png',
+        function() {
+            _exec( 'Remove exposure outside the selected range',
+                function(){
+                	DrawingTools.removeExposureOutsideRange();
+                });
+        },
+        'Remove exposure outside the selected range.'
     );
 
     ///
     colGroup.mainLayout.addStretch();
+
+
+
 
     // ==========================================================
     var colGroup = modal.addGroup('Cleanup:', ui, true, hGroupStyle);
@@ -84,6 +99,9 @@ function PS_DrawingTools() {
 
     ///
     colGroup.mainLayout.addStretch();
+
+
+
 
     // ==========================================================
     // Output
