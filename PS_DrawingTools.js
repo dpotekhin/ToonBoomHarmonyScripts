@@ -1,38 +1,43 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
 
-[Name: PS_PaletteTools :]
-[Version: 0.220602 :]
+[Name: PS_DrawingTools :]
+[Version: 0.220609 :]
 
 [Description:
-A set of tools for working with palettes.
+A set of tools for working with Drawings.
 Some tools has options - check out for tooltips on tool buttons.
 :]
 */
 
+
 var pModal = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/pModal.js"));
-var _PaletteTools = require(fileMapper.toNativePath(specialFolders.userScripts + "/PS_PaletteTools-Resources/PaletteTools.js"));
+var _DrawingTools = require(fileMapper.toNativePath(specialFolders.userScripts + "/PS_DrawingTools-Resources/DrawingTools.js"));
 
-///
-function PS_PaletteTools() {
-
+//
+function PS_DrawingTools() {
 
     //
     MessageLog.clearLog();
 
     //
-    var scriptName = 'Palette Tools';
+    var scriptName = 'Drawing Tools';
     var scriptVer = '0.220401';
     //
 
     // var SETTINGS_NAME = 'PS_DEFORMER_TOOLS_SETTINGS';
 
-    var PaletteTools = _PaletteTools;
+    var DrawingTools = _DrawingTools;
+
+    var findDrawingsByColor_PREFS = '_PS_findDrawingsByColor';
+    var SUCCESS = 1;
+    var WARNING = 2;
+    var FAIL = 3;
 
     //
     var btnHeight = 30;
     var modalWidth = 290;
-    var iconPath = fileMapper.toNativePath(specialFolders.userScripts + "/PS_PaletteTools-Resources/icons/");
+    var iconPath = fileMapper.toNativePath(specialFolders.userScripts + "/PS_DrawingTools-Resources/icons/");
     var hGroupStyle = 'QGroupBox{ position: relative; border: none; padding-top:0; padding-bottom: 0; border-radius: 0;}';
     var forceWindowInstances = true; //KeyModifiers.IsControlPressed();
 
@@ -46,33 +51,22 @@ function PS_PaletteTools() {
 
     ui.setStyleSheet(ui.styleSheet + ' QPushButton{ border: none; }');
 
-    // ==========================================================
-    // 
-    var palettesGroup = modal.addGroup('Palettes:', ui, true, hGroupStyle);
-
-
-    ///
-    palettesGroup.mainLayout.addStretch();
 
 
     // ==========================================================
-    // 
-    var colorsGroup = modal.addGroup('Colors:', ui, true, hGroupStyle);
+    var colGroup = modal.addGroup('Cleanup:', ui, true, hGroupStyle);
 
-    modal.addButton('', colorsGroup, btnHeight, btnHeight,
-        iconPath + 'find-drawing-by-color.png',
-        function(){
-            _exec('Find Drawings by the selected Color',
-                PaletteTools.findDrawingsByColor_UI
-            );
+    modal.addButton('', colGroup, btnHeight, btnHeight,
+        iconPath + 'remove-unused-drawing-columns.png',
+        function() {
+            _exec( 'Remove unused Drawing columns',
+                DrawingTools.removeUnusedDrawingColumns );
         },
-        'Find a Drawing by the selected Color.' +
-        '\n- Hold down th Control key to loop through the found exposures.'
+        'Remove unused Drawing columns'
     );
 
     ///
-    colorsGroup.mainLayout.addStretch();
-
+    colGroup.mainLayout.addStretch();
 
     // ==========================================================
     // Output
@@ -81,7 +75,7 @@ function PS_PaletteTools() {
     _group.mainLayout.addWidget(outputText, 0, 0);
     outputText.text = '...';
     outputText.wordWrap = true;
-    PaletteTools.setOutputText(outputText);
+    DrawingTools.setOutputText(outputText);
 
     //
     ui.mainLayout.addStretch();
@@ -93,7 +87,7 @@ function PS_PaletteTools() {
     function _exec(_name, _action) {
 
         MessageLog.trace('>>> ' + _name);
-        PaletteTools.showOutput('...');
+        DrawingTools.showOutput('...');
 
         scene.beginUndoRedoAccum(_name);
 
