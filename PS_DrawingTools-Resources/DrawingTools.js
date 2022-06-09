@@ -46,7 +46,7 @@ exports = {
     removeUnusedDrawingColumns: removeUnusedDrawingColumns,
     expandExposure: expandExposure,
     removeExposureOutsideRange: removeExposureOutsideRange,
-
+	clearExposure: clearExposure,
 }
 
 
@@ -135,4 +135,42 @@ function removeExposureOutsideRange() {
 
     });
 
+}
+
+
+//
+function clearExposure() {
+
+    var startFrame = frame.current();
+    var finish;
+
+    SelectionUtils.getSelectedLayers().forEach(function(nodeData) {
+
+        var _node = nodeData.node;
+        if (node.type(_node) !== 'READ') return;
+        // MessageLog.trace(JSON.stringify(nodeData));
+        var drawingColumnName = ColumnUtils.getDrawingColumnOfNode(_node);
+        var entries = ColumnUtils.getColumnEntries(drawingColumnName);
+        // MessageLog.trace(JSON.stringify(entries));
+        if (!entries.length) return;
+
+        var entry = column.getEntry(drawingColumnName, 1, startFrame);
+
+        finish = false;
+        var currentFrame = startFrame;
+        do {
+
+            // MessageLog.trace(currentFrame + ' > ' + column.getEntry(drawingColumnName, 1, startFrame));
+
+            if ( column.getEntry(drawingColumnName, 1, currentFrame) !== entry ) {
+            	finish = true;
+            } else {
+                column.addKeyDrawingExposureAt(drawingColumnName, currentFrame);
+                column.setEntry(drawingColumnName, 1, currentFrame, '');
+                currentFrame--;
+            }
+
+        } while (currentFrame >= 1 && !finish)
+
+    });
 }

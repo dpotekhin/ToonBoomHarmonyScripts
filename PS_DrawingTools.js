@@ -56,6 +56,7 @@ function PS_DrawingTools() {
     // ==========================================================
     var colGroup = modal.addGroup('Exposure:', ui, true, hGroupStyle);
 
+
     modal.addButton('', colGroup, btnHeight, btnHeight,
         iconPath + 'expand-exposure.png',
         function() {
@@ -68,6 +69,7 @@ function PS_DrawingTools() {
         +'\n- Hold down Ctrl key to expand to all Timeline.'
     );
 
+
     modal.addButton('', colGroup, btnHeight, btnHeight,
         iconPath + 'remove-exposure-outside-range.png',
         function() {
@@ -77,6 +79,18 @@ function PS_DrawingTools() {
                 });
         },
         'Remove exposure outside the selected range.'
+    );
+
+
+    modal.addButton('', colGroup, btnHeight, btnHeight,
+        iconPath + 'clear-exposure.png',
+        function() {
+            _exec( 'Clear exposure',
+                function(){
+                	DrawingTools.clearExposure();
+                });
+        },
+        'Clear exposure.'
     );
 
     ///
