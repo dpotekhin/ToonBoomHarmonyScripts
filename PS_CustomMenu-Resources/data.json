@@ -306,6 +306,22 @@
                     "scriptFunction": "PS_Markers",
                     "scriptParams": [ 6 ],
                     "icon": "@/PS_Markers-remove-left.png"
+                },
+
+                {
+                    "name": "Copy all Scene Markers",
+                    "type": "script",
+                    "scriptFile": "PS_Markers.js",
+                    "scriptFunction": "PS_CopySceneMarkers",
+                    "icon": "@/PS_Markers-copy.png"
+                },
+
+                {
+                    "name": "Paste Scene Markers",
+                    "type": "script",
+                    "scriptFile": "PS_Markers.js",
+                    "scriptFunction": "PS_PasteSceneMarkers",
+                    "icon": "@/PS_Markers-paste.png"
                 }
 
             ]
