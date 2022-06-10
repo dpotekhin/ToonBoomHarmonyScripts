@@ -375,6 +375,14 @@
             "scriptFile": "PS_SelectionSets.js",
             "scriptFunction": "PS_SelectionSets",
             "icon": "~/PS_SelectionSets.png"
+        },
+
+        {
+            "name": "PS Drawing tools",
+            "type": "script",
+            "scriptFile": "PS_DrawingTools.js",
+            "scriptFunction": "PS_DrawingTools",
+            "icon": "~/PS_DrawingTools.png"
         }
 
     ]
