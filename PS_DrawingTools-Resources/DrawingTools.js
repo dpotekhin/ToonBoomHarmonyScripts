@@ -46,7 +46,8 @@ exports = {
     removeUnusedDrawingColumns: removeUnusedDrawingColumns,
     expandExposure: expandExposure,
     removeExposureOutsideRange: removeExposureOutsideRange,
-
+	clearExposure: clearExposure,
+	selectColumnByName: selectColumnByName,
 }
 
 
@@ -134,5 +135,76 @@ function removeExposureOutsideRange() {
         ColumnUtils.clearExposures(drawingColumnName, rangeLastFrame, totalFrames);
 
     });
+
+}
+
+
+//
+function clearExposure() {
+
+    var startFrame = frame.current();
+    var finish;
+
+    SelectionUtils.getSelectedLayers().forEach(function(nodeData) {
+
+        var _node = nodeData.node;
+        if (node.type(_node) !== 'READ') return;
+        // MessageLog.trace(JSON.stringify(nodeData));
+        var drawingColumnName = ColumnUtils.getDrawingColumnOfNode(_node);
+        var entries = ColumnUtils.getColumnEntries(drawingColumnName);
+        // MessageLog.trace(JSON.stringify(entries));
+        if (!entries.length) return;
+
+        var entry = column.getEntry(drawingColumnName, 1, startFrame);
+
+        finish = false;
+        var currentFrame = startFrame;
+        do {
+
+            // MessageLog.trace(currentFrame + ' > ' + column.getEntry(drawingColumnName, 1, startFrame));
+
+            if ( column.getEntry(drawingColumnName, 1, currentFrame) !== entry ) {
+            	finish = true;
+            } else {
+                column.addKeyDrawingExposureAt(drawingColumnName, currentFrame);
+                column.setEntry(drawingColumnName, 1, currentFrame, '');
+                currentFrame--;
+            }
+
+        } while (currentFrame >= 1 && !finish)
+
+    });
+}
+
+
+//
+function selectColumnByName () {
+	
+	var searchColumnName = Input.getText('Enter Column name:', '', '');
+	// MessageLog.trace(searchColumnName);
+	if( !searchColumnName ) return;
+
+	var columnCount = column.numberOf();
+	var columnFound = [];
+
+	for( var i=0; i<columnCount; i++ ){
+		var columnName = column.getName(i);
+		if( columnName === searchColumnName ){
+			columnFound.push(columnName);
+			break;
+		}
+		columnName = undefined;
+		// MessageLog.trace(i+') '+columnName+' > '+searchColumnName );
+	}
+
+	if( !columnFound.length ){
+		showOutput("No column found.", WARNING);
+		return;
+	}
+
+	showOutput("Columns found: "+columnFound.length, SUCCESS);
+
+	selection.clearSelection();
+	selection.addColumnToSelection( columnFound[0] );
 
 }

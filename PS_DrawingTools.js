@@ -54,9 +54,10 @@ function PS_DrawingTools() {
 
 
     // ==========================================================
-    var colGroup = modal.addGroup('Exposure:', ui, true, hGroupStyle);
+    var exposureGroup = modal.addGroup('Exposure:', ui, true, hGroupStyle);
 
-    modal.addButton('', colGroup, btnHeight, btnHeight,
+
+    modal.addButton('', exposureGroup, btnHeight, btnHeight,
         iconPath + 'expand-exposure.png',
         function() {
             _exec( 'Expand exposure to the current frame',
@@ -68,7 +69,8 @@ function PS_DrawingTools() {
         +'\n- Hold down Ctrl key to expand to all Timeline.'
     );
 
-    modal.addButton('', colGroup, btnHeight, btnHeight,
+
+    modal.addButton('', exposureGroup, btnHeight, btnHeight,
         iconPath + 'remove-exposure-outside-range.png',
         function() {
             _exec( 'Remove exposure outside the selected range',
@@ -79,16 +81,38 @@ function PS_DrawingTools() {
         'Remove exposure outside the selected range.'
     );
 
+
+    modal.addButton('', exposureGroup, btnHeight, btnHeight,
+        iconPath + 'clear-exposure.png',
+        function() {
+            _exec( 'Clear exposure',
+                function(){
+                	DrawingTools.clearExposure();
+                });
+        },
+        'Clear exposure.'
+    );
+
     ///
-    colGroup.mainLayout.addStretch();
+    exposureGroup.mainLayout.addStretch();
 
 
 
 
     // ==========================================================
-    var colGroup = modal.addGroup('Cleanup:', ui, true, hGroupStyle);
+    var columnGroup = modal.addGroup('Columns:', ui, true, hGroupStyle);
 
-    modal.addButton('', colGroup, btnHeight, btnHeight,
+    modal.addButton('', columnGroup, btnHeight, btnHeight,
+        iconPath + 'find-column-by-name.png',
+        function() {
+            _exec( 'Select Column by name',
+                DrawingTools.selectColumnByName );
+        },
+        'Select Column by name'
+    );
+
+
+    modal.addButton('', columnGroup, btnHeight, btnHeight,
         iconPath + 'remove-unused-drawing-columns.png',
         function() {
             _exec( 'Remove unused Drawing columns',
@@ -98,7 +122,7 @@ function PS_DrawingTools() {
     );
 
     ///
-    colGroup.mainLayout.addStretch();
+    columnGroup.mainLayout.addStretch();
 
 
 
