@@ -54,6 +54,7 @@ function PS_DrawingTools() {
 
 
     // ==========================================================
+    // EXPOSURE
     var exposureGroup = modal.addGroup('Exposure:', ui, true, hGroupStyle);
 
 
@@ -93,13 +94,14 @@ function PS_DrawingTools() {
         'Clear exposure.'
     );
 
-    ///
+    //
     exposureGroup.mainLayout.addStretch();
 
 
 
 
     // ==========================================================
+    // COLUMNS
     var columnGroup = modal.addGroup('Columns:', ui, true, hGroupStyle);
 
     modal.addButton('', columnGroup, btnHeight, btnHeight,
@@ -121,8 +123,34 @@ function PS_DrawingTools() {
         'Remove unused Drawing columns'
     );
 
-    ///
+    //
     columnGroup.mainLayout.addStretch();
+
+
+    // ==========================================================
+    // ELEMENTS
+    var elementsGroup = modal.addGroup('Elements:', ui, true, hGroupStyle);
+
+    modal.addButton('', elementsGroup, btnHeight, btnHeight,
+        iconPath + 'open-selected-element-folder.png',
+        function() {
+            _exec( undefined,
+                DrawingTools.openSelectedElementFolder );
+        },
+        'Open Selected Element Folder'
+    );
+
+    modal.addButton('', elementsGroup, btnHeight, btnHeight,
+        iconPath + 'change-element-format.png',
+        function() {
+            _exec( undefined,
+                DrawingTools.changeElementFormat );
+        },
+        'Change Element Format'
+    );
+
+    //
+    elementsGroup.mainLayout.addStretch();
 
 
 
@@ -148,7 +176,7 @@ function PS_DrawingTools() {
         MessageLog.trace('>>> ' + _name);
         DrawingTools.showOutput('...');
 
-        scene.beginUndoRedoAccum(_name);
+        if( _name ) scene.beginUndoRedoAccum(_name);
 
         try {
 
@@ -158,7 +186,7 @@ function PS_DrawingTools() {
             MessageLog.trace('Error: ' + _name + ': ' + err);
         }
 
-        scene.endUndoRedoAccum();
+        if( _name ) scene.endUndoRedoAccum();
 
     }
 

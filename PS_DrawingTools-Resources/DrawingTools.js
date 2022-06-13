@@ -7,6 +7,7 @@ var Utils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/Ut
 var SelectionUtils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/SelectionUtils.js"));
 var NodeUtils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/NodeUtils.js"));
 var ColumnUtils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/ColumnUtils.js"));
+var FileSystem = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/FileSystem.js"));
 
 ///
 var COLORART = 1;
@@ -46,8 +47,10 @@ exports = {
     removeUnusedDrawingColumns: removeUnusedDrawingColumns,
     expandExposure: expandExposure,
     removeExposureOutsideRange: removeExposureOutsideRange,
-	clearExposure: clearExposure,
-	selectColumnByName: selectColumnByName,
+    clearExposure: clearExposure,
+    selectColumnByName: selectColumnByName,
+    openSelectedElementFolder: openSelectedElementFolder,
+    changeElementFormat: changeElementFormat,
 }
 
 
@@ -163,8 +166,8 @@ function clearExposure() {
 
             // MessageLog.trace(currentFrame + ' > ' + column.getEntry(drawingColumnName, 1, startFrame));
 
-            if ( column.getEntry(drawingColumnName, 1, currentFrame) !== entry ) {
-            	finish = true;
+            if (column.getEntry(drawingColumnName, 1, currentFrame) !== entry) {
+                finish = true;
             } else {
                 column.addKeyDrawingExposureAt(drawingColumnName, currentFrame);
                 column.setEntry(drawingColumnName, 1, currentFrame, '');
@@ -178,33 +181,112 @@ function clearExposure() {
 
 
 //
-function selectColumnByName () {
-	
-	var searchColumnName = Input.getText('Enter Column name:', '', '');
-	// MessageLog.trace(searchColumnName);
-	if( !searchColumnName ) return;
+function selectColumnByName() {
 
-	var columnCount = column.numberOf();
-	var columnFound = [];
+    var searchColumnName = Input.getText('Enter Column name:', '', '');
+    // MessageLog.trace(searchColumnName);
+    if (!searchColumnName) return;
 
-	for( var i=0; i<columnCount; i++ ){
-		var columnName = column.getName(i);
-		if( columnName === searchColumnName ){
-			columnFound.push(columnName);
-			break;
-		}
-		columnName = undefined;
-		// MessageLog.trace(i+') '+columnName+' > '+searchColumnName );
-	}
+    var columnCount = column.numberOf();
+    var columnFound = [];
 
-	if( !columnFound.length ){
-		showOutput("No column found.", WARNING);
-		return;
-	}
+    for (var i = 0; i < columnCount; i++) {
+        var columnName = column.getName(i);
+        if (columnName === searchColumnName) {
+            columnFound.push(columnName);
+            break;
+        }
+        columnName = undefined;
+        // MessageLog.trace(i+') '+columnName+' > '+searchColumnName );
+    }
 
-	showOutput("Columns found: "+columnFound.length, SUCCESS);
+    if (!columnFound.length) {
+        showOutput("No column found.", WARNING);
+        return;
+    }
 
-	selection.clearSelection();
-	selection.addColumnToSelection( columnFound[0] );
+    showOutput("Columns found: " + columnFound.length, SUCCESS);
+
+    selection.clearSelection();
+    selection.addColumnToSelection(columnFound[0]);
+
+}
+
+
+///
+function openSelectedElementFolder() {
+    var _node = selection.selectedNodes()[0];
+    if (node.type(_node) !== "READ") return;
+    var elementId = node.getElementId(_node);
+    MessageLog.trace('PS_OpenDrawingFolder: ' + _node);
+    MessageLog.trace('elementId: ' + elementId);
+    MessageLog.trace('completeFolder: ' + element.completeFolder(elementId));
+    MessageLog.trace('folder: ' + element.folder(elementId));
+    MessageLog.trace('physicalName: ' + element.physicalName(elementId));
+    MessageLog.trace('vectorType: ' + element.vectorType(elementId));
+    MessageLog.trace('pixmapFormat: ' + element.pixmapFormat(elementId));
+    var path = element.completeFolder(elementId);
+    FileSystem.openFolder(fileMapper.toNativePath(path));
+}
+
+///
+function changeElementFormat() {
+
+    // scanType    : "COLOR", "GRAY_SCALE" or "BW" (for black and white).
+    // fieldChart  : 12, 16 or 24.
+    // pixmapFormat    : 1 for OPT, 3 for SCAN, 4 for SGI, 5 for TGA, 7 for YUV, 9 for OMF or 10 for PSD, 11 for PNG, 12 for JPEG, 13 for BMP, 15 for TIFF.
+    // vectorType  : 0 (None), 1 (PNT) or 2 (TVG).
+
+    var _node = selection.selectedNodes()[0];
+    if (node.type(_node) !== "READ") return;
+    var elementId = node.getElementId(_node);
+
+    var currentScanType = element.scanType(elementId);
+    MessageLog.trace('scanType: ' + currentScanType);
+
+    var currentFieldChart = element.fieldChart(elementId);
+    MessageLog.trace('fieldChart: ' + currentFieldChart);
+
+    var currentPixelFormat = element.pixmapFormat(elementId);
+    MessageLog.trace('pixelFormat: ' + currentPixelFormat);
+
+    var currentVectorType = element.vectorType(elementId);
+    MessageLog.trace('vectorType: ' + currentVectorType);
+
+
+    var pixelFormat = {
+        "OPT": 1,
+        "SCAN": 3,
+        "SGI": 4,
+        "TGA": 5,
+        "YUV": 7,
+        "OMF": 9,
+        "PSD": 10,
+        "PNG": 11,
+        "JPG": 12,
+        "BMP": 13,
+        "TIFF": 15,
+    }
+    var d = new Dialog();
+    d.title = "Sample Dialog";
+
+    var pixelFormatInput = new ComboBox();
+    pixelFormatInput.label = "Pixmap Format:"
+    pixelFormatInput.editable = true;
+    pixelFormatInput.itemList = Object.keys(pixelFormat);
+    pixelFormatInput.currentItemPos = Object.keys(pixelFormat).indexOf(currentPixelFormat);
+    d.add(pixelFormatInput);
+
+    if (d.exec()) {
+
+        // MessageLog.trace(pixelFormatInput.currentItem);
+        element.modify(elementId,
+            currentScanType,
+            currentFieldChart,
+            pixelFormatInput.currentItem,
+            currentVectorType
+        );
+
+    }
 
 }
