@@ -62,7 +62,7 @@ function PS_RenameNodes(){
 		'LINE_ART': '{{NAME}}-LA',
 		'COLOR_ART': '{{NAME}}-CA',
 		'TbdColorSelector': '{{NAME}}-CS',
-		'CUTTER': '{{NAME}}-CUT',
+		'CUTTER': '{{NAME}}-C',
 		'AutoPatchModule': '{{NAME}}-AP',
 		'VISIBILITY': '{{NAME}}-VIS',
 		
@@ -160,8 +160,9 @@ function PS_RenameNodes(){
 			'LINE_ART': 'LA',
 			'COLOR_ART': 'CA',
 			'TbdColorSelector': 'CS',
-			'CUTTER': 'CUT',
+			'CUTTER': 'C',
 			'AutoPatchModule': 'AP',
+			'COMPOSITE': 'CMP',
 		}
 
 		Object.keys(shortPaterns).forEach(function( n ){
