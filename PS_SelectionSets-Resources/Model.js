@@ -8,8 +8,6 @@ var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Util
 var NodeUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/NodeUtils.js"));
 var config = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_SelectionSets-Resources/config.js"));
 
-///
-var dataNodePrefix = 'PS-SS_';
 
 ///
 function Model( scriptVer ){
@@ -133,7 +131,7 @@ function Model( scriptVer ){
     //
     var dataNode = node.add(
       parentNode,
-      NodeUtils.getUnusedName( parentNode+'/'+NodeUtils.getValidNodeName(dataNodePrefix+dataNodeName), true ),
+      NodeUtils.getUnusedName( parentNode+'/'+NodeUtils.getValidNodeName(config.dataNodePrefix+dataNodeName), true ),
       'NOTE',
       0,
       0,
@@ -304,7 +302,7 @@ function Model( scriptVer ){
       var dataNodeParent = itemData.dataNode.split('/');
       dataNodeParent.pop();
       dataNodeParent = dataNodeParent.join('/');
-      var dataNodeName = NodeUtils.getUnusedName( dataNodeParent+'/'+ NodeUtils.getValidNodeName(dataNodePrefix+newName), true );
+      var dataNodeName = NodeUtils.getUnusedName( dataNodeParent+'/'+ NodeUtils.getValidNodeName(config.dataNodePrefix+newName), true );
       // MessageLog.trace('dataNodeName: '+dataNodeName+'; '+dataNodeParent );
       node.rename( itemData.dataNode, dataNodeName );
       
