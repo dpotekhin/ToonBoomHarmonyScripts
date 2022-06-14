@@ -2,7 +2,7 @@
 Author: Dima Potekhin (skinion.onn@gmail.com)
 
 [Name: PS_SelectionSets :]
-[Version: 0.211006 :]
+[Version: 0.220614 :]
 
 [Description:
 This script lets you to save and use groups of node selection sets (SS).
@@ -48,7 +48,7 @@ function PS_SelectionSets(){
   // MessageLog.clearLog();
 
   var scriptName = 'Selection Sets';
-  var scriptVer = '0.211006';
+  var scriptVer = '0.220614';
 
   var modalWidthMin = 100;
   var modalWidthMax = 400;
