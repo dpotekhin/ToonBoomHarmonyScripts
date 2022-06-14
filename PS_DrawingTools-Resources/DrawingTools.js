@@ -50,7 +50,7 @@ exports = {
     clearExposure: clearExposure,
     selectColumnByName: selectColumnByName,
     openSelectedElementFolder: openSelectedElementFolder,
-    changeElementFormat: changeElementFormat,
+    // changeElementFormat: changeElementFormat,
 }
 
 
@@ -229,6 +229,7 @@ function openSelectedElementFolder() {
     FileSystem.openFolder(fileMapper.toNativePath(path));
 }
 
+/*
 ///
 function changeElementFormat() {
 
@@ -290,3 +291,4 @@ function changeElementFormat() {
     }
 
 }
+*/

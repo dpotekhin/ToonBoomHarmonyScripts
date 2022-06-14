@@ -140,6 +140,7 @@ function PS_DrawingTools() {
         'Open Selected Element Folder'
     );
 
+    /*
     modal.addButton('', elementsGroup, btnHeight, btnHeight,
         iconPath + 'change-element-format.png',
         function() {
@@ -148,7 +149,8 @@ function PS_DrawingTools() {
         },
         'Change Element Format'
     );
-
+    */
+    
     //
     elementsGroup.mainLayout.addStretch();
 
