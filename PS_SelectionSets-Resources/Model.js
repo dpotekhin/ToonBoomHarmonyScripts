@@ -1,11 +1,12 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.211116
+Version: 0.220614
 */
 
 //
 var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
 var NodeUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/NodeUtils.js"));
+var config = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_SelectionSets-Resources/config.js"));
 
 ///
 var dataNodePrefix = 'PS-SS_';
@@ -349,10 +350,11 @@ function Model( scriptVer ){
       name: setName,
       groupId: groupData.id,
       nodes: nodes || [],
+      color: this.getSetDefaultColor( nodes ),
     };
     groupData.items.push( itemData );
 
-    // MessageLog.trace('createSetInGroup', groupId, setName, JSON.stringify(groupData,true,' ') );
+    // MessageLog.trace('createSetInGroup:'+ groupId+', '+setName+', '+JSON.stringify(groupData,true,' ') );
 
     this.saveGroupData( groupData );
 
@@ -661,6 +663,34 @@ function Model( scriptVer ){
         return JSON.parse( loadedData )['PS_SelectionSets'];
       }
     }catch(err){ return; }
+
+  }
+
+
+  //
+  this.getSetDefaultColor = function (_nodes) {
+    
+    var nodesTypes = {};
+    _nodes.forEach(function(_node){
+      var nodeType = node.type(_node);
+      if( !nodesTypes[nodeType] ) nodesTypes[nodeType] = 1;
+      else nodesTypes[nodeType]++;
+    });
+
+    var primaryNodeType = Object.keys(nodesTypes)[0];
+    if( !primaryNodeType ) return;
+    
+    // MessageLog.trace(primaryNodeType, JSON.stringify(nodesTypes,true,'  '));
+
+    var defaultColor;
+
+    Object.keys(config.defaultColors).forEach(function( _nodeTypes ){
+      _nodeTypes.split(',').forEach(function(_nodeType){
+        if( _nodeType === primaryNodeType ) defaultColor = config.defaultColors[_nodeTypes];
+      })
+    })
+
+    return defaultColor;
 
   }
 

@@ -216,7 +216,10 @@ function selectColumnByName() {
 ///
 function openSelectedElementFolder() {
     var _node = selection.selectedNodes()[0];
-    if (node.type(_node) !== "READ") return;
+    if (node.type(_node) !== "READ") {
+        showOutput('No Drawing selected.',WARNING);
+        return;
+    }
     var elementId = node.getElementId(_node);
     MessageLog.trace('PS_OpenDrawingFolder: ' + _node);
     MessageLog.trace('elementId: ' + elementId);
