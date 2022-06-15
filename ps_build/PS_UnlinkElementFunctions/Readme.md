@@ -14,4 +14,4 @@ This script allows to unlink animation functions and expressions from selected n
 
 ### Installation:
 Copy all files from this folder to [Harmony User Scripts directory](https://docs.toonboom.com/help/harmony-20/premium/scripting/import-script.html).\
-Add script "PS_UnlinkElementFunctions" to a panel.  
+Add the script "PS_UnlinkElementFunctions" to a panel.  
