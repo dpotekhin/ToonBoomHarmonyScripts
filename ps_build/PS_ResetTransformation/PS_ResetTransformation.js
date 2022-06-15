@@ -49,6 +49,22 @@ function _getCommonData(){
 		return;
 	}
 
+	// MessageLog.trace( node.getTextAttr(selectedNodes[0],frame.current(),'ROTATION.X') );
+	// var attr =  node.getAttr(selectedNodes[0],frame.current(),'ROTATION.QUATERNIONPATH');
+	// var attr =  node.getAttr(selectedNodes[0],frame.current(),'ROTATION.QUATERNIONPATH.X');
+	// MessageLog.trace( attr.intValue() );
+	
+	// Utils.getFullAttributeList(selectedNodes[0],frame.current()).forEach(function(attr){
+	// 	MessageLog.trace(  attr.keyword()+' > '+attr.typeName(), attr.textValueAt(frame.current()) );	
+	// });
+	
+
+	var attr =  node.getAttr(selectedNodes[0],frame.current(),'ROTATION.QUATERNIONPATH');
+	// MessageLog.trace( Object.keys(attr).join('\n'));
+	// MessageLog.trace( attr.doubleValueAt(frame.current()) );
+	// MessageLog.trace( attr.getSubAttributes() );
+	// return;
+
 	var usePosition = KeyModifiers.IsShiftPressed();
 	var useScale = KeyModifiers.IsControlPressed();
 	var useRotation = KeyModifiers.IsAlternatePressed();
