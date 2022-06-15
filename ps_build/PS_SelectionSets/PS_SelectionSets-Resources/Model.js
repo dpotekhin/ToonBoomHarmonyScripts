@@ -1,14 +1,13 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.211006
+Version: 0.220614
 */
 
 //
 var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_SelectionSets-Resources/ps/Utils.js"));
 var NodeUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_SelectionSets-Resources/ps/NodeUtils.js"));
+var config = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_SelectionSets-Resources/config.js"));
 
-///
-var dataNodePrefix = 'PS-SS_';
 
 ///
 function Model( scriptVer ){
@@ -132,7 +131,7 @@ function Model( scriptVer ){
     //
     var dataNode = node.add(
       parentNode,
-      NodeUtils.getUnusedName( parentNode+'/'+NodeUtils.getValidNodeName(dataNodePrefix+dataNodeName), true ),
+      NodeUtils.getUnusedName( parentNode+'/'+NodeUtils.getValidNodeName(config.dataNodePrefix+dataNodeName), true ),
       'NOTE',
       0,
       0,
@@ -303,7 +302,7 @@ function Model( scriptVer ){
       var dataNodeParent = itemData.dataNode.split('/');
       dataNodeParent.pop();
       dataNodeParent = dataNodeParent.join('/');
-      var dataNodeName = NodeUtils.getUnusedName( dataNodeParent+'/'+ NodeUtils.getValidNodeName(dataNodePrefix+newName), true );
+      var dataNodeName = NodeUtils.getUnusedName( dataNodeParent+'/'+ NodeUtils.getValidNodeName(config.dataNodePrefix+newName), true );
       // MessageLog.trace('dataNodeName: '+dataNodeName+'; '+dataNodeParent );
       node.rename( itemData.dataNode, dataNodeName );
       
@@ -349,10 +348,11 @@ function Model( scriptVer ){
       name: setName,
       groupId: groupData.id,
       nodes: nodes || [],
+      color: this.getSetDefaultColor( nodes ),
     };
     groupData.items.push( itemData );
 
-    // MessageLog.trace('createSetInGroup', groupId, setName, JSON.stringify(groupData,true,' ') );
+    // MessageLog.trace('createSetInGroup:'+ groupId+', '+setName+', '+JSON.stringify(groupData,true,' ') );
 
     this.saveGroupData( groupData );
 
@@ -661,6 +661,34 @@ function Model( scriptVer ){
         return JSON.parse( loadedData )['PS_SelectionSets'];
       }
     }catch(err){ return; }
+
+  }
+
+
+  //
+  this.getSetDefaultColor = function (_nodes) {
+    
+    var nodesTypes = {};
+    _nodes.forEach(function(_node){
+      var nodeType = node.type(_node);
+      if( !nodesTypes[nodeType] ) nodesTypes[nodeType] = 1;
+      else nodesTypes[nodeType]++;
+    });
+
+    var primaryNodeType = Object.keys(nodesTypes)[0];
+    if( !primaryNodeType ) return;
+    
+    // MessageLog.trace(primaryNodeType, JSON.stringify(nodesTypes,true,'  '));
+
+    var defaultColor;
+
+    Object.keys(config.defaultColors).forEach(function( _nodeTypes ){
+      _nodeTypes.split(',').forEach(function(_nodeType){
+        if( _nodeType === primaryNodeType ) defaultColor = config.defaultColors[_nodeTypes];
+      })
+    })
+
+    return defaultColor;
 
   }
 

@@ -58,11 +58,12 @@ function PS_UnlinkElementFunctions(){
 		MessageLog.trace('>>> Unlink all except: '+columnFilter );
 	}
 
-	scene.beginUndoRedoAccum('unlinkFunctions');
+	scene.beginUndoRedoAccum('Unlink Animation Functions');
 
 	try{
-		for (i = 0; i < n; ++i)
-		{
+
+		for (i = 0; i < n; ++i){
+			
 	 		var selNode = selection.selectedNode(i);
 			
 			if( node.isGroup(selNode) ){
@@ -76,14 +77,13 @@ function PS_UnlinkElementFunctions(){
 			}else{
 				NodeUtils.unlinkFunctions( selNode, columnFilter, invertColumnFilter, keepCurrentValues );
 			}
-			
-
-			// // Get Node position in the Node View
-			// MessageLog.trace('x='+node.coordX(selNode)+', y='+node.coordY(selNode));
 
 	 	}
+
 	 }catch(err){
-	 	// MessageLog.trace('Error: '+err);
+
+	 	MessageLog.trace('Error: '+err);
+
 	 }
 
  	scene.endUndoRedoAccum();

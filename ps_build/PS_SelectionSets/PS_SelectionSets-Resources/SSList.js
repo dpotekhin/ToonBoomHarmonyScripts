@@ -1,12 +1,13 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.211006
+Version: 0.211116
 */
 
 var _ContextMenu = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_SelectionSets-Resources/ps/ContextMenu.js"));
 var TreeView = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_SelectionSets-Resources/TreeView.js"));
 var Model = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_SelectionSets-Resources/Model.js"));
 var SelectionUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_SelectionSets-Resources/ps/SelectionUtils.js"));
+var config = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_SelectionSets-Resources/config.js"));
 
 ///
 function SSList( scriptVer, parentWidget ){
@@ -737,12 +738,11 @@ function SSList( scriptVer, parentWidget ){
 
 
   // PREFERENCES >>>
-  var prefsName = 'PS_SelectionSets_Prefs';
-  var prefs = this.prefs = JSON.parse( preferences.getString( prefsName, '{}' ) );
+  var prefs = this.prefs = JSON.parse( preferences.getString( config.prefsName, '{}' ) );
 
   this.savePrefs = function(){
 
-    preferences.setString( prefsName, JSON.stringify(prefs) );
+    preferences.setString( config.prefsName, JSON.stringify(prefs) );
   
   }
 

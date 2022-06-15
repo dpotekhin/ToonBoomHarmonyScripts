@@ -50,7 +50,7 @@ exports = {
     clearExposure: clearExposure,
     selectColumnByName: selectColumnByName,
     openSelectedElementFolder: openSelectedElementFolder,
-    changeElementFormat: changeElementFormat,
+    // changeElementFormat: changeElementFormat,
 }
 
 
@@ -216,7 +216,10 @@ function selectColumnByName() {
 ///
 function openSelectedElementFolder() {
     var _node = selection.selectedNodes()[0];
-    if (node.type(_node) !== "READ") return;
+    if (node.type(_node) !== "READ") {
+        showOutput('No Drawing selected.',WARNING);
+        return;
+    }
     var elementId = node.getElementId(_node);
     MessageLog.trace('PS_OpenDrawingFolder: ' + _node);
     MessageLog.trace('elementId: ' + elementId);
@@ -229,6 +232,7 @@ function openSelectedElementFolder() {
     FileSystem.openFolder(fileMapper.toNativePath(path));
 }
 
+/*
 ///
 function changeElementFormat() {
 
@@ -290,3 +294,4 @@ function changeElementFormat() {
     }
 
 }
+*/
