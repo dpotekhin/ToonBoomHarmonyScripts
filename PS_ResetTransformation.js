@@ -2,7 +2,7 @@
 Author: Dima Potekhin (skinion.onn@gmail.com)
 
 [Name: PS_ResetTransformation :]
-[Version: 0.220408 :]
+[Version: 0.220615 :]
 
 [Description:
 Three scripts to universal (pegs and deformers) reset of transformations, save transformation state and remove that state.
@@ -42,350 +42,304 @@ var Utils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/Ut
 var NodeUtils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/NodeUtils.js"));
 
 //
-function _getCommonData(){
+function _getCommonData() {
 
-	var selectedNodes = selection.selectedNodes();
-	if( !selectedNodes || !selectedNodes.length ){
-		return;
-	}
+    var selectedNodes = selection.selectedNodes();
+    if (!selectedNodes || !selectedNodes.length) {
+        return;
+    }
 
-	// MessageLog.trace( node.getTextAttr(selectedNodes[0],frame.current(),'ROTATION.X') );
-	// var attr =  node.getAttr(selectedNodes[0],frame.current(),'ROTATION.QUATERNIONPATH');
-	// var attr =  node.getAttr(selectedNodes[0],frame.current(),'ROTATION.QUATERNIONPATH.X');
-	// MessageLog.trace( attr.intValue() );
-	
-	// Utils.getFullAttributeList(selectedNodes[0],frame.current()).forEach(function(attr){
-	// 	MessageLog.trace(  attr.keyword()+' > '+attr.typeName(), attr.textValueAt(frame.current()) );	
-	// });
-	
+    // MessageLog.trace( node.getTextAttr(selectedNodes[0],frame.current(),'ROTATION.X') );
+    // var attr =  node.getAttr(selectedNodes[0],frame.current(),'ROTATION.QUATERNIONPATH');
+    // var attr =  node.getAttr(selectedNodes[0],frame.current(),'ROTATION.QUATERNIONPATH.X');
+    // MessageLog.trace( attr.intValue() );
 
-	var attr =  node.getAttr(selectedNodes[0],frame.current(),'ROTATION.QUATERNIONPATH');
-	// MessageLog.trace( Object.keys(attr).join('\n'));
-	// MessageLog.trace( attr.doubleValueAt(frame.current()) );
-	// MessageLog.trace( attr.getSubAttributes() );
-	// return;
-
-	var usePosition = KeyModifiers.IsShiftPressed();
-	var useScale = KeyModifiers.IsControlPressed();
-	var useRotation = KeyModifiers.IsAlternatePressed();
-
-	//
-	var nodeTemplates = {
-		'PEG,READ': {
-			position: [
-				'POSITION.X',0,'POSITION.Y',0,'POSITION.Z',0,
-				'POSITION.3DPATH',0,
-				'OFFSET.X',0,'OFFSET.Y',0,'OFFSET.Z',0
-				],
-			rotation: [
-				'ROTATION.ANGLEX',0,'ROTATION.ANGLEY',0,'ROTATION.ANGLEZ',0,
-				'ROTATION.QUATERNIONPATH',0,
-				'ANGLE',0,'SKEW',0
-			],
-			scale: [
-				'SCALE.X',1,'SCALE.Y',1,'SCALE.Z',1,
-				'SCALE.XY',1
-			]
-		},
-		'OffsetModule,CurveModule': {
-			position: ['offset.X','restingOffset.X','offset.Y','restingOffset.Y'],
-			rotation: [
-				'orientation','restingOrientation',
-				'orientation1','restingOrientation1',
-				'>orientation0','>restingOrientation0',
-			],
-			scale: [
-				'length1','restLength1',
-				'>length0','>restLength0'
-			]
-		},
-		'BendyBoneModule':{
-			position: ['offset.X','restOffset.X','offset.Y','restOffset.Y'],
-			rotation: [
-				'orientation','restOrientation',
-				'radius','restRadius','bias','restBias'
-			],
-			scale: ['length','restLength']
-		}
-	};
-	
-	var nodeTemplatesByNodeName = {};
-	var nodeTypes = [];
-	Object.keys(nodeTemplates).forEach(function(_nodeName){
-		_nodeName.split(',').forEach(function(__nodeName){
-			nodeTypes.push(__nodeName);
-			nodeTemplatesByNodeName[__nodeName] = nodeTemplates[_nodeName];
-		});
-	});
+    // Utils.getFullAttributeList(selectedNodes[0],frame.current()).forEach(function(attr){
+    // 	MessageLog.trace(  attr.keyword()+' > '+attr.typeName(), attr.textValueAt(frame.current()) );	
+    // });
 
 
-	//
-	if( usePosition && useScale && useRotation ) {
-		selectedNodes = NodeUtils.getAllChildNodes( selectedNodes, nodeTypes.join('|') );
-		MessageLog.trace('Reset all children:\n'+selectedNodes.join('\n') );
-	}
+    var attr = node.getAttr(selectedNodes[0], frame.current(), 'ROTATION.QUATERNIONPATH');
+    // MessageLog.trace( Object.keys(attr).join('\n'));
+    // MessageLog.trace( attr.doubleValueAt(frame.current()) );
+    // MessageLog.trace( attr.getSubAttributes() );
+    // return;
 
-	// get content of groups
-	var nodeList = [];
-	selectedNodes.forEach(function(_node){
-		if( node.type(_node) !== 'GROUP' ){ nodeList.push(_node); }
-		else nodeList = nodeList.concat( node.subNodes(_node) );
-	});
+    var usePosition = KeyModifiers.IsShiftPressed();
+    var useScale = KeyModifiers.IsControlPressed();
+    var useRotation = KeyModifiers.IsAlternatePressed();
 
-	//
-	function getOutputNode( _node ){
-	   var numOutput = node.numberOfOutputPorts( _node );
-	   var listOfDestinationNodes = [];
-	   for(var i = 0; i<numOutput; i++)
-	     listOfDestinationNodes.push(node.dstNode(_node, i, 0));
-	   return listOfDestinationNodes[0];
-	}
+    //
+    var nodeTemplates = {
+        'PEG,READ': {
+            position: [
+                'POSITION.X', 0, 'POSITION.Y', 0, 'POSITION.Z', 0,
+                'POSITION.3DPATH', 0,
+                'OFFSET.X', 0, 'OFFSET.Y', 0, 'OFFSET.Z', 0
+            ],
+            rotation: [
+                'ROTATION.ANGLEX', 0, 'ROTATION.ANGLEY', 0, 'ROTATION.ANGLEZ', 0,
+                'ROTATION.QUATERNIONPATH', 0,
+                'ANGLE', 0, 'SKEW', 0
+            ],
+            scale: [
+                'SCALE.X', 1, 'SCALE.Y', 1, 'SCALE.Z', 1,
+                'SCALE.XY', 1
+            ]
+        },
+        'OffsetModule,CurveModule': {
+            position: ['offset.X', 'restingOffset.X', 'offset.Y', 'restingOffset.Y'],
+            rotation: [
+                'orientation', 'restingOrientation',
+                'orientation1', 'restingOrientation1',
+                '>orientation0', '>restingOrientation0',
+            ],
+            scale: [
+                'length1', 'restLength1',
+                '>length0', '>restLength0'
+            ]
+        },
+        'BendyBoneModule': {
+            position: ['offset.X', 'restOffset.X', 'offset.Y', 'restOffset.Y'],
+            rotation: [
+                'orientation', 'restOrientation',
+                'radius', 'restRadius', 'bias', 'restBias'
+            ],
+            scale: ['length', 'restLength']
+        }
+    };
 
-	//
-	function getNodeAttr( _node, attrName, currentFrame, createIfNotExist, returnNodeAndAttr ){
-	
-		var modifier = attrName.charAt(0);
-		
-		if( modifier === '>' ){ // reset next node
-			var nextNode = getOutputNode(_node);
-			if( !nextNode ) {
-				MessageLog.trace('Next node of the "'+_node+'" not found.');
-				return;
-			}
-			// MessageLog.trace('Get an attribute of the next node of "'+_node+'" > '+nextNode );
-			attrName = attrName.substr(1,attrName.length);
-			_node = nextNode;
-		}
-
-		var attr = node.getAttr(_node, currentFrame, attrName );
-
-		if( (!attr || attr.keyword() === '') && createIfNotExist ){
-			
-			attr = undefined;
-
-			if ( node.createDynamicAttr( _node, "DOUBLE", attrName, '', false) ) {
-				attr = node.getAttr(_node, currentFrame, attrName);
-				MessageLog.trace('Dynamic attr added: ' + attrName);
-			}else{
-				MessageLog.trace('Dynamic attr NOT added: ' + attrName);
-				return;
-			}
-		}
-
-		return returnNodeAndAttr ? { node: _node, attr: attr } : attr;
-	}
-
-	//
-	function eachNode( _commonData, nodeAction, onNodeComplete ){
-
-		_commonData.nodeList.forEach(function(_node){
-		
-			var nodeType = node.type(_node);
-
-			var nodeAttrSettings = _commonData.nodeTemplates[nodeType];
-			if( !nodeAttrSettings ){
-				MessageLog.trace('Custom attr settings not found for node "'+_node+'" ('+nodeType+')');
-				return;
-			}
-
-			if( _commonData.useAll || _commonData.usePosition ) nodeAction( _node, nodeAttrSettings.position );
-			if( _commonData.useAll || _commonData.useRotation ) nodeAction( _node, nodeAttrSettings.rotation );
-			if( _commonData.useAll || _commonData.useScale ) nodeAction( _node, nodeAttrSettings.scale );
-
-			if( onNodeComplete ) onNodeComplete( _node, nodeType );
-
-		});
-
-	}
-
-	//
-	function getCustomAttrName( attrName ){
-		attrName = attrName.replace('>','');
-		return '_PS_OST_' + attrName; // an original attribute name with the state prefix
-	}
+    var nodeTemplatesByNodeName = {};
+    var nodeTypes = [];
+    Object.keys(nodeTemplates).forEach(function(_nodeName) {
+        _nodeName.split(',').forEach(function(__nodeName) {
+            nodeTypes.push(__nodeName);
+            nodeTemplatesByNodeName[__nodeName] = nodeTemplates[_nodeName];
+        });
+    });
 
 
-	//
-	return {
-		nodeList: nodeList,
-		nodeTemplates: nodeTemplatesByNodeName,
-		getNodeAttr: getNodeAttr,
-		eachNode: eachNode,
-		getCustomAttrName: getCustomAttrName,
-		currentFrame: frame.current(),
-		usePosition: usePosition,
-		useScale: useScale,
-		useRotation: useRotation,
-		useAll: !(usePosition || useRotation || useScale)
-	};
+    //
+    if (usePosition && useScale && useRotation) {
+        selectedNodes = NodeUtils.getAllChildNodes(selectedNodes, nodeTypes.join('|'));
+        MessageLog.trace('Reset all children:\n' + selectedNodes.join('\n'));
+    }
+
+    // get content of groups
+    var nodeList = [];
+    selectedNodes.forEach(function(_node) {
+        if (node.type(_node) !== 'GROUP') { nodeList.push(_node); } else nodeList = nodeList.concat(node.subNodes(_node));
+    });
+
+    //
+    function getOutputNode(_node) {
+        var numOutput = node.numberOfOutputPorts(_node);
+        var listOfDestinationNodes = [];
+        for (var i = 0; i < numOutput; i++)
+            listOfDestinationNodes.push(node.dstNode(_node, i, 0));
+        return listOfDestinationNodes[0];
+    }
+
+    //
+    function getNodeAttr(_node, attrName, currentFrame, createIfNotExist, returnNodeAndAttr) {
+
+        var modifier = attrName.charAt(0);
+
+        if (modifier === '>') { // reset next node
+            var nextNode = getOutputNode(_node);
+            if (!nextNode) {
+                MessageLog.trace('Next node of the "' + _node + '" not found.');
+                return;
+            }
+            // MessageLog.trace('Get an attribute of the next node of "'+_node+'" > '+nextNode );
+            attrName = attrName.substr(1, attrName.length);
+            _node = nextNode;
+        }
+
+        var attr = node.getAttr(_node, currentFrame, attrName);
+
+        if ((!attr || attr.keyword() === '') && createIfNotExist) {
+
+            attr = undefined;
+
+            if (node.createDynamicAttr(_node, "DOUBLE", attrName, '', false)) {
+                attr = node.getAttr(_node, currentFrame, attrName);
+                MessageLog.trace('Dynamic attr added: ' + attrName);
+            } else {
+                MessageLog.trace('Dynamic attr NOT added: ' + attrName);
+                return;
+            }
+        }
+
+        return returnNodeAndAttr ? { node: _node, attr: attr } : attr;
+    }
+
+    //
+    function eachNode(_commonData, nodeAction, onNodeComplete) {
+
+        _commonData.nodeList.forEach(function(_node) {
+
+            var nodeType = node.type(_node);
+
+            var nodeAttrSettings = _commonData.nodeTemplates[nodeType];
+            if (!nodeAttrSettings) {
+                MessageLog.trace('Custom attr settings not found for node "' + _node + '" (' + nodeType + ')');
+                return;
+            }
+
+            if (_commonData.useAll || _commonData.usePosition) nodeAction(_node, nodeAttrSettings.position);
+            if (_commonData.useAll || _commonData.useRotation) nodeAction(_node, nodeAttrSettings.rotation);
+            if (_commonData.useAll || _commonData.useScale) nodeAction(_node, nodeAttrSettings.scale);
+
+            if (onNodeComplete) onNodeComplete(_node, nodeType);
+
+        });
+
+    }
+
+    //
+    function getCustomAttrName(attrName) {
+        attrName = attrName.replace('>', '');
+        return '_PS_OST_' + attrName; // an original attribute name with the state prefix
+    }
+
+
+    //
+    return {
+        nodeList: nodeList,
+        nodeTemplates: nodeTemplatesByNodeName,
+        getNodeAttr: getNodeAttr,
+        eachNode: eachNode,
+        getCustomAttrName: getCustomAttrName,
+        currentFrame: frame.current(),
+        usePosition: usePosition,
+        useScale: useScale,
+        useRotation: useRotation,
+        useAll: !(usePosition || useRotation || useScale)
+    };
 
 }
 
 
 
 //
-function PS_ResetTransformation(){
+function PS_ResetTransformation() {
 
-	// MessageLog.clearLog();
+    // MessageLog.clearLog();
 
-	var _commonData = _getCommonData();
-	if( !_commonData ) {
-		MessageBox.information('Select at least one node (Peg, Drawing and Deformation) to reset its transformations to their saved (via PS_SaveTransformation script) or default state with options:'
-			+'\n- Resets all transformations - Position, Rotation and Scale by default'
-			+'\n- Hold the Shift key to reset only the Position of the selected node'
-			+'\n- Hold the Control key to reset only the Scale of the selected node'
-			+'\n- Hold the Alt key to reset only the Rotation of the selected node'
-			+'\n- Hold the Shift + Control + Alt keys to reset all transformations of child elements'
-		,0,0,0);
-		return;
-	}
+    var _commonData = _getCommonData();
+    if (!_commonData) {
+        MessageBox.information('Select at least one node (Peg, Drawing and Deformation) to reset its transformations to their saved (via PS_SaveTransformation script) or default state with options:' +
+            '\n- Resets all transformations - Position, Rotation and Scale by default' +
+            '\n- Hold the Shift key to reset only the Position of the selected node' +
+            '\n- Hold the Control key to reset only the Scale of the selected node' +
+            '\n- Hold the Alt key to reset only the Rotation of the selected node' +
+            '\n- Hold the Shift + Control + Alt keys to reset all transformations of child elements', 0, 0, 0);
+        return;
+    }
 
-	//
-	function setAttrValues( _node, attrList ){
+    //
+    function setAttrValues(_node, attrList) {
 
-		for( var i=0; i<attrList.length; i+=2){
-			
-			var attrName = attrList[i];
+        for (var i = 0; i < attrList.length; i += 2) {
 
-			var val = attrList[i+1];
-			var _val = val;
-			if( typeof val === 'string' ){ // the value is a name of an another node attribute
+            var attrName = attrList[i];
 
-				var attr = _commonData.getNodeAttr( _node, val, _commonData.currentFrame );
-				if( !attr ) {
-					MessageLog.trace('Referenced attribute not found "'+val+'"');
-					continue;
-				}
-				val = attr.doubleValueAt( _commonData.currentFrame );
-			}
+            var val = attrList[i + 1];
+            var _val = val;
+            if (typeof val === 'string') { // the value is a name of an another node attribute
 
-			// Custom attr
-			var customAttributeName = _commonData.getCustomAttrName( attrName );
-			var custAttr = _commonData.getNodeAttr(_node, customAttributeName, _commonData.currentFrame );
-			if( custAttr && custAttr.keyword() ){
-				val = custAttr.doubleValue();
-				MessageLog.trace('Dynamic Attr "' + customAttributeName + '" = ' + val );
-			}
+                var attr = _commonData.getNodeAttr(_node, val, _commonData.currentFrame);
+                if (!attr) {
+                    MessageLog.trace('Referenced attribute not found "' + val + '"');
+                    continue;
+                }
+                val = attr.doubleValueAt(_commonData.currentFrame);
+            }
 
-			// 3d Path attribute
-			if( attrName.indexOf("3DPATH") !== -1 || attrName.indexOf("QUATERNIONPATH") !== -1 ){ // TODO: reset 3d path values to custom values
+            // Custom attr
+            var customAttributeName = _commonData.getCustomAttrName(attrName);
+            var custAttr = _commonData.getNodeAttr(_node, customAttributeName, _commonData.currentFrame);
+            if (custAttr && custAttr.keyword()) {
+                val = custAttr.doubleValue();
+                MessageLog.trace('Dynamic Attr "' + customAttributeName + '" = ' + val);
+            }
 
-			 	var columnName = node.linkedColumn( _node, attrName );
-			 	if( columnName !== "" ){
-					MessageLog.trace('Reset column attr "'+attrName+'": '+attrName+' > '+_node);
-					column.setEntry(columnName, 1, _commonData.currentFrame, 0 ); 
-					column.setEntry(columnName, 2, _commonData.currentFrame, 0 );
-					column.setEntry(columnName, 3, _commonData.currentFrame, 0 );
-					column.setEntry(columnName, 4, _commonData.currentFrame, 0 );
-				}
+            var columnName = node.linkedColumn(_node, attrName);
 
-			}else{ // Standard attr
+            // 3d Path attribute
+            if (attrName.indexOf("3DPATH") !== -1 || attrName.indexOf("QUATERNIONPATH") !== -1) { // TODO: reset 3d path values to custom values
 
-				var attr = _commonData.getNodeAttr( _node, attrName, _commonData.currentFrame );
-				if( !attr ){
-					MessageLog.trace('Attribute not found "'+attrName+'"');
-					continue;
-				}
+               
+                if ( columnName ) { // If Attr is animated set value at current frame
 
-				attr.setValueAt( val, _commonData.currentFrame );	
-			}
-			
-			// MessageLog.trace( attrName+' => '+val+' ('+_val+') = '+attr.doubleValueAt( _commonData.currentFrame ) );
+                    // MessageLog.trace('Reset column attr "' + attrName + '": ' + attrName + ' > ' + _node);
+                    column.setEntry(columnName, 1, _commonData.currentFrame, 0);
+                    column.setEntry(columnName, 2, _commonData.currentFrame, 0);
+                    column.setEntry(columnName, 3, _commonData.currentFrame, 0);
+                    column.setEntry(columnName, 4, _commonData.currentFrame, 0);
 
-		}
+                }else{
 
-	}
+                	node.getAttr( _node, _commonData.currentFrame, 'ROTATION.ANGLEX' ).setValue( 0 );
+                    node.getAttr( _node, _commonData.currentFrame, 'ROTATION.ANGLEY' ).setValue( 0 );
+                    node.getAttr( _node, _commonData.currentFrame, 'ROTATION.ANGLEZ' ).setValue( 0 );
+                }
 
+            } else { // Standard attr
 
-	///
-	scene.beginUndoRedoAccum('ResetTransformation');	
+                var attr = _commonData.getNodeAttr(_node, attrName, _commonData.currentFrame);
+                if (!attr) {
+                    MessageLog.trace('Attribute not found "' + attrName + '"');
+                    continue;
+                }
 
-	
-	_commonData.eachNode( _commonData, setAttrValues,
-		function( _node, nodeType ){
-			/*
-			MessageLog.trace('reset node transform: '+ _node+' > '+ nodeType );
-			var _attrs = Utils.getFullAttributeList( _node, _commonData.currentFrame, true );
-			MessageLog.trace('attrs: '+ _attrs.join('\n') );
-			MessageLog.trace('>>> '+node.getTextAttr(_node,_commonData.currentFrame,'POSITION.3DPATH.X'));
+                if ( columnName ) { // If Attr is animated set value at current frame
 
-			try{
-				var attrs = Utils.getFullAttributeList(_node, _commonData.currentFrame, false );
-			// MessageLog.trace('>>> '+attr.attr.getSubAttributes().map(function(u,i){return u.keyword()+'='+i}).join('\n') );
-				attrs.forEach(function(u){
-					if( u.typeName() !== 'PATH_3D') return;
-					MessageLog.trace('==> '+u.keyword ()+' > '+u.typeName()+' >> '+u.hasSubAttributes() );
-					
-				})
-			}catch(err){MessageLog.trace(err);}
-			*/
-		}
-	);
-	
-	
-	///
-	scene.endUndoRedoAccum();
-	
-}
+                    attr.setValueAt( val, _commonData.currentFrame );
+
+                } else {
+
+                	attr.setValue( val );
+                }
+
+            }
+
+            // MessageLog.trace( attrName+' => '+val+' ('+_val+') = '+attr.doubleValueAt( _commonData.currentFrame ) );
+
+        }
+
+    }
 
 
+    ///
+    scene.beginUndoRedoAccum('ResetTransformation');
 
 
+    _commonData.eachNode(_commonData, setAttrValues,
+        function(_node, nodeType) {
+            /*
+            MessageLog.trace('reset node transform: '+ _node+' > '+ nodeType );
+            var _attrs = Utils.getFullAttributeList( _node, _commonData.currentFrame, true );
+            MessageLog.trace('attrs: '+ _attrs.join('\n') );
+            MessageLog.trace('>>> '+node.getTextAttr(_node,_commonData.currentFrame,'POSITION.3DPATH.X'));
+
+            try{
+            	var attrs = Utils.getFullAttributeList(_node, _commonData.currentFrame, false );
+            // MessageLog.trace('>>> '+attr.attr.getSubAttributes().map(function(u,i){return u.keyword()+'='+i}).join('\n') );
+            	attrs.forEach(function(u){
+            		if( u.typeName() !== 'PATH_3D') return;
+            		MessageLog.trace('==> '+u.keyword ()+' > '+u.typeName()+' >> '+u.hasSubAttributes() );
+            		
+            	})
+            }catch(err){MessageLog.trace(err);}
+            */
+        }
+    );
 
 
-
-
-
-
-//
-function PS_SaveTransformation(){
-
-	// MessageLog.clearLog();
-
-	var _commonData = _getCommonData();
-	if( !_commonData ) return;
-
-	//
-	function setCustomAttrValues( _node, attrList ){
-
-		for( var i=0; i<attrList.length; i+=2){
-			
-			var attrName = attrList[i];
-			var attr = _commonData.getNodeAttr( _node, attrName, _commonData.currentFrame );
-			var val = attr.doubleValueAt( _commonData.currentFrame );
-
-			if( !attr ){
-				MessageLog.trace('Attribute not found "'+attrName+'"');
-				continue;
-			}
-			
-			var customAttributeName = _commonData.getCustomAttrName( attrName );
-			var custAttr = _commonData.getNodeAttr(_node, customAttributeName, _commonData.currentFrame, true );
-
-			if( custAttr && custAttr.keyword() ){
-				custAttr = node.getAttr(_node, _commonData.currentFrame, customAttributeName);
-				custAttr.setValue( val );
-				MessageLog.trace('Dynamic Attr "'+customAttributeName+'" set: ' + custAttr.doubleValue( val ) );
-			}
-
-		}
-
-	}
-
-	///
-	scene.beginUndoRedoAccum('SaveTransformation');
-
-	_commonData.eachNode( _commonData, setCustomAttrValues,
-		function( _node, nodeType ){
-			MessageLog.trace('Save node transform: '+ _node+' > '+ nodeType );
-		
-			// var _attrs = Utils.getFullAttributeList( _node, _commonData.currentFrame, true );
-			// MessageLog.trace('attrs: '+ _attrs.join('\n') );
-		}
-	);
-
-	///
-	scene.endUndoRedoAccum();
+    ///
+    scene.endUndoRedoAccum();
 
 }
 
@@ -399,46 +353,107 @@ function PS_SaveTransformation(){
 
 
 //
-function PS_ClearSavedTransformation(){
+function PS_SaveTransformation() {
 
-	// MessageLog.clearLog();
+    // MessageLog.clearLog();
 
-	var _commonData = _getCommonData();
-	if( !_commonData ) return;
+    var _commonData = _getCommonData();
+    if (!_commonData) return;
 
-	//
-	function removeCustomAttr( _node, attrList ){
+    //
+    function setCustomAttrValues(_node, attrList) {
 
-		for( var i=0; i<attrList.length; i+=2){
-			
-			var attrName = attrList[i];	
+        for (var i = 0; i < attrList.length; i += 2) {
 
-			var customAttributeName = _commonData.getCustomAttrName(attrName);
-			var nodeAndAttr = _commonData.getNodeAttr(_node, customAttributeName, _commonData.currentFrame, false, true );
+            var attrName = attrList[i];
+            var attr = _commonData.getNodeAttr(_node, attrName, _commonData.currentFrame);
+            var val = attr.doubleValueAt(_commonData.currentFrame);
 
-			if( nodeAndAttr.attr && nodeAndAttr.attr.keyword() ){
-				node.removeDynamicAttr( nodeAndAttr.node, customAttributeName );
-				MessageLog.trace('Dynamic Attr removed "'+customAttributeName+'" of "'+nodeAndAttr.node+'"' );
-			}
+            if (!attr) {
+                MessageLog.trace('Attribute not found "' + attrName + '"');
+                continue;
+            }
 
-		}
+            var customAttributeName = _commonData.getCustomAttrName(attrName);
+            var custAttr = _commonData.getNodeAttr(_node, customAttributeName, _commonData.currentFrame, true);
 
-	}
+            if (custAttr && custAttr.keyword()) {
+                custAttr = node.getAttr(_node, _commonData.currentFrame, customAttributeName);
+                custAttr.setValue(val);
+                MessageLog.trace('Dynamic Attr "' + customAttributeName + '" set: ' + custAttr.doubleValue(val));
+            }
+
+        }
+
+    }
+
+    ///
+    scene.beginUndoRedoAccum('SaveTransformation');
+
+    _commonData.eachNode(_commonData, setCustomAttrValues,
+        function(_node, nodeType) {
+            MessageLog.trace('Save node transform: ' + _node + ' > ' + nodeType);
+
+            // var _attrs = Utils.getFullAttributeList( _node, _commonData.currentFrame, true );
+            // MessageLog.trace('attrs: '+ _attrs.join('\n') );
+        }
+    );
+
+    ///
+    scene.endUndoRedoAccum();
+
+}
 
 
-	///
-	scene.beginUndoRedoAccum('ClearTransformation');
 
-	_commonData.eachNode( _commonData, removeCustomAttr,
-		function( _node, nodeType ){
-			MessageLog.trace('Clear node transform: '+ _node+' > '+ nodeType );
-			MessageLog.trace('...');
-			// var _attrs = Utils.getFullAttributeList( _node, _commonData.currentFrame, true );
-			// MessageLog.trace('attrs: '+ _attrs.join('\n') );
-		}
-	);
 
-	///
-	scene.endUndoRedoAccum();
+
+
+
+
+
+
+//
+function PS_ClearSavedTransformation() {
+
+    // MessageLog.clearLog();
+
+    var _commonData = _getCommonData();
+    if (!_commonData) return;
+
+    //
+    function removeCustomAttr(_node, attrList) {
+
+        for (var i = 0; i < attrList.length; i += 2) {
+
+            var attrName = attrList[i];
+
+            var customAttributeName = _commonData.getCustomAttrName(attrName);
+            var nodeAndAttr = _commonData.getNodeAttr(_node, customAttributeName, _commonData.currentFrame, false, true);
+
+            if (nodeAndAttr.attr && nodeAndAttr.attr.keyword()) {
+                node.removeDynamicAttr(nodeAndAttr.node, customAttributeName);
+                MessageLog.trace('Dynamic Attr removed "' + customAttributeName + '" of "' + nodeAndAttr.node + '"');
+            }
+
+        }
+
+    }
+
+
+    ///
+    scene.beginUndoRedoAccum('ClearTransformation');
+
+    _commonData.eachNode(_commonData, removeCustomAttr,
+        function(_node, nodeType) {
+            MessageLog.trace('Clear node transform: ' + _node + ' > ' + nodeType);
+            MessageLog.trace('...');
+            // var _attrs = Utils.getFullAttributeList( _node, _commonData.currentFrame, true );
+            // MessageLog.trace('attrs: '+ _attrs.join('\n') );
+        }
+    );
+
+    ///
+    scene.endUndoRedoAccum();
 
 }
