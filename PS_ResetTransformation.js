@@ -92,11 +92,11 @@ function _getCommonData() {
             rotation: [
                 'orientation', 'restingOrientation',
                 'orientation1', 'restingOrientation1',
-                '>orientation0', '>restingOrientation0',
+                'orientation0', 'restingOrientation0',
             ],
             scale: [
                 'length1', 'restLength1',
-                '>length0', '>restLength0'
+                'length0', 'restLength0'
             ]
         },
         'BendyBoneModule': {
@@ -128,7 +128,8 @@ function _getCommonData() {
     // get content of groups
     var nodeList = [];
     selectedNodes.forEach(function(_node) {
-        if (node.type(_node) !== 'GROUP') { nodeList.push(_node); } else nodeList = nodeList.concat(node.subNodes(_node));
+        // if (node.type(_node) !== 'GROUP') { nodeList.push(_node); } // else nodeList = nodeList.concat(node.subNodes(_node));
+        if( nodeTypes.indexOf(node.type(_node)) !== -1 ) nodeList.push(_node);
     });
 
     //
@@ -144,34 +145,63 @@ function _getCommonData() {
     function getNodeAttr(_node, attrName, currentFrame, createIfNotExist, returnNodeAndAttr) {
 
         var modifier = attrName.charAt(0);
-
+        
+        var result = {
+    		node: _node,
+    		attrName: attrName,
+    		attr: node.getAttr(_node, currentFrame, attrName),
+        	isValid: false,
+        	isModified: false
+        };
+/*
         if (modifier === '>') { // reset next node
             var nextNode = getOutputNode(_node);
             if (!nextNode) {
                 MessageLog.trace('Next node of the "' + _node + '" not found.');
                 return;
             }
-            // MessageLog.trace('Get an attribute of the next node of "'+_node+'" > '+nextNode );
-            attrName = attrName.substr(1, attrName.length);
-            _node = nextNode;
+            attrName = result.attrName = attrName.substr(1, attrName.length);
+            MessageLog.trace('Get an attribute of the next node of "'+_node+'" > '+nextNode+' >> "'+attrName+'"' );
+            _node = result.node = nextNode;
+            result.isModified = true;
+        }
+*/
+        var attr = result.attr = node.getAttr( result.node, currentFrame, result.attrName);
+
+        if (!attr || attr.keyword() === ''){
+
+	        if( createIfNotExist ) {
+
+	            if ( node.createDynamicAttr(_node, "DOUBLE", attrName, '', false) ) {
+
+	                var attr = node.getAttr(_node, currentFrame, attrName);
+	                attr.setValue( result.attr.doubleValueAt( currentFrame ) );
+	                result.attr = attr;
+	                result.isValid = true;
+	                MessageLog.trace('Dynamic attribute added: "' + attrName+'"');
+
+	            } else {
+
+	                MessageLog.trace('Dynamic attribute NOT added: "' + attrName+'"');
+	                return;
+	            }
+
+	        }else{
+
+		        // MessageLog.trace('Attribute NOT found: "' + attrName+'" in node "'+result.node+'" ('+_node+')' );
+		        return;
+
+		    }
+
         }
 
-        var attr = node.getAttr(_node, currentFrame, attrName);
+    	result.val = result.attr.doubleValue();
+    	result.valAtFrame = result.attr.doubleValueAt( currentFrame );
+    	result.isValid = true;
+		result.columnName = node.linkedColumn( result.node, result.attrName );
+		// MessageLog.trace( '#### '+node.getTextAttr(result.node, currentFrame, result.attrName ) );
+        return returnNodeAndAttr ? result : attr;
 
-        if ((!attr || attr.keyword() === '') && createIfNotExist) {
-
-            attr = undefined;
-
-            if (node.createDynamicAttr(_node, "DOUBLE", attrName, '', false)) {
-                attr = node.getAttr(_node, currentFrame, attrName);
-                MessageLog.trace('Dynamic attr added: ' + attrName);
-            } else {
-                MessageLog.trace('Dynamic attr NOT added: ' + attrName);
-                return;
-            }
-        }
-
-        return returnNodeAndAttr ? { node: _node, attr: attr } : attr;
     }
 
     //
@@ -183,7 +213,7 @@ function _getCommonData() {
 
             var nodeAttrSettings = _commonData.nodeTemplates[nodeType];
             if (!nodeAttrSettings) {
-                MessageLog.trace('Custom attr settings not found for node "' + _node + '" (' + nodeType + ')');
+                MessageLog.trace('Custom attribute settings not found for node "' + _node + '" (' + nodeType + ')');
                 return;
             }
 
@@ -225,7 +255,7 @@ function _getCommonData() {
 //
 function PS_ResetTransformation() {
 
-    // MessageLog.clearLog();
+    MessageLog.clearLog();
 
     var _commonData = _getCommonData();
     if (!_commonData) {
@@ -240,40 +270,102 @@ function PS_ResetTransformation() {
 
     //
     function setAttrValues(_node, attrList) {
-
+    	try{
         for (var i = 0; i < attrList.length; i += 2) {
 
             var attrName = attrList[i];
+            // if( attrName.indexOf('length0') === -1 ) continue; // !!!
+            var val = attrList[i + 1]; // 
+            // var _val = val;
 
-            var val = attrList[i + 1];
-            var _val = val;
+            var currentAttrObject = _commonData.getNodeAttr( _node, attrName, _commonData.currentFrame, false, true );
+            if( !currentAttrObject ) continue;
+            // MessageLog.trace( '>>>>>> : '+ _node+', '+attrName );
+            // MessageLog.trace( '\n\currentAttrObject: '+JSON.stringify(currentAttrObject,true,'  '));
+
+            var srcAttrObject = _commonData.getNodeAttr( currentAttrObject.node, _commonData.getCustomAttrName(currentAttrObject.attrName), _commonData.currentFrame, false, true );
+
+            if (typeof val === 'string') { // the value is a name of an another node attribute
+            	
+            	if( !srcAttrObject )
+            		srcAttrObject = _commonData.getNodeAttr( currentAttrObject.node, val, _commonData.currentFrame, false, true );
+            	// MessageLog.trace( '\n\nsrcAttrObject: '+JSON.stringify(srcAttrObject,true,'  '));
+            	if( !srcAttrObject ) continue;
+            	currentAttrObject.val = srcAttrObject.val;
+            	currentAttrObject.valAtFrame = srcAttrObject.valAtFrame;
+            	// currentAttrObject = srcAttrObject;
+			}else{
+
+				currentAttrObject.valAtFrame = currentAttrObject.val = srcAttrObject ? srcAttrObject.val : val;
+
+			}
+
+			if( currentAttrObject.columnName ){ // If Attr is animated set value at current frame
+	            currentAttrObject.attr.setValueAt( currentAttrObject.val, _commonData.currentFrame );
+				// MessageLog.trace('Apply value to "'+currentAttrObject.attrName+'" '+currentAttrObject.val+' at the current frame.' );
+
+	        }else{
+
+				currentAttrObject.attr.setValue( currentAttrObject.val );
+				// MessageLog.trace('Apply value to "'+currentAttrObject.attrName+'" '+currentAttrObject.val );
+	        }
+
+            /*
             if (typeof val === 'string') { // the value is a name of an another node attribute
 
-                var attr = _commonData.getNodeAttr(_node, val, _commonData.currentFrame);
-                if (!attr) {
+                attrObject = _commonData.getNodeAttr( _node, val, _commonData.currentFrame, false, true );
+                if (!attrObject) {
                     MessageLog.trace('Referenced attribute not found "' + val + '"');
                     continue;
                 }
-                val = attr.doubleValueAt(_commonData.currentFrame);
-            }
+                val = attrObject.attr.doubleValueAt(_commonData.currentFrame);
+                MessageLog.trace('Reset the next Node attr: "'+attrObject.node+'", "'+attrObject.attrName+'", '+val);
 
+            }
+            */
+
+            // if ( columnName ) { // If Attr is animated set value at current frame
+
+            // 	MessageLog.trace('Reset column attr "' + attrName);
+            //     attrObject.attr.setValueAt( val, _commonData.currentFrame );
+
+            // } else {
+
+            // 	attrObject.attr.setValue( val );
+            // }
+
+            /*
             // Custom attr
             var customAttributeName = _commonData.getCustomAttrName(attrName);
-            var custAttr = _commonData.getNodeAttr(_node, customAttributeName, _commonData.currentFrame);
-            if (custAttr && custAttr.keyword()) {
-                val = custAttr.doubleValue();
+            var custAttrObject = _commonData.getNodeAttr( _node, customAttributeName, _commonData.currentFrame, false, true );
+            if (custAttrObject && custAttrObject.attr.keyword()) {
+                val = custAttrObject.attr.doubleValue();
                 MessageLog.trace('Dynamic Attr "' + customAttributeName + '" = ' + val);
             }
 
-            var columnName = node.linkedColumn(_node, attrName);
+            var columnName = node.linkedColumn( custAttrObject.node, attrName);
+            MessageLog.trace('NODE: "'+custAttrObject.node.split('/').pop()+'"' );
+            MessageLog.trace(' - attr: "'+attrName+'"');
+            MessageLog.trace(' - column: "'+columnName+'"');
+            MessageLog.trace(' - val: "'+val+'"');
+            if ( columnName ) { // If Attr is animated set value at current frame
 
+            	MessageLog.trace('Reset column attr "' + attrName);
+                custAttrObject.attr.setValueAt( val, _commonData.currentFrame );
+
+            } else {
+
+            	custAttrObject.attr.setValue( val );
+            }
+
+            
             // 3d Path attribute
             if (attrName.indexOf("3DPATH") !== -1 || attrName.indexOf("QUATERNIONPATH") !== -1) { // TODO: reset 3d path values to custom values
 
                
                 if ( columnName ) { // If Attr is animated set value at current frame
 
-                    // MessageLog.trace('Reset column attr "' + attrName + '": ' + attrName + ' > ' + _node);
+                    MessageLog.trace('Reset column attr "' + attrName);
                     column.setEntry(columnName, 1, _commonData.currentFrame, 0);
                     column.setEntry(columnName, 2, _commonData.currentFrame, 0);
                     column.setEntry(columnName, 3, _commonData.currentFrame, 0);
@@ -281,33 +373,35 @@ function PS_ResetTransformation() {
 
                 }else{
 
-                	node.getAttr( _node, _commonData.currentFrame, 'ROTATION.ANGLEX' ).setValue( 0 );
-                    node.getAttr( _node, _commonData.currentFrame, 'ROTATION.ANGLEY' ).setValue( 0 );
-                    node.getAttr( _node, _commonData.currentFrame, 'ROTATION.ANGLEZ' ).setValue( 0 );
+                	node.getAttr( custAttrObject.node, _commonData.currentFrame, 'ROTATION.ANGLEX' ).setValue( 0 );
+                    node.getAttr( custAttrObject.node, _commonData.currentFrame, 'ROTATION.ANGLEY' ).setValue( 0 );
+                    node.getAttr( custAttrObject.node, _commonData.currentFrame, 'ROTATION.ANGLEZ' ).setValue( 0 );
                 }
 
             } else { // Standard attr
 
-                var attr = _commonData.getNodeAttr(_node, attrName, _commonData.currentFrame);
-                if (!attr) {
-                    MessageLog.trace('Attribute not found "' + attrName + '"');
-                    continue;
-                }
+                // var attrObject = _commonData.getNodeAttr(custAttrObject.node, attrName, _commonData.currentFrame, false, true );
+                // if (!attrObject) {
+                //     MessageLog.trace('Attribute not found "' + attrName + '"');
+                //     continue;
+                // }
 
                 if ( columnName ) { // If Attr is animated set value at current frame
 
-                    attr.setValueAt( val, _commonData.currentFrame );
+                	MessageLog.trace('Reset column attr "' + attrName);
+                    attrObject.attr.setValueAt( val, _commonData.currentFrame );
 
                 } else {
 
-                	attr.setValue( val );
+                	attrObject.attr.setValue( val );
                 }
 
             }
 
             // MessageLog.trace( attrName+' => '+val+' ('+_val+') = '+attr.doubleValueAt( _commonData.currentFrame ) );
-
+			*/
         }
+    }catch(err){MessageLog.trace('ERR3:'+err)}
 
     }
 
@@ -355,7 +449,7 @@ function PS_ResetTransformation() {
 //
 function PS_SaveTransformation() {
 
-    // MessageLog.clearLog();
+    MessageLog.clearLog();
 
     var _commonData = _getCommonData();
     if (!_commonData) return;
@@ -366,23 +460,23 @@ function PS_SaveTransformation() {
         for (var i = 0; i < attrList.length; i += 2) {
 
             var attrName = attrList[i];
-            var attr = _commonData.getNodeAttr(_node, attrName, _commonData.currentFrame);
-            var val = attr.doubleValueAt(_commonData.currentFrame);
+            var currentAttrObject = _commonData.getNodeAttr(_node, attrName, _commonData.currentFrame, false, true );
+            // MessageLog.trace( '\n\rcurrentAttrObject: '+JSON.stringify(currentAttrObject,true,'  '));
 
-            if (!attr) {
-                MessageLog.trace('Attribute not found "' + attrName + '"');
+            if (!currentAttrObject) {
+                // MessageLog.trace('Attribute not found "' + attrName + '"');
                 continue;
             }
 
-            var customAttributeName = _commonData.getCustomAttrName(attrName);
-            var custAttr = _commonData.getNodeAttr(_node, customAttributeName, _commonData.currentFrame, true);
+            var customAttrObject = _commonData.getNodeAttr(currentAttrObject.node, _commonData.getCustomAttrName(currentAttrObject.attrName), _commonData.currentFrame, true, true );
+            // MessageLog.trace( '\n\rcustomAttrObject: '+JSON.stringify(customAttrObject,true,'  '));
 
-            if (custAttr && custAttr.keyword()) {
-                custAttr = node.getAttr(_node, _commonData.currentFrame, customAttributeName);
-                custAttr.setValue(val);
-                MessageLog.trace('Dynamic Attr "' + customAttributeName + '" set: ' + custAttr.doubleValue(val));
+            if (customAttrObject) {
+                customAttrObject.attr.setValueAt( currentAttrObject.valAtFrame, _commonData.currentFrame );
+                MessageLog.trace('Dynamic Attribute added "' + customAttrObject.attrName + '" set: ' + currentAttrObject.valAtFrame );
             }
 
+            
         }
 
     }
@@ -421,28 +515,41 @@ function PS_ClearSavedTransformation() {
     var _commonData = _getCommonData();
     if (!_commonData) return;
 
+    
+
     //
     function removeCustomAttr(_node, attrList) {
 
+    	try{
         for (var i = 0; i < attrList.length; i += 2) {
 
             var attrName = attrList[i];
 
-            var customAttributeName = _commonData.getCustomAttrName(attrName);
-            var nodeAndAttr = _commonData.getNodeAttr(_node, customAttributeName, _commonData.currentFrame, false, true);
+            var currentAttrObject = _commonData.getNodeAttr(_node, attrName, _commonData.currentFrame, false, true );
+            // MessageLog.trace( '\n\rcurrentAttrObject: '+JSON.stringify(currentAttrObject,true,'  '));
 
-            if (nodeAndAttr.attr && nodeAndAttr.attr.keyword()) {
-                node.removeDynamicAttr(nodeAndAttr.node, customAttributeName);
-                MessageLog.trace('Dynamic Attr removed "' + customAttributeName + '" of "' + nodeAndAttr.node + '"');
+            if (!currentAttrObject) {
+                // MessageLog.trace('Attribute not found "' + attrName + '"');
+                continue;
+            }
+
+            var customAttrObject = _commonData.getNodeAttr(currentAttrObject.node, _commonData.getCustomAttrName(currentAttrObject.attrName), _commonData.currentFrame, false, true);
+            // MessageLog.trace( '\n\rcustomAttrObject: '+JSON.stringify(customAttrObject,true,'  '));
+
+            if (customAttrObject) {
+                node.removeDynamicAttr(customAttrObject.node, customAttrObject.attrName );
+                MessageLog.trace('Dynamic Attr "' + customAttrObject.attrName + '" removed in node "' + customAttrObject.node + '"');
+            }else{
+            	MessageLog.trace("Three's no Dynamic Attr for '"+attrName+"' in node '" + _node + "'" );
             }
 
         }
+        }catch(err){MessageLog.trace('ERROR: removeCustomAttr: '+err); }
 
     }
 
-
     ///
-    scene.beginUndoRedoAccum('ClearTransformation');
+    scene.beginUndoRedoAccum('Clear Saved Custom Transformation');
 
     _commonData.eachNode(_commonData, removeCustomAttr,
         function(_node, nodeType) {
