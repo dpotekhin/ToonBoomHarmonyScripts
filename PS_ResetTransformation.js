@@ -2,7 +2,7 @@
 Author: Dima Potekhin (skinion.onn@gmail.com)
 
 [Name: PS_ResetTransformation :]
-[Version: 0.220615 :]
+[Version: 0.220616 :]
 
 [Description:
 Three scripts to universal (pegs and deformers) reset of transformations, save transformation state and remove that state.
@@ -256,7 +256,7 @@ function _getCommonData() {
 //
 function PS_ResetTransformation() {
 
-    MessageLog.clearLog();
+    // MessageLog.clearLog();
 
     var _commonData = _getCommonData();
     if (!_commonData) {
@@ -387,7 +387,7 @@ function PS_ResetTransformation() {
 //
 function PS_SaveTransformation() {
 
-    MessageLog.clearLog();
+    // MessageLog.clearLog();
 
     var _commonData = _getCommonData();
     if (!_commonData) return;
