@@ -9,9 +9,9 @@ This script lets you to convert 3D Path position animation to Separate position 
 Script lets to adjust the color of the selected node.
 
 ## [PS_DeformerTools](ps_build/PS_DeformerTools)
+
 A set of tools for working with deformers.
 Some tools has options - check out for tooltips on tool buttons.
-
 
 ## [PS_ExpressionEditor](ps_build/PS_ExpressionEditor)
 Simple implementation of an expression editor.
@@ -30,8 +30,8 @@ This Script converts Node Attribute Animation to Drawing Node Exposure Keys.
 
 
 ## [PS_Markers](ps_build/PS_Markers)
-A tiny helper for working with scene markers.
 
+A tiny helper for working with scene markers.
 
 ## [PS_PathTools](ps_build/PS_PathTools)
 The script provides tools for aligning, mirroring and modifying strokes.
@@ -54,8 +54,8 @@ This script compensates for rotation attributes values change over 180 degrees b
 A set of scene helper scripts.
 
 ## [PS_SelectionSets](ps_build/PS_SelectionSets)
-This script lets you to save and use groups of node selection sets (SS).
 
+This script lets you to save and use groups of node selection sets (SS).
 
 ## [PS_SetPlaybackRange](ps_build/PS_SetPlaybackRange)
 
@@ -79,5 +79,5 @@ This script allows to swap two nodes keeping their connections.\
 Swapping nodes between different groups is also supported.
 
 ## [PS_UnlinkElementFunctions](ps_build/PS_UnlinkElementFunctions)
-This script allows to unlink animation functions and expressions from selected nodes.
 
+This script allows to unlink animation functions and expressions from selected nodes.
