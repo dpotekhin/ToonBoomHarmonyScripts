@@ -28,6 +28,7 @@ function PS_LineStyleFromStroke() {
             drawing: settings.currentDrawing,
         };
 
+        var hasLines = false;
         var minThickness = 99999;
         var maxThickness = 0;
         var startTip = "ROUND_TIP";
@@ -38,7 +39,7 @@ function PS_LineStyleFromStroke() {
 
             var _selection = Drawing.selection.get(config);
             if( !_selection.selectedStrokes.length ) continue;
-            MessageLog.trace(JSON.stringify(_selection, true, '  '));
+            // MessageLog.trace(JSON.stringify(_selection, true, '  '));
             
             var strokesData = Drawing.query.getStrokes(config);
             // MessageLog.trace(JSON.stringify(strokesData, true, '  '));
@@ -47,9 +48,10 @@ function PS_LineStyleFromStroke() {
             _selection.selectedStrokes.forEach(function(strokeData){
             	var layerData = strokesData.layers[strokeData.layer];
             	
-            	MessageLog.trace(JSON.stringify(layerData, true, '  '));
+            	// MessageLog.trace(JSON.stringify(layerData, true, '  '));
             	
-            	layerData.thicknessPaths.forEach(function(thicknessPathsData){
+            	if( layerData.thicknessPaths ) layerData.thicknessPaths.forEach(function(thicknessPathsData){
+                    hasLines = true;
             		if( minThickness > thicknessPathsData.minThickness ) minThickness = thicknessPathsData.minThickness;
             		if( maxThickness < thicknessPathsData.maxThickness ) maxThickness = thicknessPathsData.maxThickness;
             		if( thicknessPathsData.keys[0].leftFromCtrlThickness === 0 && thicknessPathsData.keys[0].rightFromCtrlThickness === 0 ) startTip =  "FLAT_TIP";
@@ -57,15 +59,19 @@ function PS_LineStyleFromStroke() {
             	});
 
             	
-            	colorId = layerData.strokes[0].pencilColorId;
+            	if( layerData.strokes && layerData.strokes[0] ) colorId = layerData.strokes[0].pencilColorId;
 
             })
 
             // Drawing.selection.clear();
+            if( !hasLines ){
+                MessageLog.trace('The selection has no lines.');
+                return;
+            }
 
             Action.perform("onActionChoosePencilTool()","sceneUI");
 
-            MessageLog.trace(minThickness+' > '+maxThickness+' > '+ startTip );
+            // MessageLog.trace(minThickness+' > '+maxThickness+' > '+ startTip );
             var settings = PenstyleManager.getCurrentPenstyleMaximumSize();
         	PenstyleManager.changeCurrentPenstyleMaximumSize( maxThickness );
         	PenstyleManager.changeCurrentPenstyleMinimumSize( minThickness );
