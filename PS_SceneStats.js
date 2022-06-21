@@ -32,7 +32,7 @@ function PS_SceneStats(){
 	// var Utils = _Utils;
 
 	var btnHeight = 30;
-	var modalWidth = 700;
+	var modalWidth = 850;
 	var modalHeight = 700;
 	// var iconPath = fileMapper.toNativePath(specialFolders.userScripts+"/PS_DeformerTools-Resources/icons/");
 	var forceWindowInstances = true;//KeyModifiers.IsControlPressed();
@@ -66,6 +66,11 @@ function PS_SceneStats(){
   			selection.clearSelection();
 			selection.addNodeToSelection(data.path);
   			Action.perform("onActionEditProperties()", "scene" );
+  		},
+
+  		selectNode: function(data){
+  			selection.clearSelection();
+			selection.addNodeToSelection(data.path);
   		}
   	};
 

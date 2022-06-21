@@ -26,11 +26,11 @@ function DrawingsStats( selectedNodes, modal, lib ){
 
 			var elementId = node.getElementId(n);
 			var DrawingSubstitutionCount = Drawing.numberOf(elementId);
-
+			var nodeName = node.getName(n);
 			return {
 				index: i+1,
 				path: n,
-				name: node.getName(n),
+				name: nodeName,
 				parent: node.parentNode(n),
 				enabled: node.getEnable(n),
 				color: Utils.rgbToHex( node.getColor(n), true ),
@@ -38,6 +38,7 @@ function DrawingsStats( selectedNodes, modal, lib ){
 				enable3d: node.getTextAttr( n, 1, 'ENABLE_3D' ) === 'Y',
 				element: ''+node.getElementId(n),
 				DSCount: ''+DrawingSubstitutionCount,
+				hasNumberEnding: nodeName.match(/_\d\d?$/),
 			};
 		})
 		.sort(function(a,b){ 
@@ -80,6 +81,8 @@ function DrawingsStats( selectedNodes, modal, lib ){
 			getBg: function(v,data) {
 				return data.DSCount == 0 ? lib.bgFail : undefined;
 			},
+			onClick: lib.selectNode
+			/*
 			onClick: function ( data, columnName ) {
 				// MessageLog.trace( 'CLICKED Name: '+columnName+' >> '+JSON.stringify(data,true,'  ') );
 				MessageLog.trace( data.path );
@@ -87,6 +90,7 @@ function DrawingsStats( selectedNodes, modal, lib ){
 
 				lib.showNodeProperties( data );
 			},
+			*/
 		},
 
 		{
@@ -111,6 +115,15 @@ function DrawingsStats( selectedNodes, modal, lib ){
 			toolTip: 'Enable 3D',
 			getValue: lib.outputYesNo,
 			getBg: lib.bgSuccessYellow,
+			onClick: lib.showNodeProperties,
+		},
+
+		{
+			key: 'hasNumberEnding',
+			header: 'NUM',
+			toolTip: 'Has Number Ending',
+			getValue: lib.outputYesNo,
+			getBg: lib.bgSuccessOrFailInverted,
 			onClick: lib.showNodeProperties,
 		}
 
