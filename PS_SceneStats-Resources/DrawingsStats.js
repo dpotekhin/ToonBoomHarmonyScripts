@@ -9,25 +9,26 @@ var NodeUtils = require(fileMapper.toNativePath(specialFolders.userScripts + "/p
 var TableView = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/TableView.js"));
 
 //
-function DrawingsStats( selectedNodes, modal, lib ){
+exports = function( selectedNodes, modal, lib ){
 
 	// Generate the Table
 	
 	// Group
 	var style = 'QGroupBox{ position: relative; border: none; padding-top:0; padding-bottom: 0; border-radius: 0;}';
   	var uiGroup = modal.addGroup( 'DRAWINGS', modal.ui, true, style );
+  	
   	// Collect Data
-	var drawings = NodeUtils.getAllChildNodes( selectedNodes, 'READ' );
-	if( !drawings.length ) return;
-	drawings = drawings
-		.map(function(n,i){
-			// MessageLog.trace( Utils.rgbToHex( node.getColor(n) ) );
-			MessageLog.trace( node.linkedColumn(n, "DRAWING.ELEMENT") );
+	var items = NodeUtils.getAllChildNodes( selectedNodes, 'READ' );
+	if( !items.length ) return;
 
-			var elementId = node.getElementId(n);
-			var DrawingSubstitutionCount = Drawing.numberOf(elementId);
+	items = items
+		.map(function(n,i){
+
+			// MessageLog.trace( Utils.rgbToHex( node.getColor(n) ) );
 			var nodeName = node.getName(n);
-			return {
+			var elementId = node.getElementId(n);
+
+			var itemData = {
 				index: i+1,
 				path: n,
 				name: nodeName,
@@ -36,10 +37,17 @@ function DrawingsStats( selectedNodes, modal, lib ){
 				color: Utils.rgbToHex( node.getColor(n), true ),
 				canAnimate: node.getTextAttr( n, 1, 'CAN_ANIMATE' ) === 'Y',
 				enable3d: node.getTextAttr( n, 1, 'ENABLE_3D' ) === 'Y',
-				element: ''+node.getElementId(n),
-				DSCount: ''+DrawingSubstitutionCount,
 				hasNumberEnding: nodeName.match(/_\d\d?$/),
+				element: elementId,
+				DSCount: 0
 			};
+
+			if( elementId >= 0 ){
+				itemData.DSCount = Drawing.numberOf(elementId);
+			}
+
+			return itemData;
+
 		})
 		.sort(function(a,b){ 
 		    if(a.parent < b.parent) return -1;
@@ -48,9 +56,9 @@ function DrawingsStats( selectedNodes, modal, lib ){
 		})
 	;
 
-	MessageLog.trace( JSON.stringify(drawings, true, '  ') );
+	MessageLog.trace( JSON.stringify( items, true, '  ') );
 
-	var tableView = new TableView( drawings, [
+	var tableView = new TableView( items, [
 
 		{
 			key: 'color',
@@ -131,6 +139,3 @@ function DrawingsStats( selectedNodes, modal, lib ){
 	
 
 }
-
-///
-exports = DrawingsStats;
