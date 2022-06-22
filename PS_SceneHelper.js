@@ -2,7 +2,7 @@
 Author: Dima Potekhin (skinion.onn@gmail.com)
 
 [Name: PS_SceneHelpers :]
-[Version: 0.210921 :]
+[Version: 0.220622 :]
 
 [Description:
 A set of scene helper scripts.
@@ -92,7 +92,8 @@ Open Scene folder
 (Windows only)
 */
 function PS_OpenSceneFolder() {
-    var projectPath = scene.currentProjectPathRemapped();
+    var projectPath = fileMapper.toNativePath(scene.currentProjectPathRemapped());
+    MessageLog.trace('projectPath: '+projectPath);
     FileSystem.openFolder(projectPath);
 }
 
