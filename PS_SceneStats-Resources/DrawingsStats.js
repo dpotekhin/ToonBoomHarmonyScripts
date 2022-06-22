@@ -12,10 +12,6 @@ var TableView = require(fileMapper.toNativePath(specialFolders.userScripts + "/p
 exports = function( selectedNodes, modal, lib ){
 
 	// Generate the Table
-	
-	// Group
-	var style = 'QGroupBox{ position: relative; border: none; padding-top:0; padding-bottom: 0; border-radius: 0;}';
-  	var uiGroup = modal.addGroup( 'DRAWINGS', modal.ui, true, style );
   	
   	// Collect Data
 	var items = NodeUtils.getAllChildNodes( selectedNodes, 'READ' );
@@ -24,23 +20,15 @@ exports = function( selectedNodes, modal, lib ){
 	items = items
 		.map(function(n,i){
 
-			// MessageLog.trace( Utils.rgbToHex( node.getColor(n) ) );
-			var nodeName = node.getName(n);
 			var elementId = node.getElementId(n);
 
-			var itemData = {
-				index: i+1,
-				path: n,
-				name: nodeName,
-				parent: node.parentNode(n),
-				enabled: node.getEnable(n),
-				color: Utils.rgbToHex( node.getColor(n), true ),
+			var itemData = Object.assign( lib.getBaseItemData(n,i), {
 				canAnimate: node.getTextAttr( n, 1, 'CAN_ANIMATE' ) === 'Y',
 				enable3d: node.getTextAttr( n, 1, 'ENABLE_3D' ) === 'Y',
-				hasNumberEnding: nodeName.match(/_\d\d?$/),
+				hasNumberEnding: node.getName(n).match(/_\d\d?$/),
 				element: elementId,
 				DSCount: 0
-			};
+			});
 
 			if( elementId >= 0 ){
 				itemData.DSCount = Drawing.numberOf(elementId);
@@ -55,51 +43,14 @@ exports = function( selectedNodes, modal, lib ){
 		    return 0;
 		})
 	;
+	// MessageLog.trace( JSON.stringify( items, true, '  ') );
 
-	MessageLog.trace( JSON.stringify( items, true, '  ') );
+	// Group
+	var style = 'QGroupBox{ position: relative; border: none; padding-top:0; padding-bottom: 0; border-radius: 0;}';
+  	var uiGroup = modal.addGroup( 'DRAWINGS ('+items.length+')', modal.ui, true, style );
 
-	var tableView = new TableView( items, [
-
-		{
-			key: 'color',
-			header: 'Col',
-			toolTip: 'Node Color',
-			getBg: function (v) { return v ? new QBrush( new QColor( '#'+v ) ) : undefined; },
-			getValue: function (v) { return v==='000000' ? 'No' : ''; },
-			onClick: lib.showNodeProperties
-		},
-
-		{
-			key: 'enabled',
-			header: 'Enb',
-			toolTip: 'Node Enabled',
-			getValue: lib.outputYesNo,
-			getBg: lib.bgSuccessOrFail,
-			onClick: lib.showNodeProperties,
-		},
-
-		{
-			key: 'parent',
-			header: 'GROUP',
-		},
-
-		{
-			key: 'name',
-			header: 'Name',
-			getBg: function(v,data) {
-				return data.DSCount == 0 ? lib.bgFail : undefined;
-			},
-			onClick: lib.selectNode
-			/*
-			onClick: function ( data, columnName ) {
-				// MessageLog.trace( 'CLICKED Name: '+columnName+' >> '+JSON.stringify(data,true,'  ') );
-				MessageLog.trace( data.path );
-				MessageLog.trace( Utils.getFullAttributeList( data.path, 1, true ).join('\n') );
-
-				lib.showNodeProperties( data );
-			},
-			*/
-		},
+  	//
+	var tableView = new TableView( items, lib.getBaseTableRows().concat([
 
 		{
 			key: 'DSCount',
@@ -135,7 +86,7 @@ exports = function( selectedNodes, modal, lib ){
 			onClick: lib.showNodeProperties,
 		}
 
-	], uiGroup );
+	]), uiGroup );
 	
 
 }
