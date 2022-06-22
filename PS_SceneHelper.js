@@ -161,7 +161,7 @@ ToDo:
 */
 function PS_BackupScene(mode) {
 
-    var projectPath = scene.currentProjectPathRemapped();
+    var projectPath = fileMapper.toNativePath( scene.currentProjectPathRemapped() );
 
     var sceneName = scene.currentScene();
 
