@@ -35,7 +35,7 @@ function PS_SceneStats() {
 
     var btnHeight = 30;
     var modalWidth = 1100;
-    var modalHeight = 700;
+    var modalHeight = 900;
     // var iconPath = fileMapper.toNativePath(specialFolders.userScripts+"/PS_DeformerTools-Resources/icons/");
     var forceWindowInstances = true; //KeyModifiers.IsControlPressed();
 
@@ -63,7 +63,7 @@ function PS_SceneStats() {
         bgSuccessOrFailInverted: function(v) { return !v ? lib.bgSuccess : lib.bgFail; },
         bgSuccessYellow: function(v) { return v ? lib.bgYellow : undefined; },
         bgEmpty: function(v) { return !v || v == 0 ? lib.bgFail : undefined },
-
+        
         outputYesNo: function(v) { return v ? 'Yes' : 'No'; },
 
         showNodeProperties: function(data) {

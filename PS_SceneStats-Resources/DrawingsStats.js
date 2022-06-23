@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.220412
+Version: 0.220622
 */
 
 //
@@ -17,16 +17,21 @@ exports = function( selectedNodes, modal, lib ){
 	var items = NodeUtils.getAllChildNodes( selectedNodes, 'READ' );
 	if( !items.length ) return;
 
+	var usedElements = {};
+
 	items = items
 		.map(function(n,i){
 
 			var elementId = node.getElementId(n);
+			if( !usedElements[elementId] ) usedElements[elementId] = [n];
+			else usedElements[elementId].push(n);
 
 			var itemData = Object.assign( lib.getBaseItemData(n,i), {
 				canAnimate: node.getTextAttr( n, 1, 'CAN_ANIMATE' ) === 'Y',
 				enable3d: node.getTextAttr( n, 1, 'ENABLE_3D' ) === 'Y',
 				hasNumberEnding: node.getName(n).match(/_\d\d?$/),
-				element: elementId,
+				elementId: elementId,
+				drawingColumn: node.linkedColumn(n,"DRAWING.ELEMENT"),
 				DSCount: 0
 			});
 
@@ -84,6 +89,15 @@ exports = function( selectedNodes, modal, lib ){
 			getValue: lib.outputYesNo,
 			getBg: lib.bgSuccessOrFailInverted,
 			onClick: lib.showNodeProperties,
+		},
+
+		{
+			header: 'EU',
+			toolTip: function(v,data){ return 'Element Used:\n'+usedElements[data.elementId].join('\n'); },
+			getBg: function(v,data){ return usedElements[data.elementId].length === 1 ? lib.bgEmpty : lib.bgYellow; },
+			getValue: function(v,data){
+				return usedElements[data.elementId].length;
+			}
 		}
 
 	]), uiGroup );

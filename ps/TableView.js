@@ -40,7 +40,7 @@ function TableView( arr, columnConfig, uiParent ){
     			var bg = columnConfigItemData.getBg ? columnConfigItemData.getBg( val, itemData ) : undefined;
     			if( bg ) item.setBackground( bg );
     			
-    			if( columnConfigItemData.toolTip ) item.setToolTip( columnConfigItemData.toolTip );
+    			if( columnConfigItemData.toolTip ) item.setToolTip( typeof columnConfigItemData.toolTip === 'string' ? columnConfigItemData.toolTip : columnConfigItemData.toolTip(val, itemData) );
 
     			tableWidget.setItem(itemDataI, columnConfigItemDataI, item);
 
