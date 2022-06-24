@@ -71,8 +71,13 @@ function PS_SceneStats() {
         bgSuccessOrFailInverted: function(v) { return !v ? lib.bgSuccess : lib.bgFail; },
         bgSuccessYellow: function(v) { return v ? lib.bgYellow : undefined; },
         bgEmpty: function(v) { return !v || v == 0 ? lib.bgFail : undefined },
+		bgSuccessIfOne:  function(v){ return v===1 ? lib.bgSuccess : lib.bgYellow },
 
         outputYesNo: function(v) { return v ? 'Yes' : 'No'; },
+        outputWarning: function(v) { return v ? '!' : ''; },
+        outputPointOne: function(v){ return ~~(v*10)/10; },
+        outputPointTwo: function(v){ return ~~(v*100)/100; },
+        outputPointThree: function(v){ return ~~(v*1000)/1000; },
 
         defaultCellClick: function(data){
 

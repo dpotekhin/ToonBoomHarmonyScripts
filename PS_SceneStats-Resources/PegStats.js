@@ -20,6 +20,9 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ){
 	items = items
 		.map(function(n,i){
 
+			var currentFrame = frame.current();
+
+			// Pivot
 			var pivotX = Math.abs( Number(node.getTextAttr( n, 1, 'PIVOT.X' )) );
 			var pivotY = Math.abs( Number(node.getTextAttr( n, 1, 'PIVOT.Y' )) );
 			var pivotWarning = '';
@@ -30,7 +33,7 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ){
 				pivotWarningMessage = 'The Pivot has zero values.';
 			}
 
-			if( pivotX < .1 ){
+			if( pivotX < .1 || pivotY < .1 ){
 				pivotWarning = '!';
 				pivotWarningMessage = 'The Pivot has near zero values.';
 			}
@@ -41,6 +44,11 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ){
 				hasNumberEnding: node.getName(n).match(/_\d\d?$/),
 				pivotWarning: pivotWarning,
 				pivotWarningMessage: pivotWarningMessage,
+				positionZ: node.getAttr(n, currentFrame, 'POSITION.Z' ).doubleValue(),
+				rotationZ: node.getAttr(n, currentFrame, 'ROTATION.ANGLEZ' ).doubleValue(),
+				scaleX: node.getAttr(n, currentFrame, 'SCALE.X' ).doubleValue(),
+				scaleY: node.getAttr(n, currentFrame, 'SCALE.Y' ).doubleValue(),
+				scaleZ: node.getAttr(n, currentFrame, 'SCALE.Z' ).doubleValue(),
 			});
 
 			return itemData;
@@ -94,6 +102,51 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ){
 			toolTip: 'Has Number Ending',
 			getValue: lib.outputYesNo,
 			getBg: lib.bgSuccessOrFailInverted,
+			onClick: lib.defaultCellClick,
+		},
+
+		{
+			key: 'positionZ',
+			header: 'PZ',
+			toolTip: 'Current Z Position',
+			getValue: lib.outputPointThree,
+			getBg: lib.bgSuccessOrFailInverted,
+			onClick: lib.defaultCellClick,
+		},
+
+		{
+			key: 'rotationZ',
+			header: 'RZ',
+			toolTip: 'Current Z Rotation',
+			getValue: lib.outputPointTwo,
+			getBg: lib.bgSuccessOrFailInverted,
+			onClick: lib.defaultCellClick,
+		},
+
+		{
+			key: 'scaleX',
+			header: 'SX',
+			toolTip: 'Current X Scale',
+			getValue: lib.outputPointOne,
+			getBg: lib.bgSuccessIfOne,
+			onClick: lib.defaultCellClick,
+		},
+
+		{
+			key: 'scaleY',
+			header: 'SY',
+			toolTip: 'Current Y Scale',
+			getValue: lib.outputPointOne,
+			getBg: lib.bgSuccessIfOne,
+			onClick: lib.defaultCellClick,
+		},
+
+		{
+			key: 'scaleZ',
+			header: 'SZ',
+			toolTip: 'Current Z Scale',
+			getValue: lib.outputPointOne,
+			getBg: lib.bgSuccessIfOne,
 			onClick: lib.defaultCellClick,
 		},
 
