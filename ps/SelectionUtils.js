@@ -150,7 +150,7 @@ function eachAnimatedAttributeOfSelectedLayers( _action ){
 
 //
 function focusOnSelectedNode(){
-	MessageLog.trace('focusOnSelectedNode');
+
 	Action.perform("onActionFocusOnSelectionNV()", "Node View");
 	Action.perform("onActionResetView()", "Node View");
 	Action.perform("onActionZoomIn()", "Node View");

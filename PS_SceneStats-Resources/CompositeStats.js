@@ -9,7 +9,7 @@ var NodeUtils = require(fileMapper.toNativePath(specialFolders.userScripts + "/p
 var TableView = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/TableView.js"));
 
 //
-exports = function(selectedNodes, modal, lib) {
+exports = function( selectedNodes, modal, lib, contentMaxHeight ) {
 
     // Collect Data
     var items = NodeUtils.getAllChildNodes(selectedNodes, 'COMPOSITE');
@@ -34,7 +34,7 @@ exports = function(selectedNodes, modal, lib) {
 
     // Group
     var style = 'QGroupBox{ position: relative; border: none; padding-top:0; padding-bottom: 0; border-radius: 0;}';
-    var uiGroup = modal.addGroup('COMPOSITES ('+items.length+')', modal.ui, true, style);
+    // var uiGroup = modal.addGroup('COMPOSITES ('+items.length+')', modal.ui, true, style);
     
     //
     var bgColors = {
@@ -53,9 +53,11 @@ exports = function(selectedNodes, modal, lib) {
 			getBg: function(v,data) {
 				return bgColors[v];
 			},
-			onClick: lib.showNodeProperties
+			onClick: lib.defaultCellClick
 		}
 
-    ]), uiGroup); 
+    ]), undefined, contentMaxHeight ); 
+
+    return tableView;
 
 }

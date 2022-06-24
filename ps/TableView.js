@@ -6,7 +6,7 @@ Version: 0.220412
 
 //
 //
-function TableView( arr, columnConfig, uiParent ){
+function TableView( arr, columnConfig, uiParent, minHeight ){
 
 	var _this = this;
 	var tableWidget = new QTableWidget(this);
@@ -28,6 +28,7 @@ function TableView( arr, columnConfig, uiParent ){
 		tableWidget.rowCount = arr.length;
     	tableWidget.columnCount = columnConfig.length;
     	tableWidget.setHorizontalHeaderLabels( columnConfig.map(function( itemcolumnConfig, i ){ return itemcolumnConfig.header || i+1; }) );
+        if( minHeight ) tableWidget.minimumHeight = minHeight;
 
     	arr.forEach(function(itemData, itemDataI){
     		
@@ -51,6 +52,7 @@ function TableView( arr, columnConfig, uiParent ){
     	tableWidget.resizeColumnsToContents();
 	}
 
+    return tableWidget;
 }
 ///
 exports = TableView;

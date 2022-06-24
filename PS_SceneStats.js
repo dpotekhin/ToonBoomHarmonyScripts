@@ -2,15 +2,17 @@
 Author: Dima Potekhin (skinion.onn@gmail.com)
 
 Name: PS_SceneStats
-Version: 0.220622
+Version: 0.220624
 
 */
 
 
 //
-var Utils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/Utils.js"));
+var _Utils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/Utils.js"));
+var _SelectionUtils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/SelectionUtils.js"));
 var pModal = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/pModal.js"));
 var DrawingsStats = require(fileMapper.toNativePath(specialFolders.userScripts + "/PS_SceneStats-Resources/DrawingsStats.js"));
+var PegStats = require(fileMapper.toNativePath(specialFolders.userScripts + "/PS_SceneStats-Resources/PegStats.js"));
 var CompositeStats = require(fileMapper.toNativePath(specialFolders.userScripts + "/PS_SceneStats-Resources/CompositeStats.js"));
 
 //
@@ -25,17 +27,23 @@ function PS_SceneStats() {
         return;
     }
 
+    if( node.type( selectedNodes[0] ) !== 'GROUP' ){ // Use the group of the selected node if it isn't a Group
+    	selectedNodes = [node.parentNode(selectedNodes[0])];
+    }
+
     //
     var scriptName = 'Scene Stats';
-    var scriptVer = '0.220412';
+    var scriptVer = '0.220624';
     //
 
     // var DeformerTools = _DeformerTools;
-    // var Utils = _Utils;
+    var Utils = _Utils;
+    var SelectionUtils = _SelectionUtils;
 
     var btnHeight = 30;
     var modalWidth = 1100;
-    var modalHeight = 900;
+    var modalHeight = 500;
+    var contentMaxHeight = modalHeight - 60;
     // var iconPath = fileMapper.toNativePath(specialFolders.userScripts+"/PS_DeformerTools-Resources/icons/");
     var forceWindowInstances = true; //KeyModifiers.IsControlPressed();
 
@@ -63,8 +71,26 @@ function PS_SceneStats() {
         bgSuccessOrFailInverted: function(v) { return !v ? lib.bgSuccess : lib.bgFail; },
         bgSuccessYellow: function(v) { return v ? lib.bgYellow : undefined; },
         bgEmpty: function(v) { return !v || v == 0 ? lib.bgFail : undefined },
-        
+
         outputYesNo: function(v) { return v ? 'Yes' : 'No'; },
+
+        defaultCellClick: function(data){
+
+        	if( KeyModifiers.IsControlPressed() ) {
+
+        		lib.selectNode( data );
+        		SelectionUtils.focusOnSelectedNode();
+        		return;
+
+        	}else if( KeyModifiers.IsShiftPressed() ) {
+
+        		lib.showNodeProperties( data );
+        		return;
+
+        	}
+
+        	lib.selectNode( data );
+        },
 
         showNodeProperties: function(data) {
             // MessageLog.trace('>>'+data.path);
@@ -175,8 +201,13 @@ function PS_SceneStats() {
 
     try {
         
-        new DrawingsStats( selectedNodes, modal, lib );
-        new CompositeStats(selectedNodes, modal, lib);
+        var tabs = new QTabWidget(ui);
+        tabs.addTab( new PegStats( selectedNodes, undefined, lib, contentMaxHeight ), 'Pegs');
+        tabs.addTab( new DrawingsStats( selectedNodes, undefined, lib, contentMaxHeight ), 'Drawings');
+        tabs.addTab( new CompositeStats( selectedNodes, undefined, lib, contentMaxHeight ), 'Composites');
+        // tabs.addTab( new QLabel("widget 2"), 'Tab2');
+
+        ui.mainLayout.addWidget( tabs, 0, 0 );
 
         //
         // modal.addVLine( btnHeight, mainGroup );
@@ -187,6 +218,6 @@ function PS_SceneStats() {
     //
     ui.mainLayout.addStretch();
 
-    modal.show();
+    ui.show();
 
 }
