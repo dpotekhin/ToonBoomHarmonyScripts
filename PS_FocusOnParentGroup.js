@@ -6,8 +6,6 @@ Makes the focus on the parent node of the selected one.
 
 */
 
-var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
-
 function PS_FocusOnParentGroup(){
 
 	var _selection = selection.selectedNodes();

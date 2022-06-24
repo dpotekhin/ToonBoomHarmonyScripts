@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.220622
+Version: 0.220624
 */
 
 //
@@ -14,30 +14,34 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ){
 	// Generate the Table
   	
   	// Collect Data
-	var items = NodeUtils.getAllChildNodes( selectedNodes, 'READ' );
+	var items = NodeUtils.getAllChildNodes( selectedNodes, 'PEG' );
 	if( !items.length ) return;
-
-	var usedElements = {};
 
 	items = items
 		.map(function(n,i){
 
-			var elementId = node.getElementId(n);
-			if( !usedElements[elementId] ) usedElements[elementId] = [n];
-			else usedElements[elementId].push(n);
+			var pivotX = Math.abs( Number(node.getTextAttr( n, 1, 'PIVOT.X' )) );
+			var pivotY = Math.abs( Number(node.getTextAttr( n, 1, 'PIVOT.Y' )) );
+			var pivotWarning = '';
+			var pivotWarningMessage = '';
+
+			if( pivotX+pivotY === 0 ) {
+				pivotWarning = true;
+				pivotWarningMessage = 'The Pivot has zero values.';
+			}
+
+			if( pivotX < .1 ){
+				pivotWarning = '!';
+				pivotWarningMessage = 'The Pivot has near zero values.';
+			}
 
 			var itemData = Object.assign( lib.getBaseItemData(n,i), {
-				canAnimate: node.getTextAttr( n, 1, 'CAN_ANIMATE' ) === 'Y',
 				enable3d: node.getTextAttr( n, 1, 'ENABLE_3D' ) === 'Y',
+				position3dPath: node.getTextAttr( n, 1, 'POSITION.SEPARATE' ) !== 'On',
 				hasNumberEnding: node.getName(n).match(/_\d\d?$/),
-				elementId: elementId,
-				drawingColumn: node.linkedColumn(n,"DRAWING.ELEMENT"),
-				DSCount: 0
+				pivotWarning: pivotWarning,
+				pivotWarningMessage: pivotWarningMessage,
 			});
-
-			if( elementId >= 0 ){
-				itemData.DSCount = Drawing.numberOf(elementId);
-			}
 
 			return itemData;
 
@@ -58,26 +62,28 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ){
 	var tableView = new TableView( items, lib.getBaseTableRows().concat([
 
 		{
-			key: 'DSCount',
-			header: 'DSc',
-			toolTip: 'Drawing Substitution Count',
-			getBg: lib.bgEmpty,
-		},
-
-		{
-			key: 'canAnimate',
-			header: 'Anm',
-			toolTip: 'Animate Using Animation Tools',
-			getValue: lib.outputYesNo,
-			getBg: lib.bgSuccessOrFailInverted,
-			onClick: lib.defaultCellClick,
-		},
-
-		{
 			key: 'enable3d',
 			header: '3d',
 			toolTip: 'Enable 3D',
 			getValue: lib.outputYesNo,
+			getBg: lib.bgSuccessYellow,
+			onClick: lib.defaultCellClick,
+		},
+
+		{
+			key: 'position3dPath',
+			header: 'P3d',
+			toolTip: 'Position 3D Path',
+			getValue: lib.outputYesNo,
+			getBg: lib.bgSuccessYellow,
+			onClick: lib.defaultCellClick,
+		},
+
+		{
+			key: 'pivotWarning',
+			header: 'Pvt',
+			toolTip: function(v,data){ return data.pivotWarningMessage; },
+			// getValue: lib.outputYesNo,
 			getBg: lib.bgSuccessYellow,
 			onClick: lib.defaultCellClick,
 		},
@@ -90,15 +96,6 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ){
 			getBg: lib.bgSuccessOrFailInverted,
 			onClick: lib.defaultCellClick,
 		},
-
-		{
-			header: 'EU',
-			toolTip: function(v,data){ return 'Element Used:\n'+usedElements[data.elementId].join('\n'); },
-			getBg: function(v,data){ return usedElements[data.elementId].length === 1 ? lib.bgEmpty : lib.bgYellow; },
-			getValue: function(v,data){
-				return usedElements[data.elementId].length;
-			}
-		}
 
 	]), undefined, contentMaxHeight );
 	
