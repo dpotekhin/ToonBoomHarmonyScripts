@@ -127,7 +127,7 @@ function PS_SceneStats() {
                     toolTip: 'Node Color',
                     getBg: function(v) { return v ? new QBrush(new QColor('#' + v)) : undefined; },
                     getValue: function(v) { return v === '000000' ? 'No' : ''; },
-                    onClick: lib.showNodeProperties
+                    onClick: lib.defaultCellClick,
                 },
 
                 {
@@ -136,12 +136,13 @@ function PS_SceneStats() {
                     toolTip: 'Node Enabled',
                     getValue: lib.outputYesNo,
                     getBg: lib.bgSuccessOrFail,
-                    onClick: lib.showNodeProperties,
+                    onClick: lib.defaultCellClick,
                 },
 
                 {
                     key: 'parent',
                     header: 'GROUP',
+                    onClick: lib.defaultCellClick,
                 },
 
                 {
@@ -150,7 +151,7 @@ function PS_SceneStats() {
                     getBg: function(v, data) {
                         return data.DSCount == 0 ? lib.bgFail : undefined;
                     },
-                    onClick: lib.selectNode
+                    onClick: lib.defaultCellClick,
 
                 },
 
@@ -159,7 +160,8 @@ function PS_SceneStats() {
                     header: 'IN',
                     toolTip: 'Has Input Connections',
                     getValue: lib.outputYesNo,
-                    getBg: lib.bgSuccessOrFail
+                    getBg: lib.bgSuccessOrFail,
+                    onClick: lib.defaultCellClick,
                 },
 
                 {
@@ -167,7 +169,8 @@ function PS_SceneStats() {
                     header: 'OUT',
                     toolTip: 'Has Output Connections',
                     getValue: lib.outputYesNo,
-                    getBg: lib.bgSuccessOrFail
+                    getBg: lib.bgSuccessOrFail,
+                    onClick: lib.defaultCellClick,
                 },
 
             ];

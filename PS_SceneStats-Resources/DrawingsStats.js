@@ -62,6 +62,7 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ){
 			header: 'DSc',
 			toolTip: 'Drawing Substitution Count',
 			getBg: lib.bgEmpty,
+			onClick: lib.defaultCellClick,
 		},
 
 		{
@@ -97,7 +98,8 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ){
 			getBg: function(v,data){ return usedElements[data.elementId].length === 1 ? lib.bgEmpty : lib.bgYellow; },
 			getValue: function(v,data){
 				return usedElements[data.elementId].length;
-			}
+			},
+			onClick: lib.defaultCellClick,
 		}
 
 	]), undefined, contentMaxHeight );
