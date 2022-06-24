@@ -37,6 +37,7 @@ function TableView( arr, columnConfig, uiParent, minHeight ){
     			var val = itemData[columnConfigItemData.key];
     			
     			var item = new QTableWidgetItem( '' + ( columnConfigItemData.getValue ? columnConfigItemData.getValue( val, itemData ) : val ) || '', 0 );
+                item.setFlags(item.flags() ^ Qt.ItemIsEditable);
     			
     			var bg = columnConfigItemData.getBg ? columnConfigItemData.getBg( val, itemData ) : undefined;
     			if( bg ) item.setBackground( bg );
