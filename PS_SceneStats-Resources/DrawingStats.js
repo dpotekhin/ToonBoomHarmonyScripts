@@ -29,7 +29,6 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ){
 			var itemData = Object.assign( lib.getBaseItemData(n,i), {
 				canAnimate: node.getTextAttr( n, 1, 'CAN_ANIMATE' ) === 'Y',
 				enable3d: node.getTextAttr( n, 1, 'ENABLE_3D' ) === 'Y',
-				hasNumberEnding: node.getName(n).match(/_\d\d?$/),
 				elementId: elementId,
 				drawingColumn: node.linkedColumn(n,"DRAWING.ELEMENT"),
 				DSCount: 0
@@ -80,15 +79,6 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ){
 			toolTip: 'Enable 3D',
 			getValue: lib.outputYesNo,
 			getBg: lib.bgSuccessYellow,
-			onClick: lib.defaultCellClick,
-		},
-
-		{
-			key: 'hasNumberEnding',
-			header: 'NUM',
-			toolTip: 'Has Number Ending',
-			getValue: lib.outputYesNo,
-			getBg: lib.bgSuccessOrFailInverted,
 			onClick: lib.defaultCellClick,
 		},
 

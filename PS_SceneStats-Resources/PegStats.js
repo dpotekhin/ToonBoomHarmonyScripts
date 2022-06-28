@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.220624
+Version: 0.220628
 */
 
 //
@@ -41,9 +41,10 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ){
 			var itemData = Object.assign( lib.getBaseItemData(n,i), {
 				enable3d: node.getTextAttr( n, 1, 'ENABLE_3D' ) === 'Y',
 				position3dPath: node.getTextAttr( n, 1, 'POSITION.SEPARATE' ) !== 'On',
-				hasNumberEnding: node.getName(n).match(/_\d\d?$/),
 				pivotWarning: pivotWarning,
 				pivotWarningMessage: pivotWarningMessage,
+				positionX: node.getAttr(n, currentFrame, 'POSITION.X' ).doubleValue(),
+				positionY: node.getAttr(n, currentFrame, 'POSITION.Y' ).doubleValue(),
 				positionZ: node.getAttr(n, currentFrame, 'POSITION.Z' ).doubleValue(),
 				rotationZ: node.getAttr(n, currentFrame, 'ROTATION.ANGLEZ' ).doubleValue(),
 				scaleX: node.getAttr(n, currentFrame, 'SCALE.X' ).doubleValue(),
@@ -97,10 +98,19 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ){
 		},
 
 		{
-			key: 'hasNumberEnding',
-			header: 'NUM',
-			toolTip: 'Has Number Ending',
-			getValue: lib.outputYesNo,
+			key: 'positionX',
+			header: 'PX',
+			toolTip: 'Current X Position',
+			getValue: lib.outputPointThree,
+			getBg: lib.bgSuccessOrFailInverted,
+			onClick: lib.defaultCellClick,
+		},
+
+		{
+			key: 'positionY',
+			header: 'PY',
+			toolTip: 'Current Y Position',
+			getValue: lib.outputPointThree,
 			getBg: lib.bgSuccessOrFailInverted,
 			onClick: lib.defaultCellClick,
 		},

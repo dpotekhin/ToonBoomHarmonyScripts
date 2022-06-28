@@ -2,7 +2,7 @@
 Author: Dima Potekhin (skinion.onn@gmail.com)
 
 Name: PS_SceneStats
-Version: 0.220624
+Version: 0.220628
 
 */
 
@@ -34,7 +34,7 @@ function PS_SceneStats() {
 
     //
     var scriptName = 'Scene Stats';
-    var scriptVer = '0.220624';
+    var scriptVer = '0.220628';
     //
 
     // var DeformerTools = _DeformerTools;
@@ -120,10 +120,12 @@ function PS_SceneStats() {
         },
 
         getBaseItemData: function(n, i) {
+            var name = node.getName(n);
             return {
                 index: i + 1,
                 path: n,
-                name: node.getName(n),
+                name: name,
+                hasNumberEnding: name.match(/_\d\d?$/),
                 parent: node.parentNode(n),
                 enabled: node.getEnable(n),
                 color: Utils.rgbToHex(node.getColor(n), true),
@@ -164,7 +166,10 @@ function PS_SceneStats() {
                     key: 'name',
                     header: 'Name',
                     getBg: function(v, data) {
-                        return data.DSCount == 0 ? lib.bgFail : undefined;
+                        return data.DSCount === 0 || v.toLowerCase().match(/^drawing/) || data.hasNumberEnding ? lib.bgYellow : undefined;
+                    },
+                    toolTip: function(v, data) {
+                        return data.DSCount === 0 || v.toLowerCase().match(/^drawing/) || data.hasNumberEnding ? 'Has naming issues' : '';  
                     },
                     onClick: lib.defaultCellClick,
 
@@ -185,6 +190,15 @@ function PS_SceneStats() {
                     toolTip: 'Has Output Connections',
                     getValue: lib.outputYesNo,
                     getBg: lib.bgSuccessOrFail,
+                    onClick: lib.defaultCellClick,
+                },
+
+                {
+                    key: 'hasNumberEnding',
+                    header: 'NUM',
+                    toolTip: 'Has Number Ending',
+                    getValue: lib.outputYesNo,
+                    getBg: lib.bgSuccessOrFailInverted,
                     onClick: lib.defaultCellClick,
                 },
 
@@ -230,7 +244,7 @@ function PS_SceneStats() {
         var palettesTables = new PaletteStats( selectedNodes, undefined, lib, contentMaxHeight );
         tabs.addTab( palettesTables[0], 'Palettes');
         tabs.addTab( palettesTables[1], 'Colors');
-        
+
         // tabs.addTab( new QLabel("widget 2"), 'Tab2');
 
         ui.mainLayout.addWidget( tabs, 0, 0 );
