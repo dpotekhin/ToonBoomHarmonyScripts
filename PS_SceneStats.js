@@ -11,9 +11,10 @@ Version: 0.220624
 var _Utils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/Utils.js"));
 var _SelectionUtils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/SelectionUtils.js"));
 var pModal = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/pModal.js"));
-var DrawingsStats = require(fileMapper.toNativePath(specialFolders.userScripts + "/PS_SceneStats-Resources/DrawingsStats.js"));
+var DrawingStats = require(fileMapper.toNativePath(specialFolders.userScripts + "/PS_SceneStats-Resources/DrawingStats.js"));
 var PegStats = require(fileMapper.toNativePath(specialFolders.userScripts + "/PS_SceneStats-Resources/PegStats.js"));
 var CompositeStats = require(fileMapper.toNativePath(specialFolders.userScripts + "/PS_SceneStats-Resources/CompositeStats.js"));
+var PaletteStats = require(fileMapper.toNativePath(specialFolders.userScripts + "/PS_SceneStats-Resources/PaletteStats.js"));
 
 //
 function PS_SceneStats() {
@@ -56,9 +57,14 @@ function PS_SceneStats() {
 
     // Main Group
     // var mainGroup = modal.addGroup( '', ui, true, hGroupStyle);
+    function checkNull(v1,v2){
+        if(v1 === null) return '';
+        return v2;
+    }
 
     var lib = {
 
+        checkNull: checkNull,
         returnEmpty: function() {},
 
         bgSuccess: new QBrush(new QColor('#004000')),
@@ -67,17 +73,21 @@ function PS_SceneStats() {
         bgWarning: new QBrush(new QColor('#404000')),
         bgStrange: new QBrush(new QColor('#444400')),
         bgInfo: new QBrush(new QColor('#000044')),
-        bgSuccessOrFail: function(v) { return v ? lib.bgSuccess : lib.bgFail; },
-        bgSuccessOrFailInverted: function(v) { return !v ? lib.bgSuccess : lib.bgFail; },
-        bgSuccessYellow: function(v) { return v ? lib.bgYellow : undefined; },
-        bgEmpty: function(v) { return !v || v == 0 ? lib.bgFail : undefined },
-		bgSuccessIfOne:  function(v){ return v===1 ? lib.bgSuccess : lib.bgYellow },
+        bgSuccessOrFail: function(v) { return checkNull( v, v ? lib.bgSuccess : lib.bgFail); },
+        bgSuccessOrFailInverted: function(v) { return checkNull( v, !v ? lib.bgSuccess : lib.bgFail); },
+        bgSuccessYellow: function(v) { return checkNull( v, v ? lib.bgYellow : undefined); },
+        bgFailYellow: function(v) { return checkNull( v, v ? lib.bgSuccess : lib.bgYellow); },
+        bgEmpty: function(v) { return checkNull( v, !v || v == 0 ? lib.bgFail : undefined); },
+		bgSuccessIfOne:  function(v){ return checkNull( v, v===1 ? lib.bgSuccess : lib.bgYellow); },
 
-        outputYesNo: function(v) { return v ? 'Yes' : 'No'; },
-        outputWarning: function(v) { return v ? '!' : ''; },
-        outputPointOne: function(v){ return ~~(v*10)/10; },
-        outputPointTwo: function(v){ return ~~(v*100)/100; },
-        outputPointThree: function(v){ return ~~(v*1000)/1000; },
+        outputYesNo: function(v) { return checkNull( v, v ? 'Yes' : 'No'); },
+        outputYesNoInverted: function(v) { return checkNull( v, !v ? 'Yes' : 'No'); },
+        outputWarning: function(v) { return checkNull( v, v ? '!' : ''); },
+        outputString: function(v){ return checkNull( v, v) },
+        outputNumber: function(v){ return checkNull( v, ~~v) },
+        outputPointOne: function(v){ return checkNull( v, ~~(v*10)/10); },
+        outputPointTwo: function(v){ return checkNull( v, ~~(v*100)/100); },
+        outputPointThree: function(v){ return checkNull( v, ~~(v*1000)/1000); },
 
         defaultCellClick: function(data){
 
@@ -210,9 +220,17 @@ function PS_SceneStats() {
     try {
         
         var tabs = new QTabWidget(ui);
+
         tabs.addTab( new PegStats( selectedNodes, undefined, lib, contentMaxHeight ), 'Pegs');
-        tabs.addTab( new DrawingsStats( selectedNodes, undefined, lib, contentMaxHeight ), 'Drawings');
+
+        tabs.addTab( new DrawingStats( selectedNodes, undefined, lib, contentMaxHeight ), 'Drawings');
+
         tabs.addTab( new CompositeStats( selectedNodes, undefined, lib, contentMaxHeight ), 'Composites');
+
+        var palettesTables = new PaletteStats( selectedNodes, undefined, lib, contentMaxHeight );
+        tabs.addTab( palettesTables[0], 'Palettes');
+        tabs.addTab( palettesTables[1], 'Colors');
+        
         // tabs.addTab( new QLabel("widget 2"), 'Tab2');
 
         ui.mainLayout.addWidget( tabs, 0, 0 );
