@@ -44,7 +44,7 @@ function PS_TraceAllAttributesOfNode( _node ){
 
     });
 
-    MessageLog.trace( 'Attributes of node "'+_node+'":\n'+output );
+    MessageLog.trace( 'Attributes of node "'+_node+'" ('+node.type(_node)+') :\n'+output );
 }
 
 
