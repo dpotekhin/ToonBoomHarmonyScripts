@@ -49,7 +49,7 @@ exports = function(selectedNodes, modal, lib, contentMaxHeight) {
         }
         colorTableItems.push(paletteItem);
         paletteTableItems.push(paletteItem);
-        MessageLog.trace('ID: '+_palette.id);
+        // MessageLog.trace('ID: '+_palette.id);
 
         // Colors
         for (var ci = 0; ci < _palette.nColors; ci++) {
