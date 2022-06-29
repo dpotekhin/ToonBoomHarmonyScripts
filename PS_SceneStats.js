@@ -2,7 +2,7 @@
 Author: Dima Potekhin (skinion.onn@gmail.com)
 
 Name: PS_SceneStats
-Version: 0.220628
+Version: 0.220629
 
 */
 
@@ -34,7 +34,7 @@ function PS_SceneStats() {
 
     //
     var scriptName = 'Scene Stats';
-    var scriptVer = '0.220628';
+    var scriptVer = '0.220629';
     //
 
     // var DeformerTools = _DeformerTools;
@@ -82,6 +82,7 @@ function PS_SceneStats() {
 
         outputYesNo: function(v) { return checkNull( v, v ? 'Yes' : 'No'); },
         outputYesNoInverted: function(v) { return checkNull( v, !v ? 'Yes' : 'No'); },
+        outputValueOrNo: function(v) { return checkNull( v, v ? v : 'No'); },
         outputWarning: function(v) { return checkNull( v, v ? '!' : ''); },
         outputString: function(v){ return checkNull( v, v) },
         outputNumber: function(v){ return checkNull( v, ~~v) },
