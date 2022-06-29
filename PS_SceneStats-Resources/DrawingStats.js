@@ -18,6 +18,11 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ){
 	if( !items.length ) return;
 
 	var usedElements = {};
+	var scaleIndependentShorthands = {
+		'Scale Dependent': 'SD',
+		'Scale Independent': 'SI',
+		'Scale Independent (Legacy)': 'SIL',
+	};
 
 	items = items
 		.map(function(n,i){
@@ -26,9 +31,41 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ){
 			if( !usedElements[elementId] ) usedElements[elementId] = [n];
 			else usedElements[elementId].push(n);
 
+			//
+			var adjustPencilThickness = node.getTextAttr( n, 1, 'ADJUST_PENCIL_THICKNESS' ) === 'Y';
+			var adjustPencilThicknessToolTip = 'Pencil Thickness Adjusted';
+			if( adjustPencilThickness ){
+				
+				var _scaleIndependent = node.getTextAttr( n, 1, 'ZOOM_INDEPENDENT_LINE_ART_THICKNESS' );
+				var _proportional = Number(node.getTextAttr( n, 1, 'MULT_LINE_ART_THICKNESS' ));
+				var _constant = Number(node.getTextAttr( n, 1, 'ADD_LINE_ART_THICKNESS' ));
+				var _min = Number(node.getTextAttr( n, 1, 'MIN_LINE_ART_THICKNESS' ));
+				var _max = Number(node.getTextAttr( n, 1, 'MAX_LINE_ART_THICKNESS' ));
+				
+				adjustPencilThickness = scaleIndependentShorthands[_scaleIndependent]
+					+'/'+ lib.outputPointOne( _proportional )
+					+'/'+ lib.outputPointOne( _constant )
+					+'/'+ lib.outputPointOne( _min )
+					+'/'+ lib.outputPointOne( _max )
+				;
+
+				adjustPencilThicknessToolTip = 'Pencil Thickness Adjusted.'
+					+'\n - Scale Independent: '+ _scaleIndependent
+					+'\n - Proportional: '+ _proportional
+					+'\n - Constant: '+ _constant
+					+'\n - Minimum: '+ _min
+					+'\n - Maximum: '+ _max
+				;
+
+			}
+
+			//
 			var itemData = Object.assign( lib.getBaseItemData(n,i), {
 				canAnimate: node.getTextAttr( n, 1, 'CAN_ANIMATE' ) === 'Y',
 				enable3d: node.getTextAttr( n, 1, 'ENABLE_3D' ) === 'Y',
+				adjustPencilThickness: adjustPencilThickness,
+				adjustPencilThicknessToolTip: adjustPencilThicknessToolTip,
+				preserveLineThickness: node.getTextAttr( n, 1, 'PENCIL_LINE_DEFORMATION_PRESERVE_THICKNESS' ) === 'Y',
 				elementId: elementId,
 				drawingColumn: node.linkedColumn(n,"DRAWING.ELEMENT"),
 				DSCount: 0
@@ -89,6 +126,23 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ){
 			getValue: function(v,data){
 				return usedElements[data.elementId].length;
 			},
+			onClick: lib.defaultCellClick,
+		},
+
+		{
+			key: 'adjustPencilThickness',
+			header: 'PT',
+			toolTip: function(v,data){ return data.adjustPencilThicknessToolTip },
+			getBg: lib.bgSuccessYellow,
+			onClick: lib.defaultCellClick,
+		},
+
+		{
+			key: 'preserveLineThickness',
+			header: 'PLT',
+			toolTip: 'Preserve Line Thickness',
+			getBg: lib.bgSuccessYellow,
+			getValue: lib.outputYesNo,
 			onClick: lib.defaultCellClick,
 		}
 
