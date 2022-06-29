@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.220622
+Version: 0.220629
 */
 
 //
@@ -133,6 +133,7 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ){
 			key: 'adjustPencilThickness',
 			header: 'PT',
 			toolTip: function(v,data){ return data.adjustPencilThicknessToolTip },
+			getValue: lib.outputValueOrNo,
 			getBg: lib.bgSuccessYellow,
 			onClick: lib.defaultCellClick,
 		},
