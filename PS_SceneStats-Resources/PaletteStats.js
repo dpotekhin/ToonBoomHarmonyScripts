@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.220628
+Version: 0.220630
 */
 
 //
@@ -176,7 +176,7 @@ exports = function(selectedNodes, modal, lib, contentMaxHeight) {
             getValue: lib.outputNumber,
         },
 
-        
+
         {
             key: 'usedInScene',
             header: 'UiS',
