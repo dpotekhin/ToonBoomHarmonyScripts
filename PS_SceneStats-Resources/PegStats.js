@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.220628
+Version: 0.220630
 */
 
 //
@@ -38,6 +38,20 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ){
 				pivotWarningMessage = 'The Pivot has near zero values.';
 			}
 
+			// Scale X is flipped in the animation ?
+			var scaleXFlipped = false;
+			var scaleXStartValue;
+			var scaleXColumnName = node.linkedColumn(n, "SCALE.X");
+			if( scaleXColumnName ){
+				var points = func.numberOfPoints( scaleXColumnName );
+				for( var pi=0; pi<points; pi++ ){
+					var xv = func.pointY( scaleXColumnName, pi );
+					if( scaleXStartValue === undefined ) scaleXStartValue = xv;
+					else if( xv !== scaleXStartValue ) scaleXFlipped= true;
+				}
+			}
+
+			//
 			var itemData = Object.assign( lib.getBaseItemData(n,i), {
 				enable3d: node.getTextAttr( n, 1, 'ENABLE_3D' ) === 'Y',
 				position3dPath: node.getTextAttr( n, 1, 'POSITION.SEPARATE' ) !== 'On',
@@ -50,6 +64,7 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ){
 				scaleX: node.getAttr(n, currentFrame, 'SCALE.X' ).doubleValue(),
 				scaleY: node.getAttr(n, currentFrame, 'SCALE.Y' ).doubleValue(),
 				scaleZ: node.getAttr(n, currentFrame, 'SCALE.Z' ).doubleValue(),
+				scaleXFlipped: scaleXFlipped
 			});
 
 			return itemData;
@@ -157,6 +172,15 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ){
 			toolTip: 'Current Z Scale',
 			getValue: lib.outputPointOne,
 			getBg: lib.bgSuccessIfOne,
+			onClick: lib.defaultCellClick,
+		},
+
+		{
+			key: 'scaleXFlipped',
+			header: 'SXF',
+			toolTip: 'X Scale flipped',
+			getValue: lib.outputYesNo,
+			getBg: lib.bgSuccessOrFailInverted,
 			onClick: lib.defaultCellClick,
 		},
 
