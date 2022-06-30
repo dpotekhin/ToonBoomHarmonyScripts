@@ -87,7 +87,7 @@ exports = function(options) {
                 SelectionUtils.focusOnSelectedNode();
                 return;
 
-            } else if (KeyModifiers.IsShiftPressed()) {
+            } else if (KeyModifiers.IsAlternatePressed()) {
 
                 lib.showNodeProperties(data);
                 return;
