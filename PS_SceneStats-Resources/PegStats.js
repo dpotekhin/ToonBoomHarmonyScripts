@@ -45,7 +45,8 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ){
 			if( scaleXColumnName ){
 				var points = func.numberOfPoints( scaleXColumnName );
 				for( var pi=0; pi<points; pi++ ){
-					var xv = func.pointY( scaleXColumnName, pi );
+					var xv = Math.sign( func.pointY( scaleXColumnName, pi ) );
+					if( xv === 0 ) continue;
 					if( scaleXStartValue === undefined ) scaleXStartValue = xv;
 					else if( xv !== scaleXStartValue ) scaleXFlipped= true;
 				}

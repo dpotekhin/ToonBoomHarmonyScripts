@@ -295,6 +295,17 @@ if (!Object.assign) {
 
 
 //
+Math.sign = function(v){
+    if( !v ) return 0;
+    return v < 0 ? -1 : 1;
+}
+
+//
+Math.signp = function(v){
+    return v < 0 ? -1 : 1;
+}
+
+//
 exports = {
     gridWidth: gridWidth,
     getTimestamp: getTimestamp,
