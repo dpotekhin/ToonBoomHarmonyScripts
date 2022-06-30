@@ -50,11 +50,7 @@ function PS_CustomMenu(){
   menuData['!Configure'] = _sf.showConfigureUI;
   */
 
-  ContextMenu.showContextMenu(
-    menuData,
-    new QPoint( QCursor.pos().x(), QCursor.pos().y() ),
-    _sf.getParentWidget()
-  );
+  ContextMenu.showContextMenu( menuData );
 
 }
 
@@ -137,18 +133,6 @@ var _sf = {
     }
     
   },
-
-  //
-  getParentWidget: function(){
-    var topWidgets = QApplication.topLevelWidgets();
-    for( var i in topWidgets ){
-      var widget = topWidgets[i];
-      if( widget instanceof QMainWindow && !widget.parentWidget() )
-        return widget;
-    }
-    return "";
-  },
-
 
   //
   showConfigureUI: function(){
