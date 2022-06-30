@@ -227,6 +227,17 @@ function PS_SceneStats() {
             return dest;
         },
 
+        checkColorName: function( name ){
+            if( !name ) return;
+            name = name.replace('_pencil_texture',''); // !!!
+            var namingIssues = {};
+            if( !(name.match(/^[A-Z][a-z]+(-[A-Z]([a-z]?)+)?(-[A-Z]([a-z]?)+)?(_[A-Z]+)?$/) || name.match(/^[A-Z]+$/) ) ) namingIssues[' - Name pattern <Element-Name>[_<MODIFIER>]'] = true; // Name Pattern
+            if( name.toLowerCase().match(/^new/) ) namingIssues[' - Default name'] = true; // Default names
+            if( name.match(' ') ) namingIssues[' - Has spaces'] = true; // Has spaces
+            if( name.toLowerCase().match(/\d/) ) namingIssues[' - Contains Numbers'] = true; // Contains Numbers
+            return Object.keys(namingIssues).length ? Object.keys(namingIssues) : false;
+        },
+
     };
 
 
@@ -242,9 +253,9 @@ function PS_SceneStats() {
 
         tabs.addTab( new CompositeStats( selectedNodes, undefined, lib, contentMaxHeight ), 'Composites');
 
-        var palettesTables = new PaletteStats( selectedNodes, undefined, lib, contentMaxHeight );
-        tabs.addTab( palettesTables[0], 'Palettes');
-        tabs.addTab( palettesTables[1], 'Colors');
+        var palettesData = new PaletteStats( selectedNodes, undefined, lib, contentMaxHeight );
+        tabs.addTab( palettesData.palettes.tableView, 'Palettes');
+        tabs.addTab( palettesData.colors.tableView, 'Colors');
 
         // tabs.addTab( new QLabel("widget 2"), 'Tab2');
 

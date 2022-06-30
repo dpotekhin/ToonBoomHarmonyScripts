@@ -38,10 +38,16 @@ function TableView( arr, columnConfig, uiParent, minHeight ){
     			
     			var item = new QTableWidgetItem( '' + ( columnConfigItemData.getValue ? columnConfigItemData.getValue( val, itemData ) : val ) || '', 0 );
                 item.setFlags(item.flags() ^ Qt.ItemIsEditable);
+    			
     			var bg = columnConfigItemData.getBg ? ( typeof columnConfigItemData.getBg === 'function' ? columnConfigItemData.getBg( val, itemData ) : columnConfigItemData.getBg ) : undefined;
     			if( bg ) item.setBackground( bg );
     			
-    			if( columnConfigItemData.toolTip ) item.setToolTip( typeof columnConfigItemData.toolTip === 'string' ? columnConfigItemData.toolTip : columnConfigItemData.toolTip(val, itemData) );
+    			if( columnConfigItemData.toolTip !== undefined ) {
+    				var toolTip = columnConfigItemData.toolTip;
+    				if( columnConfigItemData.toolTip === true ) toolTip = val;
+    				else if ( typeof columnConfigItemData.toolTip !== 'string' ) toolTip = columnConfigItemData.toolTip(val, itemData);
+    				if( toolTip ) item.setToolTip( toolTip );
+    			}
 
     			tableWidget.setItem(itemDataI, columnConfigItemDataI, item);
 
