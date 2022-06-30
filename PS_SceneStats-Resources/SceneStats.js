@@ -132,7 +132,7 @@ exports = function(options) {
                     key: 'color',
                     header: 'Col',
                     toolTip: 'Node Color',
-                    getBg: function(v) { return v ? new QBrush(new QColor('#' + v)) : undefined; },
+                    getBg: function(v) { if( v ) return new QBrush(new QColor('#'+v.substr(0,6))) },
                     getValue: function(v) { return v === '000000' ? 'No' : ''; },
                     onClick: lib.defaultCellClick,
                 },
