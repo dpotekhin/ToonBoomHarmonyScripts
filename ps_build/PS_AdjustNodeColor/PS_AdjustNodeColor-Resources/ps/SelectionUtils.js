@@ -1,3 +1,9 @@
+/*
+Author: Dima Potekhin (skinion.onn@gmail.com)
+Version: 0.220624
+*/
+var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_AdjustNodeColor-Resources/ps/Utils.js"));
+
 //
 function eachNode( nodes, callback, useGroups, nodeTypeFilter ){
 	
@@ -55,6 +61,7 @@ function filterNodesByType( nodes, typeList, useGroups ){
 	}
 	// MessageLog.trace("filterNodesByType "+nodes+' ; '+typeList );
 	if( !nodes || !nodes.length ) return false;
+	if( !typeList ) return nodes;
 	var filtered = [];
 	eachNode( nodes, function(_node){ filtered.push(_node); }, useGroups, typeList );
 	return filtered;
@@ -66,9 +73,100 @@ function hasSelectedNodes(){
 }
 
 //
+function selectNodes( _nodes ){
+	selection.clearSelection();
+	if( typeof _nodes === 'string' ) selection.addNodeToSelection(_nodes);
+	else selection.addNodesToSelection(_nodes);
+}
+
+
+//
+function getSelectedLayers( onlyFirstAndLast ){
+    
+    var selectedLayers = {};
+    var numSelLayers = Timeline.numLayerSel;
+    var layerName;
+    
+    for ( var i = 0; i < numSelLayers; i++ ){
+
+        if ( Timeline.selIsNode( i ) ){
+            
+            layerName = Timeline.selToNode(i);
+            if( !selectedLayers[layerName] ) selectedLayers[layerName] = {
+                name: node.getName(layerName),
+                node: layerName,
+                index: i,
+                layerType: 'node',
+            };
+
+        }else if ( Timeline.selIsColumn( i ) ){
+            
+            layerName = Timeline.selToColumn(i);
+            if( !selectedLayers[layerName] ) selectedLayers[layerName] = {
+                name: layerName,
+                index: i,
+                layerType: 'column',
+                columnType:  column.type(layerName),
+                column: layerName
+            };
+        }
+
+    }
+
+    var layerKeys = Object.keys(selectedLayers);
+    var result = [];
+
+    if( !layerKeys.length ) return result;
+
+    layerKeys.forEach(function( layerName, i ){
+        if( onlyFirstAndLast && !( i === 0 || i === layerKeys.length-1 ) ) return;
+        result.push( selectedLayers[layerName] );
+    });
+
+    return result;
+
+}
+
+
+//
+function eachAnimatedAttributeOfSelectedLayers( _action ){
+
+  var selectedlayers = getSelectedLayers();
+  // MessageLog.trace('selectedlayers: '+JSON.stringify(selectedlayers,true,' '));
+
+  selectedlayers.forEach(function( _layer, i ){
+    
+    var _node = _layer.node;
+    var attributes = Utils.getLinkedAttributeNames( _node );
+    // MessageLog.trace(i+') '+_node+': '+JSON.stringify(attributes,true,' '));
+    
+    attributes.forEach(function( _attrName ){
+      	_action( _node, _attrName );
+    });
+
+  });
+
+}
+
+//
+function focusOnSelectedNode(){
+
+	Action.perform("onActionFocusOnSelectionNV()", "Node View");
+	Action.perform("onActionResetView()", "Node View");
+	Action.perform("onActionZoomIn()", "Node View");
+	Action.perform("onActionZoomIn()", "Node View");
+	Action.perform("onActionFocusOnSelectionNV()", "Node View");
+
+}
+
+///
 exports = {
 	eachNode: eachNode,
 	eachSelectedNode: eachSelectedNode,
 	filterNodesByType: filterNodesByType,
-	hasSelectedNodes: hasSelectedNodes
+	hasSelectedNodes: hasSelectedNodes,
+	selectNodes: selectNodes,
+	getSelectedLayers: getSelectedLayers,
+	eachAnimatedAttributeOfSelectedLayers: eachAnimatedAttributeOfSelectedLayers,
+	focusOnSelectedNode: focusOnSelectedNode
 }

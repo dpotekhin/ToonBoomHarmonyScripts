@@ -34,6 +34,7 @@ var _exports = {
   setSize: setSize,
   setWidth: setWidth,
   setHeight: setHeight,
+  getSize: getSize,
 };
 
 
@@ -661,6 +662,35 @@ function setSize( w, h, title ){
   selectedDrawing.restoreSelection();
 
   scene.endUndoRedoAccum();
+
+}
+
+function getSize(){
+
+  var size = {x:0,y:0};
+
+  try{
+
+    var selectionData = getSelectionData();
+    if( !selectionData ) {
+      MessageLog.trace('No selection Data');
+      scene.endUndoRedoAccum();
+      return;
+    }
+
+    var selectedDrawing = selectionData.selectedDrawing;
+    var selectedStrokesLayers = selectionData.selectedStrokesLayers;
+    var box = selectionData.box;    
+    size.x = Utils.pixelsToGridX( box.x1-box.x0 );
+    size.y = Utils.pixelsToGridY( box.y1-box.y0 );
+
+  } catch(err){
+    MessageLog.trace('Error: '+err );
+    return;
+  }
+
+  selectedDrawing.restoreSelection();
+  return size;
 
 }
 

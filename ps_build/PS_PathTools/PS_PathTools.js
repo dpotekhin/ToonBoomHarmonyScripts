@@ -211,7 +211,7 @@ function PS_PathTools(){
   // Width
   var btnSetWidth = modal.addButton( '', sizeGroup, btnHeight, btnHeight, iconPath+'set-width.png',
     setWidth,
-    'Set width'
+    'Set Width'
   );
   var setWidthInput = modal.addNumberInput( '', sizeGroup, btnHeight*1.5, btnHeight, 0, undefined, setWidth, setWidth );
   function setWidth () {
@@ -221,7 +221,7 @@ function PS_PathTools(){
   // Width
   var btnSetHeight = modal.addButton( '', sizeGroup, btnHeight, btnHeight, iconPath+'set-height.png',
     setHeight,
-    'Set width'
+    'Set Height'
   );
   var setHeightInput = modal.addNumberInput( '', sizeGroup, btnHeight*1.5, btnHeight, 0, undefined, setHeight, setHeight );
   function setHeight () {
@@ -229,13 +229,23 @@ function PS_PathTools(){
   }
 
   //
-   modal.addButton( '', sizeGroup, btnHeight, btnHeight, iconPath+'set-size.png',
-    setSize,
-    'Set size'
+  modal.addButton( '', sizeGroup, btnHeight, btnHeight, iconPath+'set-size.png',
+    function() {
+      AlignPaths.setSize( parseFloat( setWidthInput.text ), parseFloat( setHeightInput.text ) );
+    },
+    'Set Size'
   );
-  function setSize () {
-    AlignPaths.setSize( parseFloat( setWidthInput.text ), parseFloat( setHeightInput.text ) );
-  }
+
+  //
+  modal.addButton( '', sizeGroup, btnHeight, btnHeight, iconPath+'get-size.png',
+    function() {
+      var size = AlignPaths.getSize();
+      setWidthInput.text = ''+~~(size.x*100)/100;
+      setHeightInput.text = ''+~~(size.y*100)/100;
+    },
+    'Get actual Size'
+  );
+ 
 
   //
   sizeGroup.mainLayout.addStretch();

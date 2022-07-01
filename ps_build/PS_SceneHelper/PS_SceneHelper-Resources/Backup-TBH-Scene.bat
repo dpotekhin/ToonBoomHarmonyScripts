@@ -55,7 +55,7 @@ echo CMD^: %cmdParams%
 echo ---------------------------------------------------
 
 REM goto end
-%zipPath% a %cmdParams%
+"%zipPath%" a %cmdParams%
 
 echo ^<^:^<%backupFilePath%^>^:^>
 
