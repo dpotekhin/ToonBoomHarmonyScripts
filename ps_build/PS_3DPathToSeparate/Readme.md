@@ -9,4 +9,4 @@ Select a Peg node and click the Script button.
 
 ### Installation:
 Copy all files from this folder to [Harmony User Scripts directory](https://docs.toonboom.com/help/harmony-20/premium/scripting/import-script.html).\
-Add script "PS_3DPathToSeparate" to a panel.  
+Add the script "PS_3DPathToSeparate" to a panel.  

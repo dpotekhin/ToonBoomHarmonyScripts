@@ -218,6 +218,33 @@ function configure(packageFolder, packageName)
     // = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 
+
+     // = = = = = = = = = = = = = = = = = = = = = = = = = = =
+    // Backup User Settings
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    var backupTBHSettingsAction = {
+        id: "ru.peppers-studio.backupTBHSettingsDisplay",
+        text: "Backup User Settings",
+        icon: "PS_BackupScene.png",
+        checkable: false,
+        isEnabled: true,
+        onTrigger: SceneHelper.PS_BackupTBHSettings
+    };
+
+
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ScriptManager.addAction(backupTBHSettingsAction);
+
+    ScriptManager.addMenuItem({
+        targetMenuId: "File/Backup",
+        id: backupTBHSettingsAction.id,
+        text: backupTBHSettingsAction.text,
+        action: backupTBHSettingsAction.id
+        //action: 'backupTBHSettingsAction.onTrigger in ./configure.js'
+    });
+    // = = = = = = = = = = = = = = = = = = = = = = = = = = =
+
+
 }
 
 ///

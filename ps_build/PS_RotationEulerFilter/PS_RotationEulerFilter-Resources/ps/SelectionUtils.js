@@ -1,3 +1,9 @@
+/*
+Author: Dima Potekhin (skinion.onn@gmail.com)
+Version: 0.220624
+*/
+var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_RotationEulerFilter-Resources/ps/Utils.js"));
+
 //
 function eachNode( nodes, callback, useGroups, nodeTypeFilter ){
 	
@@ -55,6 +61,7 @@ function filterNodesByType( nodes, typeList, useGroups ){
 	}
 	// MessageLog.trace("filterNodesByType "+nodes+' ; '+typeList );
 	if( !nodes || !nodes.length ) return false;
+	if( !typeList ) return nodes;
 	var filtered = [];
 	eachNode( nodes, function(_node){ filtered.push(_node); }, useGroups, typeList );
 	return filtered;
@@ -130,18 +137,27 @@ function eachAnimatedAttributeOfSelectedLayers( _action ){
   selectedlayers.forEach(function( _layer, i ){
     
     var _node = _layer.node;
-    var attributes = getLinkedAttributeNames( _node );
+    var attributes = Utils.getLinkedAttributeNames( _node );
     // MessageLog.trace(i+') '+_node+': '+JSON.stringify(attributes,true,' '));
     
     attributes.forEach(function( _attrName ){
-      _action( _node, _attrName );
+      	_action( _node, _attrName );
     });
 
   });
 
 }
 
+//
+function focusOnSelectedNode(){
 
+	Action.perform("onActionFocusOnSelectionNV()", "Node View");
+	Action.perform("onActionResetView()", "Node View");
+	Action.perform("onActionZoomIn()", "Node View");
+	Action.perform("onActionZoomIn()", "Node View");
+	Action.perform("onActionFocusOnSelectionNV()", "Node View");
+
+}
 
 ///
 exports = {
@@ -152,4 +168,5 @@ exports = {
 	selectNodes: selectNodes,
 	getSelectedLayers: getSelectedLayers,
 	eachAnimatedAttributeOfSelectedLayers: eachAnimatedAttributeOfSelectedLayers,
+	focusOnSelectedNode: focusOnSelectedNode
 }

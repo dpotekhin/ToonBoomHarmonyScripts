@@ -62,7 +62,7 @@ function PS_RenameNodes(){
 		'LINE_ART': '{{NAME}}-LA',
 		'COLOR_ART': '{{NAME}}-CA',
 		'TbdColorSelector': '{{NAME}}-CS',
-		'CUTTER': '{{NAME}}-CUT',
+		'CUTTER': '{{NAME}}-C',
 		'AutoPatchModule': '{{NAME}}-AP',
 		'VISIBILITY': '{{NAME}}-VIS',
 		
@@ -74,6 +74,7 @@ function PS_RenameNodes(){
 		'WRITE': 'Write-{{NAME}}',
 		'DISPLAY': '{{NAME}}-DSP',
 		'COLOR_CARD': '{{NAME}}-CC',
+		'COLOR_OVERRIDE_TVG': '{{NAME}}-CO',
 
 		'GROUP': [
 			['Deformation|-DFM', '{{NAME}}-DFM'], // the naming pattern for standard deformation groups
@@ -159,8 +160,9 @@ function PS_RenameNodes(){
 			'LINE_ART': 'LA',
 			'COLOR_ART': 'CA',
 			'TbdColorSelector': 'CS',
-			'CUTTER': 'CUT',
+			'CUTTER': 'C',
 			'AutoPatchModule': 'AP',
+			'COMPOSITE': 'CMP',
 		}
 
 		Object.keys(shortPaterns).forEach(function( n ){
@@ -168,7 +170,6 @@ function PS_RenameNodes(){
 		});
 
 		if( !mainName ) mainName = '';
-
 	}
 
 
@@ -278,7 +279,8 @@ function PS_RenameNodes(){
 		}
 
 		var newName = namePattern.replace('{{NAME}}',name);
-		
+		if( newName.charAt(0) === '-' ) newName = newName.substr(1,newName.length);
+
 		if( nodeName === newName ) return;
 
 		var _newName;

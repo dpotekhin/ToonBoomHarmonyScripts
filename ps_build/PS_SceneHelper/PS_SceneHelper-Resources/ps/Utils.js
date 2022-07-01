@@ -13,7 +13,7 @@ function getNumber(v){
 //
 function getTimestamp(){
     var date = new Date();
-    return date.getFullYear() + getZeroLeadingString(date.getMonth()+1) + getZeroLeadingString(date.getDate())+'_'+getZeroLeadingString(date.getHours())+getZeroLeadingString(date.getMinutes());
+    return date.getFullYear() +''+ getZeroLeadingString(date.getMonth()+1) + getZeroLeadingString(date.getDate())+'_'+getZeroLeadingString(date.getHours())+getZeroLeadingString(date.getMinutes());
 }
 
 
@@ -178,54 +178,6 @@ function eachAnimatableAttr( _node, callback ){
 }
 
 
-//
-function getSelectedLayers( onlyFirstAndLast ){
-    
-    var selectedLayers = {};
-    var numSelLayers = Timeline.numLayerSel;
-    var layerName;
-    
-    for ( var i = 0; i < numSelLayers; i++ ){
-
-        if ( Timeline.selIsNode( i ) ){
-            
-            layerName = Timeline.selToNode(i);
-            if( !selectedLayers[layerName] ) selectedLayers[layerName] = {
-                name: node.getName(layerName),
-                node: layerName,
-                index: i,
-                layerType: 'node',
-            };
-
-        }else if ( Timeline.selIsColumn( i ) ){
-            
-            layerName = Timeline.selToColumn(i);
-            if( !selectedLayers[layerName] ) selectedLayers[layerName] = {
-                name: layerName,
-                index: i,
-                layerType: 'column',
-                columnType:  column.type(layerName),
-                column: layerName
-            };
-        }
-
-    }
-
-    var layerKeys = Object.keys(selectedLayers);
-    var result = [];
-
-    if( !layerKeys.length ) return result;
-
-    layerKeys.forEach(function( layerName, i ){
-        if( onlyFirstAndLast && !( i === 0 || i === layerKeys.length-1 ) ) return;
-        result.push( selectedLayers[layerName] );
-    });
-
-    return result;
-
-}
-
-
 
 //
 function getSoundColumns( count ){
@@ -249,6 +201,24 @@ function getSoundColumns( count ){
 }
 
 
+//
+function getUnusedColumnName( name ){
+
+    name = name ? name.replace(/\s/gi,'_').replace(/[^a-zA-Z0-9_-]+/gi,'') : undefined;
+    if( !name ) return;
+
+    if( !column.type( name ) ) return name;
+
+    for( var i = 1; i < 999; i++ ){
+
+        var _name = name+'_'+i;
+        if( !column.type( _name ) ) return _name;
+
+    }
+
+}
+
+
 
 //
 function createUid(){
@@ -263,8 +233,14 @@ function componentToHex(c) {
 }
 
 //
-function rgbToHex(r, g, b, a) {
+function rgbToHex(r, g, b, a, ignoreAlpha) { // alternate params: ColorRGBA, useAlpha
   // return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+  if( b === undefined ){
+    g = r.g;
+    b = r.b;
+    if( g ) a = r.a;
+    r = r.r;
+  }
   var result = componentToHex(r) + componentToHex(g) + componentToHex(b);
   if( a !== undefined && !ignoreAlpha ) result += componentToHex(a);
   return result;
@@ -281,6 +257,52 @@ function hexToRgb(hex) {
     b: parseInt(result[3], 16),
     a: parseInt(result[4], 16)
   };
+}
+
+
+// Object.assign polyfill
+if (!Object.assign) {
+  Object.defineProperty(Object, 'assign', {
+    enumerable: false,
+    configurable: true,
+    writable: true,
+    value: function(target, firstSource) {
+      'use strict';
+      if (target === undefined || target === null) {
+        throw new TypeError('Cannot convert first argument to object');
+      }
+
+      var to = Object(target);
+      for (var i = 1; i < arguments.length; i++) {
+        var nextSource = arguments[i];
+        if (nextSource === undefined || nextSource === null) {
+          continue;
+        }
+
+        var keysArray = Object.keys(Object(nextSource));
+        for (var nextIndex = 0, len = keysArray.length; nextIndex < len; nextIndex++) {
+          var nextKey = keysArray[nextIndex];
+          var desc = Object.getOwnPropertyDescriptor(nextSource, nextKey);
+          if (desc !== undefined && desc.enumerable) {
+            to[nextKey] = nextSource[nextKey];
+          }
+        }
+      }
+      return to;
+    }
+  });
+}
+
+
+//
+Math.sign = function(v){
+    if( !v ) return 0;
+    return v < 0 ? -1 : 1;
+}
+
+//
+Math.signp = function(v){
+    return v < 0 ? -1 : 1;
 }
 
 //
@@ -302,7 +324,7 @@ exports = {
     createUid: createUid,
     rgbToHex: rgbToHex,
     hexToRgb: hexToRgb,
-    getSelectedLayers: getSelectedLayers,
     getSoundColumns: getSoundColumns,
+    getUnusedColumnName: getUnusedColumnName,
     getNumber: getNumber,
 };

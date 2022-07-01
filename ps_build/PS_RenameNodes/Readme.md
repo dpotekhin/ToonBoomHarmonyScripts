@@ -20,4 +20,4 @@ You can change templates in the script body.
 
 ### Installation:
 Copy all files from this folder to [Harmony User Scripts directory](https://docs.toonboom.com/help/harmony-20/premium/scripting/import-script.html).\
-Add script "PS_RenameNodes" to a panel.  
+Add the script "PS_RenameNodes" to a panel.  

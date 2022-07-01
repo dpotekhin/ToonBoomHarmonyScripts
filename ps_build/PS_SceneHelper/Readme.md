@@ -1,5 +1,5 @@
 ## PS_SceneHelpers
-v0.210921
+v0.220622
 
 ### Description
 A set of scene helper scripts.
@@ -22,6 +22,10 @@ Package adds the Main Menu item: File / Backup / Backup Scene
 Opens the Backup folder ../_backup  
 Package adds the Main Menu item: File / Backup / Open Backup Folder
 
+#### PS_BackupTBHSettings
+Backups user Toon Boom Harmony settings
+Package adds the Main Menu item: File / Backup / Backup User Settings
+
 #### PS_OpenScriptsFolder
 Opens Harmony User scripts folder  
 Package adds the Main Menu item: File / Resources / Open User Scripts Folder
@@ -36,5 +40,5 @@ Package adds the Main Menu item: File / Resources / Open Pencil Texture Folder
 
 ### Installation:
 Copy all files from this folder to [Harmony User Scripts directory](https://docs.toonboom.com/help/harmony-20/premium/scripting/import-script.html).\
-Add scripts "PS_ReloadScene", "PS_OpenSceneFolder", "PS_OpenTemplateFolder", "PS_OpenScriptsFolder", "PS_OpenPencilTextureFolder", "PS_BackupScene", "PS_OpenBackupFolder" to a panel.  
+Add the scripts "PS_ReloadScene", "PS_OpenSceneFolder", "PS_OpenTemplateFolder", "PS_OpenScriptsFolder", "PS_OpenPencilTextureFolder", "PS_BackupScene", "PS_OpenBackupFolder", "PS_BackupTBHSettings" to a panel.  
 Don't copy folder "packages" if you don't want to add items to the Main Menu.

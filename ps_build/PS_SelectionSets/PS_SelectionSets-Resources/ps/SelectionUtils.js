@@ -1,4 +1,7 @@
-//
+/*
+Author: Dima Potekhin (skinion.onn@gmail.com)
+Version: 0.220624
+*/
 var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_SelectionSets-Resources/ps/Utils.js"));
 
 //
@@ -145,7 +148,16 @@ function eachAnimatedAttributeOfSelectedLayers( _action ){
 
 }
 
+//
+function focusOnSelectedNode(){
 
+	Action.perform("onActionFocusOnSelectionNV()", "Node View");
+	Action.perform("onActionResetView()", "Node View");
+	Action.perform("onActionZoomIn()", "Node View");
+	Action.perform("onActionZoomIn()", "Node View");
+	Action.perform("onActionFocusOnSelectionNV()", "Node View");
+
+}
 
 ///
 exports = {
@@ -156,4 +168,5 @@ exports = {
 	selectNodes: selectNodes,
 	getSelectedLayers: getSelectedLayers,
 	eachAnimatedAttributeOfSelectedLayers: eachAnimatedAttributeOfSelectedLayers,
+	focusOnSelectedNode: focusOnSelectedNode
 }

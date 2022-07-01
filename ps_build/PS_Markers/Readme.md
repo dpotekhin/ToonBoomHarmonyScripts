@@ -3,6 +3,10 @@ v0.220602
 
 ### Description
 A tiny helper for working with scene markers.
+- create | delete a marker on the current frame
+- move markers to the left or right
+- remove all markers
+- copy | paste markers between scenes
 
 ### Usage
 Just click on the script button.
@@ -18,4 +22,4 @@ Options:
 
 ### Installation:
 Copy all files from this folder to [Harmony User Scripts directory](https://docs.toonboom.com/help/harmony-20/premium/scripting/import-script.html).\
-Add the script "PS_Markers" to a panel.  
+Add the scripts "PS_Markers", "PS_CopySceneMarkers", "PS_PasteSceneMarkers" to a panel.  

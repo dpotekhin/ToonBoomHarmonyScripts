@@ -15,4 +15,4 @@ Script lets to adjust the color of the selected node.
 
 ### Installation:
 Copy all files from this folder to [Harmony User Scripts directory](https://docs.toonboom.com/help/harmony-20/premium/scripting/import-script.html).\
-Add script "PS_AdjustNodeColor" to a panel.  
+Add the script "PS_AdjustNodeColor" to a panel.  

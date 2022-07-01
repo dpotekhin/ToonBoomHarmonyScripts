@@ -1,3 +1,6 @@
+// Author: Dima Potekhin (skinion.onn@gmail.com)
+// Version: 0.220615
+
 //
 function getAttributes(attribute, attributeList) {
     attributeList.push(attribute);
@@ -31,44 +34,98 @@ function unlinkFunctions(_node, _columnTypes, _invertColumnTypes, keepCurrentVal
     MessageLog.trace("NODE: " + i + ") " + nodeName + ", [" + node.type(_node) + "]");
 
     var attrs = getFullAttributeList(_node);
-    for (var ai = 0; ai < attrs.length; ai++) {
+    var isPositionSeparate = node.getTextAttr(_node, 1, 'POSITION.SEPARATE') === 'Y'; //
+    var isEnabled3d = node.getTextAttr(_node, 1, 'ENABLE_3D') === 'Y'; //
+    var isRotationSeparate = node.getTextAttr(_node, 1, 'ROTATION.SEPARATE') === 'On'; // On = Euler; Off = Quaternion
+    // MessageLog.trace("isEnabled3d: "+isEnabled3d);
+    // MessageLog.trace("isRotationSeparate: "+isRotationSeparate);
 
-        var attr = attrs[ai];
-        var attrFullName = attr.fullKeyword();
+    try {
 
-        var linkedColumn = node.linkedColumn(_node, attrFullName);
-        if (!linkedColumn) continue;
+        attrs.forEach(function(attr) {
 
-        var columnType = column.type(linkedColumn);
-        // MessageLog.trace('--> columnType: "'+columnType+'", '+attr.name()+" ("+attrFullName+")"+" <"+attr.typeName()+">");
+            var attrFullName = attr.fullKeyword();
+            // MessageLog.trace("ATTR: " + attrFullName+' > '+ node.getTextAttr(_node, 1, attrFullName ) );
 
-        if (_columnTypes) {
+            var linkedColumn = node.linkedColumn(_node, attrFullName);
+            if (!linkedColumn) return;
 
-            if (_invertColumnTypes) { // Skip provided column types
+            var columnType = column.type(linkedColumn);
+            // if (columnType !==E 'QUATERNIONPATH') return; // !!!
 
-                if (_columnTypes.indexOf(columnType) !== -1) continue;
+            if (_columnTypes) {
 
-            } else { // Skip all except provided column types
+                if (_invertColumnTypes) { // Skip provided column types
 
-                if (_columnTypes.indexOf(columnType) === -1) continue;
+                    if (_columnTypes.indexOf(columnType) !== -1) {
+                        MessageLog.trace('Skipped');
+                        return;
+                    }
+
+                } else { // Skip all except provided column types
+
+                    if (_columnTypes.indexOf(columnType) === -1) {
+                        return;
+                        MessageLog.trace('Skipped');
+                    }
+
+                }
 
             }
 
-        }
+            // if ( linkedColumn && attrFullName != "DRAWING.ELEMENT" ){
+            // MessageLog.trace("-   UNLINK: " + attr.name() + " (" + attrFullName + ")" + " <" + attr.typeName());
 
-        // if ( linkedColumn && attrFullName != "DRAWING.ELEMENT" ){
-        MessageLog.trace("-   UNLINK: " + attr.name() + " (" + attrFullName + ")" + " <" + attr.typeName() + " > " + currentValue + ' (' + typeof currentValue + ')');
+            if (isEnabled3d) { // 3d mode enabled
 
-        node.unlinkAttr(_node, attrFullName);
+                if (isRotationSeparate) { // Euler
+                    if (columnType === 'QUATERNIONPATH') return;
 
-        if (keepCurrentValues) {
+                } else { // Quaternion
+                    if (attrFullName.indexOf('ROTATION.ANGLE') !== -1) return;
+
+                }
+
+            }
+
             var currentValue = column.getEntry(linkedColumn, 0, frame.current());
-            if (numberTypes.indexOf(typeof attr.typeName()) === -1) currentValue = parseFloat(currentValue);
-            MessageLog.trace('Apply Column Value: ' + currentValue + ' > ' + typeof currentValue);
-            attr.setValue(currentValue);
-        }
 
-    }
+            switch (columnType) {
+
+                case 'QUATERNIONPATH':
+
+                    currentValue = attr.pos3dValueAt(frame.current());
+                    break;
+
+            }
+            // MessageLog.trace('--> columnType: "' + columnType + '", ' + attr.name() + " (" + attrFullName + ")" + " <" + attr.typeName() + ">");
+
+            node.unlinkAttr(_node, attrFullName);
+
+            if (keepCurrentValues) {
+
+                switch (columnType) {
+
+                    case 'QUATERNIONPATH':
+                        node.getAttr(_node, frame.current(), 'ROTATION.ANGLEX').setValue(currentValue.x);
+                        node.getAttr(_node, frame.current(), 'ROTATION.ANGLEY').setValue(currentValue.y);
+                        node.getAttr(_node, frame.current(), 'ROTATION.ANGLEZ').setValue(currentValue.z);
+                        break;
+
+                    default:
+                        // MessageLog.trace("-   VALUE: " + currentValue);
+                        if (numberTypes.indexOf(typeof attr.typeName()) === -1) currentValue = parseFloat(currentValue);
+                        // MessageLog.trace('Apply EColumn Value: ' + currentValue + ' > ' + typeof currentValue);
+                        attr.setValue(currentValue);
+                }
+
+
+            }
+
+        });
+
+    } catch (err) { MessageLog.trace('ERR:' + err) }
+
 }
 
 
@@ -230,7 +287,7 @@ function getAllChildNodes(nodes, typeFilter) {
 
 
 //
-function getLayerByDrawing( columnName, exposureName ) {
+function getLayerByDrawing(columnName, exposureName) {
 
     var columnElementId = column.getElementIdOfDrawing(columnName);
     // MessageLog.trace('getLayerByDrawing:' + columnName + ', ' + exposureName+', '+columnElementId );
@@ -247,60 +304,60 @@ function getLayerByDrawing( columnName, exposureName ) {
         var elementPhysicalName = element.physicalName(elementId);
         var elementColumn = node.linkedColumn(nodeName, "DRAWING.ELEMENT");
         // MessageLog.trace(i + ') ' +elementId+' !== '+columnElementId);
-        if( elementId !== columnElementId ) return true;
-        
+        if (elementId !== columnElementId) return true;
+
         layerFound = nodeName;
 
         // Find the position on the Timeline
-        var keyframes = getDrawingKeyframes( elementColumn, 0, true );
-        keyframes.every(function(_frame){
-           // MessageLog.trace( column.getEntry( elementColumn, 1, _frame ) +' != '+ exposureName);
-          if( column.getEntry( elementColumn, 1, _frame ) != exposureName ) return true;
+        var keyframes = getDrawingKeyframes(elementColumn, 0, true);
+        keyframes.every(function(_frame) {
+            // MessageLog.trace( column.getEntry( elementColumn, 1, _frame ) +' != '+ exposureName);
+            if (column.getEntry(elementColumn, 1, _frame) != exposureName) return true;
             // MessageLog.trace('KEY is found');
             frameFound = _frame;
         });
 
-        if( !frameFound ) return true; // keep on searching while the key is not found
+        if (!frameFound) return true; // keep on searching while the key is not found
 
         // MessageLog.trace(i + ') ' + nodeName+', '+layerName+', '+elementId+', '+elementName+', '+elementPhysicalName  );
     });
-    
-    if( !layerFound ) return;
+
+    if (!layerFound) return;
 
     return {
-      layerName: layerFound,
-      frame: frameFound,
+        layerName: layerFound,
+        frame: frameFound,
     };
 
 }
 
 //
-function getDrawingKeyframes( columnName, startFrame, onlyUnique ){
-  
-  if( !startFrame ) startFrame = 0;
-  
-  // MessageLog.trace('getDrawingKeyframes: '+columnName+', '+startFrame);
-  
-  var keyframes = [];
-  var prevVal;
+function getDrawingKeyframes(columnName, startFrame, onlyUnique) {
 
-  for( var i=startFrame; i<frame.numberOf(); i++ ){
-    var val = column.getEntry( columnName, 1, i );
-    if( !val ) {
-      prevVal = undefined;
-      continue;
-    }
-    // MessageLog.trace(i+')) '+columnName+' => '+i +' > '+val);
-    if( val != prevVal ){
-      prevVal = val;
-      // MessageLog.trace(i+'] '+keyframes.length +' >> '+keyframes[keyframes.length-1]+' > '+val);
-      if( onlyUnique && keyframes.length && keyframes[keyframes.length-1] == val ) continue;
-      keyframes.push(i);
-    }
-  }
+    if (!startFrame) startFrame = 0;
 
-  // MessageLog.trace( JSON.stringify(keyframes,true,'  ') );
-  return keyframes;
+    // MessageLog.trace('getDrawingKeyframes: '+columnName+', '+startFrame);
+
+    var keyframes = [];
+    var prevVal;
+
+    for (var i = startFrame; i < frame.numberOf(); i++) {
+        var val = column.getEntry(columnName, 1, i);
+        if (!val) {
+            prevVal = undefined;
+            continue;
+        }
+        // MessageLog.trace(i+')) '+columnName+' => '+i +' > '+val);
+        if (val != prevVal) {
+            prevVal = val;
+            // MessageLog.trace(i+'] '+keyframes.length +' >> '+keyframes[keyframes.length-1]+' > '+val);
+            if (onlyUnique && keyframes.length && keyframes[keyframes.length - 1] == val) continue;
+            keyframes.push(i);
+        }
+    }
+
+    // MessageLog.trace( JSON.stringify(keyframes,true,'  ') );
+    return keyframes;
 }
 
 
