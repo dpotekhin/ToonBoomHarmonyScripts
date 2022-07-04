@@ -4,9 +4,6 @@ Version: 0.220630
 */
 
 //
-var Utils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/Utils.js"));
-// var pFile = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/pFile.js"));
-var NodeUtils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/NodeUtils.js"));
 var TableView = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/TableView.js"));
 
 //
@@ -20,7 +17,7 @@ var defaultColorsIds = [
 ];
 
 //
-exports = function(selectedNodes, modal, lib, contentMaxHeight) {
+exports = function(selectedNodes, modal, storage, contentMaxHeight) {
 
     var selectedGroupName = node.getName(selectedNodes[0]);
     var currentSceneName = scene.currentScene().replace(/\.tpl$/, '').replace(/\.|_v\d\d\d?$/, '');
@@ -47,7 +44,7 @@ exports = function(selectedNodes, modal, lib, contentMaxHeight) {
             type: 'Palette',
             paletteId: _palette.id,
             paletteName: paletteName,
-            paletteNamingIssues: lib.checkColorName( paletteName ),
+            paletteNamingIssues: storage.checkColorName( paletteName ),
             colorsNamingIssues: [],
             isNameEqualToGroup: selectedGroupName === paletteName,
             isNameEqualToScene: currentSceneName === paletteName,
@@ -84,7 +81,7 @@ exports = function(selectedNodes, modal, lib, contentMaxHeight) {
             if( colorItem.usedDefaultColorId ) paletteItem.usedDefaultColorId = true;
 
             // Naming Issues
-            colorItem.colorNamingIssues = lib.checkColorName( palletteColor.name );
+            colorItem.colorNamingIssues = storage.checkColorName( palletteColor.name );
             if( colorItem.colorNamingIssues ){
                 colorItem.colorNamingIssues.forEach(function(v){ if( paletteItem.colorsNamingIssues.indexOf(v) === -1 ) paletteItem.colorsNamingIssues.push(v); })
                 colorItem.colorNamingIssues = 'Has naming issuses:\n' + colorItem.colorNamingIssues.join('\n');
@@ -125,8 +122,8 @@ exports = function(selectedNodes, modal, lib, contentMaxHeight) {
     // var uiGroup = modal.addGroup('COMPOSITES ('+colorTableItems.length+')', modal.ui, true, style);
 
     var typeColors = {
-        Palette: lib.bgInfo,
-        Texture: lib.bgYellow,
+        Palette: storage.bgInfo,
+        Texture: storage.bgYellow,
         Color: ''
     };
 
@@ -142,52 +139,52 @@ exports = function(selectedNodes, modal, lib, contentMaxHeight) {
         {
             key: 'paletteName',
             header: 'Palette Name',
-            getValue: lib.outputString,
+            getValue: storage.outputString,
             getBg: function(v, data) {
-                return lib.checkNull(v, hasDefaultName(v) ? lib.bgFail : lib.bgSuccess);
+                return storage.checkNull(v, hasDefaultName(v) ? storage.bgFail : storage.bgSuccess);
             },
-            toolTip: function(v, data) { return lib.checkNull(v, hasDefaultName(v) ? 'Palette has default name' : ''); }
-            // onClick: lib.defaultCellClick
+            toolTip: function(v, data) { return storage.checkNull(v, hasDefaultName(v) ? 'Palette has default name' : ''); }
+            // onClick: storage.defaultCellClick
         },
 
         {
             key: 'paletteNamingIssues',
             header: 'NI',
             toolTip: true,
-            getBg: lib.bgSuccessOrFailInverted,
-            getValue: lib.outputYesNo
+            getBg: storage.bgSuccessOrFailInverted,
+            getValue: storage.outputYesNo
         },
 
         {
             key: 'isNameEqualToGroup',
             header: 'NeG',
             toolTip: function(v) { return v ? 'The palette name is equal to the selected group name' : 'The palette name is NOT equal to the selected group name'; },
-            getBg: lib.bgSuccessOrFail,
-            getValue: lib.outputYesNo
+            getBg: storage.bgSuccessOrFail,
+            getValue: storage.outputYesNo
         },
 
         {
             key: 'isNameEqualToScene',
             header: 'NeS',
             toolTip: function(v) { return v ? 'The palette name is equal to the scene name' : 'The palette name is NOT equal to the scene name'; },
-            getBg: lib.bgSuccessOrFail,
-            getValue: lib.outputYesNo
+            getBg: storage.bgSuccessOrFail,
+            getValue: storage.outputYesNo
         },
 
         {
             key: 'isColorPalette',
             header: 'CP',
             toolTip: 'Is Color Palette',
-            getBg: lib.bgFailYellow,
-            getValue: lib.outputYesNo
+            getBg: storage.bgFailYellow,
+            getValue: storage.outputYesNo
         },
 
         {
             key: 'nColors',
             header: 'cN',
             toolTip: 'Palette Color count',
-            getBg: lib.bgSuccessOrFail,
-            getValue: lib.outputNumber,
+            getBg: storage.bgSuccessOrFail,
+            getValue: storage.outputNumber,
         },
 
 
@@ -195,24 +192,24 @@ exports = function(selectedNodes, modal, lib, contentMaxHeight) {
             key: 'usedInScene',
             header: 'UiS',
             toolTip: 'Colors is used in the Scene',
-            getBg: lib.bgSuccess,
-            getValue: lib.outputYesNo
+            getBg: storage.bgSuccess,
+            getValue: storage.outputYesNo
         },
 
         {
             key: 'colorsNamingIssues',
             header: 'cNI',
             toolTip: true,
-            getBg: lib.bgSuccessOrFailInverted,
-            getValue: lib.outputYesNo
+            getBg: storage.bgSuccessOrFailInverted,
+            getValue: storage.outputYesNo
         },
 
         {
             key: 'usedDefaultColorId',
             header: 'DCID',
             toolTip: 'Some of Palette Colors have Default Color IDs',
-            getBg: lib.bgSuccessOrFailInverted,
-            getValue: lib.outputYesNo,
+            getBg: storage.bgSuccessOrFailInverted,
+            getValue: storage.outputYesNo,
             // onClick: selectPalletOrColor
         },
 
@@ -223,8 +220,8 @@ exports = function(selectedNodes, modal, lib, contentMaxHeight) {
                 if (v) return 'Palette colors has the same ID:\n' + data.colorsHasSameIdToolTip;
                 return 'Palette colors has unique IDs';
             },
-            getBg: lib.bgSuccessOrFailInverted,
-            getValue: lib.outputYesNo,
+            getBg: storage.bgSuccessOrFailInverted,
+            getValue: storage.outputYesNo,
             // onClick: selectPalletOrColor
         }
     ];
@@ -250,31 +247,31 @@ exports = function(selectedNodes, modal, lib, contentMaxHeight) {
         {
             key: 'paletteName',
             header: 'Palette Name',
-            getValue: lib.outputString,
-            // onClick: lib.defaultCellClick
+            getValue: storage.outputString,
+            // onClick: storage.defaultCellClick
         },
 
         {
             key: 'colorName',
             header: 'Color Name',
-            getValue: lib.outputString,
-            // onClick: lib.defaultCellClick
+            getValue: storage.outputString,
+            // onClick: storage.defaultCellClick
         },
 
         {
             key: 'colorNamingIssues',
             header: 'NI',
             toolTip: true,
-            getBg: lib.bgSuccessOrFailInverted,
-            getValue: lib.outputYesNo
+            getBg: storage.bgSuccessOrFailInverted,
+            getValue: storage.outputYesNo
         },
 
         {
             key: 'usedInScene',
             header: 'UiS',
             toolTip: 'Colors is used in the Scene',
-            getBg: lib.bgSuccess,
-            getValue: lib.outputYesNo
+            getBg: storage.bgSuccess,
+            getValue: storage.outputYesNo
         },
 
         {
@@ -284,8 +281,8 @@ exports = function(selectedNodes, modal, lib, contentMaxHeight) {
                 if (v) return 'Palette colors has the same ID:\n' + data.colorsHasSameIdToolTip;
                 return 'Palette colors has unique IDs';
             },
-            getBg: lib.bgSuccessOrFailInverted,
-            getValue: lib.outputYesNo,
+            getBg: storage.bgSuccessOrFailInverted,
+            getValue: storage.outputYesNo,
             // onClick: selectPalletOrColor
         },
 
@@ -293,8 +290,8 @@ exports = function(selectedNodes, modal, lib, contentMaxHeight) {
             key: 'usedDefaultColorId',
             header: 'DCID',
             toolTip: 'Color has Default Color ID',
-            getBg: lib.bgSuccessOrFailInverted,
-            getValue: lib.outputYesNo,
+            getBg: storage.bgSuccessOrFailInverted,
+            getValue: storage.outputYesNo,
             // onClick: selectPalletOrColor
         },
 

@@ -9,18 +9,17 @@ var NodeUtils = require(fileMapper.toNativePath(specialFolders.userScripts + "/p
 var TableView = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/TableView.js"));
 
 //
-exports = function( selectedNodes, modal, lib, contentMaxHeight ) {
+exports = function( selectedNodes, modal, storage, contentMaxHeight ) {
 
     // Collect Data
-    var items = NodeUtils.getAllChildNodes(selectedNodes, 'COMPOSITE');
+    var items = storage.getAllChildNodes(selectedNodes, 'COMPOSITE');
     if (!items.length) return;
 
     items = items
-        .map(function(n, i) {
+        .map(function(nodeData, i) {
 
-            var itemData = Object.assign( lib.getBaseItemData(n,i), {
-            	mode: node.getTextAttr( n, 1, 'COMPOSITE_MODE' ),
-                type: node.type(n),
+            var itemData = Object.assign( storage.getBaseItemData(nodeData,i), {
+            	mode: node.getTextAttr( nodeData.node, 1, 'COMPOSITE_MODE' )
             });
 
             return itemData;
@@ -39,20 +38,20 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ) {
     
     //
     var bgColors = {
-    	'Pass Through': lib.bgSuccess,
-    	'As Bitmap': lib.bgWarning,
-    	'As Seamless Bitmap': lib.bgInfo,
-    	'As Vector': lib.bgStrange,
+    	'Pass Through': storage.bgSuccess,
+    	'As Bitmap': storage.bgWarning,
+    	'As Seamless Bitmap': storage.bgInfo,
+    	'As Vector': storage.bgStrange,
     };
 
     //
     var typeBg = {
         'COMPOSITE': '',
-        'MATTE_COMPOSITE': lib.bgInfo,
+        'MATTE_COMPOSITE': storage.bgInfo,
     };
 
     //
-    var tableView = new TableView(items, lib.getBaseTableRows().concat([
+    var tableView = new TableView(items, storage.getBaseTableRows().concat([
 
         {
             key: 'type',
@@ -60,7 +59,7 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ) {
             getBg: function(v,data) {
                 return typeBg[v];
             },
-            onClick: lib.defaultCellClick
+            onClick: storage.defaultCellClick
         },
 
 		{
@@ -69,7 +68,7 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ) {
 			getBg: function(v,data) {
 				return bgColors[v];
 			},
-			onClick: lib.defaultCellClick
+			onClick: storage.defaultCellClick
 		}
 
     ]), undefined, contentMaxHeight ); 

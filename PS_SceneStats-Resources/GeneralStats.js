@@ -4,12 +4,10 @@ Version: 0.220630
 */
 
 //
-var Utils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/Utils.js"));
-var NodeUtils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/NodeUtils.js"));
 var TableView = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/TableView.js"));
 
 //
-exports = function(selectedNodes, modal, lib, contentMaxHeight) {
+exports = function(selectedNodes, modal, storage, contentMaxHeight) {
 
     // Collect Data
     var scenePath = fileMapper.toNativePath(scene.currentProjectPath() + '/' + scene.currentVersionName() + '.xstage');
@@ -48,12 +46,27 @@ exports = function(selectedNodes, modal, lib, contentMaxHeight) {
         {
             key: "Scene is Template",
             value: sceneIsTemplate ? 'Yes' : 'No',
-            bg: sceneIsTemplate ? lib.bgSuccess : lib.bgYellow,
+            bg: sceneIsTemplate ? storage.bgSuccess : storage.bgYellow,
+        },
+
+        {
+            key: "Drawings",
+            value: storage.getAllChildNodes( selectedNodes, 'READ' ).length,
+        },
+
+        {
+            key: "Pegs",
+            value: storage.getAllChildNodes( selectedNodes, 'PEG' ).length,
+        },
+
+        {
+            key: "Composites",
+            value: storage.getAllChildNodes( selectedNodes, 'COMPOSITE' ).length,
         },
 
         {
             key: "Cutters",
-            value: NodeUtils.getAllChildNodes(selectedNodes, 'CUTTER').length,
+            value: storage.getAllChildNodes( selectedNodes, 'CUTTER' ).length,
         }
 
     ]

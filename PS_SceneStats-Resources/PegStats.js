@@ -5,22 +5,21 @@ Version: 0.220630
 
 //
 var Utils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/Utils.js"));
-var NodeUtils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/NodeUtils.js"));
 var TableView = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/TableView.js"));
 
 //
-exports = function( selectedNodes, modal, lib, contentMaxHeight ){
+exports = function( selectedNodes, modal, storage, contentMaxHeight ){
 
 	// Generate the Table
   	
   	// Collect Data
-	var items = NodeUtils.getAllChildNodes( selectedNodes, 'PEG' );
+	var items = storage.getAllChildNodes( selectedNodes, 'PEG' );
 	if( !items.length ) return;
 
 	items = items
-		.map(function(n,i){
+		.map(function(nodeData,i){
 
-			var currentFrame = frame.current();
+			var n = nodeData.node;
 
 			// Pivot
 			var pivotX = Math.abs( Number(node.getTextAttr( n, 1, 'PIVOT.X' )) );
@@ -53,18 +52,18 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ){
 			}
 
 			//
-			var itemData = Object.assign( lib.getBaseItemData(n,i), {
+			var itemData = Object.assign( storage.getBaseItemData(nodeData,i), {
 				enable3d: node.getTextAttr( n, 1, 'ENABLE_3D' ) === 'Y',
 				position3dPath: node.getTextAttr( n, 1, 'POSITION.SEPARATE' ) !== 'On',
 				pivotWarning: pivotWarning,
 				pivotWarningMessage: pivotWarningMessage,
-				positionX: node.getAttr(n, currentFrame, 'POSITION.X' ).doubleValue(),
-				positionY: node.getAttr(n, currentFrame, 'POSITION.Y' ).doubleValue(),
-				positionZ: node.getAttr(n, currentFrame, 'POSITION.Z' ).doubleValue(),
-				rotationZ: node.getAttr(n, currentFrame, 'ROTATION.ANGLEZ' ).doubleValue(),
-				scaleX: node.getAttr(n, currentFrame, 'SCALE.X' ).doubleValue(),
-				scaleY: node.getAttr(n, currentFrame, 'SCALE.Y' ).doubleValue(),
-				scaleZ: node.getAttr(n, currentFrame, 'SCALE.Z' ).doubleValue(),
+				positionX: node.getAttr(n, storage.currentFrame, 'POSITION.X' ).doubleValue(),
+				positionY: node.getAttr(n, storage.currentFrame, 'POSITION.Y' ).doubleValue(),
+				positionZ: node.getAttr(n, storage.currentFrame, 'POSITION.Z' ).doubleValue(),
+				rotationZ: node.getAttr(n, storage.currentFrame, 'ROTATION.ANGLEZ' ).doubleValue(),
+				scaleX: node.getAttr(n, storage.currentFrame, 'SCALE.X' ).doubleValue(),
+				scaleY: node.getAttr(n, storage.currentFrame, 'SCALE.Y' ).doubleValue(),
+				scaleZ: node.getAttr(n, storage.currentFrame, 'SCALE.Z' ).doubleValue(),
 				scaleXFlipped: scaleXFlipped
 			});
 
@@ -84,105 +83,105 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ){
   	// var uiGroup = modal.addGroup( 'DRAWINGS ('+items.length+')', modal.ui, true, style );
 
   	//
-	var tableView = new TableView( items, lib.getBaseTableRows().concat([
+	var tableView = new TableView( items, storage.getBaseTableRows().concat([
 
 		{
 			header: '3d',
 			key: 'enable3d',
 			toolTip: 'Enable 3D',
-			getValue: lib.outputYesNo,
-			getBg: lib.bgSuccessYellow,
-			onClick: lib.defaultCellClick,
+			getValue: storage.outputYesNo,
+			getBg: storage.bgSuccessYellow,
+			onClick: storage.defaultCellClick,
 		},
 
 		{
 			header: 'P3d',
 			key: 'position3dPath',
 			toolTip: 'Position 3D Path',
-			getValue: lib.outputYesNo,
-			getBg: lib.bgSuccessYellow,
-			onClick: lib.defaultCellClick,
+			getValue: storage.outputYesNo,
+			getBg: storage.bgSuccessYellow,
+			onClick: storage.defaultCellClick,
 		},
 
 		{
 			header: 'Pvt',
 			key: 'pivotWarning',
 			toolTip: function(v,data){ return data.pivotWarningMessage; },
-			// getValue: lib.outputYesNo,
-			getBg: lib.bgSuccessYellow,
-			onClick: lib.defaultCellClick,
+			// getValue: storage.outputYesNo,
+			getBg: storage.bgSuccessYellow,
+			onClick: storage.defaultCellClick,
 		},
 
 		{
 			header: 'PX',
 			key: 'positionX',
 			toolTip: 'Current X Position',
-			getValue: lib.outputPointThree,
-			getBg: lib.bgSuccessOrFailInverted,
-			onClick: lib.defaultCellClick,
+			getValue: storage.outputPointThree,
+			getBg: storage.bgSuccessOrFailInverted,
+			onClick: storage.defaultCellClick,
 		},
 
 		{
 			header: 'PY',
 			key: 'positionY',
 			toolTip: 'Current Y Position',
-			getValue: lib.outputPointThree,
-			getBg: lib.bgSuccessOrFailInverted,
-			onClick: lib.defaultCellClick,
+			getValue: storage.outputPointThree,
+			getBg: storage.bgSuccessOrFailInverted,
+			onClick: storage.defaultCellClick,
 		},
 
 		{
 			header: 'PZ',
 			key: 'positionZ',
 			toolTip: 'Current Z Position',
-			getValue: lib.outputPointThree,
-			getBg: lib.bgSuccessOrFailInverted,
-			onClick: lib.defaultCellClick,
+			getValue: storage.outputPointThree,
+			getBg: storage.bgSuccessOrFailInverted,
+			onClick: storage.defaultCellClick,
 		},
 
 		{
 			header: 'RZ',
 			key: 'rotationZ',
 			toolTip: 'Current Z Rotation',
-			getValue: lib.outputPointTwo,
-			getBg: lib.bgSuccessOrFailInverted,
-			onClick: lib.defaultCellClick,
+			getValue: storage.outputPointTwo,
+			getBg: storage.bgSuccessOrFailInverted,
+			onClick: storage.defaultCellClick,
 		},
 
 		{
 			header: 'SX',
 			key: 'scaleX',
 			toolTip: 'Current X Scale',
-			getValue: lib.outputPointOne,
-			getBg: lib.bgSuccessIfOne,
-			onClick: lib.defaultCellClick,
+			getValue: storage.outputPointOne,
+			getBg: storage.bgSuccessIfOne,
+			onClick: storage.defaultCellClick,
 		},
 
 		{
 			header: 'SY',
 			key: 'scaleY',
 			toolTip: 'Current Y Scale',
-			getValue: lib.outputPointOne,
-			getBg: lib.bgSuccessIfOne,
-			onClick: lib.defaultCellClick,
+			getValue: storage.outputPointOne,
+			getBg: storage.bgSuccessIfOne,
+			onClick: storage.defaultCellClick,
 		},
 
 		{
 			header: 'SZ',
 			key: 'scaleZ',
 			toolTip: 'Current Z Scale',
-			getValue: lib.outputPointOne,
-			getBg: lib.bgSuccessIfOne,
-			onClick: lib.defaultCellClick,
+			getValue: storage.outputPointOne,
+			getBg: storage.bgSuccessIfOne,
+			onClick: storage.defaultCellClick,
 		},
 
 		{
 			header: 'SXF',
 			key: 'scaleXFlipped',
 			toolTip: 'X Scale flipped',
-			getValue: lib.outputYesNo,
-			getBg: lib.bgSuccessOrFailInverted,
-			onClick: lib.defaultCellClick,
+			getValue: storage.outputYesNo,
+			getBg: storage.bgSuccessOrFailInverted,
+			onClick: storage.defaultCellClick,
 		},
 
 	]), undefined, contentMaxHeight );

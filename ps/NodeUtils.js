@@ -248,7 +248,7 @@ function getOutputNodes(_node) {
 }
 
 //
-function getAllChildNodes(nodes, typeFilter) {
+function getAllChildNodes( nodes, typeFilter, eachNodeCb ) {
 
     if (typeof nodes === 'string') nodes = [nodes];
 
@@ -268,7 +268,10 @@ function getAllChildNodes(nodes, typeFilter) {
         }
 
         if (!_typeFilter || nodeType.match(_typeFilter)) {
-            if (_nodes.indexOf(_node) === -1) _nodes.push(_node);
+            if (_nodes.indexOf(_node) === -1) {
+                _nodes.push(_node);
+                if( eachNodeCb ) eachNodeCb( _node );
+            }
         }
 
         getOutputNodes(_node).forEach(function(n) { checkNode(n) });
