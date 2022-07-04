@@ -132,7 +132,7 @@ exports = function(options) {
                     key: 'color',
                     header: 'Col',
                     toolTip: 'Node Color',
-                    getBg: function(v) { if( v ) return new QBrush(new QColor('#'+v.substr(0,6))) },
+                    getBg: function(v) { if (v) return new QBrush(new QColor('#' + v.substr(0, 6))) },
                     getValue: function(v) { return v === '000000' ? 'No' : ''; },
                     onClick: lib.defaultCellClick,
                 },
@@ -269,6 +269,13 @@ exports = function(options) {
                 tabsAdded++;
             }
         }
+
+        if (options.all || options.general) {
+            var GeneralStats = require(fileMapper.toNativePath(specialFolders.userScripts + "/PS_SceneStats-Resources/GeneralStats.js"));
+            tabs.addTab(new GeneralStats(selectedNodes, undefined, lib, contentMaxHeight), 'General');
+            tabsAdded++;
+        }
+
         // tabs.addTab( new QLabel("widget 2"), 'Tab2');
 
         ui.mainLayout.addWidget(tabs, 0, 0);

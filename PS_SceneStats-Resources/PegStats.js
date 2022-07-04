@@ -87,8 +87,8 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ){
 	var tableView = new TableView( items, lib.getBaseTableRows().concat([
 
 		{
-			key: 'enable3d',
 			header: '3d',
+			key: 'enable3d',
 			toolTip: 'Enable 3D',
 			getValue: lib.outputYesNo,
 			getBg: lib.bgSuccessYellow,
@@ -96,8 +96,8 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ){
 		},
 
 		{
-			key: 'position3dPath',
 			header: 'P3d',
+			key: 'position3dPath',
 			toolTip: 'Position 3D Path',
 			getValue: lib.outputYesNo,
 			getBg: lib.bgSuccessYellow,
@@ -105,8 +105,8 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ){
 		},
 
 		{
-			key: 'pivotWarning',
 			header: 'Pvt',
+			key: 'pivotWarning',
 			toolTip: function(v,data){ return data.pivotWarningMessage; },
 			// getValue: lib.outputYesNo,
 			getBg: lib.bgSuccessYellow,
@@ -114,8 +114,8 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ){
 		},
 
 		{
-			key: 'positionX',
 			header: 'PX',
+			key: 'positionX',
 			toolTip: 'Current X Position',
 			getValue: lib.outputPointThree,
 			getBg: lib.bgSuccessOrFailInverted,
@@ -123,8 +123,8 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ){
 		},
 
 		{
-			key: 'positionY',
 			header: 'PY',
+			key: 'positionY',
 			toolTip: 'Current Y Position',
 			getValue: lib.outputPointThree,
 			getBg: lib.bgSuccessOrFailInverted,
@@ -132,8 +132,8 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ){
 		},
 
 		{
-			key: 'positionZ',
 			header: 'PZ',
+			key: 'positionZ',
 			toolTip: 'Current Z Position',
 			getValue: lib.outputPointThree,
 			getBg: lib.bgSuccessOrFailInverted,
@@ -141,8 +141,8 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ){
 		},
 
 		{
-			key: 'rotationZ',
 			header: 'RZ',
+			key: 'rotationZ',
 			toolTip: 'Current Z Rotation',
 			getValue: lib.outputPointTwo,
 			getBg: lib.bgSuccessOrFailInverted,
@@ -150,8 +150,8 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ){
 		},
 
 		{
-			key: 'scaleX',
 			header: 'SX',
+			key: 'scaleX',
 			toolTip: 'Current X Scale',
 			getValue: lib.outputPointOne,
 			getBg: lib.bgSuccessIfOne,
@@ -159,8 +159,8 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ){
 		},
 
 		{
-			key: 'scaleY',
 			header: 'SY',
+			key: 'scaleY',
 			toolTip: 'Current Y Scale',
 			getValue: lib.outputPointOne,
 			getBg: lib.bgSuccessIfOne,
@@ -168,8 +168,8 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ){
 		},
 
 		{
-			key: 'scaleZ',
 			header: 'SZ',
+			key: 'scaleZ',
 			toolTip: 'Current Z Scale',
 			getValue: lib.outputPointOne,
 			getBg: lib.bgSuccessIfOne,
@@ -177,8 +177,8 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ){
 		},
 
 		{
-			key: 'scaleXFlipped',
 			header: 'SXF',
+			key: 'scaleXFlipped',
 			toolTip: 'X Scale flipped',
 			getValue: lib.outputYesNo,
 			getBg: lib.bgSuccessOrFailInverted,

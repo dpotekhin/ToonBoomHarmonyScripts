@@ -20,6 +20,7 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ) {
 
             var itemData = Object.assign( lib.getBaseItemData(n,i), {
             	mode: node.getTextAttr( n, 1, 'COMPOSITE_MODE' ),
+                type: node.type(n),
             });
 
             return itemData;
@@ -45,7 +46,22 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ) {
     };
 
     //
+    var typeBg = {
+        'COMPOSITE': '',
+        'MATTE_COMPOSITE': lib.bgInfo,
+    };
+
+    //
     var tableView = new TableView(items, lib.getBaseTableRows().concat([
+
+        {
+            key: 'type',
+            header: 'Type',
+            getBg: function(v,data) {
+                return typeBg[v];
+            },
+            onClick: lib.defaultCellClick
+        },
 
 		{
 			key: 'mode',

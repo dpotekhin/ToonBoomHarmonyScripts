@@ -10,6 +10,16 @@ var NodeUtils = require(fileMapper.toNativePath(specialFolders.userScripts + "/p
 var TableView = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/TableView.js"));
 
 //
+var defaultColorsIds = [
+    "0b3934f843700d34",
+    "0b3934f843700d36",
+    "0b3934f843700d38",
+    "0b3934f843700d3a",
+    "0b3934f843700d3c",
+    "0000000000000003"
+];
+
+//
 exports = function(selectedNodes, modal, lib, contentMaxHeight) {
 
     var selectedGroupName = node.getName(selectedNodes[0]);
@@ -47,7 +57,9 @@ exports = function(selectedNodes, modal, lib, contentMaxHeight) {
             isColorPalette: _palette.isColorPalette(),
             nColors: _palette.nColors,
             palettePath: _palette.getPath(),
-        }
+            usedDefaultColorId: false,
+        };
+
         paletteTableItems.push(paletteItem);
         // MessageLog.trace('ID: '+_palette.id);
 
@@ -68,7 +80,9 @@ exports = function(selectedNodes, modal, lib, contentMaxHeight) {
             colorItem.id = palletteColor.id;
             colorItem.isTexture = palletteColor.isTexture;
             colorItem.usedInScene = _palette.containsUsedColors([palletteColor.id]);
-            
+            colorItem.usedDefaultColorId = defaultColorsIds.indexOf(palletteColor.id) !== -1;
+            if( colorItem.usedDefaultColorId ) paletteItem.usedDefaultColorId = true;
+
             // Naming Issues
             colorItem.colorNamingIssues = lib.checkColorName( palletteColor.name );
             if( colorItem.colorNamingIssues ){
@@ -194,6 +208,15 @@ exports = function(selectedNodes, modal, lib, contentMaxHeight) {
         },
 
         {
+            key: 'usedDefaultColorId',
+            header: 'DCID',
+            toolTip: 'Some of Palette Colors have Default Color IDs',
+            getBg: lib.bgSuccessOrFailInverted,
+            getValue: lib.outputYesNo,
+            // onClick: selectPalletOrColor
+        },
+
+        {
             key: 'colorsHasSameId',
             header: 'cSID',
             toolTip: function(v, data) {
@@ -261,6 +284,15 @@ exports = function(selectedNodes, modal, lib, contentMaxHeight) {
                 if (v) return 'Palette colors has the same ID:\n' + data.colorsHasSameIdToolTip;
                 return 'Palette colors has unique IDs';
             },
+            getBg: lib.bgSuccessOrFailInverted,
+            getValue: lib.outputYesNo,
+            // onClick: selectPalletOrColor
+        },
+
+        {
+            key: 'usedDefaultColorId',
+            header: 'DCID',
+            toolTip: 'Color has Default Color ID',
             getBg: lib.bgSuccessOrFailInverted,
             getValue: lib.outputYesNo,
             // onClick: selectPalletOrColor
