@@ -13,4 +13,4 @@ If you don't select a time range, the entier Timeline will be used.
 
 ### Installation:
 Copy all files from this folder to [Harmony User Scripts directory](https://docs.toonboom.com/help/harmony-20/premium/scripting/import-script.html).\
-Add script "PS_RotationEulerFilter" to a panel.  
+Add the script "PS_RotationEulerFilter" to a panel.  

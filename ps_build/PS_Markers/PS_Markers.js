@@ -6,6 +6,10 @@ Author: Dima Potekhin (skinion.onn@gmail.com)
 
 [Description:
 A tiny helper for working with scene markers.
+- create | delete a marker on the current frame
+- move markers to the left or right
+- remove all markers
+- copy | paste markers between scenes
 :]
 
 [Usage:
@@ -22,7 +26,9 @@ Options:
 :]
 */
 
-function PS_Markers() {
+function PS_Markers( _mode ) {
+
+    MessageLog.trace('_mode: '+_mode);
 
     var markers = TimelineMarker.getAllMarkers();
 
@@ -39,14 +45,14 @@ function PS_Markers() {
     // 
     var modeActions = { 0: actionToggleMarker };
 
-    modeActions[ RIGHT ] = function() { actionMove('Right') };
-    modeActions[ LEFT ] = function() { actionMove('Left') };
+    modeActions[ RIGHT ] = function() { actionMove('Right') }; // mode: 1
+    modeActions[ LEFT ] = function() { actionMove('Left') }; // mode: 2
 
-    modeActions[ REMOVE ] =  actionRemove;
-	modeActions[ REMOVE + RIGHT ] = function() { actionRemove('Right') };
-	modeActions[ REMOVE + LEFT ] = function() { actionRemove('Left') };
+    modeActions[ REMOVE ] =  actionRemove; // mode: 4
+	modeActions[ REMOVE + RIGHT ] = function() { actionRemove('Right') }; // mode: 5
+	modeActions[ REMOVE + LEFT ] = function() { actionRemove('Left') }; // mode: 6
 
-    modeActions[ REMOVE + RIGHT + LEFT ] = actionShowContextMenu;
+    modeActions[ REMOVE + RIGHT + LEFT ] = actionShowContextMenu; // mode: 
 
     var directions = {
         Right: 1,
@@ -54,6 +60,7 @@ function PS_Markers() {
     };
 
     (modeActions[
+        _mode !== undefined ? _mode :
     	Number(KeyModifiers.IsControlPressed() * RIGHT) +
     	Number(KeyModifiers.IsShiftPressed() * LEFT) +
     	Number(KeyModifiers.IsAlternatePressed() * REMOVE)
@@ -128,7 +135,7 @@ function PS_Markers() {
             var markers = TimelineMarker.getAllMarkers();
             markers.forEach(function(markerData, i) {
 
-                if (Timeline.numFrameSel > 1) { // Remove frames in the range of frames
+                if (Timeline.numFrameSel > 1) { // Remove markers in the range of frames
 
                     if (markerData.frame < firstFrame || markerData.frame >= lastFrame) return;
 
@@ -161,6 +168,8 @@ function PS_Markers() {
     		[ 'Remove all Markers\tLMB+'+REMOVE_KEY, modeActions[REMOVE]],
     		[ 'Remove Markers to the Left\tLMB+'+REMOVE_KEY+'+'+LEFT_KEY, modeActions[REMOVE+LEFT]],
     		[ 'Remove Markers to the Right\tLMB+'+REMOVE_KEY+'+'+RIGHT_KEY, modeActions[REMOVE+RIGHT]],
+            [ 'Copy all Scene Markers', PS_CopySceneMarkers],
+            [ 'Paste Scene Markers', PS_PasteSceneMarkers],
     	]);
 
     }
@@ -208,5 +217,64 @@ function PS_Markers() {
         }
         return "";
     }
+
+}
+
+
+
+
+///
+var clipboardDataType = 'PS_CopySceneMarkers';
+
+//
+function PS_CopySceneMarkers(){
+
+    var markers = TimelineMarker.getAllMarkers();
+    var data = {
+        type: clipboardDataType,
+    }
+
+    if (Timeline.numFrameSel > 1) { // Remove markers in the range of frames
+        var firstFrame = data.firstFrame = Timeline.firstFrameSel;
+        var lastFrame = data.lastFrame = firstFrame + Timeline.numFrameSel;
+        markers = markers.filter(function(markerData){ return markerData.frame >= firstFrame && markerData.frame < lastFrame; });
+    }
+
+    data.markers = markers;
+
+    // MessageLog.trace('data: '+JSON.stringify(data,true,'  '));
+
+    QApplication.clipboard().setText( JSON.stringify(data));
+
+}
+
+//
+function PS_PasteSceneMarkers() {
+
+    var markers;
+    var data;
+
+    try{
+
+        data = JSON.parse( QApplication.clipboard().text() );
+        if( data.type !== clipboardDataType ) return;
+        markers = data.markers;
+
+    }catch(err){ MessageLog.trace('Error: '+err); return; }
+
+    scene.beginUndoRedoAccum('Paste Scene Markers');
+
+    // Remove existing markers
+    var oldMarkers = TimelineMarker.getAllMarkers();
+    oldMarkers.forEach(function(markerData, i) {
+        if( data.firstFrame !== undefined && (markerData.frame < firstFrame || markerData.frame >= lastFrame ) ) return; // remove markers inside a copied range only
+        TimelineMarker.deleteMarker(markerData);
+    });
+
+    markers.forEach(function(markerData, i) { // paste markers
+        TimelineMarker.createMarker(markerData);
+    });
+
+    scene.endUndoRedoAccum();
 
 }

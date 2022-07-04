@@ -233,7 +233,7 @@ function componentToHex(c) {
 }
 
 //
-function rgbToHex(r, g, b, a) { // alternate params: ColorRGBA, useAlpha
+function rgbToHex(r, g, b, a, ignoreAlpha) { // alternate params: ColorRGBA, useAlpha
   // return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
   if( b === undefined ){
     g = r.g;
@@ -293,6 +293,17 @@ if (!Object.assign) {
   });
 }
 
+
+//
+Math.sign = function(v){
+    if( !v ) return 0;
+    return v < 0 ? -1 : 1;
+}
+
+//
+Math.signp = function(v){
+    return v < 0 ? -1 : 1;
+}
 
 //
 exports = {

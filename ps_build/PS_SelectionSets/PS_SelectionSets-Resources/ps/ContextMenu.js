@@ -1,132 +1,147 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.211022
+Version: 0.220630
 */
 
-var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_SelectionSets-Resources/ps/Utils.js"));
+var Utils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/Utils.js"));
 
 //
-function showContextMenu( menuData, event, parentWidget ){
+function showContextMenu( menuData, event, parentWidget ) {
 
-  // try{ // !!!
+    // try{ // !!!
 
-  var menu = new QMenu( parentWidget );
+    var menu = new QMenu( parentWidget || getParentWidget() );
 
-  var submenuFlatList = createSubmenu( menu, menuData );
+    var submenuFlatList = createSubmenu(menu, menuData);
 
-  menu.triggered.connect(function(a){
-    // MessageLog.trace('clicked '+JSON.stringify(a,true,'  ')+'\n'+JSON.stringify( submenuFlatList,true,'  '));
-    var action = submenuFlatList[a.text];
-    if( action ) action();
-  });
-  
-  menu.exec( event.globalPos ? event.globalPos() : event );
+    menu.triggered.connect(function(a) {
+        // MessageLog.trace('clicked '+JSON.stringify(a,true,'  ')+'\n'+JSON.stringify( submenuFlatList,true,'  '));
+        var action = submenuFlatList[a.text];
+        if (action) action();
+    });
 
-  delete menu;
-  
-  // }catch(err){MessageLog.trace(err)} // !!!
-  
+    menu.exec( event && event.globalPos ? event.globalPos() : ( event || new QPoint( QCursor.pos().x(), QCursor.pos().y() ) ) );
+
+    delete menu;
+
+    // }catch(err){MessageLog.trace(err)} // !!!
+
 }
 
 
 //
-function addMenuAction( menu, itemName ){
-  // 
-  var iconSeparatorIndex = itemName.indexOf('$');
-  if( iconSeparatorIndex !== -1 ){
-    var iconPath = itemName.substr( iconSeparatorIndex+1, itemName.length );
-    itemName = itemName.substr( 0, iconSeparatorIndex );
-    // MessageLog.trace('ICON: "'+itemName+'", "'+iconPath+'"');
-    var menuItem = menu.addAction( new QIcon(iconPath), itemName );
+function addMenuAction(menu, itemName) {
+    // 
+    var iconSeparatorIndex = itemName.indexOf('$');
+    if (iconSeparatorIndex !== -1) {
+        var iconPath = itemName.substr(iconSeparatorIndex + 1, itemName.length);
+        itemName = itemName.substr(0, iconSeparatorIndex);
+        // MessageLog.trace('ICON: "'+itemName+'", "'+iconPath+'"');
+        var menuItem = menu.addAction(new QIcon(iconPath), itemName);
+        menuItem.itemName = itemName;
+        return menuItem;
+    }
+
+    var menuItem = menu.addAction(itemName);
     menuItem.itemName = itemName;
     return menuItem;
-  }
-
-  var menuItem = menu.addAction(itemName);
-  menuItem.itemName = itemName;
-  return menuItem;
 
 }
 
 
 //
-function createSubmenu( menu, submenuData, submenuFlatList ){
+function createSubmenu(menu, submenuData, submenuFlatList) {
 
-  if( !submenuFlatList ) submenuFlatList = {};
+    if (!submenuFlatList) submenuFlatList = {};
 
-  Object.keys( submenuData ).forEach(function( submenuItemName ){
-    
-    var submenuItemData = submenuData[submenuItemName];
+    Object.keys(submenuData).forEach(function(submenuItemName) {
 
-    // MessageLog.trace('!! '+submenuItemName+' >> '+Utils.isFunction(submenuItemData) );
+        var submenuItemData = submenuData[submenuItemName];
 
-    if( submenuItemName.charAt(0) === '-' ){ // Add a Separator
+        // MessageLog.trace('!! '+submenuItemName+' >> '+Utils.isFunction(submenuItemData) );
 
-      menu.addSeparator();
+        if (submenuItemName.charAt(0) === '-') { // Add a Separator
 
-    }else if( submenuItemName.charAt(0) === '!' ){ // Add a function
+            menu.addSeparator();
 
-      var _submenuItemName = submenuItemName.substr(1,submenuItemName.length);
-      // MessageLog.trace('Action: "'+submenuItemName+'" '+_submenuItemName);
-      // menu.addAction(_submenuItemName);
-      _submenuItemName = addMenuAction( menu, _submenuItemName ).itemName;
-      submenuFlatList[_submenuItemName] = submenuItemData;
+        } else if (submenuItemName.charAt(0) === '!') { // Add a function
 
-    }else{
+            var _submenuItemName = submenuItemName.substr(1, submenuItemName.length);
+            // MessageLog.trace('Action: "'+submenuItemName+'" '+_submenuItemName);
+            // menu.addAction(_submenuItemName);
+            _submenuItemName = addMenuAction(menu, _submenuItemName).itemName;
+            submenuFlatList[_submenuItemName] = submenuItemData;
 
-      if( typeof submenuItemData === 'string' ){ // Add menu item
-        
-        // menu.addAction(submenuItemName);
-        submenuItemData = addMenuAction( menu, submenuItemName ).itemName;
-        submenuFlatList[submenuItemName] = submenuItemData;
+        } else {
 
-      }else if( Utils.isFunction(submenuItemData) ){ // Dynamic items
+            if (typeof submenuItemData === 'string') { // Add menu item
 
-        var submenuItems = submenuItemData();
+                // menu.addAction(submenuItemName);
+                submenuItemData = addMenuAction(menu, submenuItemName).itemName;
+                submenuFlatList[submenuItemName] = submenuItemData;
 
-        if( submenuItems ){
+            } else if (Utils.isFunction(submenuItemData)) { // Dynamic items
 
-          if(  Utils.isFunction(submenuItems) ){ // Add conditional menu item
+                var submenuItems = submenuItemData();
 
-             // MessageLog.trace('Add Menu item');
-            // var submenu = menu.addAction( submenuItems );
-            // menu.addAction(submenuItemName);
-            submenuItemName = addMenuAction( menu, submenuItemName ).itemName;
-            submenuFlatList[submenuItemName] = submenuItems;
+                if (submenuItems) {
 
-          }else if( Object.keys(submenuItems).length ){ // Add conditional submenu
+                    if (Utils.isFunction(submenuItems)) { // Add conditional menu item
 
-            var submenuObject = {};
-            submenuObject[submenuItemName] = submenuItems;
-            createSubmenu( menu, submenuObject, submenuFlatList );
+                        // MessageLog.trace('Add Menu item');
+                        // var submenu = menu.addAction( submenuItems );
+                        // menu.addAction(submenuItemName);
+                        submenuItemName = addMenuAction(menu, submenuItemName).itemName;
+                        submenuFlatList[submenuItemName] = submenuItems;
 
-          }
+                    } else if (Object.keys(submenuItems).length) { // Add conditional submenu
 
-        }else{
-          
-          // var submenu = menu.addMenu( submenuItemName );
-          // var submenu = menu.addAction( submenuItemName );
-          var submenu = addMenuAction( menu, submenuItemName );
-          submenu.enabled = false;
+                        var submenuObject = {};
+                        submenuObject[submenuItemName] = submenuItems;
+                        createSubmenu(menu, submenuObject, submenuFlatList);
+
+                    }
+
+                } else {
+
+                    // var submenu = menu.addMenu( submenuItemName );
+                    // var submenu = menu.addAction( submenuItemName );
+                    var submenu = addMenuAction(menu, submenuItemName);
+                    submenu.enabled = false;
+
+                }
+
+            } else { // Add a submenu
+
+                var submenu = menu.addMenu(submenuItemName);
+                createSubmenu(submenu, submenuItemData, submenuFlatList);
+
+            }
 
         }
 
-      }else{ // Add a submenu
+    });
 
-        var submenu = menu.addMenu( submenuItemName );
-        createSubmenu( submenu, submenuItemData, submenuFlatList );
+    return submenuFlatList;
 
-      }
+}
 
+
+function getParentWidget() {
+
+    var topWidgets = QApplication.topLevelWidgets();
+
+    for (var i in topWidgets) {
+        var widget = topWidgets[i];
+        if (widget instanceof QMainWindow && !widget.parentWidget())
+            return widget;
     }
 
-  });
-
-  return submenuFlatList;
+    return "";
 
 }
 
 ///
 exports = {
-  showContextMenu: showContextMenu,
+    showContextMenu: showContextMenu,
 }

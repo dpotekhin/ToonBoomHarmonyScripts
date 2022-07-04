@@ -2,7 +2,7 @@
 Author: Dima Potekhin (skinion.onn@gmail.com)
 
 [Name: PS_SceneHelpers :]
-[Version: 0.210921 :]
+[Version: 0.220622 :]
 
 [Description:
 A set of scene helper scripts.
@@ -27,6 +27,10 @@ Package adds the Main Menu item: File / Backup / Backup Scene
 Opens the Backup folder ../_backup  
 Package adds the Main Menu item: File / Backup / Open Backup Folder
 
+#### PS_BackupTBHSettings
+Backups user Toon Boom Harmony settings
+Package adds the Main Menu item: File / Backup / Backup User Settings
+
 #### PS_OpenScriptsFolder
 Opens Harmony User scripts folder  
 Package adds the Main Menu item: File / Resources / Open User Scripts Folder
@@ -38,6 +42,7 @@ Package adds the Main Menu item: File / Resources / Open Selected Library Templa
 #### PS_OpenPencilTextureFolder
 Opens the default Pencil Texture folder  
 Package adds the Main Menu item: File / Resources / Open Pencil Texture Folder
+
 
 :]
 
@@ -67,6 +72,7 @@ exports = {
     PS_OpenPencilTextureFolder: PS_OpenPencilTextureFolder,
     PS_OpenTemplateFolder: PS_OpenTemplateFolder,
     PS_OpenScriptsFolder: PS_OpenScriptsFolder,
+    PS_BackupTBHSettings: PS_BackupTBHSettings,
     MODE_OPEN_ONLY: MODE_OPEN_ONLY,
     MODE_SHOW_FOLDER_ON_COMPLETE: 'mode-show-folder-on-complete',
 };
@@ -86,7 +92,8 @@ Open Scene folder
 (Windows only)
 */
 function PS_OpenSceneFolder() {
-    var projectPath = scene.currentProjectPathRemapped();
+    var projectPath = fileMapper.toNativePath(scene.currentProjectPathRemapped());
+    MessageLog.trace('projectPath: '+projectPath);
     FileSystem.openFolder(projectPath);
 }
 
@@ -154,7 +161,7 @@ ToDo:
 */
 function PS_BackupScene(mode) {
 
-    var projectPath = scene.currentProjectPathRemapped();
+    var projectPath = fileMapper.toNativePath( scene.currentProjectPathRemapped() );
 
     var sceneName = scene.currentScene();
 
@@ -172,6 +179,7 @@ function PS_BackupScene(mode) {
         return;
     }
 
+    /*
     var batPath = specialFolders.userScripts+'\\PS_SceneHelper-Resources\\Backup-TBH-Scene.bat';
     var command = '"'+batPath +'" "'+projectPath+'"';
     MessageLog.trace('PS_BackupScene command: '+command);
@@ -189,6 +197,15 @@ function PS_BackupScene(mode) {
         MessageLog.trace('Backup Error: ' + result + ': ' + command);
         return;
     }
+    */
+
+    
+
+    var backupFileName = sceneName + '_@' + Utils.getTimestamp() +'_'+ about.getUserName() + '.zip';
+    var backupFullPath =  backupFolderPath +'\\'+ backupFileName;
+    var fileDirCheck = FileSystem.checkFileDir(backupFullPath, true);
+
+    _sf.zip( projectPath, backupFullPath );
 
     MessageLog.trace( 'Backup file: '+ backupFullPath );
 
@@ -205,3 +222,54 @@ function PS_BackupScene(mode) {
 function PS_OpenBackupFolder(){
 	PS_BackupScene( MODE_OPEN_ONLY );
 }
+
+
+///
+function PS_BackupTBHSettings(){
+
+    MessageLog.clearLog();
+
+    
+
+    var settingsPath = specialFolders.userConfig.split('/');
+    settingsPath.pop();
+    settingsPath = settingsPath.join('/');
+    MessageLog.trace('Backup Settings:\n'+specialFolders.app+'\n>'+settingsPath );    
+    
+    var destFilePath = FileDialog.getSaveFileName('*.zip', 'Locate where to save the backup');
+    if( !destFilePath ){
+        return;
+    }
+
+    _sf.zip( settingsPath, destFilePath );
+
+    MessageBox.information("User settings have been successfully copied to: " + destFilePath );
+
+    var destDirPath = destFilePath.split('/');
+    destDirPath.pop();
+    destDirPath = destDirPath.join('/');
+    FileSystem.openFolder( fileMapper.toNativePath(destDirPath) );
+    
+}
+
+
+var _sf = {
+
+    get7ZipPath: function( destFilePath ){
+        return specialFolders.app + '/bin_3rdParty/7z.exe';
+    },
+
+    zip: function( srcPath, dstPath ) {
+        
+        var z7path = _sf.get7ZipPath();
+        var excludes = '-x!*-small.tga';
+        var command = '"'+z7path+'" a -tzip -ssw -mx1 -r0 -y  "'+dstPath+'" "'+srcPath+'" '+excludes;
+        MessageLog.trace('zip command:\n'+ command );
+
+        var proc = new QProcess();
+        proc.start(command);
+        proc.waitForFinished();
+
+    }
+
+};

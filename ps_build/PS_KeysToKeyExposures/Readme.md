@@ -26,4 +26,4 @@ The Key Exposures Mapping and other Script parameters related to a specific Draw
 
 ### Installation:
 Copy all files from this folder to [Harmony User Scripts directory](https://docs.toonboom.com/help/harmony-20/premium/scripting/import-script.html).\
-Add script "PS_KeysToKeyExposures" to a panel.  
+Add the script "PS_KeysToKeyExposures" to a panel.  

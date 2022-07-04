@@ -27,7 +27,7 @@ function PS_HexPaletteColor(){
 
 	// MessageLog.clearLog();
 
-	var paletteList = PaletteObjectManager.getScenePaletteList(); // In some reason without this new color vakues does not applied.
+	var paletteList = PaletteObjectManager.getScenePaletteList(); // In some reason without this new color values does not applied.
 	if(paletteList.numPalettes < 1) return;
 
 	function componentToHex(c) {
