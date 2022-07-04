@@ -27,6 +27,7 @@ function PS_SceneStats() {
         '!Drawings': function(){ runStats({drawings: true}); },
         '!Pegs': function(){ runStats({pegs: true}); },
         '!Composites': function(){ runStats({composites: true}); },
+        '!General': function(){ runStats({general: true}); },
     });
 
     function runStats( options ){

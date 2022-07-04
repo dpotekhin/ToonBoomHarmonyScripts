@@ -4,17 +4,15 @@ Version: 0.220629
 */
 
 //
-var Utils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/Utils.js"));
-var NodeUtils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/NodeUtils.js"));
 var TableView = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/TableView.js"));
 
 //
-exports = function( selectedNodes, modal, lib, contentMaxHeight ){
+exports = function( selectedNodes, modal, storage, contentMaxHeight ){
 
 	// Generate the Table
   	
   	// Collect Data
-	var items = NodeUtils.getAllChildNodes( selectedNodes, 'READ' );
+	var items = storage.getAllChildNodes( selectedNodes, 'READ' );
 	if( !items.length ) return;
 
 	var usedElements = {};
@@ -25,7 +23,9 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ){
 	};
 
 	items = items
-		.map(function(n,i){
+		.map(function(nodeData,i){
+
+			var n = nodeData.node;
 
 			var elementId = node.getElementId(n);
 			if( !usedElements[elementId] ) usedElements[elementId] = [n];
@@ -43,10 +43,10 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ){
 				var _max = Number(node.getTextAttr( n, 1, 'MAX_LINE_ART_THICKNESS' ));
 				
 				adjustPencilThickness = scaleIndependentShorthands[_scaleIndependent]
-					+'/'+ lib.outputPointOne( _proportional )
-					+'/'+ lib.outputPointOne( _constant )
-					+'/'+ lib.outputPointOne( _min )
-					+'/'+ lib.outputPointOne( _max )
+					+'/'+ storage.outputPointOne( _proportional )
+					+'/'+ storage.outputPointOne( _constant )
+					+'/'+ storage.outputPointOne( _min )
+					+'/'+ storage.outputPointOne( _max )
 				;
 
 				adjustPencilThicknessToolTip = 'Pencil Thickness Adjusted.'
@@ -60,7 +60,7 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ){
 			}
 
 			//
-			var itemData = Object.assign( lib.getBaseItemData(n,i), {
+			var itemData = Object.assign( storage.getBaseItemData(nodeData,i), {
 				canAnimate: node.getTextAttr( n, 1, 'CAN_ANIMATE' ) === 'Y',
 				enable3d: node.getTextAttr( n, 1, 'ENABLE_3D' ) === 'Y',
 				adjustPencilThickness: adjustPencilThickness,
@@ -91,60 +91,60 @@ exports = function( selectedNodes, modal, lib, contentMaxHeight ){
   	// var uiGroup = modal.addGroup( 'DRAWINGS ('+items.length+')', modal.ui, true, style );
 
   	//
-	var tableView = new TableView( items, lib.getBaseTableRows().concat([
+	var tableView = new TableView( items, storage.getBaseTableRows().concat([
 
 		{
 			key: 'DSCount',
 			header: 'DSc',
 			toolTip: 'Drawing Substitution Count',
-			getBg: lib.bgEmpty,
-			onClick: lib.defaultCellClick,
+			getBg: storage.bgEmpty,
+			onClick: storage.defaultCellClick,
 		},
 
 		{
 			key: 'canAnimate',
 			header: 'Anm',
 			toolTip: 'Animate Using Animation Tools',
-			getValue: lib.outputYesNo,
-			getBg: lib.bgSuccessOrFailInverted,
-			onClick: lib.defaultCellClick,
+			getValue: storage.outputYesNo,
+			getBg: storage.bgSuccessOrFailInverted,
+			onClick: storage.defaultCellClick,
 		},
 
 		{
 			key: 'enable3d',
 			header: '3d',
 			toolTip: 'Enable 3D',
-			getValue: lib.outputYesNo,
-			getBg: lib.bgSuccessYellow,
-			onClick: lib.defaultCellClick,
+			getValue: storage.outputYesNo,
+			getBg: storage.bgSuccessYellow,
+			onClick: storage.defaultCellClick,
 		},
 
 		{
 			header: 'EU',
 			toolTip: function(v,data){ return 'Element Used:\n'+usedElements[data.elementId].join('\n'); },
-			getBg: function(v,data){ return usedElements[data.elementId].length === 1 ? lib.bgEmpty : lib.bgYellow; },
+			getBg: function(v,data){ return usedElements[data.elementId].length === 1 ? storage.bgEmpty : storage.bgYellow; },
 			getValue: function(v,data){
 				return usedElements[data.elementId].length;
 			},
-			onClick: lib.defaultCellClick,
+			onClick: storage.defaultCellClick,
 		},
 
 		{
 			key: 'adjustPencilThickness',
 			header: 'PT',
 			toolTip: function(v,data){ return data.adjustPencilThicknessToolTip },
-			getValue: lib.outputValueOrNo,
-			getBg: lib.bgSuccessYellow,
-			onClick: lib.defaultCellClick,
+			getValue: storage.outputValueOrNo,
+			getBg: storage.bgSuccessYellow,
+			onClick: storage.defaultCellClick,
 		},
 
 		{
 			key: 'preserveLineThickness',
 			header: 'PLT',
 			toolTip: 'Preserve Line Thickness',
-			getBg: lib.bgSuccessYellow,
-			getValue: lib.outputYesNo,
-			onClick: lib.defaultCellClick,
+			getBg: storage.bgSuccessYellow,
+			getValue: storage.outputYesNo,
+			onClick: storage.defaultCellClick,
 		}
 
 	]), undefined, contentMaxHeight );
