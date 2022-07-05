@@ -23,116 +23,6 @@ function getFullAttributeList(nodePath) {
     return attributeList;
 }
 
-
-//
-function unlinkFunctions(_node, _columnTypes, _invertColumnTypes, keepCurrentValues) {
-
-    var nodeNamePath = _node.split("/");
-    var nodeName = nodeNamePath[nodeNamePath.length - 1];
-    // MessageLog.trace(i+") "+nodeName+", "+nodeNamePath  );
-
-    MessageLog.trace("NODE: " + i + ") " + nodeName + ", [" + node.type(_node) + "]");
-
-    var attrs = getFullAttributeList(_node);
-    var isPositionSeparate = node.getTextAttr(_node, 1, 'POSITION.SEPARATE') === 'Y'; //
-    var isEnabled3d = node.getTextAttr(_node, 1, 'ENABLE_3D') === 'Y'; //
-    var isRotationSeparate = node.getTextAttr(_node, 1, 'ROTATION.SEPARATE') === 'On'; // On = Euler; Off = Quaternion
-    // MessageLog.trace("isEnabled3d: "+isEnabled3d);
-    // MessageLog.trace("isRotationSeparate: "+isRotationSeparate);
-
-    try {
-
-        attrs.forEach(function(attr) {
-
-            var attrFullName = attr.fullKeyword();
-            // MessageLog.trace("ATTR: " + attrFullName+' > '+ node.getTextAttr(_node, 1, attrFullName ) );
-
-            var linkedColumn = node.linkedColumn(_node, attrFullName);
-            if (!linkedColumn) return;
-
-            var columnType = column.type(linkedColumn);
-            // if (columnType !==E 'QUATERNIONPATH') return; // !!!
-
-            if (_columnTypes) {
-
-                if (_invertColumnTypes) { // Skip provided column types
-
-                    if (_columnTypes.indexOf(columnType) !== -1) {
-                        MessageLog.trace('Skipped');
-                        return;
-                    }
-
-                } else { // Skip all except provided column types
-
-                    if (_columnTypes.indexOf(columnType) === -1) {
-                        return;
-                        MessageLog.trace('Skipped');
-                    }
-
-                }
-
-            }
-
-            // if ( linkedColumn && attrFullName != "DRAWING.ELEMENT" ){
-            // MessageLog.trace("-   UNLINK: " + attr.name() + " (" + attrFullName + ")" + " <" + attr.typeName());
-
-            if (isEnabled3d) { // 3d mode enabled
-
-                if (isRotationSeparate) { // Euler
-                    if (columnType === 'QUATERNIONPATH') return;
-
-                } else { // Quaternion
-                    if (attrFullName.indexOf('ROTATION.ANGLE') !== -1) return;
-
-                }
-
-            }
-
-            var currentValue = column.getEntry(linkedColumn, 0, frame.current());
-
-            switch (columnType) {
-
-                case 'QUATERNIONPATH':
-
-                    currentValue = attr.pos3dValueAt(frame.current());
-                    break;
-
-            }
-            // MessageLog.trace('--> columnType: "' + columnType + '", ' + attr.name() + " (" + attrFullName + ")" + " <" + attr.typeName() + ">");
-
-            node.unlinkAttr(_node, attrFullName);
-
-            if (keepCurrentValues) {
-
-                switch (columnType) {
-
-                    case 'QUATERNIONPATH':
-                        node.getAttr(_node, frame.current(), 'ROTATION.ANGLEX').setValue(currentValue.x);
-                        node.getAttr(_node, frame.current(), 'ROTATION.ANGLEY').setValue(currentValue.y);
-                        node.getAttr(_node, frame.current(), 'ROTATION.ANGLEZ').setValue(currentValue.z);
-                        break;
-
-                    default:
-                        // MessageLog.trace("-   VALUE: " + currentValue);
-                        if (numberTypes.indexOf(typeof attr.typeName()) === -1) currentValue = parseFloat(currentValue);
-                        // MessageLog.trace('Apply EColumn Value: ' + currentValue + ' > ' + typeof currentValue);
-                        attr.setValue(currentValue);
-                }
-
-
-            }
-
-        });
-
-    } catch (err) { MessageLog.trace('ERR:' + err) }
-
-}
-
-
-
-
-var numberTypes = ['DOUBLEVB', 'DOUBLE', 'INT'];
-
 //
 function getAttributeValue(attr) {
     switch (attr.typeName()) {
@@ -368,7 +258,6 @@ function getDrawingKeyframes(columnName, startFrame, onlyUnique) {
 exports = {
     getAttributes: getAttributes,
     getFullAttributeList: getFullAttributeList,
-    unlinkFunctions: unlinkFunctions,
     getUnusedName: getUnusedName,
     getValidNodeName: getValidNodeName,
     getNodesBounds: getNodesBounds,
