@@ -123,6 +123,16 @@ function createNode(parentNode, name, type, x, y, src, dest) {
 
 
 //
+function unlinkAllInputs(_node) {
+    
+    var numInput = node.numberOfInputPorts(_node);
+    for( var i=numInput-1; i>=0; i-- ){
+        if (node.isLinked(_node, i)) node.unlink(_node, i);
+    }
+}
+
+
+//
 function getOutputNodes(_node) {
     var numOutput = node.numberOfOutputPorts(_node);
     // MessageLog.trace('>>>>'+numOutput);
@@ -266,4 +276,5 @@ exports = {
     getOutputNodes: getOutputNodes,
     getAllChildNodes: getAllChildNodes,
     getLayerByDrawing: getLayerByDrawing,
+    unlinkAllInputs: unlinkAllInputs,
 }

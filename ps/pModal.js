@@ -1,12 +1,12 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.211020
+Version: 0.220706
 */
 
 function pModal( title, width, height, unique ){
 
   this.create(title, width, height, unique);
-	
+  
 }
 
 
@@ -107,7 +107,9 @@ pModal.prototype.addGroup = function( title, parent, layoutType, style ){
       groupBox.setStyleSheet( style );
     }
   }
+
   parent.mainLayout.addWidget( groupBox, 0, 0 );
+
   return groupBox;
 }
 
@@ -128,13 +130,31 @@ pModal.prototype.addNumberInput = function( labelText, parent, width, height, de
   _input.setValidator( new QDoubleValidator(_input) );
   _input.label = label;
 
+  var valueIsJustSetted = false;
+
   if( onChange ){
-    _input.textChanged.connect( _input, onChange );
+    _input.textChanged.connect( _input, function(v){
+      if( valueIsJustSetted ){
+        valueIsJustSetted = false;
+        return;
+      }
+      onChange(v)
+    });
   }
 
   if( onReturnPressed ){
     _input.returnPressed.connect( _input, onReturnPressed );
   }
+
+  Object.defineProperty(_input, 'text2', {
+    get: function () {
+        return _input.text;
+    },
+    set: function (v) {
+      valueIsJustSetted = true;
+      _input.text = v;
+    }
+  });
 
   return _input;
 
@@ -213,8 +233,10 @@ pModal.prototype.addLabel = function( text, parent, width, height, align ){
   var label = new QLabel();
   label.setText( text );
   if(width){
-    label.setMinimumSize(width,10);
+    label.setMinimumSize(width,12);
     label.setMaximumSize(width,height);
+  }else{
+    label.minimumHeight = 12;
   }
   // if( width ) label.setFixedWidth( width );
   // if( height ) label.setFixedWidth( height );
@@ -242,6 +264,32 @@ pModal.prototype.addHLine = function( width, parent ){
   line.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed);
   line.setStyleSheet("background-color: #303030; border-top: 1px solid #303030; border-bottom: 1px solid #505050;");
   parent.mainLayout.addWidget(line,0,0);
+}
+
+
+//
+pModal.prototype.addDropdown = function( parent, items, onIndexChanged ){
+  var dropdown = new QComboBox();
+  var _items = items;
+  var itemsDataIsObject = false;
+  if( _items ) {
+    if( typeof _items[0] !== 'string'){
+      itemsDataIsObject = true;
+      _items = items.map(function(v){ return v.title; });
+    }
+    dropdown.addItems(_items);
+  }
+  if( parent ) parent.mainLayout.addWidget( dropdown, 0, 0 );
+  if( onIndexChanged ) dropdown["currentIndexChanged(int)"].connect(function(i){
+    if( _items ){
+      if( itemsDataIsObject ){
+        onIndexChanged( items[i].value );
+      }else onIndexChanged( _items[i] );
+    }
+  });
+  // dropdown.setCurrentIndex( 1 );
+  // dropdown.currentIndex
+  return dropdown;
 }
 
 

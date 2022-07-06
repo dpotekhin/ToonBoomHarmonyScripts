@@ -40,7 +40,7 @@ function PS_TraceAllAttributesOfNode( _node ){
         ;
 
         var linkedColumn = node.linkedColumn(_node, attrName );
-        if( linkedColumn ) output += '- column: "'+linkedColumn+'"\n';
+        if( linkedColumn ) output += '- column: "'+linkedColumn+'"\n- column Display Name: "'+column.getDisplayName(linkedColumn)+'"\n';
 
     });
 
