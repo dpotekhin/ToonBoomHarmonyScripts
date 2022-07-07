@@ -272,7 +272,7 @@ function getDrawingKeyframes(columnName, startFrame, onlyUnique) {
 //
 function clearKeys(_node, attrNames, startFrame, lastFrame) {
 
-    try {
+    // try {
         if (!attrNames) return;
 
         if (attrNames === true) {
@@ -280,7 +280,7 @@ function clearKeys(_node, attrNames, startFrame, lastFrame) {
         }
 
         if (typeof attrNames === 'string') attrNames = [attrNames];
-        MessageLog.trace('clearKeys: ' + _node + ' > ' + attrNames.join(', '));
+        // MessageLog.trace('clearKeys: ' + _node + ' > ' + attrNames.join(', '));
 
         attrNames.forEach(function(attrName) {
 
@@ -300,7 +300,7 @@ function clearKeys(_node, attrNames, startFrame, lastFrame) {
                 column.clearKeyFrame(columnName, fr);
             });
         });
-    } catch (err) { MessageLog.trace('Error: clearKeys: ' + err) }
+    // } catch (err) { MessageLog.trace('Error: clearKeys: ' + err) }
 
 }
 
