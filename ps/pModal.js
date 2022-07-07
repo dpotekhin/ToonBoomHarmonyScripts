@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.220706
+Version: 0.220707
 */
 
 function pModal( title, width, height, unique ){
@@ -78,7 +78,7 @@ pModal.prototype.show = function(){
 //
 pModal.prototype.addGroup = function( title, parent, layoutType, style ){
   var groupBox = new QGroupBox( title );
-  // groupBox.setFlat(true);
+  // groupBox.flat = true;
   var groupBoxLayout;
   switch( layoutType ){
     
@@ -106,9 +106,11 @@ pModal.prototype.addGroup = function( title, parent, layoutType, style ){
     }else{
       groupBox.setStyleSheet( style );
     }
+  }else{
+    this.setDefaulElementMargins( groupBox );
   }
 
-  parent.mainLayout.addWidget( groupBox, 0, 0 );
+  if( parent ) parent.mainLayout.addWidget( groupBox, 0, 0 );
 
   return groupBox;
 }
@@ -311,11 +313,19 @@ pModal.prototype.getParentWidget = function(){
 
 //
 pModal.prototype.removeElementMargins = function( group ){
-  group.setStyleSheet('QGroupBox{ border:none; margin: 0; padding: 0; }' );
+  // group.setStyleSheet('QGroupBox{ border:none; padding: 0; }');
+  // group.setStyleSheet('border-width:0; padding: 0; margin: 0;');
+  group.setStyleSheet('border-width:0; padding: 0; margin: 0;');
   ( group.mainLayout || group ).setContentsMargins(0,0,0,0);
 }
 
+pModal.prototype.setDefaulElementMargins = function( group ){
+  group.setStyleSheet('border-width:1; padding: 4 2; margin: 4;');
+  ( group.mainLayout || group ).setContentsMargins(2,4,0,0);
+  // ( group.mainLayout || group ).setContentsMargins(10,10,10,10);
+}
 
+//
 pModal.prototype.setFocusOnMainWindow = function(){
 
   var mainWindow = this.getParentWidget();
