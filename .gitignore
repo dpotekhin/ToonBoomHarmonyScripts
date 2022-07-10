@@ -5,6 +5,7 @@
 *.json
 *.xml
 /USR_*
+/SMF_*
 
 #
 !/ps/**

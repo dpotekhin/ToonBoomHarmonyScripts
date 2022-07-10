@@ -1,5 +1,5 @@
 // Author: Dima Potekhin (skinion.onn@gmail.com)
-// Version: 0.220707
+// Version: 0.220710
 
 //
 function getAttributes(attribute, attributeList) {
@@ -316,6 +316,15 @@ function getLinkedAttributeNames(_node) {
     return linkedAttrs;
 }
 
+
+//
+function renameNode( _node, _newName ){
+    var parent = node.parentNode(_node);
+    var newName = getValidNodeName(_newName);
+    if( ! node.rename(_node, newName ) ) return;
+    return parent + '/' + newName;
+}
+
 ///
 exports = {
     getAttributes: getAttributes,
@@ -331,4 +340,5 @@ exports = {
     unlinkAllInputs: unlinkAllInputs,
     getLinkedAttributeNames: getLinkedAttributeNames,
     clearKeys: clearKeys,
+    renameNode: renameNode,
 }
