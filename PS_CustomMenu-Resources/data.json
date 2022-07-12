@@ -28,6 +28,14 @@
                     "scriptFile": "PS_RotationEulerFilter.js",
                     "scriptFunction": "PS_RotationEulerFilter",
                     "icon": "~/PS_RotationEulerFilter.png"
+                },
+
+                {
+                    "name": "PS Expression Editor",
+                    "type": "script",
+                    "scriptFile": "PS_ExpressionEditor.js",
+                    "scriptFunction": "PS_ExpressionEditor",
+                    "icon": "~/PS_ExpressionEditor.png"
                 }
 
             ]
@@ -68,6 +76,14 @@
                     "scriptFile": "PS_RemoveCelDuplicates.js",
                     "scriptFunction": "PS_RemoveCelDuplicates",
                     "icon": "~/PS_RemoveCelDuplicates.png"
+                },
+
+                {
+                    "name": "PS Drawing tools",
+                    "type": "script",
+                    "scriptFile": "PS_DrawingTools.js",
+                    "scriptFunction": "PS_DrawingTools",
+                    "icon": "~/PS_DrawingTools.png"
                 }
 
             ]
@@ -194,6 +210,22 @@
                     "scriptFile": "PS_SetupSceneForRendering.js",
                     "scriptFunction": "PS_SetupSceneForRendering",
                     "icon": "~/PS_SetupSceneForRendering.png"
+                },
+
+                {
+                    "name": "PS Selection Sets",
+                    "type": "script",
+                    "scriptFile": "PS_SelectionSets.js",
+                    "scriptFunction": "PS_SelectionSets",
+                    "icon": "~/PS_SelectionSets.png"
+                },
+
+                {
+                    "name": "PS Scene Stats",
+                    "type": "script",
+                    "scriptFile": "PS_SceneStats.js",
+                    "scriptFunction": "PS_SceneStats",
+                    "icon": "~/PS_SceneStats.png"
                 }
 
             ]
@@ -254,12 +286,12 @@
             "type": "group",
             "items": [
 
-                 {
+                {
                     "name": "Toggle Marker",
                     "type": "script",
                     "scriptFile": "PS_Markers.js",
                     "scriptFunction": "PS_Markers",
-                    "scriptParams": [ 0 ],
+                    "scriptParams": [0],
                     "icon": "~/PS_Markers.png"
                 },
 
@@ -268,7 +300,7 @@
                     "type": "script",
                     "scriptFile": "PS_Markers.js",
                     "scriptFunction": "PS_Markers",
-                    "scriptParams": [ 1 ],
+                    "scriptParams": [1],
                     "icon": "@/PS_Markers-move-right.png"
                 },
 
@@ -277,7 +309,7 @@
                     "type": "script",
                     "scriptFile": "PS_Markers.js",
                     "scriptFunction": "PS_Markers",
-                    "scriptParams": [ 2 ],
+                    "scriptParams": [2],
                     "icon": "@/PS_Markers-move-left.png"
                 },
 
@@ -286,16 +318,16 @@
                     "type": "script",
                     "scriptFile": "PS_Markers.js",
                     "scriptFunction": "PS_Markers",
-                    "scriptParams": [ 4 ],
+                    "scriptParams": [4],
                     "icon": "@/PS_Markers-remove-all.png"
                 },
 
-                 {
+                {
                     "name": "Remove all Markers on the Right",
                     "type": "script",
                     "scriptFile": "PS_Markers.js",
                     "scriptFunction": "PS_Markers",
-                    "scriptParams": [ 5 ],
+                    "scriptParams": [5],
                     "icon": "@/PS_Markers-remove-right.png"
                 },
 
@@ -304,7 +336,7 @@
                     "type": "script",
                     "scriptFile": "PS_Markers.js",
                     "scriptFunction": "PS_Markers",
-                    "scriptParams": [ 6 ],
+                    "scriptParams": [6],
                     "icon": "@/PS_Markers-remove-left.png"
                 },
 
@@ -359,30 +391,6 @@
                 }
 
             ]
-        },
-
-        {
-            "name": "PS Expression Editor",
-            "type": "script",
-            "scriptFile": "PS_ExpressionEditor.js",
-            "scriptFunction": "PS_ExpressionEditor",
-            "icon": "~/PS_ExpressionEditor.png"
-        },
-
-        {
-            "name": "PS Selection Sets",
-            "type": "script",
-            "scriptFile": "PS_SelectionSets.js",
-            "scriptFunction": "PS_SelectionSets",
-            "icon": "~/PS_SelectionSets.png"
-        },
-
-        {
-            "name": "PS Drawing tools",
-            "type": "script",
-            "scriptFile": "PS_DrawingTools.js",
-            "scriptFunction": "PS_DrawingTools",
-            "icon": "~/PS_DrawingTools.png"
         }
 
     ]
