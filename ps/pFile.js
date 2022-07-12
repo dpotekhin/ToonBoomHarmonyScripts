@@ -9,7 +9,7 @@ function pFile(){
 
 //
 pFile.getFileNameFromPath = function(path){
-  path = path.split('/');
+  path = path.split(/\/|\\/);
   var fileName = path.pop();
   path = path.join('/');
   return {path:path, fileName:fileName};

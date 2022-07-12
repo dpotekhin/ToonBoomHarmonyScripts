@@ -1,5 +1,5 @@
 // Author: Dima Potekhin (skinion.onn@gmail.com)
-// Version: 0.220615
+// Version: 0.220710
 
 //
 function getAttributes(attribute, attributeList) {
@@ -14,11 +14,16 @@ function getAttributes(attribute, attributeList) {
 
 
 //
-function getFullAttributeList(nodePath) {
+function getFullAttributeList(nodePath, frame, onlyNames) {
     var attributeList = [];
-    var topAttributeList = node.getAttrList(nodePath, 1);
+    var topAttributeList = node.getAttrList(nodePath, frame);
     for (var i = 0; i < topAttributeList.length; ++i) {
         getAttributes(topAttributeList[i], attributeList);
+    }
+    if (onlyNames) {
+        attributeList = attributeList.map(function(attr) {
+            return attr.fullKeyword();
+        });
     }
     return attributeList;
 }
@@ -35,6 +40,16 @@ function getAttributeValue(attr) {
             return attr.textValue()
     }
 }
+
+
+//
+function renameNode(_node, _newName) {
+    var parent = node.parentNode(_node);
+    var newName = getUnusedName(parent + '/'+getValidNodeName(_newName)).split('/').pop();
+    if (!node.rename(_node, newName)) return;
+    return parent + '/' + newName;
+}
+
 
 //
 function getUnusedName(_node, nameOnly) {
@@ -85,7 +100,10 @@ function getNodesBounds(_nodes) {
             top: 999999
         }
     };
-
+    if (typeof _nodes === 'string') {
+        if (node.isGroup(_nodes)) _nodes = node.subNodes(_nodes);
+        else _nodes = [_nodes];
+    }
     _nodes.forEach(function(_node) {
         var x = node.coordX(_node);
         var y = node.coordY(_node);
@@ -123,6 +141,43 @@ function createNode(parentNode, name, type, x, y, src, dest) {
 
 
 //
+function unlinkAllInputs(_node) {
+
+    var numInput = node.numberOfInputPorts(_node);
+    for (var i = numInput - 1; i >= 0; i--) {
+        if (node.isLinked(_node, i)) node.unlink(_node, i);
+    }
+}
+
+//
+function unlinkAllOutputs(_node) {
+
+    // MessageLog.trace('unlinkAllOutputs: '+_node+' > '+node.type(_node) );
+    var numOutputPorts = node.numberOfOutputPorts(_node);
+
+    for (var i = numOutputPorts - 1; i >= 0; i--) {
+
+        var numLinks = node.numberOfOutputLinks(_node, i);
+
+        for (var j = numLinks - 1; j >= 0; j--) {
+            var dstNode = node.dstNode(_node, i, j)
+
+            var numInput = node.numberOfInputPorts(dstNode);
+            for (var di = numInput - 1; di >= 0; di--) {
+                var source = node.srcNode(dstNode, di);
+                if (source === _node) {
+                    node.unlink(dstNode, di);
+                    continue;
+                }
+            }
+
+        }
+
+    }
+
+}
+
+//
 function getOutputNodes(_node) {
     var numOutput = node.numberOfOutputPorts(_node);
     // MessageLog.trace('>>>>'+numOutput);
@@ -138,7 +193,7 @@ function getOutputNodes(_node) {
 }
 
 //
-function getAllChildNodes( nodes, typeFilter, eachNodeCb ) {
+function getAllChildNodes(nodes, typeFilter, eachNodeCb) {
 
     if (typeof nodes === 'string') nodes = [nodes];
 
@@ -160,7 +215,7 @@ function getAllChildNodes( nodes, typeFilter, eachNodeCb ) {
         if (!_typeFilter || nodeType.match(_typeFilter)) {
             if (_nodes.indexOf(_node) === -1) {
                 _nodes.push(_node);
-                if( eachNodeCb ) eachNodeCb( _node );
+                if (eachNodeCb) eachNodeCb(_node);
             }
         }
 
@@ -254,10 +309,58 @@ function getDrawingKeyframes(columnName, startFrame, onlyUnique) {
 }
 
 
+//
+function clearKeys(_node, attrNames, startFrame, lastFrame) {
+
+    // try {
+    if (!attrNames) return;
+
+    if (attrNames === true) {
+        attrNames = getLinkedAttributeNames(_node);
+    }
+
+    if (typeof attrNames === 'string') attrNames = [attrNames];
+    // MessageLog.trace('clearKeys: ' + _node + ' > ' + attrNames.join(', '));
+
+    attrNames.forEach(function(attrName) {
+
+        var columnName = node.linkedColumn(_node, attrName);
+        if (!columnName || column.type(columnName) !== 'BEZIER') return;
+        var n = func.numberOfPoints(columnName);
+
+        var keysToRemove = [];
+
+        for (var i = 0; i < n; i++) {
+            var fr = func.pointX(columnName, i);
+            if (fr >= startFrame && fr <= lastFrame) keysToRemove.push(fr);
+            // MessageLog.trace(i + ')' + fr + ' > ' + func.pointConstSeg(columnName, i));
+        }
+
+        keysToRemove.forEach(function(fr) {
+            column.clearKeyFrame(columnName, fr);
+        });
+    });
+    // } catch (err) { MessageLog.trace('Error: clearKeys: ' + err) }
+
+}
+
+
+//
+function getLinkedAttributeNames(_node) {
+    var linkedAttrs = [];
+    getFullAttributeList(_node, 1, true).forEach(function(attrName, i) {
+        var _column = node.linkedColumn(_node, attrName);
+        // MessageLog.trace( i+') '+attrName+', '+_column  );
+        if (_column) linkedAttrs.push(attrName);
+    });
+    return linkedAttrs;
+}
+
 ///
 exports = {
     getAttributes: getAttributes,
     getFullAttributeList: getFullAttributeList,
+    renameNode: renameNode,
     getUnusedName: getUnusedName,
     getValidNodeName: getValidNodeName,
     getNodesBounds: getNodesBounds,
@@ -266,4 +369,8 @@ exports = {
     getOutputNodes: getOutputNodes,
     getAllChildNodes: getAllChildNodes,
     getLayerByDrawing: getLayerByDrawing,
+    unlinkAllInputs: unlinkAllInputs,
+    getLinkedAttributeNames: getLinkedAttributeNames,
+    clearKeys: clearKeys,
+    unlinkAllOutputs: unlinkAllOutputs,
 }

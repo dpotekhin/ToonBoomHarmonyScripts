@@ -85,7 +85,7 @@ exports = function(options) {
 
         if (options.all || options.general) {
             var GeneralStats = require(fileMapper.toNativePath(specialFolders.userScripts + "/PS_SceneStats-Resources/GeneralStats.js"));
-            tabs.addTab(new GeneralStats(selectedNodes, undefined, storage, contentMaxHeight), 'General');
+            tabs.addTab(new GeneralStats(selectedNodes, modal, storage, contentMaxHeight), 'General');
             tabsAdded++;
         }
 
