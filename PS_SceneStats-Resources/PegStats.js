@@ -184,8 +184,10 @@ exports = function( selectedNodes, modal, storage, contentMaxHeight ){
 			onClick: storage.defaultCellClick,
 		},
 
-	]), undefined, contentMaxHeight );
+	]), modal, contentMaxHeight );
 	
+	tableView.sortingEnabled = true;
+
 	return tableView;
 
 }

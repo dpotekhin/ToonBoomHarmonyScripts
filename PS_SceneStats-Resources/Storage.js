@@ -76,7 +76,7 @@ var storage = {
     getBaseItemData: function(nodeData, i) {
         var n = nodeData.node;
         return Object.assign(nodeData, {
-            index: i + 1,
+            index: Utils.getZeroLeadingString( i + 1, 3 ),
             path: n
         });
     },
@@ -84,6 +84,11 @@ var storage = {
     getBaseTableRows: function() {
 
         return [
+
+            {
+                key: 'index',
+                header: '#'
+            },
 
             {
                 key: 'color',
@@ -197,8 +202,8 @@ var storage = {
         selectedNodes.forEach(function(_node) {
 
             if (!storage.nodes[_node]) {
-            	
-            	storage.paresNodeData( _node );
+
+                storage.paresNodeData(_node);
 
                 NodeUtils.getAllChildNodes(_node, undefined, function(__node) {
                     storage.paresNodeData(__node);
@@ -245,7 +250,7 @@ var storage = {
         );
 
     }
-    
+
 
 };
 
