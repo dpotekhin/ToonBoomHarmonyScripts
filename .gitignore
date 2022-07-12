@@ -21,3 +21,4 @@ packages/*
 !/ps_build/**
 *.js.bak
 to-*.bat
+open-YD-SMF.bat

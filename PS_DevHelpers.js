@@ -44,7 +44,7 @@ function PS_TraceAllAttributesOfNode( _node ){
 
     });
 
-    MessageLog.trace( 'Attributes of node "'+_node+'" ('+node.type(_node)+') :\n'+output );
+    MessageLog.trace( 'Attributes of node "'+_node+'" ('+node.type(_node)+') :\nX: '+node.coordX(_node)+'\nY: '+node.coordY(_node)+'\nWIDTH: '+node.width(_node)+'\nHEIGHT: '+node.height(_node)+'\n'+output );
 }
 
 
