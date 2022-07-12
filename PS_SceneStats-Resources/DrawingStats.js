@@ -149,6 +149,8 @@ exports = function( selectedNodes, modal, storage, contentMaxHeight ){
 
 	]), undefined, contentMaxHeight );
 	
+	tableView.sortingEnabled = true;
+
 	return tableView;
 
 }
