@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.1
+Version: 0.220713
 */
 
 //
@@ -296,6 +296,15 @@ Math.signp = function(v) {
 }
 
 //
+function filterUnique(arr) {
+    var _arr = []
+    arr.forEach(function(v) {
+        if (_arr.indexOf(v) === -1) _arr.push(v);
+    });
+    return _arr;
+}
+
+//
 exports = {
     gridWidth: gridWidth,
     getTimestamp: getTimestamp,
@@ -317,4 +326,5 @@ exports = {
     getSoundColumns: getSoundColumns,
     getUnusedColumnName: getUnusedColumnName,
     getNumber: getNumber,
+    filterUnique: filterUnique,
 };

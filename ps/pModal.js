@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.220707
+Version: 0.220713
 */
 
 function pModal( title, width, height, unique ){
@@ -140,7 +140,7 @@ pModal.prototype.addNumberInput = function( labelText, parent, width, height, de
         valueIsJustSetted = false;
         return;
       }
-      onChange(v)
+      onChange(Number(v));
     });
   }
 
@@ -231,7 +231,7 @@ pModal.prototype.addLineEdit = function( text, parent, width, height, onChanged,
 
 
 //
-pModal.prototype.addLabel = function( text, parent, width, height, align ){
+pModal.prototype.addLabel = function( text, parent, width, height, align, removeElementMargins ){
   var label = new QLabel();
   label.setText( text );
   if(width){
@@ -244,6 +244,7 @@ pModal.prototype.addLabel = function( text, parent, width, height, align ){
   // if( height ) label.setFixedWidth( height );
   if( align ) label.alignment = align;
   parent.mainLayout.addWidget( label, 0, 0 );
+  if( removeElementMargins ) this.removeElementMargins(label);
   return label;
 }
 
@@ -310,18 +311,52 @@ pModal.prototype.getParentWidget = function(){
 
 };
 
+//
+function parseStyleAttributes(str){
+  var attrs = {};
+  str.split(';').forEach(function(v){
+    if( !v ) return;
+    var attrData = v.split(':');
+    attrs[attrData[0].trim()] = attrData[1].trim();
+  });
+  return attrs;
+}
+
+pModal.prototype.changeStyleSheet = function( element, newStyle ){
+  var oldStyle = element.styleSheet;
+  if( !oldStyle ) {
+    element.setStyleSheet(newStyle);
+    return;
+  }
+  var style = oldStyle;
+  var elementStyleClear = style.match(/[{?]([^}]+)}/gi);
+  if( elementStyleClear ){
+    elementStyleClear = elementStyleClear[0].replace(/{|}/gi,'');
+    //console.log(elementStyleClear);
+    style = elementStyleClear;
+  }
+  var oldStyleAttrs = parseStyleAttributes(style);
+  var newStyleAttrs = parseStyleAttributes(newStyle);
+  Object.keys(newStyleAttrs).forEach(function(attrName){
+    if( newStyleAttrs[attrName] === '--' ) delete oldStyleAttrs[attrName];
+    else oldStyleAttrs[attrName] = newStyleAttrs[attrName];
+  });
+  style = Object.keys(oldStyleAttrs).map(function(attrName){ return attrName+': '+oldStyleAttrs[attrName]; }).join('; ');
+  element.setStyleSheet( elementStyleClear ? oldStyle.replace(elementStyleClear, style) : style );
+}
+
 
 //
 pModal.prototype.removeElementMargins = function( group ){
   // group.setStyleSheet('QGroupBox{ border:none; padding: 0; }');
   // group.setStyleSheet('border-width:0; padding: 0; margin: 0;');
   group.setStyleSheet('border-width:0; padding: 0; margin: 0;');
-  ( group.mainLayout || group ).setContentsMargins(0,0,0,0);
+  ( group.mainLayout || group ).setContentsMargins(4,2,4,0);
 }
 
 pModal.prototype.setDefaulElementMargins = function( group ){
-  group.setStyleSheet('border-width:1; padding: 4 2; margin: 4;');
-  ( group.mainLayout || group ).setContentsMargins(2,4,0,0);
+  group.setStyleSheet('border-width:1; padding: 4 2; margin: 4 0 0 0;');
+  ( group.mainLayout || group ).setContentsMargins(2,4,2,2);
   // ( group.mainLayout || group ).setContentsMargins(10,10,10,10);
 }
 
