@@ -9,7 +9,7 @@ var NodeUtils = require(fileMapper.toNativePath(specialFolders.userScripts + "/p
 var TableView = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/TableView.js"));
 
 //
-exports = function( selectedNodes, modal, storage, contentMaxHeight ) {
+exports = function(selectedNodes, modal, storage, contentMaxHeight) {
 
     // Collect Data
     var items = storage.getAllChildNodes(selectedNodes, 'COMPOSITE');
@@ -18,8 +18,8 @@ exports = function( selectedNodes, modal, storage, contentMaxHeight ) {
     items = items
         .map(function(nodeData, i) {
 
-            var itemData = Object.assign( storage.getBaseItemData(nodeData,i), {
-            	mode: node.getTextAttr( nodeData.node, 1, 'COMPOSITE_MODE' )
+            var itemData = Object.assign(storage.getBaseItemData(nodeData, i), {
+                mode: node.getTextAttr(nodeData.node, 1, 'COMPOSITE_MODE')
             });
 
             return itemData;
@@ -33,15 +33,29 @@ exports = function( selectedNodes, modal, storage, contentMaxHeight ) {
     // MessageLog.trace( JSON.stringify( items, true, '  ') );
 
     // Group
-    var style = 'QGroupBox{ position: relative; border: none; padding-top:0; padding-bottom: 0; border-radius: 0;}';
+    // var style = 'QGroupBox{ position: relative; border: none; padding-top:0; padding-bottom: 0; border-radius: 0;}';
     // var uiGroup = modal.addGroup('COMPOSITES ('+items.length+')', modal.ui, true, style);
-    
+
+    // Check repeated input connections of the same node
+    items.forEach(function(item) {
+        var numInput = node.numberOfInputPorts(item.node);
+        var srcNodes = {};
+        for (var i = 0; i < numInput; i++) {
+            var srcNode = node.srcNode(item.node, i);
+            if( !srcNodes[srcNode] ) srcNodes[srcNode] = 1;
+            else srcNodes[srcNode]++;
+        }
+        item.repeatedInputConnections = Object.keys(srcNodes).filter(function(srcNode){
+            return srcNodes[srcNode] > 1;
+        });
+    });
+
     //
     var bgColors = {
-    	'Pass Through': storage.bgSuccess,
-    	'As Bitmap': storage.bgWarning,
-    	'As Seamless Bitmap': storage.bgInfo,
-    	'As Vector': storage.bgStrange,
+        'Pass Through': storage.bgSuccess,
+        'As Bitmap': storage.bgWarning,
+        'As Seamless Bitmap': storage.bgInfo,
+        'As Vector': storage.bgStrange,
     };
 
     //
@@ -56,22 +70,37 @@ exports = function( selectedNodes, modal, storage, contentMaxHeight ) {
         {
             key: 'type',
             header: 'Type',
-            getBg: function(v,data) {
+            getBg: function(v, data) {
                 return typeBg[v];
             },
             onClick: storage.defaultCellClick
         },
 
-		{
-			key: 'mode',
-			header: 'Mode',
-			getBg: function(v,data) {
-				return bgColors[v];
-			},
-			onClick: storage.defaultCellClick
-		}
+        {
+            key: 'mode',
+            header: 'Mode',
+            getBg: function(v, data) {
+                return bgColors[v];
+            },
+            onClick: storage.defaultCellClick
+        },
 
-    ]), undefined, contentMaxHeight ); 
+        {
+            key: 'repeatedInputConnections',
+            header: 'RIC',
+            toolTip: function(v,data) {
+                return 'Repeated Input Connections:\n'+v.map(function(v){ return '- '+v;}).join('\n');
+            },
+            getValue: function(v,data) {
+                return v.length ? 'Yes' : 'No';
+            },
+            getBg: storage.bgSuccessOrFailInverted,
+            onClick: storage.defaultCellClick
+        },
+
+
+
+    ]), undefined, contentMaxHeight);
 
     return tableView;
 
