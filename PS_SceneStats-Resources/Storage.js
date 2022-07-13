@@ -224,7 +224,7 @@ var storage = {
 
     nodesByType: {},
 
-    getAllChildNodes: function(selectedNodes, types) {
+    getAllChildNodes: function(selectedNodes, typesOrFilterFunction) {
 
         if (typeof selectedNodes !== 'string') selectedNodes = [selectedNodes];
 
@@ -246,9 +246,25 @@ var storage = {
 
         var result = [];
 
-        if (types) {
-            if (typeof types === 'string') types = [types];
-            types.forEach(function(_type) { if (storage.nodesByType[_type]) result = result.concat(storage.nodesByType[_type]); });
+        if (typesOrFilterFunction) {
+
+            if (typeof typesOrFilterFunction === 'string') typesOrFilterFunction = [typesOrFilterFunction];
+            if (Array.isArray(typesOrFilterFunction)) {
+
+                typesOrFilterFunction.forEach(function(_type) { if (storage.nodesByType[_type]) result = result.concat(storage.nodesByType[_type]); });
+
+            } else {
+
+                Object.keys(storage.nodes).forEach(function(_node) {
+                    var nodeData = storage.nodes[_node];
+                    if (typesOrFilterFunction(nodeData)) result.push(nodeData);
+                });
+            }
+
+        } else {
+
+            result = Object.keys(storage.nodes).map(function(_node) { return storage.nodes[_node] });
+
         }
 
         return result;
