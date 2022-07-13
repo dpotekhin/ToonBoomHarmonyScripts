@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.220629
+Version: 0.220713
 */
 
 //
@@ -130,6 +130,32 @@ exports = function( selectedNodes, modal, storage, contentMaxHeight ){
 		},
 
 		{
+			key: 'drawingTimings',
+			header: 'DT',
+			toolTip: function(v,data) {
+				return 'Drawing Timings:\n'+v.map(function(v){ return '- '+v;}).join('\n');
+			},
+			getValue: function(v,data) {
+				return v.length;
+			},
+			getBg: storage.bgFailOnly,
+			onClick: storage.defaultCellClick,
+		},
+
+		{
+			key: 'usedDrawingTimings',
+			header: 'UDT',
+			toolTip: function(v,data) {
+				return 'Used Drawing Timings:\n'+v.map(function(v){ return '- '+v;}).join('\n');
+			},
+			getValue: function(v,data) {
+				return v.length;
+			},
+			getBg: storage.bgFailOnly,
+			onClick: storage.defaultCellClick,
+		},
+
+		{
 			key: 'adjustPencilThickness',
 			header: 'PT',
 			toolTip: function(v,data){ return data.adjustPencilThicknessToolTip },
@@ -149,7 +175,7 @@ exports = function( selectedNodes, modal, storage, contentMaxHeight ){
 
 	]), undefined, contentMaxHeight );
 	
-	tableView.sortingEnabled = true;
+	// tableView.sortingEnabled = true;
 
 	return tableView;
 

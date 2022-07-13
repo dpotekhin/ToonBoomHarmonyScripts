@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.220704
+Version: 0.220713
 */
 var Utils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/Utils.js"));
 var SelectionUtils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/SelectionUtils.js"));
@@ -12,10 +12,35 @@ function checkNull(v1, v2) {
     return v2;
 }
 
+function checkByValueType(val, equalTo) {
+
+    if (!val) return equalTo !== undefined ? val === equalTo : false;
+
+    if (typeof val === 'string') {
+        // console.log('string');
+        return equalTo !== undefined ? val === equalTo : !!val;
+    }
+    // Array
+    if (Array.isArray(val)) {
+        // console.log('array');
+        return equalTo !== undefined ? val.length === equalTo : !!val.length;
+    }
+
+    // Number
+    if (!isNaN(val)) {
+        // console.log('number');
+        return equalTo !== undefined ? val === equalTo : !!val;
+    }
+
+    return false
+
+}
+
 ///
 var storage = {
 
     checkNull: checkNull,
+    checkByValueType: checkByValueType,
     returnEmpty: function() {},
 
     bgSuccess: new QBrush(new QColor('#004000')),
@@ -24,17 +49,18 @@ var storage = {
     bgWarning: new QBrush(new QColor('#404000')),
     bgStrange: new QBrush(new QColor('#444400')),
     bgInfo: new QBrush(new QColor('#000044')),
-    bgSuccessOrFail: function(v) { return checkNull(v, v ? storage.bgSuccess : storage.bgFail); },
-    bgSuccessOrFailInverted: function(v) { return checkNull(v, !v ? storage.bgSuccess : storage.bgFail); },
-    bgSuccessYellow: function(v) { return checkNull(v, v ? storage.bgYellow : undefined); },
-    bgFailYellow: function(v) { return checkNull(v, v ? storage.bgSuccess : storage.bgYellow); },
-    bgEmpty: function(v) { return checkNull(v, !v || v == 0 ? storage.bgFail : undefined); },
-    bgSuccessIfOne: function(v) { return checkNull(v, v === 1 ? storage.bgSuccess : storage.bgYellow); },
+    bgSuccessOrFail: function(v) { return checkNull(v, checkByValueType(v) ? storage.bgSuccess : storage.bgFail); },
+    bgFailOnly: function(v) { return checkNull(v, checkByValueType(v) ? undefined : storage.bgFail); },
+    bgSuccessOrFailInverted: function(v) { return checkNull(v, !checkByValueType(v) ? storage.bgSuccess : storage.bgFail); },
+    bgSuccessYellow: function(v) { return checkNull(v, checkByValueType(v) ? storage.bgYellow : undefined); },
+    bgFailYellow: function(v) { return checkNull(v, checkByValueType(v) ? storage.bgSuccess : storage.bgYellow); },
+    bgEmpty: function(v) { return checkNull(v, !checkByValueType(v) || checkByValueType(v, 0) ? storage.bgFail : undefined); },
+    bgSuccessIfOne: function(v) { return checkNull(v, checkByValueType(v, 1) ? storage.bgSuccess : storage.bgYellow); },
 
-    outputYesNo: function(v) { return checkNull(v, v ? 'Yes' : 'No'); },
-    outputYesNoInverted: function(v) { return checkNull(v, !v ? 'Yes' : 'No'); },
-    outputValueOrNo: function(v) { return checkNull(v, v ? v : 'No'); },
-    outputWarning: function(v) { return checkNull(v, v ? '!' : ''); },
+    outputYesNo: function(v) { return checkNull(v, checkByValueType(v) ? 'Yes' : 'No'); },
+    outputYesNoInverted: function(v) { return checkNull(v, !checkByValueType(v) ? 'Yes' : 'No'); },
+    outputValueOrNo: function(v) { return checkNull(v, checkByValueType(v) ? v : 'No'); },
+    outputWarning: function(v) { return checkNull(v, checkByValueType(v) ? '!' : ''); },
     outputString: function(v) { return checkNull(v, v) },
     outputNumber: function(v) { return checkNull(v, ~~v) },
     outputPointOne: function(v) { return checkNull(v, ~~(v * 10) / 10); },
@@ -44,9 +70,9 @@ var storage = {
     currentFrame: frame.current(),
 
     defaultCellClick: function(data) {
+        // MessageLog.trace('defaultCellClick:' + JSON.stringify(data, true, '  '));
 
         if (KeyModifiers.IsControlPressed()) {
-
             storage.selectNode(data);
             SelectionUtils.focusOnSelectedNode();
             return;
@@ -76,7 +102,7 @@ var storage = {
     getBaseItemData: function(nodeData, i) {
         var n = nodeData.node;
         return Object.assign(nodeData, {
-            index: Utils.getZeroLeadingString( i + 1, 3 ),
+            index: Utils.getZeroLeadingString(i + 1, 3),
             path: n
         });
     },
@@ -123,6 +149,9 @@ var storage = {
                 toolTip: function(v, data) {
                     return data.DSCount === 0 || v.toLowerCase().match(/^drawing/) || data.hasNumberEnding ? 'Has naming issues' : '';
                 },
+                // getValue: function(v, data) {
+                //     return data.index + ':' + v;
+                // },
                 onClick: storage.defaultCellClick,
 
             },
@@ -203,10 +232,10 @@ var storage = {
 
             if (!storage.nodes[_node]) {
 
-                storage.paresNodeData(_node);
+                storage.parseNodeData(_node);
 
                 NodeUtils.getAllChildNodes(_node, undefined, function(__node) {
-                    storage.paresNodeData(__node);
+                    storage.parseNodeData(__node);
                 });
 
             }
@@ -227,7 +256,7 @@ var storage = {
     },
 
 
-    paresNodeData: function(_node) {
+    parseNodeData: function(_node) {
 
         if (storage.nodes[_node]) return;
 
@@ -235,21 +264,48 @@ var storage = {
         if (!storage.nodesByType[nodeType]) storage.nodesByType[nodeType] = [];
 
         var name = node.getName(_node);
-        storage.nodesByType[nodeType].push(
-            storage.nodes[_node] = {
-                node: _node,
-                type: nodeType,
-                name: name,
-                parent: node.parentNode(_node),
-                enabled: node.getEnable(_node),
-                color: Utils.rgbToHex(node.getColor(_node), true),
-                srcNode: storage.hasAnySrc(_node),
-                destNode: storage.hasAnyDest(_node),
-                hasNumberEnding: name.match(/_\d\d?$/),
-            }
-        );
 
-    }
+        var nodeData = storage.nodes[_node] = {
+            node: _node,
+            type: nodeType,
+            name: name,
+            parent: node.parentNode(_node),
+            enabled: node.getEnable(_node),
+            color: Utils.rgbToHex(node.getColor(_node), true),
+            srcNode: storage.hasAnySrc(_node),
+            destNode: storage.hasAnyDest(_node),
+            hasNumberEnding: name.match(/_\d\d?$/),
+        };
+
+        if (nodeType === 'READ') {
+
+            nodeData.elementId = node.getElementId(_node);
+            nodeData.drawingColumn = node.linkedColumn(_node, 'DRAWING.ELEMENT');
+            nodeData.drawingTimings = column.getDrawingTimings(nodeData.drawingColumn);
+
+            nodeData.usedDrawingTimings = [];
+            for (var f = 1; f <= frame.numberOf(); f++) {
+                var entry = column.getEntry(nodeData.drawingColumn, 1, f)
+                if (entry !== '' && nodeData.usedDrawingTimings.indexOf(entry) === -1) nodeData.usedDrawingTimings.push(entry);
+            }
+
+        }
+        storage.nodesByType[nodeType].push(nodeData);
+
+    },
+
+
+    // getAllDrawingElements: function(selectedNodes) {
+
+    //     var elements = [];
+
+    //     NodeUtils.getAllChildNodes(selectedNodes, 'READ').forEach(function(_node) {
+    //         var elementId = node.getElementId(_node);
+    //         if (elements.indexOf)
+    //     });
+
+    // }
+
 
 
 };

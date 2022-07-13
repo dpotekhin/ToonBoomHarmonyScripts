@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.220630
+Version: 0.220713
 */
 
 //
@@ -44,6 +44,14 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
 
     }
 
+    var drawingElements = [];
+    var usedUniqueDrawingSubstitutions = 0;
+    storage.getAllChildNodes(selectedNodes, 'READ').forEach(function(nodeData) {
+        if (drawingElements.indexOf(nodeData.elementId) !== -1) return;
+        drawingElements.push(nodeData.elementId);
+        usedUniqueDrawingSubstitutions += nodeData.usedDrawingTimings.length;
+    });
+
     // Generate the Table
     var items = [
 
@@ -56,6 +64,16 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
         {
             key: "Drawings",
             value: storage.getAllChildNodes(selectedNodes, 'READ').length,
+        },
+
+        {
+            key: "Used Unique Drawing Elements",
+            value: drawingElements.length,
+        },
+
+        {
+            key: "Used Unique Drawing Substitutions",
+            value: usedUniqueDrawingSubstitutions,
         },
 
         {
@@ -87,7 +105,7 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
     var mainGroup = modal.addGroup('', undefined, false, true);
 
     modal.addButton('Toggle Performance Report', mainGroup, 150, 30, '', function() {
-        preferences.setBool('ADVANCED_ENABLE_PERFORMANCE_REPORT', !preferences.getBool('ADVANCED_ENABLE_PERFORMANCE_REPORT', true) );
+        preferences.setBool('ADVANCED_ENABLE_PERFORMANCE_REPORT', !preferences.getBool('ADVANCED_ENABLE_PERFORMANCE_REPORT', true));
     });
 
     //
@@ -104,7 +122,8 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
             getBg: function(v, data) { return data.bg !== undefined ? data.bg : ''; }
         }
 
-    ], mainGroup, contentMaxHeight - 40 );
+    ], mainGroup, contentMaxHeight - 40);
+    tableView.maximumWidth = 260;
 
     // 
 
