@@ -186,7 +186,7 @@ exports = function( selectedNodes, modal, storage, contentMaxHeight ){
 
 	]), modal, contentMaxHeight );
 	
-	tableView.sortingEnabled = true;
+	// tableView.sortingEnabled = true;
 
 	return tableView;
 

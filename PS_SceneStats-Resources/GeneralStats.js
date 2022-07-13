@@ -45,12 +45,18 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
     }
 
     var drawingElements = [];
-    var usedUniqueDrawingSubstitutions = 0;
+    var drawingSubstitutions = 0;
+    var usedDrawingSubstitutions = 0;
+    
     storage.getAllChildNodes(selectedNodes, 'READ').forEach(function(nodeData) {
         if (drawingElements.indexOf(nodeData.elementId) !== -1) return;
         drawingElements.push(nodeData.elementId);
-        usedUniqueDrawingSubstitutions += nodeData.usedDrawingTimings.length;
+        drawingSubstitutions += nodeData.drawingTimings.length;
+        usedDrawingSubstitutions += nodeData.usedDrawingTimings.length;
     });
+
+    
+
 
     // Generate the Table
     var items = [
@@ -67,13 +73,18 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
         },
 
         {
-            key: "Used Unique Drawing Elements",
+            key: "Used Drawing Elements",
             value: drawingElements.length,
         },
 
         {
-            key: "Used Unique Drawing Substitutions",
-            value: usedUniqueDrawingSubstitutions,
+            key: "Total Drawing Substitutions",
+            value: drawingSubstitutions,
+        },
+
+        {
+            key: "Used Drawing Substitutions",
+            value: usedDrawingSubstitutions,
         },
 
         {
