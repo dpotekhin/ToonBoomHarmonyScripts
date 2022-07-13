@@ -174,14 +174,14 @@ var storage = {
                 onClick: storage.defaultCellClick,
             },
 
-            {
-                key: 'hasNumberEnding',
-                header: 'NUM',
-                toolTip: 'Has Number Ending',
-                getValue: storage.outputYesNo,
-                getBg: storage.bgSuccessOrFailInverted,
-                onClick: storage.defaultCellClick,
-            },
+            // {
+            //     key: 'hasNumberEnding',
+            //     header: 'NUM',
+            //     toolTip: 'Has Number Ending',
+            //     getValue: storage.outputYesNo,
+            //     getBg: storage.bgSuccessOrFailInverted,
+            //     onClick: storage.defaultCellClick,
+            // },
 
         ];
 
