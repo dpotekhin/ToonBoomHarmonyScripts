@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.220630
+Version: 0.220713
 */
 
 var pModal = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/pModal.js"));
@@ -41,7 +41,7 @@ exports = function(options) {
 
     // Main Group
     // var mainGroup = modal.addGroup( '', ui, true, hGroupStyle);
-  
+
 
     /// ------------------------------------------------
     var tabsAdded = 0;
@@ -81,6 +81,12 @@ exports = function(options) {
                 tabs.addTab(palettesData.colors.tableView, 'Colors');
                 tabsAdded++;
             }
+        }
+
+        if (options.all || options.unconnectedNodes) {
+            var unconnectedNodesStats = require(fileMapper.toNativePath(specialFolders.userScripts + "/PS_SceneStats-Resources/UnconnectedNodesStats.js"));
+            tabs.addTab(new unconnectedNodesStats(selectedNodes, undefined, storage, contentMaxHeight), 'Unconnected Nodes');
+            tabsAdded++;
         }
 
         if (options.all || options.general) {
