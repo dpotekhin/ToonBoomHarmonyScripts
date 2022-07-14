@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.220713
+Version: 0.220714
 */
 
 //
@@ -176,6 +176,20 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
             toolTip: 'Preserve Line Thickness',
             getBg: storage.bgSuccessYellow,
             getValue: storage.outputYesNo,
+            onClick: storage.defaultCellClick,
+        },
+
+        {
+            key: 'usedColors',
+            header: 'UC',
+            toolTip: function(v) {
+                return 'Used Colors:\n' + v.map(function(vv) {
+                    var colorItem = storage.colorsById[vv];
+                    return '- ' + colorItem ? colorItem.paletteName + '/' + colorItem.colorName : vv;
+                }).join('\n');
+            },
+            getBg: storage.bgFailYellow,
+            getValue: function(v) { return v.length; },
             onClick: storage.defaultCellClick,
         }
 

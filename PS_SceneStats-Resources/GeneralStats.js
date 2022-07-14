@@ -115,6 +115,7 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
     // Buttons
     var buttonsGroup = modal.addGroup('', mainGroup, true, true);
 
+
     // Toggle Performance Report
     modal.addButton('Toggle Performance Report', buttonsGroup, 150, 30, '', function() {
         preferences.setBool('ADVANCED_ENABLE_PERFORMANCE_REPORT', !preferences.getBool('ADVANCED_ENABLE_PERFORMANCE_REPORT', true));
@@ -141,7 +142,7 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
         function renderFinished() {
             // MessageBox.information("Render Finished");
         }
-        
+
         render.renderFinished.connect(renderFinished);
         render.frameReady.connect(frameReady);
 
@@ -149,11 +150,11 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
         render.setWhiteBackground(true);
         var currentFrame = frame.current();
 
-        testRenderButton.text = 'Test Render ' + currentFrame + 'f in progress...'
+        testRenderButton.text = 'Render ' + currentFrame + 'f in progress...'
         var startTime = Date.now();
         render.renderScene(currentFrame, currentFrame);
         var renderTime = (Date.now() - startTime) / 1000;
-        testRenderButton.text = 'Test Render (' + renderTime.toFixed(2) + 's)';
+        testRenderButton.text = 'Test Render: ' + renderTime.toFixed(2) + 's';
 
         render.renderFinished.disconnect(renderFinished);
         render.frameReady.disconnect(frameReady);

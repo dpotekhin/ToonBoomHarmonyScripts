@@ -20,7 +20,7 @@ exports = function(options) {
         selectedNodes = [node.parentNode(selectedNodes[0])];
     }
 
-    storage.topSelectedNode = selectedNodes[0];
+    storage.init(selectedNodes[0]);
 
     //
     var scriptName = 'Scene Stats';
