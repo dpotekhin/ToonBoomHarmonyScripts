@@ -163,12 +163,12 @@ function findDrawingsByColor(colorId) {
 //
 function getSelectedColor() {
     // Get the selected color
-    var palletteId = PaletteManager.getCurrentPaletteId();
+    var paletteId = PaletteManager.getCurrentPaletteId();
     var colorId = PaletteManager.getCurrentColorId();
-    // MessageLog.trace('findDrawingsByColor:' + palletteId + ', ' + colorId);
+    // MessageLog.trace('findDrawingsByColor:' + paletteId + ', ' + colorId);
 
     return {
-        palletteId: palletteId,
+        paletteId: paletteId,
         colorId: colorId
     }
 

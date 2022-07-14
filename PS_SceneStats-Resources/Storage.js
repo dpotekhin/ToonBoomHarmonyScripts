@@ -40,11 +40,14 @@ function checkByValueType(val, equalTo) {
 var storage = {
 
     topSelectedNode: undefined,
-    palettes: undefined,
-    colors: undefined,
-    colorsById: {},
     nodes: {},
     nodesByType: {},
+    
+    palettes: undefined,
+    usedPalettes: {},
+    colors: undefined,
+    usedColors: {},
+    colorsById: {},
     defaultColorsIds: [
         "0b3934f843700d34",
         "0b3934f843700d36",
@@ -294,6 +297,8 @@ var storage = {
 
         if (storage.nodes[_node]) return;
 
+        var _this = this;
+
         var nodeType = node.type(_node);
         if (!storage.nodesByType[nodeType]) storage.nodesByType[nodeType] = [];
 
@@ -334,6 +339,10 @@ var storage = {
                 }));
             }
             nodeData.usedColors = drawingKeys.length ? DrawingTools.getMultipleDrawingsUsedColors(drawingKeys) : [];
+            nodeData.usedColors.forEach(function(colorId){
+                _this.usedColors[colorId] = true;    
+            })
+            
             // MessageLog.trace('nodeData.usedColors: \n' + JSON.stringify(nodeData.usedColors, true, '  '));
         }
 
@@ -351,10 +360,10 @@ var storage = {
         this.colors = [];
 
         var paletteList = PaletteObjectManager.getScenePaletteList();
-        var palletteCount = paletteList.numPalettes;
+        var paletteCount = paletteList.numPalettes;
         var globalColorIds = {};
 
-        for (var i = 0; i < palletteCount; i++) {
+        for (var i = 0; i < paletteCount; i++) {
 
             var _palette = paletteList.getPaletteByIndex(i);
             var paletteName = _palette.getName();
@@ -388,25 +397,25 @@ var storage = {
             // Colors
             for (var ci = 0; ci < _palette.nColors; ci++) {
 
-                var palletteColor = _palette.getColorByIndex(ci);
-                // MessageLog.trace(ci + '] ' + palletteColor.name + ', ' + palletteColor.id);
+                var paletteColor = _palette.getColorByIndex(ci);
+                // MessageLog.trace(ci + '] ' + paletteColor.name + ', ' + paletteColor.id);
 
                 var colorItem = {};
                 Object.keys(paletteItem).forEach(function(v) { colorItem[v] = null; });
                 colorItem.paletteId = _palette.id;
-                colorItem.colorId = palletteColor.id;
+                colorItem.colorId = paletteColor.id;
                 colorItem.num = (i + 1) + '-' + (ci + 1);
-                colorItem.type = palletteColor.isTexture ? 'Texture' : 'Color';
+                colorItem.type = paletteColor.isTexture ? 'Texture' : 'Color';
                 colorItem.paletteName = paletteName;
-                colorItem.colorName = palletteColor.name;
-                colorItem.id = palletteColor.id;
-                colorItem.isTexture = palletteColor.isTexture;
-                colorItem.usedInScene = _palette.containsUsedColors([palletteColor.id]);
-                colorItem.usedDefaultColorId = this.defaultColorsIds.indexOf(palletteColor.id) !== -1;
+                colorItem.colorName = paletteColor.name;
+                colorItem.id = paletteColor.id;
+                colorItem.isTexture = paletteColor.isTexture;
+                colorItem.usedInScene = _palette.containsUsedColors([paletteColor.id]);
+                colorItem.usedDefaultColorId = this.defaultColorsIds.indexOf(paletteColor.id) !== -1;
                 if (colorItem.usedDefaultColorId) paletteItem.usedDefaultColorId = true;
 
                 // Naming Issues
-                colorItem.colorNamingIssues = storage.checkColorName(palletteColor.name);
+                colorItem.colorNamingIssues = storage.checkColorName(paletteColor.name);
                 if (colorItem.colorNamingIssues) {
                     colorItem.colorNamingIssues.forEach(function(v) { if (paletteItem.colorsNamingIssues.indexOf(v) === -1) paletteItem.colorsNamingIssues.push(v); })
                     colorItem.colorNamingIssues = 'Has naming issuses:\n' + colorItem.colorNamingIssues.join('\n');
@@ -417,15 +426,15 @@ var storage = {
                 this.colors.push(colorItem);
                 this.colorsById[colorItem.colorId] = colorItem;
 
-                var colorIdString = paletteName + '/' + palletteColor.name + '(' + palletteColor.id + ')';
+                var colorIdString = paletteName + '/' + paletteColor.name + '(' + paletteColor.id + ')';
 
-                if (!globalColorIds[palletteColor.id]) globalColorIds[palletteColor.id] = [];
+                if (!globalColorIds[paletteColor.id]) globalColorIds[paletteColor.id] = [];
                 else {
-                    colorsHasSameId = [palletteColor.id];
+                    colorsHasSameId = [paletteColor.id];
                     colorItem.colorsHasSameId = true;
-                    colorItem.colorsHasSameIdToolTip = colorIdString + ' >> ' + globalColorIds[palletteColor.id].join(' >> ');
+                    colorItem.colorsHasSameIdToolTip = colorIdString + ' >> ' + globalColorIds[paletteColor.id].join(' >> ');
                 }
-                globalColorIds[palletteColor.id].push(colorIdString);
+                globalColorIds[paletteColor.id].push(colorIdString);
 
             }
 
