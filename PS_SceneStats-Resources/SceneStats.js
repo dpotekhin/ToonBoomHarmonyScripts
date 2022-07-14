@@ -70,19 +70,16 @@ exports = function(options) {
             tabsAdded++;
         }
 
-        if (options.all || options.palettes || options.color) {
+        if (options.all || options.palettes) {
             var PaletteStats = require(fileMapper.toNativePath(specialFolders.userScripts + "/PS_SceneStats-Resources/PaletteStats.js"));
-            var palettesData = new PaletteStats(selectedNodes, undefined, storage, contentMaxHeight);
+            tabs.addTab(new PaletteStats(selectedNodes, undefined, storage, contentMaxHeight), 'Palettes');
+            tabsAdded++;
+        }
 
-            if (options.all || options.palettes) {
-                tabs.addTab(palettesData.palettes.tableView, 'Palettes');
-                tabsAdded++;
-            }
-
-            if (options.all || options.colors) {
-                tabs.addTab(palettesData.colors.tableView, 'Colors');
-                tabsAdded++;
-            }
+        if (options.all || options.colors) {
+            var ColorStats = require(fileMapper.toNativePath(specialFolders.userScripts + "/PS_SceneStats-Resources/ColorStats.js"));
+            tabs.addTab(new ColorStats(selectedNodes, undefined, storage, contentMaxHeight), 'Colors');
+            tabsAdded++;
         }
 
         if (options.all || options.unconnectedNodes) {

@@ -10,20 +10,10 @@ var TableView = require(fileMapper.toNativePath(specialFolders.userScripts + "/p
 //
 exports = function(selectedNodes, modal, storage, contentMaxHeight) {
 
-    var selectedGroupName = node.getName(selectedNodes[0]);
-    
+    storage.getAllChildNodes(selectedNodes, 'READ');
     // MessageLog.trace('currentSceneName: ' + currentSceneName);
-    
+
     storage.parsePalettesAndColors();
-    var paletteTableItems = storage.palettes;
-    var colorTableItems = storage.colors;
-
-    var typeColors = {
-        Palette: storage.bgInfo,
-        Texture: storage.bgYellow,
-        Color: ''
-    };
-
 
     // COLORS TABLE
     var palettesColumns = [
@@ -89,7 +79,7 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
             key: 'usedInScene',
             header: 'UiS',
             toolTip: 'Colors is used in the Scene',
-            getBg: storage.bgSuccess,
+            getBg: storage.bgSuccessOrFail,
             getValue: storage.outputYesNo
         },
 
@@ -122,97 +112,8 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
             // onClick: selectPalletOrColor
         }
     ];
-    var palettesTableView = new TableView(paletteTableItems, palettesColumns, undefined, contentMaxHeight);
 
-
-    // COLORS TABLE
-    var colorColumns = [
-
-        {
-            key: 'num',
-            header: '#',
-        },
-
-        {
-            key: 'type',
-            header: 'Type',
-            getBg: function(v, data) {
-                return typeColors[v];
-            },
-        },
-
-        {
-            key: 'paletteName',
-            header: 'Palette Name',
-            getValue: storage.outputString,
-            // onClick: storage.defaultCellClick
-        },
-
-        {
-            key: 'colorName',
-            header: 'Color Name',
-            getValue: storage.outputString,
-            // onClick: storage.defaultCellClick
-        },
-
-        {
-            key: 'colorNamingIssues',
-            header: 'NI',
-            toolTip: true,
-            getBg: storage.bgSuccessOrFailInverted,
-            getValue: storage.outputYesNo
-        },
-
-        {
-            key: 'usedInScene',
-            header: 'UiS',
-            toolTip: 'Colors is used in the Scene',
-            getBg: storage.bgSuccess,
-            getValue: storage.outputYesNo
-        },
-
-        {
-            key: 'colorsHasSameId',
-            header: 'CSID',
-            toolTip: function(v, data) {
-                if (v) return 'Palette colors has the same ID:\n' + data.colorsHasSameIdToolTip;
-                return 'Palette colors has unique IDs';
-            },
-            getBg: storage.bgSuccessOrFailInverted,
-            getValue: storage.outputYesNo,
-            // onClick: selectPalletOrColor
-        },
-
-        {
-            key: 'usedDefaultColorId',
-            header: 'DCID',
-            toolTip: 'Color has Default Color ID',
-            getBg: storage.bgSuccessOrFailInverted,
-            getValue: storage.outputYesNo,
-            // onClick: selectPalletOrColor
-        },
-
-        {
-            key: 'id',
-            header: 'ID',
-            toolTip: 'Color ID',
-        },
-
-    ];
-    var colorsTableView = new TableView(colorTableItems, colorColumns, undefined, contentMaxHeight);
-
-
-    return {
-        palettes: {
-            tableView: palettesTableView,
-            items: paletteTableItems,
-        },
-        colors: {
-            tableView: colorsTableView,
-            items: colorTableItems,
-        }
-    };
-
+    return new TableView(storage.palettes, palettesColumns, undefined, contentMaxHeight);
 
     // ----------------------------
     //
@@ -221,12 +122,12 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
     }
 
     //
-    function selectPalletOrColor(data) {
-        if (!data.paletteId) return;
-        selection.clearSelection();
-        // MessageLog.trace( data.paletteId+' , '+data.colorId);
-        if (data.type === 'Palette') PaletteManager.setCurrentPaletteById(data.paletteId);
-        else PaletteManager.setCurrentPaletteAndColorById(data.paletteId, data.colorId);
-    }
+    // function selectPalletOrColor(data) {
+    //     if (!data.paletteId) return;
+    //     selection.clearSelection();
+    //     // MessageLog.trace( data.paletteId+' , '+data.colorId);
+    //     if (data.type === 'Palette') PaletteManager.setCurrentPaletteById(data.paletteId);
+    //     else PaletteManager.setCurrentPaletteAndColorById(data.paletteId, data.colorId);
+    // }
 
 }

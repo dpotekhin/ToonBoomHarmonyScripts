@@ -44,9 +44,7 @@ var storage = {
     nodesByType: {},
     
     palettes: undefined,
-    usedPalettes: {},
     colors: undefined,
-    usedColors: {},
     colorsById: {},
     defaultColorsIds: [
         "0b3934f843700d34",
@@ -340,7 +338,11 @@ var storage = {
             }
             nodeData.usedColors = drawingKeys.length ? DrawingTools.getMultipleDrawingsUsedColors(drawingKeys) : [];
             nodeData.usedColors.forEach(function(colorId){
-                _this.usedColors[colorId] = true;    
+                var colorData = _this.colorsById[colorId];
+                if(colorData){
+                    colorData.usedInScene = true;
+                    colorData.palette.usedInScene = true;
+                }
             })
             
             // MessageLog.trace('nodeData.usedColors: \n' + JSON.stringify(nodeData.usedColors, true, '  '));
@@ -371,7 +373,7 @@ var storage = {
             var paletteColorsHasDefaultNames = false;
             var colorsHasSameId = [];
             var colorsHasSameIdToolTip = '';
-            var colorsUsedInScene = true;
+            // var colorsUsedInScene = true;
 
             var paletteItem = {
                 num: i + 1,
@@ -402,6 +404,7 @@ var storage = {
 
                 var colorItem = {};
                 Object.keys(paletteItem).forEach(function(v) { colorItem[v] = null; });
+                colorItem.palette = paletteItem;
                 colorItem.paletteId = _palette.id;
                 colorItem.colorId = paletteColor.id;
                 colorItem.num = (i + 1) + '-' + (ci + 1);
@@ -410,7 +413,7 @@ var storage = {
                 colorItem.colorName = paletteColor.name;
                 colorItem.id = paletteColor.id;
                 colorItem.isTexture = paletteColor.isTexture;
-                colorItem.usedInScene = _palette.containsUsedColors([paletteColor.id]);
+                // colorItem.usedInScene = _palette.containsUsedColors([paletteColor.id]);
                 colorItem.usedDefaultColorId = this.defaultColorsIds.indexOf(paletteColor.id) !== -1;
                 if (colorItem.usedDefaultColorId) paletteItem.usedDefaultColorId = true;
 
@@ -421,7 +424,7 @@ var storage = {
                     colorItem.colorNamingIssues = 'Has naming issuses:\n' + colorItem.colorNamingIssues.join('\n');
                 }
 
-                if (!colorItem.usedInScene) colorsUsedInScene = false;
+                // if (!colorItem.usedInScene) colorsUsedInScene = false;
 
                 this.colors.push(colorItem);
                 this.colorsById[colorItem.colorId] = colorItem;
@@ -446,7 +449,7 @@ var storage = {
 
             paletteItem.colorsHasSameId = colorsHasSameId.length;
             paletteItem.colorsHasSameIdToolTip = colorsHasSameIdToolTip;
-            paletteItem.usedInScene = colorsUsedInScene;
+            // paletteItem.usedInScene = colorsUsedInScene;
             paletteItem.colorsNamingIssues = paletteItem.colorsNamingIssues.length ? 'Palette Colors has naming issuses:\n' + paletteItem.colorsNamingIssues.join('\n') : false;
 
         }
