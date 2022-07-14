@@ -12,7 +12,9 @@ var TableView = require(fileMapper.toNativePath(specialFolders.userScripts + "/p
 exports = function(selectedNodes, modal, storage, contentMaxHeight) {
 
     // Collect Data
+    var skipNodesByType = ['NOTE'];
     var items = storage.getAllChildNodes(selectedNodes, function(nodeData) {
+        if (skipNodesByType.indexOf(nodeData.type) !== -1) return;
         return (!nodeData.srcNode && nodeData.type !== 'MULTIPORT_IN') || (!nodeData.destNode && nodeData.type !== 'MULTIPORT_OUT');
     });
     if (!items.length) return;
@@ -32,6 +34,24 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
 
     // //
     var tableView = new TableView(items, storage.getBaseTableRows().concat([
+
+        {
+            key: 'srcNode',
+            header: 'IN',
+            toolTip: 'Has Input Connections',
+            getValue: storage.outputYesNo,
+            getBg: storage.bgSuccessOrFail,
+            onClick: storage.defaultCellClick,
+        },
+
+        {
+            key: 'destNode',
+            header: 'OUT',
+            toolTip: 'Has Output Connections',
+            getValue: storage.outputYesNo,
+            getBg: storage.bgSuccessOrFail,
+            onClick: storage.defaultCellClick,
+        },
 
         {
             key: 'type',

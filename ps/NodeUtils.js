@@ -45,7 +45,7 @@ function getAttributeValue(attr) {
 //
 function renameNode(_node, _newName) {
     var parent = node.parentNode(_node);
-    var newName = getUnusedName(parent + '/'+getValidNodeName(_newName)).split('/').pop();
+    var newName = getUnusedName(parent + '/' + getValidNodeName(_newName)).split('/').pop();
     if (!node.rename(_node, newName)) return;
     return parent + '/' + newName;
 }
@@ -193,7 +193,7 @@ function getOutputNodes(_node) {
 }
 
 //
-function getAllChildNodes(nodes, typeFilter, eachNodeCb) {
+function getAllChildNodes(nodes, typeFilter, eachNodeCb, includeGroups) {
 
     if (typeof nodes === 'string') nodes = [nodes];
 
@@ -208,6 +208,10 @@ function getAllChildNodes(nodes, typeFilter, eachNodeCb) {
         var nodeType = node.type(_node);
 
         if (nodeType === 'GROUP') {
+            if (includeGroups && _nodes.indexOf(_node) === -1) {
+                _nodes.push(_node);
+                if (eachNodeCb) eachNodeCb(_node);
+            }
             (node.subNodes(_node) || []).forEach(function(n) { checkNode(n) });
             return;
         }

@@ -42,7 +42,7 @@ var storage = {
     topSelectedNode: undefined,
     nodes: {},
     nodesByType: {},
-    
+
     palettes: undefined,
     colors: undefined,
     colorsById: {},
@@ -165,34 +165,16 @@ var storage = {
                 key: 'name',
                 header: 'Name',
                 getBg: function(v, data) {
-                    return data.DSCount === 0 || v.toLowerCase().match(/^drawing/) || data.hasNumberEnding ? storage.bgYellow : undefined;
+                    return v.toLowerCase().match(/^drawing/) || data.hasNumberEnding ? storage.bgYellow : undefined;
                 },
                 toolTip: function(v, data) {
-                    return data.DSCount === 0 || v.toLowerCase().match(/^drawing/) || data.hasNumberEnding ? 'Has naming issues' : '';
+                    return v.toLowerCase().match(/^drawing/) || data.hasNumberEnding ? 'Has naming issues' : '';
                 },
                 // getValue: function(v, data) {
                 //     return data.index + ':' + v;
                 // },
                 onClick: storage.defaultCellClick,
 
-            },
-
-            {
-                key: 'srcNode',
-                header: 'IN',
-                toolTip: 'Has Input Connections',
-                getValue: storage.outputYesNo,
-                getBg: storage.bgSuccessOrFail,
-                onClick: storage.defaultCellClick,
-            },
-
-            {
-                key: 'destNode',
-                header: 'OUT',
-                toolTip: 'Has Output Connections',
-                getValue: storage.outputYesNo,
-                getBg: storage.bgSuccessOrFail,
-                onClick: storage.defaultCellClick,
             },
 
             // {
@@ -255,7 +237,7 @@ var storage = {
 
                 NodeUtils.getAllChildNodes(_node, undefined, function(__node) {
                     storage.parseNodeData(__node);
-                });
+                }, true);
 
             }
 
@@ -337,14 +319,14 @@ var storage = {
                 }));
             }
             nodeData.usedColors = drawingKeys.length ? DrawingTools.getMultipleDrawingsUsedColors(drawingKeys) : [];
-            nodeData.usedColors.forEach(function(colorId){
+            nodeData.usedColors.forEach(function(colorId) {
                 var colorData = _this.colorsById[colorId];
-                if(colorData){
+                if (colorData) {
                     colorData.usedInScene = true;
                     colorData.palette.usedInScene = true;
                 }
             })
-            
+
             // MessageLog.trace('nodeData.usedColors: \n' + JSON.stringify(nodeData.usedColors, true, '  '));
         }
 

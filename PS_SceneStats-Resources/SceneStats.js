@@ -28,7 +28,7 @@ exports = function(options) {
     //
 
     var btnHeight = 30;
-    var modalWidth = 1100;
+    var modalWidth = 800;
     var modalHeight = 500;
     var contentMaxHeight = modalHeight - 60;
     // var iconPath = fileMapper.toNativePath(specialFolders.userScripts+"/PS_DeformerTools-Resources/icons/");

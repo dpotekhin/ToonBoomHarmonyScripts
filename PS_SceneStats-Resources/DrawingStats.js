@@ -66,12 +66,7 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
                 preserveLineThickness: node.getTextAttr(n, 1, 'PENCIL_LINE_DEFORMATION_PRESERVE_THICKNESS') === 'Y',
                 elementId: elementId,
                 drawingColumn: node.linkedColumn(n, "DRAWING.ELEMENT"),
-                DSCount: 0
             });
-
-            if (elementId >= 0) {
-                itemData.DSCount = Drawing.numberOf(elementId);
-            }
 
             return itemData;
 
@@ -89,14 +84,6 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
 
     //
     var tableView = new TableView(items, storage.getBaseTableRows().concat([
-
-        {
-            key: 'DSCount',
-            header: 'DSc',
-            toolTip: 'Drawing Substitution Count',
-            getBg: storage.bgEmpty,
-            onClick: storage.defaultCellClick,
-        },
 
         {
             key: 'canAnimate',
