@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.220713
+Version: 0.220714
 */
 
 //
@@ -47,7 +47,7 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
     var drawingElements = [];
     var drawingSubstitutions = 0;
     var usedDrawingSubstitutions = 0;
-    
+
     storage.getAllChildNodes(selectedNodes, 'READ').forEach(function(nodeData) {
         if (drawingElements.indexOf(nodeData.elementId) !== -1) return;
         drawingElements.push(nodeData.elementId);
@@ -55,7 +55,7 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
         usedDrawingSubstitutions += nodeData.usedDrawingTimings.length;
     });
 
-    
+
 
 
     // Generate the Table
@@ -109,15 +109,60 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
 
     ]
 
-    // Group
-    var style = 'QGroupBox{ position: relative; border: none; padding-top:0; padding-bottom: 0; border-radius: 0;}';
-    // var uiGroup = modal.addGroup( 'DRAWINGS ('+items.length+')', modal.ui, true, style );
-
+    // Main Group
     var mainGroup = modal.addGroup('', undefined, false, true);
 
-    modal.addButton('Toggle Performance Report', mainGroup, 150, 30, '', function() {
+    // Buttons
+    var buttonsGroup = modal.addGroup('', mainGroup, true, true);
+
+    // Toggle Performance Report
+    modal.addButton('Toggle Performance Report', buttonsGroup, 150, 30, '', function() {
         preferences.setBool('ADVANCED_ENABLE_PERFORMANCE_REPORT', !preferences.getBool('ADVANCED_ENABLE_PERFORMANCE_REPORT', true));
     });
+
+    // Test Render
+    var testRenderButton = modal.addButton('Test Render', buttonsGroup, 150, 30, '', function() {
+
+        var tempDisplayNode = node.add(
+            node.parentNode(storage.topSelectedNode),
+            '__TempDisplay_' + Date.now(),
+            'DISPLAY',
+            node.coordX(storage.topSelectedNode) + node.width(storage.topSelectedNode) * .6,
+            node.coordY(storage.topSelectedNode) + 80,
+            0
+        );
+        node.link(storage.topSelectedNode, 0, tempDisplayNode, 0);
+
+        //
+        function frameReady(frame, celImage) {
+            // celImage.imageFile("c:/tmp/myimage" + frame + ".png");
+        }
+
+        function renderFinished() {
+            // MessageBox.information("Render Finished");
+        }
+        
+        render.renderFinished.connect(renderFinished);
+        render.frameReady.connect(frameReady);
+
+        render.setRenderDisplay(tempDisplayNode);
+        render.setWhiteBackground(true);
+        var currentFrame = frame.current();
+
+        testRenderButton.text = 'Test Render ' + currentFrame + 'f in progress...'
+        var startTime = Date.now();
+        render.renderScene(currentFrame, currentFrame);
+        var renderTime = (Date.now() - startTime) / 1000;
+        testRenderButton.text = 'Test Render (' + renderTime.toFixed(2) + 's)';
+
+        render.renderFinished.disconnect(renderFinished);
+        render.frameReady.disconnect(frameReady);
+
+        node.deleteNode(tempDisplayNode);
+
+    });
+
+    buttonsGroup.mainLayout.addStretch();
 
     //
     var tableView = new TableView(items, [
@@ -136,8 +181,7 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
     ], mainGroup, contentMaxHeight - 40);
     tableView.maximumWidth = 260;
 
-    // 
-
+    //
     return mainGroup;
 
 }

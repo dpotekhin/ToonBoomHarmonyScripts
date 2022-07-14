@@ -39,6 +39,8 @@ function checkByValueType(val, equalTo) {
 ///
 var storage = {
 
+    topSelectedNode: undefined,
+    
     checkNull: checkNull,
     checkByValueType: checkByValueType,
     returnEmpty: function() {},
@@ -299,7 +301,7 @@ var storage = {
             nodeData.drawingColumn = node.linkedColumn(_node, 'DRAWING.ELEMENT');
             nodeData.drawingTimings = column.getDrawingTimings(nodeData.drawingColumn);
             nodeData.drawingSyncedTo = node.getTextAttr( _node, storage.currentFrame, 'DRAWING.ELEMENT.LAYER');
-            
+
             nodeData.usedDrawingTimings = [];
             for (var f = 1; f <= frame.numberOf(); f++) {
                 var entry = column.getEntry(nodeData.drawingColumn, 1, f)
