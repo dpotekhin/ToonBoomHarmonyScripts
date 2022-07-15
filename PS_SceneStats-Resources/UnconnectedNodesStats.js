@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.220713
+Version: 0.220715
 */
 
 //
@@ -12,12 +12,11 @@ var TableView = require(fileMapper.toNativePath(specialFolders.userScripts + "/p
 exports = function(selectedNodes, modal, storage, contentMaxHeight) {
 
     // Collect Data
-    var skipNodesByType = ['NOTE'];
     var items = storage.getAllChildNodes(selectedNodes, function(nodeData) {
-        if (skipNodesByType.indexOf(nodeData.type) !== -1) return;
-        return (!nodeData.srcNode && nodeData.type !== 'MULTIPORT_IN') || (!nodeData.destNode && nodeData.type !== 'MULTIPORT_OUT');
+        var srcIsNotConnected = !nodeData.srcNode && node.numberOfInputPorts(nodeData.node);
+        var destIsNotConnected = !nodeData.destNode && node.numberOfOutputPorts(nodeData.node);
+        return srcIsNotConnected || destIsNotConnected;
     });
-    if (!items.length) return;
 
     items = items
         .map(function(nodeData, i) {
