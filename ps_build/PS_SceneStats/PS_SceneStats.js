@@ -15,7 +15,7 @@ Select a Group or Node in that Group, click the Script button and select the des
 
 
 //
-var ContextMenu = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/ContextMenu.js"));
+var ContextMenu = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_SceneStats-Resources/ps/ContextMenu.js"));
 var SceneStats = require(fileMapper.toNativePath(specialFolders.userScripts + "/PS_SceneStats-Resources/SceneStats.js"));
 
 //
