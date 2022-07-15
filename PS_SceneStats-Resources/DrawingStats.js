@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.220713
+Version: 0.220714
 */
 
 //
@@ -66,12 +66,7 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
                 preserveLineThickness: node.getTextAttr(n, 1, 'PENCIL_LINE_DEFORMATION_PRESERVE_THICKNESS') === 'Y',
                 elementId: elementId,
                 drawingColumn: node.linkedColumn(n, "DRAWING.ELEMENT"),
-                DSCount: 0
             });
-
-            if (elementId >= 0) {
-                itemData.DSCount = Drawing.numberOf(elementId);
-            }
 
             return itemData;
 
@@ -89,14 +84,6 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
 
     //
     var tableView = new TableView(items, storage.getBaseTableRows().concat([
-
-        {
-            key: 'DSCount',
-            header: 'DSc',
-            toolTip: 'Drawing Substitution Count',
-            getBg: storage.bgEmpty,
-            onClick: storage.defaultCellClick,
-        },
 
         {
             key: 'canAnimate',
@@ -176,6 +163,20 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
             toolTip: 'Preserve Line Thickness',
             getBg: storage.bgSuccessYellow,
             getValue: storage.outputYesNo,
+            onClick: storage.defaultCellClick,
+        },
+
+        {
+            key: 'usedColors',
+            header: 'UC',
+            toolTip: function(v) {
+                return 'Used Colors:\n' + v.map(function(vv) {
+                    var colorItem = storage.colorsById[vv];
+                    return '- ' + colorItem ? colorItem.paletteName + '/' + colorItem.colorName : vv;
+                }).join('\n');
+            },
+            getBg: storage.bgFailYellow,
+            getValue: function(v) { return v.length; },
             onClick: storage.defaultCellClick,
         }
 

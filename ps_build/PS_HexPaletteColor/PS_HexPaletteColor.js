@@ -56,10 +56,10 @@ function PS_HexPaletteColor(){
 	var ignoreAlpha = !KeyModifiers.IsAlternatePressed();
 	// MessageLog.trace('ignoreAlpha: '+ignoreAlpha);
 
-	var palletteId = PaletteManager.getCurrentPaletteId();
+	var paletteId = PaletteManager.getCurrentPaletteId();
 	var colorId = PaletteManager.getCurrentColorId();
 
-	if( !palletteId || !colorId ){
+	if( !paletteId || !colorId ){
 		MessageLog.trace( 'A selected Color required.' );
 		return;
 	}
@@ -67,7 +67,7 @@ function PS_HexPaletteColor(){
 	var paletteName = PaletteManager.getCurrentPaletteName();
 	var colorName = PaletteManager.getCurrentColorName();
 
-	var palette = PaletteObjectManager.getPalette(palletteId);
+	var palette = PaletteObjectManager.getPalette(paletteId);
 
 	var colorObject = palette.getColorById(colorId);
 	var colorData = colorObject.colorData;

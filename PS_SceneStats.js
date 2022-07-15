@@ -2,7 +2,7 @@
 Author: Dima Potekhin (skinion.onn@gmail.com)
 
 Name: PS_SceneStats
-Version: 0.220713
+Version: 0.220715
 
 */
 
@@ -32,7 +32,7 @@ function PS_SceneStats() {
             '!Unconneced Nodes': function() { runStats({ unconnectedNodes: true }); },
             '!General': function() { runStats({ general: true }); },
         });
-        
+
     } catch (err) { MessageLog.trace('Error: PS_SceneStats: ' + err) }
 
     function runStats(options) {

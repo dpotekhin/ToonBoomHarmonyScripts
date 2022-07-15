@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.220713
+Version: 0.220715
 */
 
 var pModal = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/pModal.js"));
@@ -20,13 +20,15 @@ exports = function(options) {
         selectedNodes = [node.parentNode(selectedNodes[0])];
     }
 
+    storage.init(selectedNodes[0]);
+
     //
     var scriptName = 'Scene Stats';
-    var scriptVer = '0.220630';
+    var scriptVer = '0.220715';
     //
 
     var btnHeight = 30;
-    var modalWidth = 1100;
+    var modalWidth = 800;
     var modalHeight = 500;
     var contentMaxHeight = modalHeight - 60;
     // var iconPath = fileMapper.toNativePath(specialFolders.userScripts+"/PS_DeformerTools-Resources/icons/");
@@ -68,19 +70,16 @@ exports = function(options) {
             tabsAdded++;
         }
 
-        if (options.all || options.palettes || options.color) {
+        if (options.all || options.palettes) {
             var PaletteStats = require(fileMapper.toNativePath(specialFolders.userScripts + "/PS_SceneStats-Resources/PaletteStats.js"));
-            var palettesData = new PaletteStats(selectedNodes, undefined, storage, contentMaxHeight);
+            tabs.addTab(new PaletteStats(selectedNodes, undefined, storage, contentMaxHeight), 'Palettes');
+            tabsAdded++;
+        }
 
-            if (options.all || options.palettes) {
-                tabs.addTab(palettesData.palettes.tableView, 'Palettes');
-                tabsAdded++;
-            }
-
-            if (options.all || options.colors) {
-                tabs.addTab(palettesData.colors.tableView, 'Colors');
-                tabsAdded++;
-            }
+        if (options.all || options.colors) {
+            var ColorStats = require(fileMapper.toNativePath(specialFolders.userScripts + "/PS_SceneStats-Resources/ColorStats.js"));
+            tabs.addTab(new ColorStats(selectedNodes, undefined, storage, contentMaxHeight), 'Colors');
+            tabsAdded++;
         }
 
         if (options.all || options.unconnectedNodes) {

@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.220713
+Version: 0.220714
 */
 
 //
@@ -47,7 +47,7 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
     var drawingElements = [];
     var drawingSubstitutions = 0;
     var usedDrawingSubstitutions = 0;
-    
+
     storage.getAllChildNodes(selectedNodes, 'READ').forEach(function(nodeData) {
         if (drawingElements.indexOf(nodeData.elementId) !== -1) return;
         drawingElements.push(nodeData.elementId);
@@ -55,16 +55,82 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
         usedDrawingSubstitutions += nodeData.usedDrawingTimings.length;
     });
 
-    
+
+    // Main Group
+    var mainGroup = modal.addGroup('', undefined, false, true);
+
+    // Buttons
+    var buttonsGroup = modal.addGroup('', mainGroup, true, true);
 
 
-    // Generate the Table
+    // Toggle Performance Report
+    modal.addButton('Toggle Performance Report', buttonsGroup, 150, 30, '', function() {
+        preferences.setBool('ADVANCED_ENABLE_PERFORMANCE_REPORT', !preferences.getBool('ADVANCED_ENABLE_PERFORMANCE_REPORT', true));
+    });
+
+    // Test Render
+    var testRenderButton = modal.addButton('Test Render', buttonsGroup, 150, 30, '', function() {
+
+        var tempDisplayNode = node.add(
+            node.parentNode(storage.topSelectedNode),
+            '__TempDisplay_' + Date.now(),
+            'DISPLAY',
+            node.coordX(storage.topSelectedNode) + node.width(storage.topSelectedNode) * .6,
+            node.coordY(storage.topSelectedNode) + 80,
+            0
+        );
+        node.link(storage.topSelectedNode, 0, tempDisplayNode, 0);
+
+        //
+        function frameReady(frame, celImage) {
+            // celImage.imageFile("c:/tmp/myimage" + frame + ".png");
+        }
+
+        function renderFinished() {
+            // MessageBox.information("Render Finished");
+        }
+
+        render.renderFinished.connect(renderFinished);
+        render.frameReady.connect(frameReady);
+
+        render.setRenderDisplay(tempDisplayNode);
+        render.setWhiteBackground(true);
+        var currentFrame = frame.current();
+
+        testRenderButton.text = 'Render ' + currentFrame + 'f in progress...'
+        var startTime = Date.now();
+        render.renderScene(currentFrame, currentFrame);
+        var renderTime = (Date.now() - startTime) / 1000;
+        testRenderButton.text = 'Test Render: ' + renderTime.toFixed(2) + 's';
+
+        render.renderFinished.disconnect(renderFinished);
+        render.frameReady.disconnect(frameReady);
+
+        node.deleteNode(tempDisplayNode);
+
+    });
+
+    buttonsGroup.mainLayout.addStretch();
+
+
+
+
+    /// Tables
+    var tablesGroup = modal.addGroup('', mainGroup, true, true);
+
+    //
+    // Table #1
     var items = [
 
         {
             key: "Scene is Template",
             value: sceneIsTemplate ? 'Yes' : 'No',
             bg: sceneIsTemplate ? storage.bgSuccess : storage.bgYellow,
+        },
+
+        {
+            key: "Total Nodes",
+            value: Object.keys(storage.nodes).length,
         },
 
         {
@@ -87,39 +153,8 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
             value: usedDrawingSubstitutions,
         },
 
-        {
-            key: "Pegs",
-            value: storage.getAllChildNodes(selectedNodes, 'PEG').length,
-        },
-
-        {
-            key: "Composites",
-            value: storage.getAllChildNodes(selectedNodes, 'COMPOSITE').length,
-        },
-
-        {
-            key: "Cutters",
-            value: storage.getAllChildNodes(selectedNodes, 'CUTTER').length,
-        },
-
-        {
-            key: "MC",
-            value: storage.getAllChildNodes(selectedNodes, 'MasterController').length,
-        }
-
     ]
 
-    // Group
-    var style = 'QGroupBox{ position: relative; border: none; padding-top:0; padding-bottom: 0; border-radius: 0;}';
-    // var uiGroup = modal.addGroup( 'DRAWINGS ('+items.length+')', modal.ui, true, style );
-
-    var mainGroup = modal.addGroup('', undefined, false, true);
-
-    modal.addButton('Toggle Performance Report', mainGroup, 150, 30, '', function() {
-        preferences.setBool('ADVANCED_ENABLE_PERFORMANCE_REPORT', !preferences.getBool('ADVANCED_ENABLE_PERFORMANCE_REPORT', true));
-    });
-
-    //
     var tableView = new TableView(items, [
 
         {
@@ -133,11 +168,72 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
             getBg: function(v, data) { return data.bg !== undefined ? data.bg : ''; }
         }
 
-    ], mainGroup, contentMaxHeight - 40);
-    tableView.maximumWidth = 260;
+    ], tablesGroup, contentMaxHeight - 40);
+    tableView.maximumWidth = 212;
 
-    // 
 
+    // Table #2
+    var items = Object.keys(storage.nodesByType)
+        .sort()
+        .map(function(typeName, i) {
+            var nodeList = storage.nodesByType[typeName];
+            return {
+                key: (typeName.match(/[A-Z][a-z]+/g) || [typeName]).join('_').split('_').map(function(vv) { return vv.charAt(0).toUpperCase() + vv.substring(1).toLowerCase() }).join(' '),
+                value: nodeList.length,
+                nodes: nodeList,
+                currentIndex: undefined,
+                itemIndex: i
+            }
+        });
+
+    var tableView = new TableView(items, [
+
+        {
+            header: "Node Type",
+            key: "key",
+        },
+
+        {
+            header: "Total",
+            key: "value",
+            getBg: function(v, data) { return data.bg !== undefined ? data.bg : ''; }
+        },
+
+        {
+            header: "Prev",
+            // value: '<-',
+            icon: storage.ICONS_PATH + 'l-arrow.png',
+            onClick: function(data) {
+
+                if (data.currentIndex === undefined) data.currentIndex = -1;
+                data.currentIndex++;
+                if (data.currentIndex >= data.nodes.length) data.currentIndex = 0;
+                // MessageLog.trace(data.currentIndex + ' > ' + JSON.stringify(data.nodes[data.currentIndex], true, ''));
+                storage.defaultCellClick(data.nodes[data.currentIndex].node);
+            }
+        },
+
+        {
+            header: "Next",
+            // value: '->',
+            icon: storage.ICONS_PATH + 'r-arrow.png',
+            onClick: function(data) {
+                if (data.currentIndex === undefined) data.currentIndex = 1;
+                data.currentIndex--;
+                if (data.currentIndex < 0) data.currentIndex = data.nodes.length - 1;
+                // MessageLog.trace(data.currentIndex + ' > ' + JSON.stringify(data.nodes[data.currentIndex], true, ''));
+                storage.defaultCellClick(data.nodes[data.currentIndex]);
+
+            }
+        },
+
+    ], tablesGroup, contentMaxHeight - 40);
+    tableView.minimumWidth = tableView.maximumWidth = 290;
+
+
+    tablesGroup.mainLayout.addStretch();
+
+    //
     return mainGroup;
 
 }
