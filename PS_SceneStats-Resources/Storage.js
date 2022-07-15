@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.220714
+Version: 0.220715
 */
 var Utils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/Utils.js"));
 var SelectionUtils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/SelectionUtils.js"));
@@ -38,6 +38,8 @@ function checkByValueType(val, equalTo) {
 
 ///
 var storage = {
+
+    ICONS_PATH: fileMapper.toNativePath(specialFolders.userScripts + "/PS_SceneStats-Resources/icons/"),
 
     topSelectedNode: undefined,
     nodes: {},
@@ -111,13 +113,13 @@ var storage = {
     showNodeProperties: function(data) {
         // MessageLog.trace('>>'+data.path);
         selection.clearSelection();
-        selection.addNodeToSelection(data.path);
+        selection.addNodeToSelection(typeof data === 'string' ? data : data.path || data.node);
         Action.perform("onActionEditProperties()", "scene");
     },
 
     selectNode: function(data) {
         selection.clearSelection();
-        selection.addNodeToSelection(data.path);
+        selection.addNodeToSelection(typeof data === 'string' ? data : data.path || data.node);
     },
 
     getBaseItemData: function(nodeData, i) {

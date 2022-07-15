@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.220714
+Version: 0.220715
 */
 
 var pModal = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/pModal.js"));
@@ -24,7 +24,7 @@ exports = function(options) {
 
     //
     var scriptName = 'Scene Stats';
-    var scriptVer = '0.220714';
+    var scriptVer = '0.220715';
     //
 
     var btnHeight = 30;

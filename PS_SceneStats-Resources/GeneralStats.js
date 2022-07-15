@@ -56,59 +56,6 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
     });
 
 
-
-
-    // Generate the Table
-    var items = [
-
-        {
-            key: "Scene is Template",
-            value: sceneIsTemplate ? 'Yes' : 'No',
-            bg: sceneIsTemplate ? storage.bgSuccess : storage.bgYellow,
-        },
-
-        {
-            key: "Drawings",
-            value: storage.getAllChildNodes(selectedNodes, 'READ').length,
-        },
-
-        {
-            key: "Used Drawing Elements",
-            value: drawingElements.length,
-        },
-
-        {
-            key: "Total Drawing Substitutions",
-            value: drawingSubstitutions,
-        },
-
-        {
-            key: "Used Drawing Substitutions",
-            value: usedDrawingSubstitutions,
-        },
-
-        {
-            key: "Pegs",
-            value: storage.getAllChildNodes(selectedNodes, 'PEG').length,
-        },
-
-        {
-            key: "Composites",
-            value: storage.getAllChildNodes(selectedNodes, 'COMPOSITE').length,
-        },
-
-        {
-            key: "Cutters",
-            value: storage.getAllChildNodes(selectedNodes, 'CUTTER').length,
-        },
-
-        {
-            key: "MC",
-            value: storage.getAllChildNodes(selectedNodes, 'MasterController').length,
-        }
-
-    ]
-
     // Main Group
     var mainGroup = modal.addGroup('', undefined, false, true);
 
@@ -165,7 +112,49 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
 
     buttonsGroup.mainLayout.addStretch();
 
+
+
+
+    /// Tables
+    var tablesGroup = modal.addGroup('', mainGroup, true, true);
+
     //
+    // Table #1
+    var items = [
+
+        {
+            key: "Scene is Template",
+            value: sceneIsTemplate ? 'Yes' : 'No',
+            bg: sceneIsTemplate ? storage.bgSuccess : storage.bgYellow,
+        },
+
+        {
+            key: "Total Nodes",
+            value: Object.keys(storage.nodes).length,
+        },
+
+        {
+            key: "Drawings",
+            value: storage.getAllChildNodes(selectedNodes, 'READ').length,
+        },
+
+        {
+            key: "Used Drawing Elements",
+            value: drawingElements.length,
+        },
+
+        {
+            key: "Total Drawing Substitutions",
+            value: drawingSubstitutions,
+        },
+
+        {
+            key: "Used Drawing Substitutions",
+            value: usedDrawingSubstitutions,
+        },
+
+    ]
+
     var tableView = new TableView(items, [
 
         {
@@ -179,8 +168,70 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
             getBg: function(v, data) { return data.bg !== undefined ? data.bg : ''; }
         }
 
-    ], mainGroup, contentMaxHeight - 40);
-    tableView.maximumWidth = 260;
+    ], tablesGroup, contentMaxHeight - 40);
+    tableView.maximumWidth = 212;
+
+
+    // Table #2
+    var items = Object.keys(storage.nodesByType)
+        .sort()
+        .map(function(typeName, i) {
+            var nodeList = storage.nodesByType[typeName];
+            return {
+                key: (typeName.match(/[A-Z][a-z]+/g) || [typeName]).join('_').split('_').map(function(vv) { return vv.charAt(0).toUpperCase() + vv.substring(1).toLowerCase() }).join(' '),
+                value: nodeList.length,
+                nodes: nodeList,
+                currentIndex: undefined,
+                itemIndex: i
+            }
+        });
+
+    var tableView = new TableView(items, [
+
+        {
+            header: "Node Type",
+            key: "key",
+        },
+
+        {
+            header: "Total",
+            key: "value",
+            getBg: function(v, data) { return data.bg !== undefined ? data.bg : ''; }
+        },
+
+        {
+            header: "Prev",
+            // value: '<-',
+            icon: storage.ICONS_PATH + 'l-arrow.png',
+            onClick: function(data) {
+
+                if (data.currentIndex === undefined) data.currentIndex = -1;
+                data.currentIndex++;
+                if (data.currentIndex >= data.nodes.length) data.currentIndex = 0;
+                // MessageLog.trace(data.currentIndex + ' > ' + JSON.stringify(data.nodes[data.currentIndex], true, ''));
+                storage.defaultCellClick(data.nodes[data.currentIndex].node);
+            }
+        },
+
+        {
+            header: "Next",
+            // value: '->',
+            icon: storage.ICONS_PATH + 'r-arrow.png',
+            onClick: function(data) {
+                if (data.currentIndex === undefined) data.currentIndex = 1;
+                data.currentIndex--;
+                if (data.currentIndex < 0) data.currentIndex = data.nodes.length - 1;
+                // MessageLog.trace(data.currentIndex + ' > ' + JSON.stringify(data.nodes[data.currentIndex], true, ''));
+                storage.defaultCellClick(data.nodes[data.currentIndex]);
+
+            }
+        },
+
+    ], tablesGroup, contentMaxHeight - 40);
+    tableView.minimumWidth = tableView.maximumWidth = 290;
+
+
+    tablesGroup.mainLayout.addStretch();
 
     //
     return mainGroup;
