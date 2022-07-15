@@ -3,8 +3,8 @@ Author: Dima Potekhin (skinion.onn@gmail.com)
 Version 0.220602
 */
 
-var NodeUtils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/NodeUtils.js"));
-var ColumnUtils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/ColumnUtils.js"));
+var NodeUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_PaletteTools-Resources/ps/NodeUtils.js"));
+var ColumnUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_PaletteTools-Resources/ps/ColumnUtils.js"));
 
 ///
 var COLORART = 1;

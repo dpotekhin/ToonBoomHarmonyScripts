@@ -3,11 +3,11 @@ Author: Dima Potekhin (skinion.onn@gmail.com)
 Version 0.220602
 */
 
-var Utils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/Utils.js"));
-var SelectionUtils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/SelectionUtils.js"));
-var NodeUtils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/NodeUtils.js"));
-var ColumnUtils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/ColumnUtils.js"));
-var FileSystem = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/FileSystem.js"));
+var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_DrawingTools-Resources/ps/Utils.js"));
+var SelectionUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_DrawingTools-Resources/ps/SelectionUtils.js"));
+var NodeUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_DrawingTools-Resources/ps/NodeUtils.js"));
+var ColumnUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_DrawingTools-Resources/ps/ColumnUtils.js"));
+var FileSystem = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_DrawingTools-Resources/ps/FileSystem.js"));
 
 ///
 var COLORART = 1;

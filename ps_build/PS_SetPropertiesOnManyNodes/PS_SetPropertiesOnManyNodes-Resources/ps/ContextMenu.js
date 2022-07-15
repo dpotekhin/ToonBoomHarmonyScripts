@@ -3,7 +3,7 @@ Author: Dima Potekhin (skinion.onn@gmail.com)
 Version: 0.220630
 */
 
-var Utils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/Utils.js"));
+var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_SetPropertiesOnManyNodes-Resources/ps/Utils.js"));
 
 //
 function showContextMenu( menuData, event, parentWidget ) {

@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.220624
+Version: 0.220706
 */
 var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_DeformerTools-Resources/ps/Utils.js"));
 
@@ -149,7 +149,9 @@ function eachAnimatedAttributeOfSelectedLayers( _action ){
 }
 
 //
-function focusOnSelectedNode(){
+function focusOnSelectedNode( nodesToSelect ){
+	
+	if( nodesToSelect ) selectNodes(nodesToSelect);
 
 	Action.perform("onActionFocusOnSelectionNV()", "Node View");
 	Action.perform("onActionResetView()", "Node View");

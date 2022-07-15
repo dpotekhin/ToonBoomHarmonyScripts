@@ -1,12 +1,12 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.211020
+Version: 0.220713
 */
 
 function pModal( title, width, height, unique ){
 
   this.create(title, width, height, unique);
-	
+  
 }
 
 
@@ -78,7 +78,7 @@ pModal.prototype.show = function(){
 //
 pModal.prototype.addGroup = function( title, parent, layoutType, style ){
   var groupBox = new QGroupBox( title );
-  // groupBox.setFlat(true);
+  // groupBox.flat = true;
   var groupBoxLayout;
   switch( layoutType ){
     
@@ -106,8 +106,12 @@ pModal.prototype.addGroup = function( title, parent, layoutType, style ){
     }else{
       groupBox.setStyleSheet( style );
     }
+  }else{
+    this.setDefaulElementMargins( groupBox );
   }
-  parent.mainLayout.addWidget( groupBox, 0, 0 );
+
+  if( parent ) parent.mainLayout.addWidget( groupBox, 0, 0 );
+
   return groupBox;
 }
 
@@ -128,13 +132,31 @@ pModal.prototype.addNumberInput = function( labelText, parent, width, height, de
   _input.setValidator( new QDoubleValidator(_input) );
   _input.label = label;
 
+  var valueIsJustSetted = false;
+
   if( onChange ){
-    _input.textChanged.connect( _input, onChange );
+    _input.textChanged.connect( _input, function(v){
+      if( valueIsJustSetted ){
+        valueIsJustSetted = false;
+        return;
+      }
+      onChange(Number(v));
+    });
   }
 
   if( onReturnPressed ){
     _input.returnPressed.connect( _input, onReturnPressed );
   }
+
+  Object.defineProperty(_input, 'text2', {
+    get: function () {
+        return _input.text;
+    },
+    set: function (v) {
+      valueIsJustSetted = true;
+      _input.text = v;
+    }
+  });
 
   return _input;
 
@@ -209,17 +231,20 @@ pModal.prototype.addLineEdit = function( text, parent, width, height, onChanged,
 
 
 //
-pModal.prototype.addLabel = function( text, parent, width, height, align ){
+pModal.prototype.addLabel = function( text, parent, width, height, align, removeElementMargins ){
   var label = new QLabel();
   label.setText( text );
   if(width){
-    label.setMinimumSize(width,10);
+    label.setMinimumSize(width,12);
     label.setMaximumSize(width,height);
+  }else{
+    label.minimumHeight = 12;
   }
   // if( width ) label.setFixedWidth( width );
   // if( height ) label.setFixedWidth( height );
   if( align ) label.alignment = align;
   parent.mainLayout.addWidget( label, 0, 0 );
+  if( removeElementMargins ) this.removeElementMargins(label);
   return label;
 }
 
@@ -246,6 +271,32 @@ pModal.prototype.addHLine = function( width, parent ){
 
 
 //
+pModal.prototype.addDropdown = function( parent, items, onIndexChanged ){
+  var dropdown = new QComboBox();
+  var _items = items;
+  var itemsDataIsObject = false;
+  if( _items ) {
+    if( typeof _items[0] !== 'string'){
+      itemsDataIsObject = true;
+      _items = items.map(function(v){ return v.title; });
+    }
+    dropdown.addItems(_items);
+  }
+  if( parent ) parent.mainLayout.addWidget( dropdown, 0, 0 );
+  if( onIndexChanged ) dropdown["currentIndexChanged(int)"].connect(function(i){
+    if( _items ){
+      if( itemsDataIsObject ){
+        onIndexChanged( items[i].value );
+      }else onIndexChanged( _items[i] );
+    }
+  });
+  // dropdown.setCurrentIndex( 1 );
+  // dropdown.currentIndex
+  return dropdown;
+}
+
+
+//
 pModal.prototype.getParentWidget = function(){
 
   var topWidgets = QApplication.topLevelWidgets();
@@ -260,14 +311,56 @@ pModal.prototype.getParentWidget = function(){
 
 };
 
-
 //
-pModal.prototype.removeElementMargins = function( group ){
-  group.setStyleSheet('QGroupBox{ border:none; margin: 0; padding: 0; }' );
-  ( group.mainLayout || group ).setContentsMargins(0,0,0,0);
+function parseStyleAttributes(str){
+  var attrs = {};
+  str.split(';').forEach(function(v){
+    if( !v ) return;
+    var attrData = v.split(':');
+    attrs[attrData[0].trim()] = attrData[1].trim();
+  });
+  return attrs;
+}
+
+pModal.prototype.changeStyleSheet = function( element, newStyle ){
+  var oldStyle = element.styleSheet;
+  if( !oldStyle ) {
+    element.setStyleSheet(newStyle);
+    return;
+  }
+  var style = oldStyle;
+  var elementStyleClear = style.match(/[{?]([^}]+)}/gi);
+  if( elementStyleClear ){
+    elementStyleClear = elementStyleClear[0].replace(/{|}/gi,'');
+    //console.log(elementStyleClear);
+    style = elementStyleClear;
+  }
+  var oldStyleAttrs = parseStyleAttributes(style);
+  var newStyleAttrs = parseStyleAttributes(newStyle);
+  Object.keys(newStyleAttrs).forEach(function(attrName){
+    if( newStyleAttrs[attrName] === '--' ) delete oldStyleAttrs[attrName];
+    else oldStyleAttrs[attrName] = newStyleAttrs[attrName];
+  });
+  style = Object.keys(oldStyleAttrs).map(function(attrName){ return attrName+': '+oldStyleAttrs[attrName]; }).join('; ');
+  element.setStyleSheet( elementStyleClear ? oldStyle.replace(elementStyleClear, style) : style );
 }
 
 
+//
+pModal.prototype.removeElementMargins = function( group ){
+  // group.setStyleSheet('QGroupBox{ border:none; padding: 0; }');
+  // group.setStyleSheet('border-width:0; padding: 0; margin: 0;');
+  group.setStyleSheet('border-width:0; padding: 0; margin: 0;');
+  ( group.mainLayout || group ).setContentsMargins(4,2,4,0);
+}
+
+pModal.prototype.setDefaulElementMargins = function( group ){
+  group.setStyleSheet('border-width:1; padding: 4 2; margin: 4 0 0 0;');
+  ( group.mainLayout || group ).setContentsMargins(2,4,2,2);
+  // ( group.mainLayout || group ).setContentsMargins(10,10,10,10);
+}
+
+//
 pModal.prototype.setFocusOnMainWindow = function(){
 
   var mainWindow = this.getParentWidget();

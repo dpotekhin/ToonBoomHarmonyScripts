@@ -1,5 +1,5 @@
 // Author: Dima Potekhin (skinion.onn@gmail.com)
-// Version: 0.220615
+// Version: 0.220710
 
 //
 function getAttributes(attribute, attributeList) {
@@ -14,124 +14,19 @@ function getAttributes(attribute, attributeList) {
 
 
 //
-function getFullAttributeList(nodePath) {
+function getFullAttributeList(nodePath, frame, onlyNames) {
     var attributeList = [];
-    var topAttributeList = node.getAttrList(nodePath, 1);
+    var topAttributeList = node.getAttrList(nodePath, frame);
     for (var i = 0; i < topAttributeList.length; ++i) {
         getAttributes(topAttributeList[i], attributeList);
     }
+    if (onlyNames) {
+        attributeList = attributeList.map(function(attr) {
+            return attr.fullKeyword();
+        });
+    }
     return attributeList;
 }
-
-
-//
-function unlinkFunctions(_node, _columnTypes, _invertColumnTypes, keepCurrentValues) {
-
-    var nodeNamePath = _node.split("/");
-    var nodeName = nodeNamePath[nodeNamePath.length - 1];
-    // MessageLog.trace(i+") "+nodeName+", "+nodeNamePath  );
-
-    MessageLog.trace("NODE: " + i + ") " + nodeName + ", [" + node.type(_node) + "]");
-
-    var attrs = getFullAttributeList(_node);
-    var isPositionSeparate = node.getTextAttr(_node, 1, 'POSITION.SEPARATE') === 'Y'; //
-    var isEnabled3d = node.getTextAttr(_node, 1, 'ENABLE_3D') === 'Y'; //
-    var isRotationSeparate = node.getTextAttr(_node, 1, 'ROTATION.SEPARATE') === 'On'; // On = Euler; Off = Quaternion
-    // MessageLog.trace("isEnabled3d: "+isEnabled3d);
-    // MessageLog.trace("isRotationSeparate: "+isRotationSeparate);
-
-    try {
-
-        attrs.forEach(function(attr) {
-
-            var attrFullName = attr.fullKeyword();
-            // MessageLog.trace("ATTR: " + attrFullName+' > '+ node.getTextAttr(_node, 1, attrFullName ) );
-
-            var linkedColumn = node.linkedColumn(_node, attrFullName);
-            if (!linkedColumn) return;
-
-            var columnType = column.type(linkedColumn);
-            // if (columnType !==E 'QUATERNIONPATH') return; // !!!
-
-            if (_columnTypes) {
-
-                if (_invertColumnTypes) { // Skip provided column types
-
-                    if (_columnTypes.indexOf(columnType) !== -1) {
-                        MessageLog.trace('Skipped');
-                        return;
-                    }
-
-                } else { // Skip all except provided column types
-
-                    if (_columnTypes.indexOf(columnType) === -1) {
-                        return;
-                        MessageLog.trace('Skipped');
-                    }
-
-                }
-
-            }
-
-            // if ( linkedColumn && attrFullName != "DRAWING.ELEMENT" ){
-            // MessageLog.trace("-   UNLINK: " + attr.name() + " (" + attrFullName + ")" + " <" + attr.typeName());
-
-            if (isEnabled3d) { // 3d mode enabled
-
-                if (isRotationSeparate) { // Euler
-                    if (columnType === 'QUATERNIONPATH') return;
-
-                } else { // Quaternion
-                    if (attrFullName.indexOf('ROTATION.ANGLE') !== -1) return;
-
-                }
-
-            }
-
-            var currentValue = column.getEntry(linkedColumn, 0, frame.current());
-
-            switch (columnType) {
-
-                case 'QUATERNIONPATH':
-
-                    currentValue = attr.pos3dValueAt(frame.current());
-                    break;
-
-            }
-            // MessageLog.trace('--> columnType: "' + columnType + '", ' + attr.name() + " (" + attrFullName + ")" + " <" + attr.typeName() + ">");
-
-            node.unlinkAttr(_node, attrFullName);
-
-            if (keepCurrentValues) {
-
-                switch (columnType) {
-
-                    case 'QUATERNIONPATH':
-                        node.getAttr(_node, frame.current(), 'ROTATION.ANGLEX').setValue(currentValue.x);
-                        node.getAttr(_node, frame.current(), 'ROTATION.ANGLEY').setValue(currentValue.y);
-                        node.getAttr(_node, frame.current(), 'ROTATION.ANGLEZ').setValue(currentValue.z);
-                        break;
-
-                    default:
-                        // MessageLog.trace("-   VALUE: " + currentValue);
-                        if (numberTypes.indexOf(typeof attr.typeName()) === -1) currentValue = parseFloat(currentValue);
-                        // MessageLog.trace('Apply EColumn Value: ' + currentValue + ' > ' + typeof currentValue);
-                        attr.setValue(currentValue);
-                }
-
-
-            }
-
-        });
-
-    } catch (err) { MessageLog.trace('ERR:' + err) }
-
-}
-
-
-
-
-var numberTypes = ['DOUBLEVB', 'DOUBLE', 'INT'];
 
 //
 function getAttributeValue(attr) {
@@ -145,6 +40,16 @@ function getAttributeValue(attr) {
             return attr.textValue()
     }
 }
+
+
+//
+function renameNode(_node, _newName) {
+    var parent = node.parentNode(_node);
+    var newName = getUnusedName(parent + '/' + getValidNodeName(_newName)).split('/').pop();
+    if (!node.rename(_node, newName)) return;
+    return parent + '/' + newName;
+}
+
 
 //
 function getUnusedName(_node, nameOnly) {
@@ -195,7 +100,10 @@ function getNodesBounds(_nodes) {
             top: 999999
         }
     };
-
+    if (typeof _nodes === 'string') {
+        if (node.isGroup(_nodes)) _nodes = node.subNodes(_nodes);
+        else _nodes = [_nodes];
+    }
     _nodes.forEach(function(_node) {
         var x = node.coordX(_node);
         var y = node.coordY(_node);
@@ -233,6 +141,43 @@ function createNode(parentNode, name, type, x, y, src, dest) {
 
 
 //
+function unlinkAllInputs(_node) {
+
+    var numInput = node.numberOfInputPorts(_node);
+    for (var i = numInput - 1; i >= 0; i--) {
+        if (node.isLinked(_node, i)) node.unlink(_node, i);
+    }
+}
+
+//
+function unlinkAllOutputs(_node) {
+
+    // MessageLog.trace('unlinkAllOutputs: '+_node+' > '+node.type(_node) );
+    var numOutputPorts = node.numberOfOutputPorts(_node);
+
+    for (var i = numOutputPorts - 1; i >= 0; i--) {
+
+        var numLinks = node.numberOfOutputLinks(_node, i);
+
+        for (var j = numLinks - 1; j >= 0; j--) {
+            var dstNode = node.dstNode(_node, i, j)
+
+            var numInput = node.numberOfInputPorts(dstNode);
+            for (var di = numInput - 1; di >= 0; di--) {
+                var source = node.srcNode(dstNode, di);
+                if (source === _node) {
+                    node.unlink(dstNode, di);
+                    continue;
+                }
+            }
+
+        }
+
+    }
+
+}
+
+//
 function getOutputNodes(_node) {
     var numOutput = node.numberOfOutputPorts(_node);
     // MessageLog.trace('>>>>'+numOutput);
@@ -248,7 +193,7 @@ function getOutputNodes(_node) {
 }
 
 //
-function getAllChildNodes(nodes, typeFilter) {
+function getAllChildNodes(nodes, typeFilter, eachNodeCb, includeGroups) {
 
     if (typeof nodes === 'string') nodes = [nodes];
 
@@ -263,12 +208,19 @@ function getAllChildNodes(nodes, typeFilter) {
         var nodeType = node.type(_node);
 
         if (nodeType === 'GROUP') {
+            if (includeGroups && _nodes.indexOf(_node) === -1) {
+                _nodes.push(_node);
+                if (eachNodeCb) eachNodeCb(_node);
+            }
             (node.subNodes(_node) || []).forEach(function(n) { checkNode(n) });
             return;
         }
 
         if (!_typeFilter || nodeType.match(_typeFilter)) {
-            if (_nodes.indexOf(_node) === -1) _nodes.push(_node);
+            if (_nodes.indexOf(_node) === -1) {
+                _nodes.push(_node);
+                if (eachNodeCb) eachNodeCb(_node);
+            }
         }
 
         getOutputNodes(_node).forEach(function(n) { checkNode(n) });
@@ -361,11 +313,58 @@ function getDrawingKeyframes(columnName, startFrame, onlyUnique) {
 }
 
 
+//
+function clearKeys(_node, attrNames, startFrame, lastFrame) {
+
+    // try {
+    if (!attrNames) return;
+
+    if (attrNames === true) {
+        attrNames = getLinkedAttributeNames(_node);
+    }
+
+    if (typeof attrNames === 'string') attrNames = [attrNames];
+    // MessageLog.trace('clearKeys: ' + _node + ' > ' + attrNames.join(', '));
+
+    attrNames.forEach(function(attrName) {
+
+        var columnName = node.linkedColumn(_node, attrName);
+        if (!columnName || column.type(columnName) !== 'BEZIER') return;
+        var n = func.numberOfPoints(columnName);
+
+        var keysToRemove = [];
+
+        for (var i = 0; i < n; i++) {
+            var fr = func.pointX(columnName, i);
+            if (fr >= startFrame && fr <= lastFrame) keysToRemove.push(fr);
+            // MessageLog.trace(i + ')' + fr + ' > ' + func.pointConstSeg(columnName, i));
+        }
+
+        keysToRemove.forEach(function(fr) {
+            column.clearKeyFrame(columnName, fr);
+        });
+    });
+    // } catch (err) { MessageLog.trace('Error: clearKeys: ' + err) }
+
+}
+
+
+//
+function getLinkedAttributeNames(_node) {
+    var linkedAttrs = [];
+    getFullAttributeList(_node, 1, true).forEach(function(attrName, i) {
+        var _column = node.linkedColumn(_node, attrName);
+        // MessageLog.trace( i+') '+attrName+', '+_column  );
+        if (_column) linkedAttrs.push(attrName);
+    });
+    return linkedAttrs;
+}
+
 ///
 exports = {
     getAttributes: getAttributes,
     getFullAttributeList: getFullAttributeList,
-    unlinkFunctions: unlinkFunctions,
+    renameNode: renameNode,
     getUnusedName: getUnusedName,
     getValidNodeName: getValidNodeName,
     getNodesBounds: getNodesBounds,
@@ -374,4 +373,8 @@ exports = {
     getOutputNodes: getOutputNodes,
     getAllChildNodes: getAllChildNodes,
     getLayerByDrawing: getLayerByDrawing,
+    unlinkAllInputs: unlinkAllInputs,
+    getLinkedAttributeNames: getLinkedAttributeNames,
+    clearKeys: clearKeys,
+    unlinkAllOutputs: unlinkAllOutputs,
 }

@@ -38,8 +38,8 @@ Removes custom attributes with the Default state of transformation of selected P
 
 
 
-var Utils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/Utils.js"));
-var NodeUtils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/NodeUtils.js"));
+var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_ResetTransformation-Resources/ps/Utils.js"));
+var NodeUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_ResetTransformation-Resources/ps/NodeUtils.js"));
 
 //
 function _getCommonData() {

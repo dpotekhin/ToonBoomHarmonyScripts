@@ -57,8 +57,8 @@ packages/PS_Scene
 */
 
 //
-var FileSystem = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/FileSystem.js"));
-var Utils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/Utils.js"));
+var FileSystem = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_SceneHelper-Resources/ps/FileSystem.js"));
+var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_SceneHelper-Resources/ps/Utils.js"));
 //
 
 //

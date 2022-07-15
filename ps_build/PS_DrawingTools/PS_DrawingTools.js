@@ -11,7 +11,7 @@ Some tools has options - check out for tooltips on tool buttons.
 */
 
 
-var pModal = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/pModal.js"));
+var pModal = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_DrawingTools-Resources/ps/pModal.js"));
 var _DrawingTools = require(fileMapper.toNativePath(specialFolders.userScripts + "/PS_DrawingTools-Resources/DrawingTools.js"));
 
 //
