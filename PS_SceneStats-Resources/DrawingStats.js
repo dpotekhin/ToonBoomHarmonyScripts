@@ -171,6 +171,7 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
             toolTip: function(v) {
                 return 'Used Colors:\n' + v.map(function(vv) {
                     var colorItem = storage.colorsById[vv];
+                    if( !colorItem ) return 'n/a';
                     return '- ' + colorItem ? colorItem.paletteName + '/' + colorItem.colorName : vv;
                 }).join('\n');
             },

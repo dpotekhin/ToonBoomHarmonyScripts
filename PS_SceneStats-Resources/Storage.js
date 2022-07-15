@@ -61,6 +61,7 @@ var storage = {
         this.topSelectedNode = topSelectedNode;
         this.currentSceneName = scene.currentScene().replace(/\.tpl$/, '').replace(/\.|_v\d\d\d?$/, '');
         this.currentFrame = frame.current();
+        this.parsePalettesAndColors();
     },
 
     ///
