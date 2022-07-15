@@ -390,7 +390,7 @@ function PS_ScriptPacker(){
 				scriptText = scriptText.replace( entry, entryFixed );
 			})
 		}*/
-		scriptText = scriptText.replace(/specialFolders\.userScripts\+"\/ps\//g,'specialFolders.userScripts+"/'+scriptData.resourceFolderName+'/ps/');
+		scriptText = scriptText.replace(/specialFolders\.userScripts\s*?\+\s*?"\/ps\//g,'specialFolders.userScripts+"/'+scriptData.resourceFolderName+'/ps/');
 		// MessageLog.trace('requireEntries '+requireEntries );
 		return scriptText;
 	}
