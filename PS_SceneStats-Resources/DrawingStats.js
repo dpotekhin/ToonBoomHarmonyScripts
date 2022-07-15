@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.220714
+Version: 0.220715
 */
 
 //
@@ -13,7 +13,6 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
 
     // Collect Data
     var items = storage.getAllChildNodes(selectedNodes, 'READ');
-    if (!items.length) return;
 
     var usedElements = {};
     var scaleIndependentShorthands = {

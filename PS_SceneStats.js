@@ -29,7 +29,7 @@ function PS_SceneStats() {
             '!Drawings': function() { runStats({ drawings: true }); },
             '!Pegs': function() { runStats({ pegs: true }); },
             '!Composites': function() { runStats({ composites: true }); },
-            '!Unconneced Nodes': function() { runStats({ unconnectedNodes: true }); },
+            '!Unconnected Nodes': function() { runStats({ unconnectedNodes: true }); },
             '!General': function() { runStats({ general: true }); },
         });
 

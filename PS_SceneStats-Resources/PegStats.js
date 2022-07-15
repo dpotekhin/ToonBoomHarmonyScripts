@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.220630
+Version: 0.220715
 */
 
 //
@@ -14,7 +14,6 @@ exports = function( selectedNodes, modal, storage, contentMaxHeight ){
   	
   	// Collect Data
 	var items = storage.getAllChildNodes( selectedNodes, 'PEG' );
-	if( !items.length ) return;
 
 	items = items
 		.map(function(nodeData,i){
