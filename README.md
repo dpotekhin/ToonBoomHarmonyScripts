@@ -75,6 +75,10 @@ This script compensates for rotation attributes values change over 180 degrees b
 A set of scene helper scripts.
 
 
+## [PS_SceneStats](ps_build/PS_SceneStats)
+The script displays statistics on the nodes of the selected group.
+
+
 ## [PS_SelectionSets](ps_build/PS_SelectionSets)
 This script lets you to save and use groups of node selection sets (SS).
 

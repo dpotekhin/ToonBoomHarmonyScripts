@@ -11,6 +11,7 @@ exports = {
     eachDrawingColumnKey: eachDrawingColumnKey,
     getColumnEntries: getColumnEntries,
     clearExposures: clearExposures,
+    getUnusedColumnName: getUnusedColumnName,
 }
 
 //
@@ -92,10 +93,19 @@ function getColumnEntries(columnName) {
 
 //
 function  clearExposures( columnName, firstFrame, lastFrame ) {
-	// MessageLog.trace('clearExposures'+firstFrame+' >'+lastFrame);
-	for( var f=firstFrame; f<=lastFrame; f++ ){
-		// MessageLog.trace('>'+f);
-		column.setEntry( columnName, 1, f, '' );
-		// column.removeKeyDrawingExposureAt( columnName, f );
-	}
+    // MessageLog.trace('clearExposures'+firstFrame+' >'+lastFrame);
+    for( var f=firstFrame; f<=lastFrame; f++ ){
+        // MessageLog.trace('>'+f);
+        column.setEntry( columnName, 1, f, '' );
+        // column.removeKeyDrawingExposureAt( columnName, f );
+    }
+}
+
+//
+function getUnusedColumnName( columnName ){
+    if( !column.type( columnName ) ) return columnName;
+    for( var i=1; i<100; i++ ){
+        var _columnName = columnName+'_'+i;
+        if( !column.type( _columnName ) ) return _columnName;
+    }
 }

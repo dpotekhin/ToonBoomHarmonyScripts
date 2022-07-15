@@ -1,9 +1,16 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
 
-Name: PS_SceneStats
-Version: 0.220715
+[Name: PS_SceneStats :]
+[Version: 0.220715 :]
 
+[Description:
+The script displays statistics on the nodes of the selected group.
+:]
+
+[Usage:
+Select a Group or Node in that Group, click the Script button and select the desired stats.
+:]
 */
 
 

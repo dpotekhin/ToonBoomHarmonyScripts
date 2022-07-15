@@ -10,7 +10,7 @@ Some tools has options - check out for tooltips on tool buttons.
 :]
 */
 
-var pModal = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/pModal.js"));
+var pModal = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_PaletteTools-Resources/ps/pModal.js"));
 var _PaletteTools = require(fileMapper.toNativePath(specialFolders.userScripts + "/PS_PaletteTools-Resources/PaletteTools.js"));
 
 ///
