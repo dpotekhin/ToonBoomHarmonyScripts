@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.211224
+Version: 0.220715
 
 
 Options:
@@ -92,7 +92,7 @@ function PS_CreateDrawingNode(){
 	}
 
 	var posX = placeOnLeftOfTarget ? node.coordX(_selectedNode) + node.width(_selectedNode) + xNodeOffset : node.coordX(_selectedNode) - node.width(drawingNode) - xNodeOffset;
-	var posY = node.coordY(_selectedNode);
+	var posY = node.coordY(_selectedNode) - (node.type(_selectedNode) === 'COMPOSITE' ? 100 : 0 );
 	node.setCoord( drawingNode, posX, posY );
 	
 	// Switch off the Animate Using Animation Tools flag
@@ -167,6 +167,8 @@ function PS_CreateDrawingNode(){
 
 	function _getLinkedComposite( _node ){
 		
+		if( node.type(_node) === 'COMPOSITE' ) return _node;
+
 		var numOutput = node.numberOfOutputPorts( _node );
 		// MessageLog.trace(_node+': '+numOutput);
 		for( var o=0; o<numOutput; o++){
