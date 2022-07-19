@@ -312,6 +312,8 @@ var storage = {
                 if (entry !== '' && nodeData.usedDrawingTimings.indexOf(entry) === -1) nodeData.usedDrawingTimings.push(entry);
             }
 
+            nodeData.unusedDrawingTimings = nodeData.drawingTimings.filter(function(nn) { return nodeData.usedDrawingTimings.indexOf(nn) === -1; });
+
             //
             var drawingKeys = [];
             for (var ki = 0; ki < nodeData.drawingTimings.length; ki++) {

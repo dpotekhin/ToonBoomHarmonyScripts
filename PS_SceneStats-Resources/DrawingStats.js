@@ -139,6 +139,19 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
         },
 
         {
+            key: 'unusedDrawingTimings',
+            header: '-UDT',
+            toolTip: function(v, data) {
+                return 'Unused Drawing Timings:\n' + v.map(function(v) { return '- ' + v; }).join('\n');
+            },
+            getValue: function(v, data) {
+                return v.length;
+            },
+            getBg: storage.bgSuccessYellow,
+            onClick: storage.defaultCellClick,
+        },
+
+        {
             key: 'drawingSyncedTo',
             header: 'Sync',
             toolTip: function(v) { return v ? 'Synced to Column: ' + v : 'Drawing is not synced' },
@@ -171,7 +184,7 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
             toolTip: function(v) {
                 return 'Used Colors:\n' + v.map(function(vv) {
                     var colorItem = storage.colorsById[vv];
-                    if( !colorItem ) return 'n/a';
+                    if (!colorItem) return 'n/a';
                     return '- ' + colorItem ? colorItem.paletteName + '/' + colorItem.colorName : vv;
                 }).join('\n');
             },
