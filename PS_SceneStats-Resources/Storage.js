@@ -40,10 +40,12 @@ function checkByValueType(val, equalTo) {
 var storage = {
 
     ICONS_PATH: fileMapper.toNativePath(specialFolders.userScripts + "/PS_SceneStats-Resources/icons/"),
+    ART_LAYERS: ['UL', 'CA', 'LA', 'OL'],
 
     topSelectedNode: undefined,
     nodes: {},
     nodesByType: {},
+    elements: [],
 
     palettes: undefined,
     colors: undefined,
@@ -75,6 +77,8 @@ var storage = {
     bgWarning: new QBrush(new QColor('#404000')),
     bgStrange: new QBrush(new QColor('#444400')),
     bgInfo: new QBrush(new QColor('#000044')),
+    bgGray1: new QBrush(new QColor('#303030')),
+    bgGray2: new QBrush(new QColor('#101010')),
     bgSuccessOrFail: function(v) { return checkNull(v, checkByValueType(v) ? storage.bgSuccess : storage.bgFail); },
     bgFailOnly: function(v) { return checkNull(v, checkByValueType(v) ? undefined : storage.bgFail); },
     bgSuccessOrFailInverted: function(v) { return checkNull(v, !checkByValueType(v) ? storage.bgSuccess : storage.bgFail); },
@@ -82,7 +86,8 @@ var storage = {
     bgFailYellow: function(v) { return checkNull(v, checkByValueType(v) ? storage.bgSuccess : storage.bgYellow); },
     bgEmpty: function(v) { return checkNull(v, !checkByValueType(v) || checkByValueType(v, 0) ? storage.bgFail : undefined); },
     bgSuccessIfOne: function(v) { return checkNull(v, checkByValueType(v, 1) ? storage.bgSuccess : storage.bgYellow); },
-
+    bgIndex: function(v) { return (typeof v === 'string' ? Number(v.split('-')[0]) : v) % 2 ? storage.bgGray1 : storage.bgGray2; },
+    
     outputYesNo: function(v) { return checkNull(v, checkByValueType(v) ? 'Yes' : 'No'); },
     outputYesNoInverted: function(v) { return checkNull(v, !checkByValueType(v) ? 'Yes' : 'No'); },
     outputValueOrNo: function(v) { return checkNull(v, checkByValueType(v) ? v : 'No'); },
@@ -306,15 +311,72 @@ var storage = {
             nodeData.drawingSubstitutions = column.getDrawingTimings(nodeData.drawingColumn);
             nodeData.drawingSyncedTo = node.getTextAttr(_node, storage.currentFrame, 'DRAWING.ELEMENT.LAYER');
 
+            nodeData.usedDrawingSubstitutionsFrames = [];
             nodeData.usedDrawingSubstitutions = [];
             for (var f = 1; f <= frame.numberOf(); f++) {
                 var entry = column.getEntry(nodeData.drawingColumn, 1, f)
-                if (entry !== '' && nodeData.usedDrawingSubstitutions.indexOf(entry) === -1) nodeData.usedDrawingSubstitutions.push(entry);
+                if (entry !== '' && nodeData.usedDrawingSubstitutions.indexOf(entry) === -1) {
+                    nodeData.usedDrawingSubstitutions.push(entry);
+                    nodeData.usedDrawingSubstitutionsFrames.push(f);
+                }
             }
 
             nodeData.unusedDrawingSubstitutions = nodeData.drawingSubstitutions.filter(function(nn) { return nodeData.usedDrawingSubstitutions.indexOf(nn) === -1; });
 
-            //
+            // Drawing substitutions
+            var elementData = _this.elements[nodeData.elementId];
+
+            if (!elementData) {
+
+                var drawingSubstitutions = {};
+                nodeData.drawingSubstitutions.forEach(function(dsName) {
+
+                    var usedArtLayers = [];
+                    for (var ai = 0; ai < 4; ai++) {
+                        var config = {
+                            drawing: {
+                                elementId: nodeData.elementId,
+                                exposure: dsName,
+                            },
+                            art: ai
+                        };
+                        if (nodeData.drawingSyncedTo) config.drawing.layer = nodeData.drawingSyncedTo;
+                        if (!Drawing.query.getBox(config).empty) usedArtLayers.push(_this.ART_LAYERS[ai]);
+                    }
+
+                    drawingSubstitutions[dsName] = {
+                        id: nodeData.elementId,
+                        name: dsName,
+                        exposedOnTimeline: {},
+                        usedArtLayers: usedArtLayers,
+                        isEmpty: !usedArtLayers.length,
+                        usedColors: [],
+                        usedInNode: nodeData.node,
+                    }
+                });
+                elementData = _this.elements[nodeData.elementId] = {
+                    elementId: nodeData.elementId,
+                    name: element.getNameById(nodeData.elementId),
+                    columns: [],
+                    nodes: [],
+                    drawingSubstitutions: drawingSubstitutions
+                };
+            }
+
+            elementData.columns.push(nodeData.drawingColumn);
+            elementData.nodes.push(nodeData.node);
+
+            nodeData.drawingSubstitutions.forEach(function(dsName, dsI) {
+                var usedDSIndex = nodeData.usedDrawingSubstitutions.indexOf(dsName);
+                if (usedDSIndex !== -1) {
+                    elementData.drawingSubstitutions[dsName].usedInNode = nodeData.node;
+                    elementData.drawingSubstitutions[dsName].usedInFrame = nodeData.usedDrawingSubstitutionsFrames[usedDSIndex];
+                }
+            });
+
+            // MessageLog.trace('nodeData.usedColors: \n' + JSON.stringify(nodeData.usedColors, true, '  '));
+
+            // Used Colors
             var drawingKeys = [];
             for (var ki = 0; ki < nodeData.drawingSubstitutions.length; ki++) {
                 drawingKeys.push(Drawing.Key({
@@ -330,9 +392,8 @@ var storage = {
                     colorData.usedInScene = true;
                     colorData.palette.usedInScene = true;
                 }
-            })
+            });
 
-            // MessageLog.trace('nodeData.usedColors: \n' + JSON.stringify(nodeData.usedColors, true, '  '));
         }
 
         storage.nodesByType[nodeType].push(nodeData);

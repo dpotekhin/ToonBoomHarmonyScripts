@@ -64,6 +64,12 @@ exports = function(options) {
             tabsAdded++;
         }
 
+        if (options.all || options.drawingSubs) {
+            var DrawingSubsStats = require(fileMapper.toNativePath(specialFolders.userScripts + "/PS_SceneStats-Resources/DrawingSubsStats.js"));
+            tabs.addTab(new DrawingSubsStats(selectedNodes, undefined, storage, contentMaxHeight), 'Drawings Substitutions');
+            tabsAdded++;
+        }
+
         if (options.all || options.composites) {
             var CompositeStats = require(fileMapper.toNativePath(specialFolders.userScripts + "/PS_SceneStats-Resources/CompositeStats.js"));
             tabs.addTab(new CompositeStats(selectedNodes, undefined, storage, contentMaxHeight), 'Composites');

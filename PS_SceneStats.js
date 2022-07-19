@@ -35,6 +35,7 @@ function PS_SceneStats() {
             '!Palettes + Colors (Click + Alt)': function() { runStats({ palettes: true, colors: true }); },
             '!Drawings': function() { runStats({ drawings: true }); },
             '!Pegs': function() { runStats({ pegs: true }); },
+            '!Drawing Substitutions': function() { runStats({ drawingSubs: true }); },
             '!Composites': function() { runStats({ composites: true }); },
             '!Unconnected Nodes': function() { runStats({ unconnectedNodes: true }); },
             '!General': function() { runStats({ general: true }); },
