@@ -51,8 +51,8 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
     storage.getAllChildNodes(selectedNodes, 'READ').forEach(function(nodeData) {
         if (drawingElements.indexOf(nodeData.elementId) !== -1) return;
         drawingElements.push(nodeData.elementId);
-        drawingSubstitutions += nodeData.drawingTimings.length;
-        usedDrawingSubstitutions += nodeData.usedDrawingTimings.length;
+        drawingSubstitutions += nodeData.drawingSubstitutions.length;
+        usedDrawingSubstitutions += nodeData.usedDrawingSubstitutions.length;
     });
 
 

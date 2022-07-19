@@ -113,10 +113,10 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
         },
 
         {
-            key: 'drawingTimings',
-            header: 'DT',
+            key: 'drawingSubstitutions',
+            header: 'DS',
             toolTip: function(v, data) {
-                return 'Drawing Timings:\n' + v.map(function(v) { return '- ' + v; }).join('\n');
+                return 'Drawing Substitutions:\n' + v.map(function(v) { return '- ' + v; }).join('\n');
             },
             getValue: function(v, data) {
                 return v.length;
@@ -126,10 +126,10 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
         },
 
         {
-            key: 'usedDrawingTimings',
-            header: 'UDT',
+            key: 'usedDrawingSubstitutions',
+            header: 'UDS',
             toolTip: function(v, data) {
-                return 'Used Drawing Timings:\n' + v.map(function(v) { return '- ' + v; }).join('\n');
+                return 'Used Drawing Substitutions:\n' + v.map(function(v) { return '- ' + v; }).join('\n');
             },
             getValue: function(v, data) {
                 return v.length;
@@ -139,10 +139,10 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
         },
 
         {
-            key: 'unusedDrawingTimings',
-            header: '-UDT',
+            key: 'unusedDrawingSubstitutions',
+            header: '-UDS',
             toolTip: function(v, data) {
-                return 'Unused Drawing Timings:\n' + v.map(function(v) { return '- ' + v; }).join('\n');
+                return 'Unused Drawing Substitutions:\n' + v.map(function(v) { return '- ' + v; }).join('\n');
             },
             getValue: function(v, data) {
                 return v.length;

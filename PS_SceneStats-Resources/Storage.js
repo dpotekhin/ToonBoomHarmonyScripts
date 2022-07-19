@@ -303,23 +303,23 @@ var storage = {
 
             nodeData.elementId = node.getElementId(_node);
             nodeData.drawingColumn = node.linkedColumn(_node, 'DRAWING.ELEMENT');
-            nodeData.drawingTimings = column.getDrawingTimings(nodeData.drawingColumn);
+            nodeData.drawingSubstitutions = column.getDrawingTimings(nodeData.drawingColumn);
             nodeData.drawingSyncedTo = node.getTextAttr(_node, storage.currentFrame, 'DRAWING.ELEMENT.LAYER');
 
-            nodeData.usedDrawingTimings = [];
+            nodeData.usedDrawingSubstitutions = [];
             for (var f = 1; f <= frame.numberOf(); f++) {
                 var entry = column.getEntry(nodeData.drawingColumn, 1, f)
-                if (entry !== '' && nodeData.usedDrawingTimings.indexOf(entry) === -1) nodeData.usedDrawingTimings.push(entry);
+                if (entry !== '' && nodeData.usedDrawingSubstitutions.indexOf(entry) === -1) nodeData.usedDrawingSubstitutions.push(entry);
             }
 
-            nodeData.unusedDrawingTimings = nodeData.drawingTimings.filter(function(nn) { return nodeData.usedDrawingTimings.indexOf(nn) === -1; });
+            nodeData.unusedDrawingSubstitutions = nodeData.drawingSubstitutions.filter(function(nn) { return nodeData.usedDrawingSubstitutions.indexOf(nn) === -1; });
 
             //
             var drawingKeys = [];
-            for (var ki = 0; ki < nodeData.drawingTimings.length; ki++) {
+            for (var ki = 0; ki < nodeData.drawingSubstitutions.length; ki++) {
                 drawingKeys.push(Drawing.Key({
                     elementId: nodeData.elementId,
-                    exposure: nodeData.drawingTimings[ki],
+                    exposure: nodeData.drawingSubstitutions[ki],
                     layer: nodeData.drawingSyncedTo
                 }));
             }
