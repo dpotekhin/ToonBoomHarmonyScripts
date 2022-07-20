@@ -68,8 +68,9 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
         preferences.setBool('ADVANCED_ENABLE_PERFORMANCE_REPORT', !preferences.getBool('ADVANCED_ENABLE_PERFORMANCE_REPORT', true));
     });
 
+
     // Test Render
-    var testRenderButton = modal.addButton('Test Render', buttonsGroup, 150, 30, '', function() {
+    var testRenderButton = modal.addButton('Test Render', buttonsGroup, 70, 30, '', function() {
 
         var tempDisplayNode = node.add(
             node.parentNode(storage.topSelectedNode),
@@ -109,6 +110,14 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
         node.deleteNode(tempDisplayNode);
 
     });
+
+
+    // Show Drawing Substitutions Tab Button
+    var showDrawingSubstitutionsTabButton = modal.addButton('Show Drawing Substitutions Tab', buttonsGroup, 170, 30, '', function() {
+        showDrawingSubstitutionsTabButton.enabled = false;
+        storage.showDrawingSubstitutionStatsTab();
+    });
+
 
     buttonsGroup.mainLayout.addStretch();
 

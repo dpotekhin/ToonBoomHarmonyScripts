@@ -5,6 +5,7 @@ Version: 0.220715
 var Utils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/Utils.js"));
 var SelectionUtils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/SelectionUtils.js"));
 var NodeUtils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/NodeUtils.js"));
+var Sha1 = require(fileMapper.toNativePath(specialFolders.userScripts + "/PS_SceneStats-Resources/Sha1.js"));
 
 ///
 function checkNull(v1, v2) {
@@ -46,6 +47,7 @@ var storage = {
     nodes: {},
     nodesByType: {},
     elements: [],
+    drawingSubstitutionHashes: {},
 
     palettes: undefined,
     colors: undefined,
@@ -87,7 +89,7 @@ var storage = {
     bgEmpty: function(v) { return checkNull(v, !checkByValueType(v) || checkByValueType(v, 0) ? storage.bgFail : undefined); },
     bgSuccessIfOne: function(v) { return checkNull(v, checkByValueType(v, 1) ? storage.bgSuccess : storage.bgYellow); },
     bgIndex: function(v) { return (typeof v === 'string' ? Number(v.split('-')[0]) : v) % 2 ? storage.bgGray1 : storage.bgGray2; },
-    
+
     outputYesNo: function(v) { return checkNull(v, checkByValueType(v) ? 'Yes' : 'No'); },
     outputYesNoInverted: function(v) { return checkNull(v, !checkByValueType(v) ? 'Yes' : 'No'); },
     outputValueOrNo: function(v) { return checkNull(v, checkByValueType(v) ? v : 'No'); },
@@ -281,6 +283,7 @@ var storage = {
     },
 
 
+    //
     parseNodeData: function(_node) {
 
         if (storage.nodes[_node]) return;
@@ -303,6 +306,8 @@ var storage = {
             destNode: storage.hasAnyDest(_node),
             hasNumberEnding: name.match(/_\d\d?$/),
         };
+
+        var tempCoun = 0;
 
         if (nodeType === 'READ') {
 
@@ -329,6 +334,7 @@ var storage = {
             if (!elementData) {
 
                 var drawingSubstitutions = {};
+
                 nodeData.drawingSubstitutions.forEach(function(dsName) {
 
                     var usedArtLayers = [];
@@ -341,19 +347,23 @@ var storage = {
                             art: ai
                         };
                         if (nodeData.drawingSyncedTo) config.drawing.layer = nodeData.drawingSyncedTo;
-                        if (!Drawing.query.getBox(config).empty) usedArtLayers.push(_this.ART_LAYERS[ai]);
+                        var box = Drawing.query.getBox(config);
+                        // if(nodeData.name==='HEAD') MessageLog.trace('??? '+dsName+' >>> '+ai+' >> '+JSON.stringify(box,true,'  '))
+                        if (box && !box.empty) usedArtLayers.push(_this.ART_LAYERS[ai]);
                     }
 
                     drawingSubstitutions[dsName] = {
-                        id: nodeData.elementId,
+                        elementId: nodeData.elementId,
                         name: dsName,
-                        exposedOnTimeline: {},
+                        // exposedOnTimeline: {},
                         usedArtLayers: usedArtLayers,
                         isEmpty: !usedArtLayers.length,
                         usedColors: [],
                         usedInNode: nodeData.node,
-                    }
+                    };
+
                 });
+
                 elementData = _this.elements[nodeData.elementId] = {
                     elementId: nodeData.elementId,
                     name: element.getNameById(nodeData.elementId),
@@ -361,6 +371,7 @@ var storage = {
                     nodes: [],
                     drawingSubstitutions: drawingSubstitutions
                 };
+
             }
 
             elementData.columns.push(nodeData.drawingColumn);
@@ -373,8 +384,6 @@ var storage = {
                     elementData.drawingSubstitutions[dsName].usedInFrame = nodeData.usedDrawingSubstitutionsFrames[usedDSIndex];
                 }
             });
-
-            // MessageLog.trace('nodeData.usedColors: \n' + JSON.stringify(nodeData.usedColors, true, '  '));
 
             // Used Colors
             var drawingKeys = [];
@@ -397,6 +406,77 @@ var storage = {
         }
 
         storage.nodesByType[nodeType].push(nodeData);
+
+    },
+
+
+
+
+    //
+    parseDrawingSubstitutions: function() {
+
+        var isCanceled = false;
+        storage.createProgressBar(function() { isCanceled = true; });
+
+        var total = 0;
+        Object.keys(storage.elements).forEach(function(elName, elI) {
+            total += Object.keys(storage.elements[elName].drawingSubstitutions).length;
+        });
+
+        var totalI = 0;
+
+        Object.keys(storage.elements).forEach(function(elName, elI) {
+
+            if (isCanceled) return;
+
+            var elData = storage.elements[elName];
+            // if(elName !== 24) return;
+            Object.keys(elData.drawingSubstitutions).forEach(function(dsName, dsI) {
+
+                if (isCanceled) return;
+
+                var dsData = elData.drawingSubstitutions[dsName];
+
+                if (dsData.usedArtLayers.length) {
+
+                    MessageLog.trace('DS: ' + elName + ' > ' + dsName);
+                    var hash = '';
+
+                    for (var ai = 0; ai < 4; ai++) {
+                        // if (dsData.usedArtLayers.indexOf(storage.ART_LAYERS[ai]) === -1) return;
+                        var config = {
+                            drawing: {
+                                elementId: elData.elementId,
+                                exposure: dsName,
+                            },
+                            art: ai
+                        };
+                        hash += Sha1(Drawing.query.getData(config)) + '_';
+                    }
+
+                    dsData.hash = hash;
+
+                    if (!storage.drawingSubstitutionHashes[hash]) storage.drawingSubstitutionHashes[hash] = [];
+                    storage.drawingSubstitutionHashes[hash].push({
+                        elData: elData,
+                        drawingSubstitution: dsName
+                    });
+                }
+
+                totalI++;
+                storage.updateProgressBar(~~(totalI / total * 100));
+                // MessageLog.trace('DS Hash: ' + elData.name + ' > ' + dsName + ' >> ' + hash);
+
+            });
+
+
+            // MessageLog.trace('>> ' + JSON.stringify(elData.drawingSubstitutions, true, '  '));
+
+        });
+
+        storage.closeProgressBar();
+
+        return !isCanceled;
 
     },
 
@@ -506,6 +586,53 @@ var storage = {
 
     },
 
+
+    // PROGRESS BAR
+    createProgressBar: function(onCancel) {
+
+        if (storage.progressBarUI) return;
+
+        var progressBarUI = storage.progressBarUI = new QProgressDialog(
+            "Processing Drawing Substitutions...",
+            "Cancel",
+            0,
+            100,
+            this,
+            Qt.FramelessWindowHint
+        );
+
+        progressBarUI.modal = true;
+        progressBarUI.value = 0;
+        progressBarUI.maximum = 100;
+        progressBarUI.minimumDuration = 0;
+
+        progressBarUI.show();
+
+        progressBarUI.canceled.connect(storage, function() {
+            // MessageLog.trace('Cancel pressed');
+            // isCanceled = true;
+            storage.progressBarUI = undefined;
+            if (onCancel) onCancel();
+        });
+
+        return progressBarUI;
+
+    },
+
+    updateProgressBar: function(v) {
+
+        if (!storage.progressBarUI) return;
+        storage.progressBarUI.value = v;
+        // MessageLog.trace('updateProgressBar: ' + v);
+    },
+
+    closeProgressBar: function() {
+
+        if (!storage.progressBarUI) return;
+
+        storage.progressBarUI.close();
+        storage.progressBarUI = undefined;
+    },
 
 
 };
