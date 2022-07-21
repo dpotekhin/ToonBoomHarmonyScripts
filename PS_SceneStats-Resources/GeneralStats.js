@@ -237,7 +237,7 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
         },
 
     ], tablesGroup, contentMaxHeight - 40);
-    tableView.minimumWidth = tableView.maximumWidth = 310;
+    tableView.minimumWidth = tableView.maximumWidth = 340;
 
 
     tablesGroup.mainLayout.addStretch();
