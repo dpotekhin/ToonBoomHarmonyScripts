@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.210728
+Version: 0.220715
 
 Base methods of the Expression editor
 */
@@ -55,7 +55,7 @@ function ExpressionEditor(){
             return;
         }
 
-        if( expressionBody ) _this.saveExpression( columnName, expressionBody );
+        if( expressionBody !== undefined ) _this.saveExpression( columnName, expressionBody );
 
         _this.onExpressionListRefreshed(columnName);
 
@@ -65,11 +65,44 @@ function ExpressionEditor(){
 
     }
 
+
+    //
+    this.lockAllNodeAttrs = function( unlinkedOnly ){
+        
+        var selectedNodes = selection.selectedNodes();
+        if( !selectedNodes ) return;
+
+        scene.beginUndoRedoAccum('Lock All Unlinked Attributes');
+        
+        var expressionColumnDefaultName = 'LOCK';
+        var expressionColumn = column.getColumnListOfType('EXPR').filter(function(v){ return v === expressionColumnDefaultName; }).pop();
+        if( !expressionColumn ) {
+            expressionColumn = column.add(expressionColumnDefaultName, 'EXPR');
+            _this.onExpressionListRefreshed(expressionColumnDefaultName);
+        };
+
+        this.traverseNodes(selectedNodes, function(_node){
+            Utils.getAnimatableAttrs( _node ).forEach(function(attrName){
+                if( node.linkedColumn(_node, attrName) ){
+                    if( unlinkedOnly ) return;
+                    node.unlinkAttr(_node, attrName);
+                }
+                node.linkAttr(_node,attrName,expressionColumnDefaultName);
+            });
+        });
+
+        scene.endUndoRedoAccum();
+
+    }
+
+
+    //
     this.saveExpression = function( expressionName, expressionBody ){
         if( !expressionName ) return;
         var result = column.setTextOfExpr( expressionName, expressionBody );
         return true;
     }
+
 
     //
     this.renameExpression = function() {
@@ -478,6 +511,8 @@ function ExpressionEditor(){
 
     //
     this.traverseNodes = function( nodes, callback ){
+        
+        if( typeof nodes === 'string' ) nodes = [nodes];
 
         nodes.forEach(function(_node){
 

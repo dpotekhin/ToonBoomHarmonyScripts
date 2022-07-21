@@ -113,10 +113,10 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
         },
 
         {
-            key: 'drawingTimings',
-            header: 'DT',
+            key: 'drawingSubstitutions',
+            header: 'DS',
             toolTip: function(v, data) {
-                return 'Drawing Timings:\n' + v.map(function(v) { return '- ' + v; }).join('\n');
+                return 'Drawing Substitutions:\n' + v.map(function(v) { return '- ' + v; }).join('\n');
             },
             getValue: function(v, data) {
                 return v.length;
@@ -126,15 +126,28 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
         },
 
         {
-            key: 'usedDrawingTimings',
-            header: 'UDT',
+            key: 'usedDrawingSubstitutions',
+            header: 'UDS',
             toolTip: function(v, data) {
-                return 'Used Drawing Timings:\n' + v.map(function(v) { return '- ' + v; }).join('\n');
+                return 'Used Drawing Substitutions:\n' + v.map(function(v) { return '- ' + v; }).join('\n');
             },
             getValue: function(v, data) {
                 return v.length;
             },
             getBg: storage.bgFailOnly,
+            onClick: storage.defaultCellClick,
+        },
+
+        {
+            key: 'unusedDrawingSubstitutions',
+            header: '-UDS',
+            toolTip: function(v, data) {
+                return 'Unused Drawing Substitutions:\n' + v.map(function(v) { return '- ' + v; }).join('\n');
+            },
+            getValue: function(v, data) {
+                return v.length;
+            },
+            getBg: storage.bgSuccessYellow,
             onClick: storage.defaultCellClick,
         },
 
@@ -171,6 +184,7 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
             toolTip: function(v) {
                 return 'Used Colors:\n' + v.map(function(vv) {
                     var colorItem = storage.colorsById[vv];
+                    if (!colorItem) return 'n/a';
                     return '- ' + colorItem ? colorItem.paletteName + '/' + colorItem.colorName : vv;
                 }).join('\n');
             },
