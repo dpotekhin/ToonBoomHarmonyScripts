@@ -2,7 +2,7 @@
 Author: Dima Potekhin (skinion.onn@gmail.com)
 
 [Name: PS_SelectionSets :]
-[Version: 0.220531 :]
+[Version: 0.220727 :]
 
 [Description:
 A set of tools for working with deformers.
@@ -10,7 +10,7 @@ Some tools has options - check out for tooltips on tool buttons.
 :]
 */
 
-var _DeformerTools = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_DeformerTools-Resources/DeformerTools.js"));
+var _DeformerUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/DeformerUtils.js"));
 var _Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
 var pModal = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/pModal.js"));
 var SelectionUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/SelectionUtils.js"));
@@ -23,12 +23,12 @@ function PS_DeformerTools(){
 
   //
   var scriptName = 'Deformer Tools';
-  var scriptVer = '0.220401';
+  var scriptVer = '0.220727';
   //
 
   // var SETTINGS_NAME = 'PS_DEFORMER_TOOLS_SETTINGS';
 
-  var DeformerTools = _DeformerTools;
+  var DeformerUtils = _DeformerUtils;
   var Utils = _Utils;
 
   var btnHeight = 30;
@@ -56,7 +56,7 @@ function PS_DeformerTools(){
   modal.addButton( '', alignGroup, btnHeight, btnHeight,
   	iconPath+'align-left.png',
     function(){
-      DeformerTools.alignVertically( -1, KeyModifiers.IsShiftPressed() );
+      DeformerUtils.alignVertically( -1, KeyModifiers.IsShiftPressed() );
     },
     'Align points to the left.'
     +'\n- Hold down the Shift key to change the resting attributes.'
@@ -65,7 +65,7 @@ function PS_DeformerTools(){
   modal.addButton( '', alignGroup, btnHeight, btnHeight,
   	iconPath+'align-h-center.png',
     function(){
-      DeformerTools.alignVertically( 0, KeyModifiers.IsShiftPressed() );
+      DeformerUtils.alignVertically( 0, KeyModifiers.IsShiftPressed() );
     },
     'Align points to the horizontal center.'
     +'\n- Hold down the Shift key to change the resting attributes.'
@@ -74,7 +74,7 @@ function PS_DeformerTools(){
   modal.addButton( '', alignGroup, btnHeight, btnHeight,
   	iconPath+'align-right.png',
     function(){
-      DeformerTools.alignVertically( 1, KeyModifiers.IsShiftPressed() );
+      DeformerUtils.alignVertically( 1, KeyModifiers.IsShiftPressed() );
     },
     'Align points to the right.'
     +'\n- Hold down the Shift key to change the resting attributes.'
@@ -87,7 +87,7 @@ function PS_DeformerTools(){
   modal.addButton( '', alignGroup, btnHeight, btnHeight,
   	iconPath+'align-top.png',
     function(){
-      DeformerTools.alignHorizontally( 1, KeyModifiers.IsShiftPressed() );
+      DeformerUtils.alignHorizontally( 1, KeyModifiers.IsShiftPressed() );
     },
     'Align points to the top.'
     +'\n- Hold down the Shift key to change the resting attributes.'
@@ -96,7 +96,7 @@ function PS_DeformerTools(){
 	modal.addButton( '', alignGroup, btnHeight, btnHeight,
   	iconPath+'align-v-center.png',
     function(){
-      DeformerTools.alignHorizontally( 0, KeyModifiers.IsShiftPressed() );
+      DeformerUtils.alignHorizontally( 0, KeyModifiers.IsShiftPressed() );
     },
     'Align points to the center.'
     +'\n- Hold down the Shift key to change the resting attributes.'
@@ -105,7 +105,7 @@ function PS_DeformerTools(){
   modal.addButton( '', alignGroup, btnHeight, btnHeight,
   	iconPath+'align-bottom.png',
     function(){
-      DeformerTools.alignHorizontally( -1, KeyModifiers.IsShiftPressed() );
+      DeformerUtils.alignHorizontally( -1, KeyModifiers.IsShiftPressed() );
     },
     'Align points to the bottom.'
     +'\n- Hold down the Shift key to change the resting attributes.'
@@ -123,7 +123,7 @@ function PS_DeformerTools(){
   modal.addButton( '', cpGroup, btnHeight, btnHeight,
   	iconPath+'orient-points.png',
     function(){
-      DeformerTools.orientControlPoints( undefined, KeyModifiers.IsShiftPressed(), KeyModifiers.IsControlPressed() );
+      DeformerUtils.orientControlPoints( undefined, KeyModifiers.IsShiftPressed(), KeyModifiers.IsControlPressed() );
     },
     'Orient control points to oposite points.'
     +'\n- Hold down the Shift key to change the resting attributes.'
@@ -133,7 +133,7 @@ function PS_DeformerTools(){
   modal.addButton( '', cpGroup, btnHeight, btnHeight,
   	iconPath+'points-on-thirds.png',
     function(){
-      DeformerTools.distributeControlPoints( undefined, KeyModifiers.IsShiftPressed(), KeyModifiers.IsControlPressed() );
+      DeformerUtils.distributeControlPoints( undefined, KeyModifiers.IsShiftPressed(), KeyModifiers.IsControlPressed() );
     },
     'Distribute control points on thirds.'
     +'\n- Hold down the Shift key to change the resting attributes.'
@@ -143,7 +143,7 @@ function PS_DeformerTools(){
   modal.addButton( '', cpGroup, btnHeight, btnHeight,
     iconPath+'move-around-left.png',
     function(){
-      DeformerTools.moveDeformersAround('left');
+      DeformerUtils.moveDeformersAround('left');
     },
     'Move deformers around to the left'
   );
@@ -151,7 +151,7 @@ function PS_DeformerTools(){
   modal.addButton( '', cpGroup, btnHeight, btnHeight,
     iconPath+'move-around-right.png',
     function(){
-      DeformerTools.moveDeformersAround('right');
+      DeformerUtils.moveDeformersAround('right');
     },
     'Move deformers around to the right'
   );
@@ -159,7 +159,7 @@ function PS_DeformerTools(){
   modal.addButton( '', cpGroup, btnHeight, btnHeight,
     iconPath+'insert-cp.png',
     function(){
-      DeformerTools.insertControlPoint();
+      DeformerUtils.insertControlPoint();
     },
     'Insert a Control point to the Deformer'
   );
@@ -176,8 +176,8 @@ function PS_DeformerTools(){
   modal.addButton( '', gdGroup, btnHeight, btnHeight,
     iconPath+'generate-circle.png',
     function(){
-      var artIndex = KeyModifiers.IsControlPressed() ? DeformerTools.COLORART : undefined;
-      DeformerTools.generateCircleDeformer( artIndex );
+      var artIndex = KeyModifiers.IsControlPressed() ? DeformerUtils.COLORART : undefined;
+      DeformerUtils.generateCircleDeformer( artIndex );
     },
     'Generate Circle Deformer.'
     +'\n- Hold down the Control key to use Color Art as a source.'
@@ -186,8 +186,8 @@ function PS_DeformerTools(){
   modal.addButton( '', gdGroup, btnHeight, btnHeight,
     iconPath+'generate-rectangle.png',
     function(){
-      var artIndex = KeyModifiers.IsControlPressed() ? DeformerTools.COLORART : undefined;
-      DeformerTools.generateRectDeformer( artIndex );
+      var artIndex = KeyModifiers.IsControlPressed() ? DeformerUtils.COLORART : undefined;
+      DeformerUtils.generateRectDeformer( artIndex );
     },
     'Generate Rectangle Deformer from Line Art.'
     +'\n- Hold down the Control key to use Color Art as a source.'
@@ -196,8 +196,8 @@ function PS_DeformerTools(){
   modal.addButton( '', gdGroup, btnHeight, btnHeight,
     iconPath+'generate-on-art.png',
     function(){
-      var artIndex = KeyModifiers.IsControlPressed() ? DeformerTools.COLORART : undefined;
-      DeformerTools.generateArtDeformer( artIndex );
+      var artIndex = KeyModifiers.IsControlPressed() ? DeformerUtils.COLORART : undefined;
+      DeformerUtils.generateArtDeformer( artIndex );
     },
     'Generate Deformer on Art.'
     +'\n- Hold down the Control key to use Color Art as a source.'
@@ -218,13 +218,13 @@ function PS_DeformerTools(){
 // !!!
 function PS_DeformerTools_TEST() {
   
-  // _DeformerTools.orientControlPoints();
-  // _DeformerTools.generateCircleDeformer();
-  // _DeformerTools.generateRectDeformer();
-  // _DeformerTools.generateArtDeformer();
-  // _DeformerTools.moveDeformersAround('left');
-  // _DeformerTools.moveDeformersAround('right');
-  // _DeformerTools.insertControlPoint();
+  // _DeformerUtils.orientControlPoints();
+  // _DeformerUtils.generateCircleDeformer();
+  // _DeformerUtils.generateRectDeformer();
+  // _DeformerUtils.generateArtDeformer();
+  // _DeformerUtils.moveDeformersAround('left');
+  // _DeformerUtils.moveDeformersAround('right');
+  // _DeformerUtils.insertControlPoint();
   
   /*
   // !!!
