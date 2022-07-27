@@ -78,7 +78,7 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
     // MessageLog.trace( JSON.stringify( items, true, '  ') );
 
     // Group
-    var style = 'QGroupBox{ position: relative; border: none; padding-top:0; padding-bottom: 0; border-radius: 0;}';
+    // var style = 'QGroupBox{ position: relative; border: none; padding-top:0; padding-bottom: 0; border-radius: 0;}';
     // var uiGroup = modal.addGroup( 'DRAWINGS ('+items.length+')', modal.ui, true, style );
 
     //
