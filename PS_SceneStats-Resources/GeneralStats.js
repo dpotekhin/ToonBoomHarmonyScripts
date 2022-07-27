@@ -70,7 +70,7 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
 
 
     // Test Render
-    var testRenderButton = modal.addButton('Test Render', buttonsGroup, 70, 30, '', function() {
+    var testRenderButton = modal.addButton('Test Render', buttonsGroup, 150, 30, '', function() {
 
         var tempDisplayNode = node.add(
             node.parentNode(storage.topSelectedNode),
