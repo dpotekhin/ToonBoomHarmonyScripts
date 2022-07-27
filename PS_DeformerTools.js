@@ -177,30 +177,36 @@ function PS_DeformerTools(){
     iconPath+'generate-circle.png',
     function(){
       var artIndex = KeyModifiers.IsControlPressed() ? DeformerUtils.COLORART : undefined;
-      DeformerUtils.generateCircleDeformer( artIndex );
+      var reversePath = KeyModifiers.IsAlternatePressed();
+      DeformerUtils.generateCircleDeformer( artIndex, undefined, reversePath );
     },
     'Generate Circle Deformer.'
     +'\n- Hold down the Control key to use Color Art as a source.'
+    // +'\n- Hold down the Alt key to reverse path.'
   );
 
   modal.addButton( '', gdGroup, btnHeight, btnHeight,
     iconPath+'generate-rectangle.png',
     function(){
       var artIndex = KeyModifiers.IsControlPressed() ? DeformerUtils.COLORART : undefined;
-      DeformerUtils.generateRectDeformer( artIndex );
+      var reversePath = KeyModifiers.IsAlternatePressed();
+      DeformerUtils.generateRectDeformer( artIndex, undefined, reversePath );
     },
     'Generate Rectangle Deformer from Line Art.'
     +'\n- Hold down the Control key to use Color Art as a source.'
+    // +'\n- Hold down the Alt key to reverse path.'
   );
 
   modal.addButton( '', gdGroup, btnHeight, btnHeight,
     iconPath+'generate-on-art.png',
     function(){
       var artIndex = KeyModifiers.IsControlPressed() ? DeformerUtils.COLORART : undefined;
-      DeformerUtils.generateArtDeformer( artIndex );
+      var reversePath = KeyModifiers.IsAlternatePressed();
+      DeformerUtils.generateArtDeformer( artIndex, undefined, reversePath );
     },
     'Generate Deformer on Art.'
     +'\n- Hold down the Control key to use Color Art as a source.'
+    // +'\n- Hold down the Alt key to reverse path.'
   );
 
   gdGroup.mainLayout.addStretch();
