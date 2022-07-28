@@ -292,15 +292,15 @@ function generateDeformer(mode, artIndex, curDrawing, reversePath, dontClosePath
             deformers = pointsToDeformerCurves(
                 strokePointsToPoints(
                     getCircleStrokes(center_local_OGL, wh, hh),
-                    center_local_OGL),
+                    center_local_OGL, reversePath),
                 curDrawing, offsetDest, dontClosePath);
             break;
 
         case 'rectangle':
-             deformers = pointsToDeformerCurves(
+            deformers = pointsToDeformerCurves(
                 strokePointsToPoints(
                     getRectangleStrokes(center_local_OGL, wh, hh),
-                    center_local_OGL),
+                    center_local_OGL, reversePath),
                 curDrawing, offsetDest, dontClosePath);
             break;
 
@@ -308,7 +308,7 @@ function generateDeformer(mode, artIndex, curDrawing, reversePath, dontClosePath
             deformers = pointsToDeformerCurves(
                 strokePointsToPoints(
                     getArtStrokesData(curDrawing, currentArtIndex),
-                    center_local_OGL),
+                    center_local_OGL, reversePath),
                 curDrawing, offsetDest, dontClosePath);
             break;
     }
@@ -336,7 +336,7 @@ function generateDeformer(mode, artIndex, curDrawing, reversePath, dontClosePath
 
 //
 function getRectangleStrokes(center, wh, hh) {
-    
+
     return Drawing.geometry.createRectangle({
         x0: center.x - wh,
         y0: center.y + hh,
@@ -389,10 +389,13 @@ function getArtStrokesData(curDrawing, artIndex) {
 
 }
 
-function strokePointsToPoints(strokePoints, center) {
+
+//
+function strokePointsToPoints(strokePoints, center, reversePath) {
 
     if (!strokePoints) return;
 
+    if (reversePath) strokePoints = strokePoints = strokePoints.reverse();
     var points = [];
     var currentPoint;
 

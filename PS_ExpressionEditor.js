@@ -169,6 +169,18 @@ function PS_ExpressionEditor( _node ){
     'Delete the selected Expression'
   );
 
+  // REPLACE AND DELETE BUTTON
+  var replaceAndDeleteButton = modal.addButton('', bottomGroup, smallBtnHeight, smallBtnHeight, iconPath+'replace-and-delete.png',
+    function(){ editor.replaceExpression(true); },
+    'Replace the selected Expression in the Scene and delete it'
+  );
+
+  // REPLACE BUTTON
+  var replaceButton = modal.addButton('', bottomGroup, smallBtnHeight, smallBtnHeight, iconPath+'replace.png',
+    editor.replaceExpression,
+    'Replace the selected Expression in the Scene'
+  );
+
   //
   bottomGroup.mainLayout.addStretch();
 
@@ -246,6 +258,8 @@ function PS_ExpressionEditor( _node ){
     findNextNodeButton.enabled =
     renameButton.enabled =
     deleteButton.enabled =
+    replaceAndDeleteButton.enabled =
+    replaceButton.enabled =
     copyExpressionButton.enabled =
       !!editor.currentExpressionName;
 
