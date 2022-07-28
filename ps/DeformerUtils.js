@@ -375,6 +375,8 @@ function getArtStrokesData(curDrawing, artIndex) {
     var points = [];
     strokes.layers.forEach(function(layerData, li) {
         layerData.strokes.forEach(function(strokeData, si) {
+            // MessageLog.trace('STROKE: '+si+' > '+JSON.stringify(strokeData,true,'  '));
+            if(strokeData.shaderRight===0) strokeData.path = strokeData.path.reverse();
             strokeData.path.forEach(function(pointData, pi) {
                 pointData.x = scene.fromOGLX(pointData.x / 1875);
                 pointData.y = scene.fromOGLY(pointData.y / 1875);
@@ -410,7 +412,7 @@ function strokePointsToPoints(strokePoints, center, reversePath) {
             controls: [],
             // angleToCenter: angleToCenter,
             // orientedAngle: angleToCenter >= 0 ? angleToCenter : 100 + angleToCenter,
-            // distToCenter: Math.sqrt(dx * dx + dy * dy);
+            // distToCenter: Math.sqrt(dx * dx + dy * dy)
         };
 
     }
@@ -465,6 +467,7 @@ function strokePointsToPoints(strokePoints, center, reversePath) {
 
 //
 function getControlData(x0, y0, controls, i, x1, y1) {
+
     if (controls) {
         x1 = controls[i].x;
         y1 = controls[i].y;
@@ -520,6 +523,9 @@ function pointsToDeformerCurves(strokePoints, curDrawing, offsetDest, dontCloseP
             })
 
         }
+
+        // Same point
+        if (Math.abs(pointData.x0 - pointData.x1) < .001 && Math.abs(pointData.y0 - pointData.y1) <.001 && !pointData.controls) return;
 
         var control0 = getControlData(pointData.x0, pointData.y0, pointData.controls, 0, pointData.x1, pointData.y1);
         var control1 = getControlData(pointData.x1, pointData.y1, pointData.controls, 1, pointData.x0, pointData.y0);
