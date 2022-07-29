@@ -2,7 +2,7 @@
 Author: Dima Potekhin (skinion.onn@gmail.com)
 
 [Name: PS_SelectionSets :]
-[Version: 0.220727 :]
+[Version: 0.220729 :]
 
 [Description:
 A set of tools for working with deformers.
@@ -23,7 +23,7 @@ function PS_DeformerTools() {
 
     //
     var scriptName = 'Deformer Tools';
-    var scriptVer = '0.220727';
+    var scriptVer = '0.220729';
     //
 
     // var SETTINGS_NAME = 'PS_DEFORMER_TOOLS_SETTINGS';
@@ -159,9 +159,17 @@ function PS_DeformerTools() {
     modal.addButton('', cpGroup, btnHeight, btnHeight,
         iconPath + 'insert-cp.png',
         function() {
-            DeformerUtils.insertControlPoint();
+            DeformerUtils.insertDeformerCurve();
         },
-        'Insert a Control point to the Deformer'
+        'Insert a Curve into the Deformer Chain'
+    );
+
+    modal.addButton('', cpGroup, btnHeight, btnHeight,
+        iconPath + 'remove-cp.png',
+        function() {
+            DeformerUtils.removeDeformerCurve();
+        },
+        'Remove the selected Curve from the Deformer Chain'
     );
 
     cpGroup.mainLayout.addStretch();
@@ -228,9 +236,11 @@ function PS_DeformerTools_TEST() {
     // _DeformerUtils.generateCircleDeformer();
     // _DeformerUtils.generateRectDeformer();
     // _DeformerUtils.generateArtDeformer(undefined, undefined, true);
+    // _DeformerUtils.generateArtDeformer(undefined, undefined);
     // _DeformerUtils.moveDeformersAround('left');
     // _DeformerUtils.moveDeformersAround('right');
-    // _DeformerUtils.insertControlPoint();
+    // _DeformerUtils.insertDeformerCurve();
+    _DeformerUtils.removeDeformerCurve();
 
     /*
     // !!!
