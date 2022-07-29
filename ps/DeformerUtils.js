@@ -26,7 +26,8 @@ exports = {
     generateRectDeformer: generateRectDeformer,
     generateArtDeformer: generateArtDeformer,
     moveDeformersAround: moveDeformersAround,
-    insertControlPoint: insertControlPoint,
+    insertDeformerCurve: insertDeformerCurve,
+    removeDeformerCurve: removeDeformerCurve,
     generateDeformer: generateDeformer,
 }
 
@@ -690,11 +691,10 @@ function moveDeformersAround(direction) {
 
 /*
 TODO:
-- to place the new CP on the deformer curve and set the length and oriantation up to the original deformer curve
 - take into account the inheritance of parent transformations
 */
 
-function insertControlPoint() {
+function insertDeformerCurve() {
 
 
     _exec('Insert a Control point to the Deformer', function() {
@@ -710,14 +710,14 @@ function insertControlPoint() {
         _deformers.forEach(function(deformerNode, i) {
 
             if (isOffsetNode(deformerNode)) {
-                MessageLog.trace('Unable to insert a Control point in the Offset.');
+                MessageLog.trace('Unable to insert a Curve point in the Offset Module.');
                 return;
             }
 
             var parentNode = getParentNode(deformerNode);
             var parentPos = getDeformerPointPosition(parentNode, false, true);
             var deformerPos = getDeformerPointPosition(deformerNode, false, true, parentPos[1]);
-            // MessageLog.trace('insertControlPoint: ' + i + ':\ndeformerNode: ' + deformerNode + '\nparentNode: ' + parentNode);
+            // MessageLog.trace('insertDeformerCurve: ' + i + ':\ndeformerNode: ' + deformerNode + '\nparentNode: ' + parentNode);
             // MessageLog.trace(i + ') ' + JSON.stringify(deformerPos, true, '  ') + ' > ' + JSON.stringify(parentPos, true, '  '));
 
             var newDeformerPath = Drawing.geometry.insertPoints({
@@ -734,7 +734,7 @@ function insertControlPoint() {
             // MessageLog.trace('NEW PATH:' + JSON.stringify(newDeformerPath, true, '  ') + '\n---\n' + JSON.stringify(newDeformerData, true, '  '));
 
             generateDeformersNodes(
-                NodeUtils.getNodeParent(deformerNode),
+                parentNode,
                 node.coordX(deformerNode) + 15,
                 node.coordY(deformerNode) - (node.coordY(deformerNode) - node.coordY(parentNode) + node.height(deformerNode)) / 2, newDeformerData
 
@@ -758,6 +758,78 @@ function insertControlPoint() {
 
 
 
+
+
+
+
+
+
+//
+function removeDeformerCurve() {
+
+
+    _exec('Remove Deformer Curve', function() {
+
+        var _deformers = getSelectedDeformers();
+        if (!_deformers.length) {
+            MessageLog.trace('The Script requires at least one selected deformer.');
+            return;
+        }
+
+        _deformers.forEach(function(deformerNode, i) {
+
+            if (isOffsetNode(deformerNode)) {
+
+                var _nodes = getDeformersChain();
+
+                if (!isChainClosed(_nodes)) {
+
+                    node.deleteNode(deformerNode, true, true);
+                    return;
+                }
+
+                MessageLog.trace('Unable to remove the Offset Module in Deformation Chain.');
+
+                return;
+            }
+
+            var parentNode = getParentNode(deformerNode);
+            var parentPos = getDeformerPointPosition(parentNode, false, true);
+            var deformerPos = getDeformerPointPosition(deformerNode, false, true, parentPos[1]);
+            var nextNode = getNextNode(deformerNode);
+            var nextPos = getDeformerPointPosition(nextNode, false, true, deformerPos[3]);
+            // MessageLog.trace('removeDeformerCurve: ' + i + ':\ndeformerNode: ' + deformerNode + '\nnextNode: ' + nextNode);
+
+            nextPos.shift();
+            var solidCurvePath = deformerPos.concat(nextPos);
+            // MessageLog.trace('SOLID CURVE: ' + JSON.stringify(solidCurvePath, true, '  '));
+
+            var path = Drawing.geometry.discretize({
+                precision: 30,
+                path: solidCurvePath
+            });
+            // MessageLog.trace('POINTS: ' + JSON.stringify(path, true, '  '));
+
+            var bezierPath = Drawing.geometry.fit({
+                oneBezier: true,
+                path: path
+            });
+            // MessageLog.trace('BEZIER: ' + JSON.stringify(bezierPath, true, '  '));
+
+            node.deleteNode(deformerNode, true, true);
+
+            // Update params of the next deformer
+            var deformerData = pointsToDeformerCurves(
+                strokePointsToPoints(
+                    bezierPath,
+                    undefined, false),
+                undefined, undefined, true, true);
+            setAttrValues(nextNode, deformerData[0].attrs, undefined, true);
+
+            // MessageLog.trace(i + ') ' + JSON.stringify(deformerPos, true, '  ') + ' > ' + JSON.stringify(parentPos, true, '  '));
+        });
+    })
+}
 
 
 
@@ -802,6 +874,15 @@ function _exec(_name, _action) {
     scene.endUndoRedoAccum();
 
 }
+
+
+
+//
+function isChainClosed(_nodes, _frame) {
+    if (!_nodes) return null;
+    return node.getTextAttr(_nodes[_nodes.length - 1], _frame || frame.current(), 'closePath') === 'Y';
+}
+
 
 
 //
@@ -915,6 +996,9 @@ function getParentNode(_node) {
     return node.srcNode(_node, 0);
 }
 
+function getNextNode(_node) {
+    return node.dstNode(_node, 0, 0);
+}
 
 //
 function getChildNodes(_node) {

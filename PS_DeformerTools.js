@@ -159,9 +159,17 @@ function PS_DeformerTools() {
     modal.addButton('', cpGroup, btnHeight, btnHeight,
         iconPath + 'insert-cp.png',
         function() {
-            DeformerUtils.insertControlPoint();
+            DeformerUtils.insertDeformerCurve();
         },
-        'Insert a Control point to the Deformer'
+        'Insert a Curve into the Deformer Chain'
+    );
+
+    modal.addButton('', cpGroup, btnHeight, btnHeight,
+        iconPath + 'remove-cp.png',
+        function() {
+            DeformerUtils.removeDeformerCurve();
+        },
+        'Remove the selected Curve from the Deformer Chain'
     );
 
     cpGroup.mainLayout.addStretch();
@@ -231,7 +239,8 @@ function PS_DeformerTools_TEST() {
     // _DeformerUtils.generateArtDeformer(undefined, undefined);
     // _DeformerUtils.moveDeformersAround('left');
     // _DeformerUtils.moveDeformersAround('right');
-    _DeformerUtils.insertControlPoint();
+    // _DeformerUtils.insertDeformerCurve();
+    _DeformerUtils.removeDeformerCurve();
 
     /*
     // !!!
