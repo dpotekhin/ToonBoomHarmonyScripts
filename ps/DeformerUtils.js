@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version 0.220727
+Version 0.220729
 */
 
 
@@ -122,8 +122,8 @@ function orientControlPoints(_nodes, applyToResting, useEntireChain) {
                     if (!srcNode) return;
                 }
 
-                var targetPos = getPointPosition(targetNode);
-                var pos = getPointPosition(srcNode);
+                var targetPos = getDeformerPointPosition(targetNode);
+                var pos = getDeformerPointPosition(srcNode);
                 var ang = Math.atan2(pos.y - targetPos.y, pos.x - targetPos.x) / Math.PI * 180;
 
                 if (applyToResting) {
@@ -172,8 +172,8 @@ function distributeControlPoints(_nodes, applyToResting, useEntireChain) {
                     if (!srcNode) return;
                 }
 
-                var targetPos = getPointPosition(targetNode);
-                var pos = getPointPosition(srcNode);
+                var targetPos = getDeformerPointPosition(targetNode);
+                var pos = getDeformerPointPosition(srcNode);
                 var dx = pos.x - targetPos.x;
                 var dy = pos.y - targetPos.y;
                 var hypo = Math.sqrt(dx * dx + dy * dy);
@@ -376,7 +376,7 @@ function getArtStrokesData(curDrawing, artIndex) {
     strokes.layers.forEach(function(layerData, li) {
         layerData.strokes.forEach(function(strokeData, si) {
             // MessageLog.trace('STROKE: '+si+' > '+JSON.stringify(strokeData,true,'  '));
-            if(strokeData.shaderRight===0) strokeData.path = strokeData.path.reverse();
+            if (strokeData.shaderRight === 0) strokeData.path = strokeData.path.reverse();
             strokeData.path.forEach(function(pointData, pi) {
                 pointData.x = scene.fromOGLX(pointData.x / 1875);
                 pointData.y = scene.fromOGLY(pointData.y / 1875);
@@ -385,7 +385,7 @@ function getArtStrokesData(curDrawing, artIndex) {
         });
     });
 
-    // ToDo: fix a multiple separate strokes case 
+
 
     return points;
 
@@ -414,6 +414,45 @@ function strokePointsToPoints(strokePoints, center, reversePath) {
             // orientedAngle: angleToCenter >= 0 ? angleToCenter : 100 + angleToCenter,
             // distToCenter: Math.sqrt(dx * dx + dy * dy)
         };
+
+    }
+
+    var firstPoint = strokePoints[0];
+    var lastPoint = strokePoints[strokePoints.length - 1];
+    var pathIsClosed = firstPoint.x === lastPoint.x && firstPoint.y === lastPoint.y;
+
+
+    if (pathIsClosed && center) {
+
+        // Find a top center point    
+        var topPoint;
+        var topPointIndex;
+
+        strokePoints.forEach(function(pointData, pi) {
+
+            pointData.i = pi;
+
+            if (!pointData.onCurve) return;
+
+            if (!topPoint) {
+                topPoint = { x: Math.abs(pointData.x - center.x), y: pointData.y - center.y };
+                topPointIndex = pi;
+            } else {
+                var x = Math.abs(pointData.x - center.x);
+                var y = pointData.y - center.y;
+                if (x < topPoint.x && y >= topPoint.y) {
+                    topPoint = { x: x, y: y }
+                    topPointIndex = pi;
+                }
+            }
+
+        });
+
+        if (topPointIndex) {
+            var _strokePoints = strokePoints.splice(0, topPointIndex + 1);
+            strokePoints.unshift(_strokePoints[_strokePoints.length - 1]);
+            strokePoints = strokePoints.concat(_strokePoints);
+        }
 
     }
 
@@ -499,7 +538,7 @@ function getControlData(x0, y0, controls, i, x1, y1) {
 
 
 //
-function pointsToDeformerCurves(strokePoints, curDrawing, offsetDest, dontClosePath) {
+function pointsToDeformerCurves(strokePoints, destNode, srcNode, dontClosePath, skipOffsetModule) {
 
     if (!strokePoints) return;
     if (strokePoints.length === 2) dontClosePath = true;
@@ -508,12 +547,12 @@ function pointsToDeformerCurves(strokePoints, curDrawing, offsetDest, dontCloseP
 
     strokePoints.forEach(function(pointData, i) {
 
-        if (i === 0) {
+        if (i === 0 && !skipOffsetModule) {
 
             deformerCurves.push({
                 name: 'Offset',
                 type: 'OffsetModule',
-                src: offsetDest,
+                src: srcNode,
                 attrs: {
                     SEPARATE: true,
                     localReferential: false,
@@ -525,7 +564,7 @@ function pointsToDeformerCurves(strokePoints, curDrawing, offsetDest, dontCloseP
         }
 
         // Same point
-        if (Math.abs(pointData.x0 - pointData.x1) < .001 && Math.abs(pointData.y0 - pointData.y1) <.001 && !pointData.controls) return;
+        if (Math.abs(pointData.x0 - pointData.x1) < .001 && Math.abs(pointData.y0 - pointData.y1) < .001 && !pointData.controls) return;
 
         var control0 = getControlData(pointData.x0, pointData.y0, pointData.controls, 0, pointData.x1, pointData.y1);
         var control1 = getControlData(pointData.x1, pointData.y1, pointData.controls, 1, pointData.x0, pointData.y0);
@@ -544,11 +583,13 @@ function pointsToDeformerCurves(strokePoints, curDrawing, offsetDest, dontCloseP
             }
         };
 
+        if (i === 0 && skipOffsetModule) _pointData.src = srcNode;
+
         deformerCurves.push(_pointData);
 
         if (i === strokePoints.length - 1) {
 
-            _pointData.dest = curDrawing;
+            _pointData.dest = destNode;
 
             if (pointData.x1 === strokePoints[0].x0 && pointData.y1 === strokePoints[0].y0) {
                 _pointData.attrs.closePath = dontClosePath;
@@ -674,39 +715,40 @@ function insertControlPoint() {
             }
 
             var parentNode = getParentNode(deformerNode);
-            MessageLog.trace(i + ') ' + deformerNode + ' > ' + parentNode);
+            var parentPos = getDeformerPointPosition(parentNode, false, true);
+            var deformerPos = getDeformerPointPosition(deformerNode, false, true, parentPos[1]);
+            // MessageLog.trace('insertControlPoint: ' + i + ':\ndeformerNode: ' + deformerNode + '\nparentNode: ' + parentNode);
+            // MessageLog.trace(i + ') ' + JSON.stringify(deformerPos, true, '  ') + ' > ' + JSON.stringify(parentPos, true, '  '));
 
-            var deformerPos = getPointPosition(deformerNode);
-            var parentPos = getPointPosition(parentNode);
+            var newDeformerPath = Drawing.geometry.insertPoints({
+                path: deformerPos,
+                params: [0.5]
+            });
+            var newDeformerPoints = newDeformerPath.splice(0, 4);
+            var newDeformerData = pointsToDeformerCurves(
+                strokePointsToPoints(
+                    newDeformerPoints,
+                    undefined, false),
+                deformerNode, parentNode, true, true);
 
-            var newDeformerData = [{
-                name: 'Curve',
-                type: 'CurveModule',
-                src: parentNode,
-                dest: deformerNode,
-                attrs: {
-                    SEPARATE: true,
-                    localReferential: false,
-                    "offset.x": deformerPos.x + (parentPos.x - deformerPos.x) / 2,
-                    "offset.y": deformerPos.y + (parentPos.y - deformerPos.y) / 2,
-                    Length0: 1,
-                    Length1: 1,
-                    orientation0: 0,
-                    orientation1: 0
-                }
-            }];
+            // MessageLog.trace('NEW PATH:' + JSON.stringify(newDeformerPath, true, '  ') + '\n---\n' + JSON.stringify(newDeformerData, true, '  '));
 
             generateDeformersNodes(
                 NodeUtils.getNodeParent(deformerNode),
                 node.coordX(deformerNode) + 15,
-                node.coordY(deformerNode) - (node.coordY(deformerNode) - node.coordY(parentNode) + node.height(deformerNode)) / 2,
-                newDeformerData
+                node.coordY(deformerNode) - (node.coordY(deformerNode) - node.coordY(parentNode) + node.height(deformerNode)) / 2, newDeformerData
+
             );
 
-            var _nodes = newDeformerData.map(function(i) { return i.node; });
-            _nodes.push(deformerNode);
-            distributeControlPoints(_nodes);
-            orientControlPoints(_nodes);
+            // Update params of the old deformer
+            newDeformerPath.unshift(newDeformerPoints[newDeformerPoints.length - 1]);
+            var oldDeformerData = pointsToDeformerCurves(
+                strokePointsToPoints(
+                    newDeformerPath,
+                    undefined, false),
+                undefined, undefined, true, true);
+            setAttrValues(deformerNode, oldDeformerData[0].attrs, undefined, true);
+
 
         });
 
@@ -901,12 +943,45 @@ function getAttrValue(_node, attrName) {
 }
 
 //
-function getPointPosition(_node) {
+function getDeformerPointPosition(_node, resting, asStroke, parentPoint) {
 
-    return {
-        x: getAttrValue(_node, 'offset.X'),
-        y: getAttrValue(_node, 'offset.Y'),
-    }
+    var point = {
+        x: getAttrValue(_node, resting ? restingAttrNames['offset.X'] : 'offset.X'),
+        y: getAttrValue(_node, resting ? restingAttrNames['offset.Y'] : 'offset.Y'),
+        length0: getAttrValue(_node, resting ? restingAttrNames['Length0'] : 'Length0'),
+        orientation0: getAttrValue(_node, resting ? restingAttrNames['orientation0'] : 'orientation0'),
+        length1: getAttrValue(_node, resting ? restingAttrNames['Length1'] : 'Length1'),
+        orientation1: getAttrValue(_node, resting ? restingAttrNames['orientation1'] : 'orientation1')
+    };
+
+    if (!asStroke) return point;
+
+    var angle0 = (point.orientation0) / 180 * Math.PI;
+    var angle1 = (point.orientation1 + 180) / 180 * Math.PI;
+    // MessageLog.trace('A: '+angle0+', '+point.length0+'\n'+JSON.stringify(point,true,'  '));
+    var strokePoint = [{
+            x: point.x + Math.cos(angle1) * point.length1,
+            y: point.y + Math.sin(angle1) * point.length1
+        },
+        {
+            onCurve: true,
+            x: point.x,
+            y: point.y
+        }
+    ];
+
+    if (!parentPoint) return strokePoint;
+
+    strokePoint.unshift({
+        onCurve: true,
+        x: parentPoint.x,
+        y: parentPoint.y
+    }, {
+        x: parentPoint.x + Math.cos(angle0) * point.length0,
+        y: parentPoint.y + Math.sin(angle0) * point.length0
+    });
+
+    return strokePoint;
 
 }
 
@@ -932,11 +1007,16 @@ function applyAttrValue(_nodes, attrName, value) {
 
 
 //
-function setAttrValues(_node, attrs, _frame) {
+function setAttrValues(_node, attrs, _frame, applyToResting) {
     if (_frame === undefined) _frame = frame.current();
     Object.keys(attrs).forEach(function(attrName) {
         node.setTextAttr(_node, attrName, _frame, attrs[attrName]);
         // MessageLog.trace( '-> '+_node+' >> '+attrName+' >> '+_frame+' >> '+attrs[attrName] );
+        if (applyToResting) {
+            var restingAttrName = restingAttrNames[attrName];
+            if (restingAttrName)
+                node.setTextAttr(_node, restingAttrName, _frame, attrs[attrName]);
+        }
     });
 }
 
@@ -1090,12 +1170,14 @@ function generateDeformersNodes(parentNode, nodeViewX, nodeViewY, deformers) {
             deformerData.dest
         );
 
-        Object.keys(deformerData.attrs).forEach(function(attrName) {
+        setAttrValues(deformerData.node, deformerData.attrs, currentFrame, true);
+        /*Object.keys(deformerData.attrs).forEach(function(attrName) {
             node.setTextAttr(deformerData.node, attrName, currentFrame, deformerData.attrs[attrName]);
             var restingAttrName = restingAttrNames[attrName];
             if (restingAttrName)
                 node.setTextAttr(deformerData.node, restingAttrName, currentFrame, deformerData.attrs[attrName]);
         });
+        */
 
     });
 
