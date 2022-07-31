@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version 0.220729
+Version 0.220731
 */
 
 
@@ -715,15 +715,16 @@ function insertDeformerCurve() {
             }
 
             var parentNode = getParentNode(deformerNode);
-            var parentPos = getDeformerPointPosition(parentNode, false, true);
-            var deformerPos = getDeformerPointPosition(deformerNode, false, true, parentPos[1]);
-            // MessageLog.trace('insertDeformerCurve: ' + i + ':\ndeformerNode: ' + deformerNode + '\nparentNode: ' + parentNode);
-            // MessageLog.trace(i + ') ' + JSON.stringify(deformerPos, true, '  ') + ' > ' + JSON.stringify(parentPos, true, '  '));
+            var parentPos = getDeformerPointPosition(parentNode, true, true);
+            var deformerPos = getDeformerPointPosition(deformerNode, true, true, parentPos[1]);
+            MessageLog.trace('insertDeformerCurve: ' + i + ':\ndeformerNode: ' + deformerNode + '\nparentNode: ' + parentNode);
+            MessageLog.trace(i + ') ' + JSON.stringify(deformerPos, true, '  ') + ' > ' + JSON.stringify(parentPos, true, '  '));
 
             var newDeformerPath = Drawing.geometry.insertPoints({
                 path: deformerPos,
                 params: [0.5]
             });
+            MessageLog.trace('newDeformerPath: '+JSON.stringify(newDeformerPath,true,'  '));
             var newDeformerPoints = newDeformerPath.splice(0, 4);
             var newDeformerData = pointsToDeformerCurves(
                 strokePointsToPoints(
@@ -734,10 +735,9 @@ function insertDeformerCurve() {
             // MessageLog.trace('NEW PATH:' + JSON.stringify(newDeformerPath, true, '  ') + '\n---\n' + JSON.stringify(newDeformerData, true, '  '));
 
             generateDeformersNodes(
-                parentNode,
+                node.parentNode(deformerNode),
                 node.coordX(deformerNode) + 15,
                 node.coordY(deformerNode) - (node.coordY(deformerNode) - node.coordY(parentNode) + node.height(deformerNode)) / 2, newDeformerData
-
             );
 
             // Update params of the old deformer
@@ -748,7 +748,6 @@ function insertDeformerCurve() {
                     undefined, false),
                 undefined, undefined, true, true);
             setAttrValues(deformerNode, oldDeformerData[0].attrs, undefined, true);
-
 
         });
 
@@ -794,10 +793,10 @@ function removeDeformerCurve() {
             }
 
             var parentNode = getParentNode(deformerNode);
-            var parentPos = getDeformerPointPosition(parentNode, false, true);
-            var deformerPos = getDeformerPointPosition(deformerNode, false, true, parentPos[1]);
+            var parentPos = getDeformerPointPosition(parentNode, true, true);
+            var deformerPos = getDeformerPointPosition(deformerNode, true, true, parentPos[1]);
             var nextNode = getNextNode(deformerNode);
-            var nextPos = getDeformerPointPosition(nextNode, false, true, deformerPos[3]);
+            var nextPos = getDeformerPointPosition(nextNode, true, true, deformerPos[3]);
             // MessageLog.trace('removeDeformerCurve: ' + i + ':\ndeformerNode: ' + deformerNode + '\nnextNode: ' + nextNode);
 
             nextPos.shift();
@@ -1020,9 +1019,9 @@ function getAttrValue(_node, attrName) {
     var val = attr.doubleValueAt(currentFrame);
     var columnName = node.linkedColumn(_node, attrName);
     if (columnName) {
-        val = column.getEntry(columnName, 0, currentFrame);
+        val = Number(column.getEntry(columnName, 0, currentFrame));
     }
-
+    // MessageLog.trace(_node+' > '+attrName+' > '+val+' > '+typeof val);
     return val;
 }
 
@@ -1030,13 +1029,15 @@ function getAttrValue(_node, attrName) {
 function getDeformerPointPosition(_node, resting, asStroke, parentPoint) {
 
     var point = {
-        x: getAttrValue(_node, resting ? restingAttrNames['offset.X'] : 'offset.X'),
-        y: getAttrValue(_node, resting ? restingAttrNames['offset.Y'] : 'offset.Y'),
+        x: getAttrValue(_node, resting ? restingAttrNames['offset.x'] : 'offset.x'),
+        y: getAttrValue(_node, resting ? restingAttrNames['offset.y'] : 'offset.y'),
         length0: getAttrValue(_node, resting ? restingAttrNames['Length0'] : 'Length0'),
         orientation0: getAttrValue(_node, resting ? restingAttrNames['orientation0'] : 'orientation0'),
         length1: getAttrValue(_node, resting ? restingAttrNames['Length1'] : 'Length1'),
         orientation1: getAttrValue(_node, resting ? restingAttrNames['orientation1'] : 'orientation1')
     };
+
+    MessageLog.trace('getDeformerPointPosition: '+JSON.stringify(point,true,'  '));
 
     if (!asStroke) return point;
 
