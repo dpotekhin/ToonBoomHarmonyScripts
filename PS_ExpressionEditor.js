@@ -125,6 +125,12 @@ function PS_ExpressionEditor( _node ){
     +'Hold Control key to open Node properties window.'
   );
 
+  // SERCH NEXT NODE BUTTON
+  modal.addButton('', topGroup, smallBtnHeight, smallBtnHeight, iconPath+'lockAttributes.png',
+    function(){ editor.lockAllNodeAttrs(true); },
+    'Link an empty expression to all unlinked attributes of selected nodes.'
+  );
+
 
 
 
