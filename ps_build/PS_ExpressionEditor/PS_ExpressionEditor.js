@@ -125,6 +125,12 @@ function PS_ExpressionEditor( _node ){
     +'Hold Control key to open Node properties window.'
   );
 
+  // SERCH NEXT NODE BUTTON
+  modal.addButton('', topGroup, smallBtnHeight, smallBtnHeight, iconPath+'lockAttributes.png',
+    function(){ editor.lockAllNodeAttrs(true); },
+    'Link an empty expression to all unlinked attributes of selected nodes.'
+  );
+
 
 
 
@@ -167,6 +173,18 @@ function PS_ExpressionEditor( _node ){
   var deleteButton = modal.addButton('', bottomGroup, smallBtnHeight, smallBtnHeight, iconPath+'delete.png',
     editor.deleteExpression,
     'Delete the selected Expression'
+  );
+
+  // REPLACE AND DELETE BUTTON
+  var replaceAndDeleteButton = modal.addButton('', bottomGroup, smallBtnHeight, smallBtnHeight, iconPath+'replace-and-delete.png',
+    function(){ editor.replaceExpression(true); },
+    'Replace the selected Expression in the Scene and delete it'
+  );
+
+  // REPLACE BUTTON
+  var replaceButton = modal.addButton('', bottomGroup, smallBtnHeight, smallBtnHeight, iconPath+'replace.png',
+    editor.replaceExpression,
+    'Replace the selected Expression in the Scene'
   );
 
   //
@@ -246,6 +264,8 @@ function PS_ExpressionEditor( _node ){
     findNextNodeButton.enabled =
     renameButton.enabled =
     deleteButton.enabled =
+    replaceAndDeleteButton.enabled =
+    replaceButton.enabled =
     copyExpressionButton.enabled =
       !!editor.currentExpressionName;
 
