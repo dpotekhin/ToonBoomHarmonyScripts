@@ -80,7 +80,27 @@ function removeUnusedDrawingColumns(colorId) {
 
 
 //
-function expandExposure(useAllTimeline) {
+function applyColumnEntry(startFrame, endFrame, exposure, columnName, useAllTimeline) {
+    var increment = startFrame < endFrame ? 1 : -1;
+
+    var prevFrame = startFrame;
+
+    for (var f = startFrame;
+        (increment > 0 && f <= endFrame) || (increment < 0 && f >= endFrame); f += increment) {
+        if (!useAllTimeline) {
+            var currentExposure = column.getEntry(columnName, 1, f);
+            if (currentExposure && currentExposure !== exposure) return;
+        }
+        column.setEntry(columnName, 1, f, exposure);
+        column.removeDuplicateKeyDrawingExposureAt(columnName, prevFrame);
+        prevFrame = f;
+    }
+
+}
+
+
+//
+function expandExposure(dir, useAllTimeline) {
 
     var currentFrame = frame.current();
 
@@ -88,35 +108,15 @@ function expandExposure(useAllTimeline) {
 
         var _node = nodeData.node;
         if (node.type(_node) !== 'READ') return;
-        // MessageLog.trace(JSON.stringify(nodeData));
         var drawingColumnName = ColumnUtils.getDrawingColumnOfNode(_node);
-        var entries = ColumnUtils.getColumnEntries(drawingColumnName);
-        if (!entries.length) return;
+        var exposure = column.getEntry(drawingColumnName, 1, currentFrame);
 
-        // MessageLog.trace('entries: '+_node+' > '+JSON.stringify(entries,true,' '))
-
-        var firstEntry = entries[0];
-        var lastEntry = entries[entries.length - 1];
-
-        if (useAllTimeline) currentFrame = 1;
-        if (currentFrame < firstEntry.firstFrame) { // expand to the left
-
-            column.setEntry(drawingColumnName, 1, currentFrame, firstEntry.entry);
-            column.fillEmptyCels(drawingColumnName, currentFrame, firstEntry.firstFrame);
-            column.removeKeyDrawingExposureAt(drawingColumnName, firstEntry.firstFrame);
-
-        }
-
-        if (useAllTimeline) currentFrame = frame.numberOf();
-        if (currentFrame > lastEntry.lastFrame) {
-
-            // column.setEntry( drawingColumnName, 1, current, lastEntry[0].entry );
-            column.fillEmptyCels(drawingColumnName, firstEntry.lastFrame, currentFrame + 1);
-        }
+        if (dir === 'both' || dir === 'left') applyColumnEntry(currentFrame, 1, exposure, drawingColumnName, useAllTimeline);
+        if (dir === 'both' || dir === 'right') applyColumnEntry(currentFrame, frame.numberOf(), exposure, drawingColumnName, useAllTimeline);
 
     });
-
 }
+
 
 
 //
@@ -254,7 +254,7 @@ function getDrawingReference() {
 function linkDrawingColumn(targetNodes, refNode) {
 
     targetNodes = _getSelectedDrawings(targetNodes, refNode);
-     if (typeof targetNodes === 'string') {
+    if (typeof targetNodes === 'string') {
         showOutput(targetNodes, FAIL);
         return;
     }

@@ -59,15 +59,39 @@ function PS_DrawingTools() {
 
 
     modal.addButton('', exposureGroup, btnHeight, btnHeight,
-        iconPath + 'expand-exposure.png',
+        iconPath + 'expand-exposure-left.png',
         function() {
-            _exec('Expand exposure to the current frame',
+            _exec('Expand exposure',
                 function() {
-                    DrawingTools.expandExposure(KeyModifiers.IsControlPressed());
+                    DrawingTools.expandExposure('left', KeyModifiers.IsControlPressed());
                 });
         },
-        'Expand exposure to the current frame.' +
-        '\n- Hold down Ctrl key to expand to all Timeline.'
+        'Expand exposure to the left from the current frame to the first different entry.' +
+        '\n- Hold down Ctrl key to expand to the start of the timeline.'
+    );
+
+    modal.addButton('', exposureGroup, btnHeight, btnHeight,
+        iconPath + 'expand-exposure-right.png',
+        function() {
+            _exec('Expand exposure',
+                function() {
+                    DrawingTools.expandExposure('right', KeyModifiers.IsControlPressed());
+                });
+        },
+        'Expand exposure to the right from the current frame to the first different entry.' +
+        '\n- Hold down Ctrl key to expand to the start of the timeline.'
+    );
+
+    modal.addButton('', exposureGroup, btnHeight, btnHeight,
+        iconPath + 'expand-exposure.png',
+        function() {
+            _exec('Expand exposure',
+                function() {
+                    DrawingTools.expandExposure('both', KeyModifiers.IsControlPressed());
+                });
+        },
+        'Expand exposure to the left and right from the current frame to the first different entry.' +
+        '\n- Hold down Ctrl key to expand to the end.'
     );
 
 
@@ -145,7 +169,7 @@ function PS_DrawingTools() {
         'Set Drawing Reference Node'
     );
 
-   var linkRefColumnButton = modal.addButton('', drawingRefGroup, btnHeight, btnHeight,
+    var linkRefColumnButton = modal.addButton('', drawingRefGroup, btnHeight, btnHeight,
         iconPath + 'link-ref-column.png',
         function() {
             _exec(undefined,
@@ -164,7 +188,7 @@ function PS_DrawingTools() {
     );
 
     //
-    function updateUI(){
+    function updateUI() {
         linkRefColumnButton.enabled = linkRefElementButton.enabled = !!drawingRefNode;
     }
 
