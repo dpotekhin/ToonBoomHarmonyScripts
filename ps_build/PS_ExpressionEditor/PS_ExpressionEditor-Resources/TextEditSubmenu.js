@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.210728
+Version: 0.220715
 
 Context menu of the Expression editor
 */
@@ -51,19 +51,35 @@ function initSubmenu( editor ){
     "Current Expression": getMenuItemsCurrentExpression,
 
     // Selected node Columns
-    "Selected Node":{
-      
-      "!Show Node Properties": function (){ Action.perform("onActionEditProperties()", "scene") },
+    "Selected Node": function(){
 
-      "Get Linked Columns": getMenuItemsForLinkedColumns,
+        if( (selection.selectedNodes()).length ){
 
-    // Create Expressions For Selected Node
-    // "!Create Expressions For Selected Node": createExpressionsForSelectedNode,
+          return {
+            "!Lock All Unlinked Attributes": function(){ editor.lockAllNodeAttrs(true) },
+            "!Show Node Properties": function (){ Action.perform("onActionEditProperties()", "scene") },
 
-      "Link Expression": getMenuItemsForLinkExpression,
+            "Get Linked Columns": getMenuItemsForLinkedColumns,
 
-      "Create Expression": getMenuItemsForCreateExpression,
+          // Create Expressions For Selected Node
+          // "!Create Expressions For Selected Node": createExpressionsForSelectedNode,
 
+            "Link Expression": getMenuItemsForLinkExpression,
+
+            "Create Expression": getMenuItemsForCreateExpression,
+          };
+
+        }else{
+
+          return {
+            '#Lock All Unlinked Attributes': '',
+            '#Show Node Properties': '',
+            '#Get Linked Columns': '',
+            '#Link Expression': '',
+            '#Create Expression': '',
+          };
+
+        }
     },
 
     // Functions
@@ -177,10 +193,15 @@ function initSubmenu( editor ){
 
         }else if( submenuItemName.charAt(0) === '!' ){ // Add a function
 
-          var _submenuItemName = submenuItemName.substr(1,submenuItemName.length);
+          var _submenuItemName = submenuItemName.substring(1);
           // MessageLog.trace('Action: "'+submenuItemName+'" '+_submenuItemName);
           menu.addAction(_submenuItemName);
           submenuFlatList[_submenuItemName] = submenuItemData;
+
+        }else if( submenuItemName.charAt(0) === '#' ){ // Add a disabled item
+
+          var actionItem = menu.addAction(submenuItemName.substring(1));
+          actionItem.enabled = false;
 
         }else{
 
@@ -269,6 +290,7 @@ function initSubmenu( editor ){
 
       submenuItems[ '!Link to: '+attrName ] = function(){
         // MessageLog.trace('Link Expression To Node Attribute:'+ _node+', '+attrName+', '+columnName );
+        if( node.linkedColumn( _node, attrName ) ) node.unlinkAttr( _node, attrName );
         node.linkAttr( _node, attrName, editor.currentExpressionName );
       };
 

@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version 0.220602
+Version 0.220805
 */
 
 var Utils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/Utils.js"));
@@ -21,7 +21,7 @@ var labelColors = [];
 labelColors[0] = 'white';
 labelColors[SUCCESS] = 'green';
 labelColors[WARNING] = 'orange';
-labelColors[FAIL] = 'red';
+labelColors[FAIL] = '#ff9090';
 
 var outputText;
 
@@ -50,6 +50,9 @@ exports = {
     clearExposure: clearExposure,
     selectColumnByName: selectColumnByName,
     openSelectedElementFolder: openSelectedElementFolder,
+    getDrawingReference: getDrawingReference,
+    linkDrawingColumn: linkDrawingColumn,
+    linkDrawingElement: linkDrawingElement,
     // changeElementFormat: changeElementFormat,
 }
 
@@ -217,7 +220,7 @@ function selectColumnByName() {
 function openSelectedElementFolder() {
     var _node = selection.selectedNodes()[0];
     if (node.type(_node) !== "READ") {
-        showOutput('No Drawing selected.',WARNING);
+        showOutput('No Drawing selected.', WARNING);
         return;
     }
     var elementId = node.getElementId(_node);
@@ -231,6 +234,80 @@ function openSelectedElementFolder() {
     var path = element.completeFolder(elementId);
     FileSystem.openFolder(fileMapper.toNativePath(path));
 }
+
+
+//
+function getDrawingReference() {
+
+    drawingRefNode = selection.selectedNode(0);
+    if (node.type(drawingRefNode) !== 'READ') {
+        showOutput("Select a Drawing Node", FAIL);
+        return;
+    }
+
+    return drawingRefNode;
+
+}
+
+
+//
+function linkDrawingColumn(targetNodes, refNode) {
+
+    targetNodes = _getSelectedDrawings(targetNodes, refNode);
+     if (typeof targetNodes === 'string') {
+        showOutput(targetNodes, FAIL);
+        return;
+    }
+
+    var refNodeColumn = node.linkedColumn(refNode, 'DRAWING.ELEMENT');
+
+    targetNodes.forEach(function(_node) {
+        if (node.linkedColumn(_node, 'DRAWING.ELEMENT')) node.unlinkAttr(_node, 'DRAWING.ELEMENT');
+        node.linkAttr(_node, 'DRAWING.ELEMENT', refNodeColumn);
+    });
+
+}
+
+
+//
+function linkDrawingElement(targetNodes, refNode) {
+
+    targetNodes = _getSelectedDrawings(targetNodes, refNode);
+    if (typeof targetNodes === 'string') {
+        showOutput(targetNodes, FAIL);
+        return;
+    }
+
+    var refNodeColumn = node.linkedColumn(refNode, 'DRAWING.ELEMENT');
+    var elementId = node.getElementId(refNode);
+
+    targetNodes.forEach(function(_node) {
+        var columnName = ColumnUtils.getUnusedColumnName(node.getName(_node));
+        column.add(columnName, "DRAWING");
+        column.setElementIdOfDrawing(columnName, elementId);
+        if (node.linkedColumn(_node, 'DRAWING.ELEMENT')) node.unlinkAttr(_node, 'DRAWING.ELEMENT');
+        node.linkAttr(_node, 'DRAWING.ELEMENT', columnName);
+    });
+
+}
+
+
+///
+function _getSelectedDrawings(targetNodes, refNode) {
+
+    if (!targetNodes) return "Select a Drawing Node";
+
+    if (targetNodes === true) targetNodes = selection.selectedNodes();
+    else if (typeof targetNodes === 'string') targetNodes = [targetNodes];
+    targetNodes = targetNodes.filter(function(n) { return node.type(n) === 'READ' && n !== refNode; })
+
+    if (!targetNodes.length) return "Select a Drawing Node";
+
+    return targetNodes;
+
+}
+
+
 
 /*
 ///

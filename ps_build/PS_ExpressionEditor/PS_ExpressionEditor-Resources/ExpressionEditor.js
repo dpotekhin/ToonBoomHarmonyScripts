@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.210728
+Version: 0.220715
 
 Base methods of the Expression editor
 */
@@ -9,8 +9,8 @@ Base methods of the Expression editor
 var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_ExpressionEditor-Resources/ps/Utils.js"));
 
 ///
-function ExpressionEditor(){
-    
+function ExpressionEditor() {
+
     var _this = this;
 
     this.expressionStartToken = '%EXPR:';
@@ -20,20 +20,20 @@ function ExpressionEditor(){
     this.modal = undefined;
     this.currentExpressionName = undefined;
     this.onExpressionListRefreshed = undefined;
-    this.showOutputMessage = function(){};
+    this.showOutputMessage = function() {};
 
     //
-    this.createExpression = function( expressionName, expressionBody, forceNameInput ) {
+    this.createExpression = function(expressionName, expressionBody, forceNameInput) {
 
         scene.beginUndoRedoAccum('Create Expression');
 
         _this.showOutputMessage();
 
-        if( !expressionName || forceNameInput ){
+        if (!expressionName || forceNameInput) {
 
             expressionName = Input.getText('Enter Expression name', expressionName || '', 'Create Expression');
             if (!expressionName) {
-                _this.showOutputMessage('Expression name required','',false);
+                _this.showOutputMessage('Expression name required', '', false);
                 return;
             }
 
@@ -45,7 +45,7 @@ function ExpressionEditor(){
 
         var columnExists = column.type(columnName);
         if (columnExists) {
-            _this.showOutputMessage('An expression with name "'+columnName+'" already exists','',false);
+            _this.showOutputMessage('An expression with name "' + columnName + '" already exists', '', false);
             return;
         }
 
@@ -55,7 +55,7 @@ function ExpressionEditor(){
             return;
         }
 
-        if( expressionBody ) _this.saveExpression( columnName, expressionBody );
+        if (expressionBody !== undefined) _this.saveExpression(columnName, expressionBody);
 
         _this.onExpressionListRefreshed(columnName);
 
@@ -65,11 +65,44 @@ function ExpressionEditor(){
 
     }
 
-    this.saveExpression = function( expressionName, expressionBody ){
-        if( !expressionName ) return;
-        var result = column.setTextOfExpr( expressionName, expressionBody );
+
+    //
+    this.lockAllNodeAttrs = function(unlinkedOnly) {
+
+        var selectedNodes = selection.selectedNodes();
+        if (!selectedNodes) return;
+
+        scene.beginUndoRedoAccum('Lock All Unlinked Attributes');
+
+        var expressionColumnDefaultName = 'LOCK';
+        var expressionColumn = column.getColumnListOfType('EXPR').filter(function(v) { return v === expressionColumnDefaultName; }).pop();
+        if (!expressionColumn) {
+            expressionColumn = column.add(expressionColumnDefaultName, 'EXPR');
+            _this.onExpressionListRefreshed(expressionColumnDefaultName);
+        };
+
+        this.traverseNodes(selectedNodes, function(_node) {
+            Utils.getAnimatableAttrs(_node).forEach(function(attrName) {
+                if (node.linkedColumn(_node, attrName)) {
+                    if (unlinkedOnly) return;
+                    node.unlinkAttr(_node, attrName);
+                }
+                node.linkAttr(_node, attrName, expressionColumnDefaultName);
+            });
+        });
+
+        scene.endUndoRedoAccum();
+
+    }
+
+
+    //
+    this.saveExpression = function(expressionName, expressionBody) {
+        if (!expressionName) return;
+        var result = column.setTextOfExpr(expressionName, expressionBody);
         return true;
     }
+
 
     //
     this.renameExpression = function() {
@@ -80,7 +113,7 @@ function ExpressionEditor(){
 
         var expressionName = Input.getText('Enter Expression name', _this.currentExpressionName, 'Rename Expression');
         if (!expressionName) {
-            _this.showOutputMessage('Expression name required','',false);
+            _this.showOutputMessage('Expression name required', '', false);
             return;
         }
 
@@ -90,13 +123,13 @@ function ExpressionEditor(){
 
         var columnExists = column.type(columnName);
         if (columnExists) {
-            _this.showOutputMessage('An expression with the same name already exists','',false);
+            _this.showOutputMessage('An expression with the same name already exists', '', false);
             return;
         }
 
         column.rename(_this.currentExpressionName, columnName);
 
-        _this.showOutputMessage('Expression renamed from "'+_this.currentExpressionName+'" to "'+columnName+'"','',true);
+        _this.showOutputMessage('Expression renamed from "' + _this.currentExpressionName + '" to "' + columnName + '"', '', true);
 
         _this.onExpressionListRefreshed(columnName);
 
@@ -117,7 +150,7 @@ function ExpressionEditor(){
 
         var expressionsData = _this.getExpressionColumns(true);
         if (!expressionsData.length) {
-            _this.showOutputMessage('No expressions found.','',false);
+            _this.showOutputMessage('No expressions found.', '', false);
             return;
         }
 
@@ -135,7 +168,7 @@ function ExpressionEditor(){
 
         _this.onExpressionListRefreshed(false);
 
-        _this.showOutputMessage('Deleted Expressions count: ' + expressionCount + '. Removed links from ' + nodeCount + ' nodes.','',true);
+        _this.showOutputMessage('Deleted Expressions count: ' + expressionCount + '. Removed links from ' + nodeCount + ' nodes.', '', true);
 
         scene.endUndoRedoAccum();
 
@@ -146,25 +179,25 @@ function ExpressionEditor(){
 
     //
     this.deleteAllUnusedExpressions = function() {
-        
+
         if (!_this.showConfirmDialog(
                 'Confirm deletion',
                 'You are about to delete all unused Expressions in the Scene.\nAre you sure?'
             )) return;
 
-        var expressionsData = _this.getExpressionColumns(true).map(function(expressionData){return expressionData.name;});
+        var expressionsData = _this.getExpressionColumns(true).map(function(expressionData) { return expressionData.name; });
         if (!expressionsData.length) {
-            _this.showOutputMessage('No Expressions found in the Scene.','',false);
+            _this.showOutputMessage('No Expressions found in the Scene.', '', false);
             return;
         }
 
         // Filter the used Expressions out
         var usedNodes = _this.getAllUsedNodes();
-        Object.keys(usedNodes).forEach(function(nodeName){
-            usedNodes[nodeName].forEach(function(attrData){
+        Object.keys(usedNodes).forEach(function(nodeName) {
+            usedNodes[nodeName].forEach(function(attrData) {
                 var usedExpressionName = attrData[0];
                 var index = expressionsData.indexOf(usedExpressionName);
-                if( index !== -1 ) expressionsData.splice(index,1);
+                if (index !== -1) expressionsData.splice(index, 1);
             });
         });
 
@@ -172,22 +205,65 @@ function ExpressionEditor(){
         // MessageLog.trace('2>>> '+JSON.stringify(usedNodes, true, '  ') );
 
         if (!expressionsData.length) {
-            _this.showOutputMessage('No unused Expressions found in the Scene.','',false);
+            _this.showOutputMessage('No unused Expressions found in the Scene.', '', false);
             return;
         }
 
         scene.beginUndoRedoAccum('Delete All Unused Expressions');
 
-        expressionsData.forEach(function(expressionName){
-            __deleteExpression( expressionName );
+        expressionsData.forEach(function(expressionName) {
+            __deleteExpression(expressionName);
         });
 
         _this.onExpressionListRefreshed(false);
 
-        _this.showOutputMessage('Deleted Expression count: ' + expressionsData.length,'',true);
+        _this.showOutputMessage('Deleted Expression count: ' + expressionsData.length, '', true);
 
         scene.endUndoRedoAccum();
 
+    }
+
+
+    //
+    this.replaceExpression = function(andDelete) {
+
+        var expressionList = _this.getExpressionColumns(true).map(function(expressionData) { return expressionData.name }).filter(function(_expressionName) { return _expressionName !== _this.currentExpressionName; });
+        if (!expressionList.length) {
+            _this.showOutputMessage('No Expressions found in the Scene.', '', false);
+            return;
+        }
+
+        var d = new Dialog();
+        d.title = "Replace " + (andDelete ? "and delete " : "") + "the \"" + _this.currentExpressionName + "\" expression";
+        var expressionNameInput = new ComboBox();
+        expressionNameInput.label = "Replace to:"
+        expressionNameInput.editable = true;
+        expressionNameInput.itemList = expressionList;
+        d.add(expressionNameInput);
+
+        if (!d.exec() || !expressionNameInput.currentItem) return;
+        var replaceTo = expressionNameInput.currentItem;
+        // MessageLog.trace('replaceExpression: ' + JSON.stringify(replaceTo, true, '  '));
+
+        scene.beginUndoRedoAccum('Replace and Delete Expression');
+
+        var usedNodes = _this.getAllUsedNodes();
+        Object.keys(usedNodes).forEach(function(_node) {
+            usedNodes[_node].forEach(function(attrData) {
+                var usedExpressionName = attrData[0];
+                if (_this.currentExpressionName !== usedExpressionName) return;
+                // MessageLog.trace('??? ' + _node + ' >> ' + attrData.join(' > '));
+                node.unlinkAttr(_node, attrData[1], replaceTo);
+                node.linkAttr(_node, attrData[1], replaceTo);
+            });
+        });
+
+        if (andDelete) {
+            __deleteExpression(_this.currentExpressionName);
+            _this.onExpressionListRefreshed(false);
+        }
+
+        scene.endUndoRedoAccum();
     }
 
 
@@ -202,11 +278,12 @@ function ExpressionEditor(){
 
         _this.onExpressionListRefreshed(false);
 
-        _this.showOutputMessage('Expression deleted. Removed links from ' + nodeCount + ' nodes.','',true);
+        _this.showOutputMessage('Expression deleted. Removed links from ' + nodeCount + ' nodes.', '', true);
 
         scene.endUndoRedoAccum();
 
     }
+
 
     //
     function __deleteExpression(expressionName) {
@@ -255,7 +332,7 @@ function ExpressionEditor(){
 
         var linkedNodesNames = Object.keys(allLinkedNodes);
         if (!linkedNodesNames.length) {
-            _this.showOutputMessage('No nodes found','',false);
+            _this.showOutputMessage('No nodes found', '', false);
             return;
         }
 
@@ -300,7 +377,7 @@ function ExpressionEditor(){
 
     ///
     //
-    this.copyExpression = function( expressionName, expressionBody ) {
+    this.copyExpression = function(expressionName, expressionBody) {
 
         if (!expressionName) return;
 
@@ -318,7 +395,7 @@ function ExpressionEditor(){
             if (filePath) {
 
                 if (saveDataToFile(filePath, expressionData))
-                    _this.showOutputMessage('Expression Data saved to the file','',true);
+                    _this.showOutputMessage('Expression Data saved to the file', '', true);
 
                 else _this.showOutputMessage('An error occurred while saving');
 
@@ -329,7 +406,7 @@ function ExpressionEditor(){
         } else { // Clipboard
 
             QApplication.clipboard().setText(expressionData);
-            _this.showOutputMessage('Expression Data copied to the Clipboard','',true);
+            _this.showOutputMessage('Expression Data copied to the Clipboard', '', true);
         }
 
         scene.endUndoRedoAccum();
@@ -432,7 +509,7 @@ function ExpressionEditor(){
 
                 scene.endUndoRedoAccum();
 
-                _this.showOutputMessage('Expression Data pasted successfully','',true);
+                _this.showOutputMessage('Expression Data pasted successfully', '', true);
 
                 return;
 
@@ -440,7 +517,7 @@ function ExpressionEditor(){
 
         }
 
-        _this.showOutputMessage('Expression Data not found in the Clipboard','',true);
+        _this.showOutputMessage('Expression Data not found in the Clipboard', '', true);
 
     }
 
@@ -448,7 +525,7 @@ function ExpressionEditor(){
 
     /// ------------------------------------------------
 
-    this.showConfirmDialog = function( title, text, okButtonText, cancelButtonText ) {
+    this.showConfirmDialog = function(title, text, okButtonText, cancelButtonText) {
         var d = new Dialog();
         d.title = title;
         if (okButtonText) d.okButtonText = okButtonText;
@@ -477,16 +554,18 @@ function ExpressionEditor(){
 
 
     //
-    this.traverseNodes = function( nodes, callback ){
+    this.traverseNodes = function(nodes, callback) {
 
-        nodes.forEach(function(_node){
+        if (typeof nodes === 'string') nodes = [nodes];
+
+        nodes.forEach(function(_node) {
 
             var name = node.getName(_node);
-            callback( _node, name );
+            callback(_node, name);
 
-            if( node.isGroup(_node) ){
+            if (node.isGroup(_node)) {
                 var childNodes = node.subNodes(_node);
-                _this.traverseNodes( childNodes, callback );
+                _this.traverseNodes(childNodes, callback);
             }
 
         });
@@ -494,27 +573,27 @@ function ExpressionEditor(){
 
 
     //
-    this.getAllUsedNodes = function( _columnName ){
+    this.getAllUsedNodes = function(_columnName) {
 
         var allLinkedNodes = {};
 
-        _this.traverseNodes([node.root()],function(_node){
+        _this.traverseNodes([node.root()], function(_node) {
 
             var linkedAttrs = [];
 
-            Utils.getFullAttributeList( _node, 1, true ).forEach(function(attrName){
-                var columnName = node.linkedColumn( _node, attrName );
-                if( columnName && column.type(columnName) === 'EXPR' ){
-                    if( !_columnName || ( _columnName && _columnName === columnName ) )  {
-                        linkedAttrs.push( [columnName, attrName] );
+            Utils.getFullAttributeList(_node, 1, true).forEach(function(attrName) {
+                var columnName = node.linkedColumn(_node, attrName);
+                if (columnName && column.type(columnName) === 'EXPR') {
+                    if (!_columnName || (_columnName && _columnName === columnName)) {
+                        linkedAttrs.push([columnName, attrName]);
                         // MessageLog.trace('Expression found: '+columnName );
                     }
                 }
             });
 
             // MessageLog.trace('--> '+_node+'; '+JSON.stringify(linkedAttrs, true, '  ') );
-          
-            if( linkedAttrs.length) allLinkedNodes[_node] = linkedAttrs;
+
+            if (linkedAttrs.length) allLinkedNodes[_node] = linkedAttrs;
 
         });
 
@@ -526,22 +605,22 @@ function ExpressionEditor(){
 
 
     //
-    this.resolveExpressionName = function(name){
-        return (name || '').trim().replace(/\s/gi,'_').replace(/[^-0-9\w]/gi,'');
+    this.resolveExpressionName = function(name) {
+        return (name || '').trim().replace(/\s/gi, '_').replace(/[^-0-9\w]/gi, '');
     }
 
 
     //
-    this.getAvailableColumnName = function( columnName ) {
-        
-        if( !column.type(columnName) ) return columnName;
+    this.getAvailableColumnName = function(columnName) {
+
+        if (!column.type(columnName)) return columnName;
 
         var counter = 0;
         var _columnName = columnName;
         do {
             counter++;
-            _columnName = columnName+'_'+counter;
-        } while ( column.type(_columnName) && counter < 100 )
+            _columnName = columnName + '_' + counter;
+        } while (column.type(_columnName) && counter < 100)
 
         return _columnName;
 
