@@ -239,8 +239,8 @@ function PS_DeformerTools_TEST() {
     // _DeformerUtils.generateArtDeformer(undefined, undefined);
     // _DeformerUtils.moveDeformersAround('left');
     // _DeformerUtils.moveDeformersAround('right');
-    // _DeformerUtils.insertDeformerCurve();
-    _DeformerUtils.removeDeformerCurve();
+    _DeformerUtils.insertDeformerCurve();
+    // _DeformerUtils.removeDeformerCurve();
 
     /*
     // !!!

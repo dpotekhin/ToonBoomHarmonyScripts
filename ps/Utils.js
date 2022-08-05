@@ -1,7 +1,12 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.220723
+Version: 0.220731
 */
+
+function getSign(v) {
+    if (typeof v !== 'number') return;
+    return Math.abs(v) / v;
+}
 
 //
 function getNumber(v) {
@@ -321,6 +326,7 @@ function deepClone(src) {
 
 //
 exports = {
+    getSign: getSign,
     gridWidth: gridWidth,
     getTimestamp: getTimestamp,
     getZeroLeadingString: getZeroLeadingString,

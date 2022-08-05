@@ -290,6 +290,7 @@ function initSubmenu( editor ){
 
       submenuItems[ '!Link to: '+attrName ] = function(){
         // MessageLog.trace('Link Expression To Node Attribute:'+ _node+', '+attrName+', '+columnName );
+        if( node.linkedColumn( _node, attrName ) ) node.unlinkAttr( _node, attrName );
         node.linkAttr( _node, attrName, editor.currentExpressionName );
       };
 
