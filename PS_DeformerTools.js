@@ -2,7 +2,7 @@
 Author: Dima Potekhin (skinion.onn@gmail.com)
 
 [Name: PS_SelectionSets :]
-[Version: 0.220729 :]
+[Version: 0.220809 :]
 
 [Description:
 A set of tools for working with deformers.
@@ -23,7 +23,7 @@ function PS_DeformerTools() {
 
     //
     var scriptName = 'Deformer Tools';
-    var scriptVer = '0.220729';
+    var scriptVer = '0.220809';
     //
 
     // var SETTINGS_NAME = 'PS_DEFORMER_TOOLS_SETTINGS';
@@ -51,7 +51,7 @@ function PS_DeformerTools() {
 
     // ==========================================================
     // ALIGN
-    var alignGroup = modal.addGroup('Align Points:', ui, true, hGroupStyle);
+    var alignGroup = modal.addGroup('Align:', ui, true, hGroupStyle);
 
     modal.addButton('', alignGroup, btnHeight, btnHeight,
         iconPath + 'align-left.png',
@@ -118,7 +118,7 @@ function PS_DeformerTools() {
 
     // ==========================================================
     // CONTROL POINTS
-    var cpGroup = modal.addGroup('Control points:', ui, true, hGroupStyle);
+    var cpGroup = modal.addGroup('Modify:', ui, true, hGroupStyle);
 
     modal.addButton('', cpGroup, btnHeight, btnHeight,
         iconPath + 'orient-points.png',
@@ -143,33 +143,28 @@ function PS_DeformerTools() {
     modal.addButton('', cpGroup, btnHeight, btnHeight,
         iconPath + 'move-around-left.png',
         function() {
-            DeformerUtils.moveDeformersAround('left');
+            DeformerUtils.moveDeformersAround('left', KeyModifiers.IsShiftPressed());
         },
-        'Move deformers around to the left'
+        'Move deformers around to the left' +
+        '\n- Hold down the Shift key to change the resting attributes.'
     );
 
     modal.addButton('', cpGroup, btnHeight, btnHeight,
         iconPath + 'move-around-right.png',
         function() {
-            DeformerUtils.moveDeformersAround('right');
+            DeformerUtils.moveDeformersAround('right', KeyModifiers.IsShiftPressed());
         },
-        'Move deformers around to the right'
+        'Move deformers around to the right' +
+        '\n- Hold down the Shift key to change the resting attributes.'
     );
 
-    modal.addButton('', cpGroup, btnHeight, btnHeight,
-        iconPath + 'insert-cp.png',
-        function() {
-            DeformerUtils.insertDeformerCurve();
-        },
-        'Insert a Curve into the Deformer Chain'
-    );
 
     modal.addButton('', cpGroup, btnHeight, btnHeight,
-        iconPath + 'remove-cp.png',
+        iconPath + 'reverse-chain.png',
         function() {
-            DeformerUtils.removeDeformerCurve();
+            DeformerUtils.reverseChain(KeyModifiers.IsShiftPressed());
         },
-        'Remove the selected Curve from the Deformer Chain'
+        'Reverse direction of the selected deformer chain.'
     );
 
     cpGroup.mainLayout.addStretch();
@@ -217,6 +212,22 @@ function PS_DeformerTools() {
         '\n- Hold down the Alt key to reverse path.'
     );
 
+    modal.addButton('', gdGroup, btnHeight, btnHeight,
+        iconPath + 'insert-cp.png',
+        function() {
+            DeformerUtils.insertDeformerCurve();
+        },
+        'Insert a Curve into the Deformer Chain'
+    );
+
+    modal.addButton('', gdGroup, btnHeight, btnHeight,
+        iconPath + 'remove-cp.png',
+        function() {
+            DeformerUtils.removeDeformerCurve();
+        },
+        'Remove the selected Curve from the Deformer Chain'
+    );
+
     gdGroup.mainLayout.addStretch();
 
     //
@@ -239,7 +250,10 @@ function PS_DeformerTools_TEST() {
     // _DeformerUtils.generateArtDeformer(undefined, undefined);
     // _DeformerUtils.moveDeformersAround('left');
     // _DeformerUtils.moveDeformersAround('right');
-    _DeformerUtils.insertDeformerCurve();
+    // _DeformerUtils.insertDeformerCurve();
+    // _DeformerUtils.symmetrizeChain();
+    // _DeformerUtils.symmetrizeCurves();
+    _DeformerUtils.reverseChain(KeyModifiers.IsShiftPressed());
     // _DeformerUtils.removeDeformerCurve();
 
     /*
