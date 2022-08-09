@@ -609,7 +609,7 @@ function reverseChain(applyToResting) {
 
         var _isChainClosed = isChainClosed(_nodes);
         var strokes = getStrokesFromChain(_nodes);
-        MessageLog.trace(JSON.stringify(strokes, true, '  '));
+        // MessageLog.trace(JSON.stringify(strokes, true, '  '));
 
         // strokePoints, destNode, srcNode, dontClosePath, skipOffsetModule
         strokes = pointsToDeformerCurves(

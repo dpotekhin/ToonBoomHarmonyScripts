@@ -164,7 +164,8 @@ function PS_DeformerTools() {
         function() {
             DeformerUtils.reverseChain(KeyModifiers.IsShiftPressed());
         },
-        'Reverse direction of the selected deformer chain.'
+        'Reverse direction of the selected deformer chain.' +
+        '\n- Hold down the Shift key to change the resting attributes.'
     );
 
     cpGroup.mainLayout.addStretch();
