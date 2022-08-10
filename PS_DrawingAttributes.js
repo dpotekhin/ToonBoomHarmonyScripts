@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version 0.1
+Version 0.220810
 
 ToDo:
 - 
@@ -16,7 +16,7 @@ function PS_DrawingAttributesModal(){
 
   //
   var scriptName = 'Drawing Attributes';
-  var scriptVer = '0.1';
+  var scriptVer = '0.220810';
   //
 
   var Utils = _Utils;
@@ -25,7 +25,7 @@ function PS_DrawingAttributesModal(){
   var btnHeight = 30;
   var listJustUpdated = true;
   var modalWidth = 400;
-  var modelHeight = 600;
+  var modalHeight = 600;
   var border = 20;
   var tableColumns = 4;
 
@@ -35,7 +35,7 @@ function PS_DrawingAttributesModal(){
   // var iconPath = fileMapper.toNativePath(specialFolders.userScripts+"/PS_PathTools-Resources/icons/");
 
   //
-  var modal = new pModal( scriptName + " v" + scriptVer, modalWidth, modelHeight, false );  
+  var modal = new pModal( scriptName + " v" + scriptVer, modalWidth, modalHeight, false );  
   if( !modal.ui ){
     return;
   }
@@ -52,7 +52,7 @@ function PS_DrawingAttributesModal(){
 	var attributes = [
 		{
 			// separator: true,
-			isUsedToolTip: 'Toggle applying all attributes bellow to the selection',
+			isUsedToolTip: 'aa',//Toggle applying all attributes bellow to the selection',
 			onIsUsedChange: function(v){
 				// MessageLog.trace('onIsUsedChange: '+v);
 				attributes.forEach(function(attrData){
@@ -319,19 +319,25 @@ function PS_DrawingAttributesModal(){
 			
 			//
 			if( attr.separator ){
+
 				if( attr.separator === true ){
+
 					var line = new QWidget;
-				  line.setMinimumSize(modalWidth-50,1);
-				  line.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed);
-				  line.setStyleSheet("background-color: #303030; border-top: 1px solid #ffffff; border-bottom: 1px solid #505050;");
+				  // line.setMinimumSize(modalWidth-50,1);
+				  // line.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed);
+				  // line.setStyleSheet("background-color: #303030; border-top: 1px solid #ffffff; border-bottom: 1px solid #505050;");
 				  groupWidget.mainLayout.addWidget( line, index, 0, 1, tableColumns, Qt.AlignCenter);
+
 			 	}else{
+
 				  var label = new QLabel();
 			  	groupWidget.mainLayout.addWidget( label, index, 0, 1, tableColumns, Qt.AlignCenter );
 			  	label.text = '--------------------&nbsp;&nbsp;&nbsp;&nbsp; <i><b>'+attr.separator+'</b></i> &nbsp;&nbsp;&nbsp;&nbsp;--------------------';
+
 				}
 
 			  index++;
+
 			}
 
 			// Is Used Checkbox
