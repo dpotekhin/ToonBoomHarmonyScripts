@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.220425
+Version: 0.220810
 */
 
 //
@@ -589,15 +589,15 @@ function Randomize( amount ){
 
 
 //
-function setWidth( w ){
+function setWidth( w, h ){
 
-  setSize( w, undefined, 'Set Width' );  
+  setSize( w, h, 'Set Width' );  
 
 }
 
 //
-function setHeight( h ){
-  setSize( undefined, h, 'Set Height' );
+function setHeight( h, w ){
+  setSize( w, h, 'Set Height' );
 }
 
 //
@@ -625,6 +625,10 @@ function setSize( w, h, title ){
     if( w !== undefined ) widthCoef = Utils.gridToPixelsX(w) / boxWidth;
     var boxHeight = box.y1-box.y0;
     if( h !== undefined ) heightCoef = Utils.gridToPixelsY(h) / boxHeight;
+    
+    if( w === true ) widthCoef = heightCoef;
+    if( h === true ) heightCoef = widthCoef;
+    
     // MessageLog.trace('boxCenter: '+JSON.stringify(box,true,'  ')+' > '+JSON.stringify(boxCenter,true,'  ') );
     // MessageLog.trace('boxWidth: '+boxWidth+', '+Utils.gridToPixelsX(w) +' > '+widthCoef);
     // MessageLog.trace('boxHeight: '+boxHeight+', '+Utils.gridToPixelsY(h) +' > '+heightCoef );

@@ -1,5 +1,5 @@
 ## PS_PathTools
-v0.220425
+v0.220810
 
 ### Description
 The script provides tools for aligning, mirroring and modifying strokes.
