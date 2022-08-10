@@ -76,6 +76,8 @@ function PS_RenameNodes(){
 		'COLOR_CARD': '{{NAME}}-CC',
 		'COLOR_OVERRIDE_TVG': '{{NAME}}-CO',
 
+		'MATTE_COMPOSITE': '{{NAME}}-MTC',
+
 		'GROUP': [
 			['Deformation|-DFM', '{{NAME}}-DFM'], // the naming pattern for standard deformation groups
 			['', '{{NAME}}-G']
@@ -163,6 +165,7 @@ function PS_RenameNodes(){
 			'CUTTER': 'C',
 			'AutoPatchModule': 'AP',
 			'COMPOSITE': 'CMP',
+			'MATTE_COMPOSITE': 'MTC',
 		}
 
 		Object.keys(shortPaterns).forEach(function( n ){

@@ -1,7 +1,12 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.220713
+Version: 0.220731
 */
+
+function getSign(v) {
+    if (typeof v !== 'number') return;
+    return Math.abs(v) / v;
+}
 
 //
 function getNumber(v) {
@@ -18,9 +23,8 @@ function getTimestamp() {
 
 
 //
-function getZeroLeadingString(v, digits) {
-    v = '' + v;
-    return '000000000000000000'.substr(0, (digits || 2) - v.length) + v;
+function getZeroLeadingString(v) {
+    return v < 10 ? '0' + v : v;
 }
 
 //
@@ -250,40 +254,6 @@ function hexToRgb(hex) {
 }
 
 
-// Object.assign polyfill
-if (!Object.assign) {
-    Object.defineProperty(Object, 'assign', {
-        enumerable: false,
-        configurable: true,
-        writable: true,
-        value: function(target, firstSource) {
-            'use strict';
-            if (target === undefined || target === null) {
-                throw new TypeError('Cannot convert first argument to object');
-            }
-
-            var to = Object(target);
-            for (var i = 1; i < arguments.length; i++) {
-                var nextSource = arguments[i];
-                if (nextSource === undefined || nextSource === null) {
-                    continue;
-                }
-
-                var keysArray = Object.keys(Object(nextSource));
-                for (var nextIndex = 0, len = keysArray.length; nextIndex < len; nextIndex++) {
-                    var nextKey = keysArray[nextIndex];
-                    var desc = Object.getOwnPropertyDescriptor(nextSource, nextKey);
-                    if (desc !== undefined && desc.enumerable) {
-                        to[nextKey] = nextSource[nextKey];
-                    }
-                }
-            }
-            return to;
-        }
-    });
-}
-
-
 //
 Math.sign = function(v) {
     if (!v) return 0;
@@ -295,17 +265,68 @@ Math.signp = function(v) {
     return v < 0 ? -1 : 1;
 }
 
+
 //
-function filterUnique(arr) {
-    var _arr = []
-    arr.forEach(function(v) {
-        if (_arr.indexOf(v) === -1) _arr.push(v);
-    });
-    return _arr;
+//
+var object_create = Object.create;
+if (typeof object_create !== 'function') {
+    object_create = function(o) {
+        function F() {}
+        F.prototype = o;
+        return new F();
+    };
 }
+
+function deepClone(src) {
+    if (src === null || typeof(src) !== 'object') {
+        return src;
+    }
+
+    //Honor native/custom clone methods
+    if (typeof src.clone == 'function') {
+        return src.clone(true);
+    }
+
+    //Special cases:
+    //Date
+    if (src instanceof Date) {
+        return new Date(src.getTime());
+    }
+    //RegExp
+    if (src instanceof RegExp) {
+        return new RegExp(src);
+    }
+    //DOM Element
+    if (src.nodeType && typeof src.cloneNode == 'function') {
+        return src.cloneNode(true);
+    }
+
+    //Array
+    if (Object.prototype.toString.call(src) == '[object Array]') {
+        //[].slice() by itself would soft clone
+        var ret = src.slice();
+
+        var i = ret.length;
+        while (i--) {
+            ret[i] = deepClone(ret[i]);
+        }
+        return ret;
+    }
+
+    //If we've reached here, we have a regular object
+    var proto = (Object.getPrototypeOf ? Object.getPrototypeOf(src) : src.__proto__);
+    var dest = object_create(proto);
+    for (var key in src) {
+        //Note: this does NOT preserve ES5 property attributes like 'writable', 'enumerable', etc.
+        dest[key] = deepClone(src[key]);
+    }
+    return dest;
+}
+
 
 //
 exports = {
+    getSign: getSign,
     gridWidth: gridWidth,
     getTimestamp: getTimestamp,
     getZeroLeadingString: getZeroLeadingString,
@@ -326,5 +347,75 @@ exports = {
     getSoundColumns: getSoundColumns,
     getUnusedColumnName: getUnusedColumnName,
     getNumber: getNumber,
-    filterUnique: filterUnique,
+    deepClone: deepClone,
 };
+
+
+//
+// Object.assign polyfill
+if (!Object.assign) {
+
+    Object.defineProperty(Object, 'assign', {
+        enumerable: false,
+        configurable: true,
+        writable: true,
+        value: function(target, firstSource) {
+            'use strict';
+            if (target === undefined || target === null) {
+                throw new TypeError('Cannot convert first argument to object');
+            }
+
+            var to = deepClone(target);
+            for (var i = 1; i < arguments.length; i++) {
+                var nextSource = arguments[i];
+                if (nextSource === undefined || nextSource === null) {
+                    continue;
+                }
+
+                var keysArray = Object.keys(Object(nextSource));
+                for (var nextIndex = 0, len = keysArray.length; nextIndex < len; nextIndex++) {
+                    var nextKey = keysArray[nextIndex];
+                    var desc = Object.getOwnPropertyDescriptor(nextSource, nextKey);
+                    if (desc !== undefined && desc.enumerable) {
+                        to[nextKey] = nextSource[nextKey];
+                    }
+                }
+            }
+            return to;
+        }
+    });
+
+}
+
+
+
+
+//
+// if(!Object.byString){
+
+Object.byString = function(o, s, v) {
+
+    s = s.replace(/\[(\w+)\]/g, '.$1');
+    s = s.replace(/^\./, '');
+    var a = s.split('.');
+    var k;
+    for (var i = 0, n = a.length; i < n; ++i) {
+        k = a[i];
+        if (k in o) {
+            o = o[k];
+        } else {
+            if (v !== undefined) {
+                // MessageLog.trace('APPLY@2: '+a[i-1]+' -> '+k+' > '+v+' >> '+JSON.stringify(lastObj,true,'  '));
+                o[k] = v;
+            }
+            return;
+        }
+    }
+    if (v !== undefined) {
+        // MessageLog.trace('APPLY@1: '+a[i-1]+' -> '+k+' > '+v);
+        o[k] = v;
+    }
+    return o;
+
+}
+// }

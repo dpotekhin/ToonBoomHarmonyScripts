@@ -135,7 +135,7 @@ function createNode(parentNode, name, type, x, y, src, dest) {
         node.unlink(dest, 0);
         node.link(createdNode, 0, dest, 0);
     }
-    // MessageLog.trace('?? '+dest);
+    // MessageLog.trace('### createNode:\n'+'parentNode:'+parentNode+'\n'+ 'name:'+name+'\n'+ 'type:'+type+'\n'+ 'x:'+x+'\n'+ 'y:'+y+'\n'+ 'src:'+src+'\ndest:'+ dest);
     return createdNode;
 }
 

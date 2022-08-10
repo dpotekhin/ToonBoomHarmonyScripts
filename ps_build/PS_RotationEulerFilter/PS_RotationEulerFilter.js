@@ -2,7 +2,7 @@
 Author: Dima Potekhin (skinion.onn@gmail.com)
 
 [Name: PS_RotationEulerFilter :]
-[Version: 0.211028 :]
+[Version: 0.220810 :]
 
 [Description:
 This script compensates for rotation attributes values change over 180 degrees between adjacent keyframes.
@@ -14,6 +14,7 @@ If you don't select a time range, the entier Timeline will be used.
 
 #### Options:
 - Hold down the Control key to use 360 degrees as minimum rotation angle.
+- Hold down the Shift key to disable 360 normalization.
 :]
 */
 
@@ -29,6 +30,7 @@ function PS_RotationEulerFilter(){
 	var nodeTypes = ['PEG','READ','CurveModule','OffsetModule'];
 	var attrNames = /ROTATION.|orientation/i;
 	var useMinimumRotationAngle = !KeyModifiers.IsControlPressed();
+	var disableNormalization = !KeyModifiers.IsShiftPressed();
 	var startFrame = Timeline.firstFrameSel;
 	var stopFrame = startFrame + Timeline.numFrameSel - 1;
 	if( startFrame === stopFrame ) {
@@ -68,7 +70,28 @@ function PS_RotationEulerFilter(){
 			var pointsNumber = func.numberOfPoints(column);
 			// MessageLog.trace('attrName: '+attrName+', '+column+': '+pointsNumber);
 
+			// Normalize angle values
+			if( !disableNormalization && Math.abs(func.pointY( column, 0 )) > 360 ){ 
+				for( var i=0; i<pointsNumber; i++ ){
+					var val = func.pointY( column, i );
+					var valNormalized = val % 360;
+					if( val === valNormalized ) continue;
+					var diff = val - valNormalized;
+					func.setBezierPoint(column,
+							func.pointX( column, i ),
+							valNormalized,
+							func.pointHandleLeftX(column,i),
+							func.pointHandleLeftY(column,i) - diff,
+							func.pointHandleRightX(column,i),
+							func.pointHandleRightY(column,i) - diff,
+							func.pointConstSeg(column,i),
+							func.pointContinuity(column,i) 
+						);
+				}
+			}
+
 			var prevValue;
+			
 			for( var i=0; i<pointsNumber; i++ ){
 				
 				var _frame = func.pointX( column, i );
