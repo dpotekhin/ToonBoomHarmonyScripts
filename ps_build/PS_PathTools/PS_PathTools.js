@@ -2,7 +2,7 @@
 Author: Dima Potekhin (skinion.onn@gmail.com)
 
 [Name: PS_PathTools :]
-[Version: 0.220425 :]
+[Version: 0.220810 :]
 
 [Description:
 The script provides tools for aligning, mirroring and modifying strokes.
@@ -42,7 +42,7 @@ function PS_PathTools(){
 
   //
   var scriptName = 'Path Tools';
-  var scriptVer = '0.220425';
+  var scriptVer = '0.220810';
   //
 
   var SETTINGS_NAME = 'PS_PATH_TOOLS_SETTINGS';
@@ -212,20 +212,22 @@ function PS_PathTools(){
   var btnSetWidth = modal.addButton( '', sizeGroup, btnHeight, btnHeight, iconPath+'set-width.png',
     setWidth,
     'Set Width'
+    +'\n- Hold down the Shift key to set the Height proportionally.'
   );
   var setWidthInput = modal.addNumberInput( '', sizeGroup, btnHeight*1.5, btnHeight, 0, undefined, setWidth, setWidth );
   function setWidth () {
-    AlignPaths.setWidth( parseFloat( setWidthInput.text ) );
+    AlignPaths.setWidth( parseFloat( setWidthInput.text ), KeyModifiers.IsShiftPressed() ? true : undefined );
   }
 
   // Width
   var btnSetHeight = modal.addButton( '', sizeGroup, btnHeight, btnHeight, iconPath+'set-height.png',
     setHeight,
     'Set Height'
+    +'\n- Hold down the Shift key to set the Width proportionally.'
   );
   var setHeightInput = modal.addNumberInput( '', sizeGroup, btnHeight*1.5, btnHeight, 0, undefined, setHeight, setHeight );
   function setHeight () {
-    AlignPaths.setHeight( parseFloat( setHeightInput.text ) );
+    AlignPaths.setHeight( parseFloat( setHeightInput.text ), KeyModifiers.IsShiftPressed() ? true : undefined );
   }
 
   //
@@ -240,8 +242,8 @@ function PS_PathTools(){
   modal.addButton( '', sizeGroup, btnHeight, btnHeight, iconPath+'get-size.png',
     function() {
       var size = AlignPaths.getSize();
-      setWidthInput.text = ''+~~(size.x*100)/100;
-      setHeightInput.text = ''+~~(size.y*100)/100;
+      setWidthInput.text = ''+~~(size.x*10000)/10000;
+      setHeightInput.text = ''+~~(size.y*10000)/10000;
     },
     'Get actual Size'
   );

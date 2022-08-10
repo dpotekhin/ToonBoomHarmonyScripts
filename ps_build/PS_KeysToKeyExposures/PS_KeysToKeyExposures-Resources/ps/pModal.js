@@ -80,26 +80,32 @@ pModal.prototype.addGroup = function( title, parent, layoutType, style ){
   var groupBox = new QGroupBox( title );
   // groupBox.flat = true;
   var groupBoxLayout;
+
   switch( layoutType ){
     
     // Horizontal
     case 1:
     case true:
     case 'horizontal':
+      layoutType = 'horizontal';
       groupBoxLayout = new QHBoxLayout( parent );
       break;
 
     case 2:
     case 'grid':
+      layoutType = 'grid';
       groupBoxLayout = new QGridLayout( parent );
       break;
 
     default:
+      layoutType = 'vertical';
       groupBoxLayout = new QVBoxLayout( parent );
   }
+
   groupBox.mainLayout = groupBoxLayout;
 
-  groupBox.setLayout( groupBoxLayout );   
+  groupBox.setLayout( groupBoxLayout ); 
+
   if( style ) {
     if( style === true ){
       this.removeElementMargins( groupBox );
@@ -107,7 +113,7 @@ pModal.prototype.addGroup = function( title, parent, layoutType, style ){
       groupBox.setStyleSheet( style );
     }
   }else{
-    this.setDefaulElementMargins( groupBox );
+    if( layoutType !== 'grid' ) this.setDefaulElementMargins( groupBox );
   }
 
   if( parent ) parent.mainLayout.addWidget( groupBox, 0, 0 );
