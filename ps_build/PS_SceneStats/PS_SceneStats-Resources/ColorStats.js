@@ -28,6 +28,7 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
         {
             key: 'num',
             header: '#',
+            getBg: storage.bgIndex
         },
 
         {

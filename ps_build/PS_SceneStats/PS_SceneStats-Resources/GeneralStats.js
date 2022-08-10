@@ -51,8 +51,8 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
     storage.getAllChildNodes(selectedNodes, 'READ').forEach(function(nodeData) {
         if (drawingElements.indexOf(nodeData.elementId) !== -1) return;
         drawingElements.push(nodeData.elementId);
-        drawingSubstitutions += nodeData.drawingTimings.length;
-        usedDrawingSubstitutions += nodeData.usedDrawingTimings.length;
+        drawingSubstitutions += nodeData.drawingSubstitutions.length;
+        usedDrawingSubstitutions += nodeData.usedDrawingSubstitutions.length;
     });
 
 
@@ -67,6 +67,7 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
     modal.addButton('Toggle Performance Report', buttonsGroup, 150, 30, '', function() {
         preferences.setBool('ADVANCED_ENABLE_PERFORMANCE_REPORT', !preferences.getBool('ADVANCED_ENABLE_PERFORMANCE_REPORT', true));
     });
+
 
     // Test Render
     var testRenderButton = modal.addButton('Test Render', buttonsGroup, 150, 30, '', function() {
@@ -109,6 +110,14 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
         node.deleteNode(tempDisplayNode);
 
     });
+
+
+    // Show Drawing Substitutions Tab Button
+    var showDrawingSubstitutionsTabButton = modal.addButton('Show Drawing Substitutions Tab', buttonsGroup, 170, 30, '', function() {
+        showDrawingSubstitutionsTabButton.enabled = false;
+        storage.showDrawingSubstitutionStatsTab();
+    });
+
 
     buttonsGroup.mainLayout.addStretch();
 
@@ -228,7 +237,7 @@ exports = function(selectedNodes, modal, storage, contentMaxHeight) {
         },
 
     ], tablesGroup, contentMaxHeight - 40);
-    tableView.minimumWidth = tableView.maximumWidth = 290;
+    tableView.minimumWidth = tableView.maximumWidth = 340;
 
 
     tablesGroup.mainLayout.addStretch();

@@ -28,7 +28,7 @@ exports = function(options) {
     //
 
     var btnHeight = 30;
-    var modalWidth = 800;
+    var modalWidth = 1000;
     var modalHeight = 500;
     var contentMaxHeight = modalHeight - 60;
     // var iconPath = fileMapper.toNativePath(specialFolders.userScripts+"/PS_DeformerTools-Resources/icons/");
@@ -98,7 +98,11 @@ exports = function(options) {
 
         ui.mainLayout.addWidget(tabs, 0, 0);
 
-        //
+        storage.showDrawingSubstitutionStatsTab = function() {
+            var DrawingSubsStats = require(fileMapper.toNativePath(specialFolders.userScripts + "/PS_SceneStats-Resources/DrawingSubsStats.js"));
+            tabs.addTab(new DrawingSubsStats(selectedNodes, undefined, storage, contentMaxHeight), 'Drawings Substitutions');
+        }
+
         // modal.addVLine( btnHeight, mainGroup );
         // mainGroup.mainLayout.addStretch();
 

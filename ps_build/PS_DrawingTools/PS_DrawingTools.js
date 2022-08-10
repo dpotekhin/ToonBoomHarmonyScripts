@@ -2,7 +2,7 @@
 Author: Dima Potekhin (skinion.onn@gmail.com)
 
 [Name: PS_DrawingTools :]
-[Version: 0.220609 :]
+[Version: 0.220805 :]
 
 [Description:
 A set of tools for working with Drawings.
@@ -22,7 +22,7 @@ function PS_DrawingTools() {
 
     //
     var scriptName = 'Drawing Tools';
-    var scriptVer = '0.220609';
+    var scriptVer = '0.220805';
     //
 
     // var SETTINGS_NAME = 'PS_DEFORMER_TOOLS_SETTINGS';
@@ -59,24 +59,48 @@ function PS_DrawingTools() {
 
 
     modal.addButton('', exposureGroup, btnHeight, btnHeight,
-        iconPath + 'expand-exposure.png',
+        iconPath + 'expand-exposure-left.png',
         function() {
-            _exec( 'Expand exposure to the current frame',
-                function(){
-                	DrawingTools.expandExposure( KeyModifiers.IsControlPressed() );
+            _exec('Expand exposure',
+                function() {
+                    DrawingTools.expandExposure('left', KeyModifiers.IsControlPressed());
                 });
         },
-        'Expand exposure to the current frame.'
-        +'\n- Hold down Ctrl key to expand to all Timeline.'
+        'Expand exposure to the left from the current frame to the first different entry.' +
+        '\n- Hold down Ctrl key to expand to the start of the timeline.'
+    );
+
+    modal.addButton('', exposureGroup, btnHeight, btnHeight,
+        iconPath + 'expand-exposure-right.png',
+        function() {
+            _exec('Expand exposure',
+                function() {
+                    DrawingTools.expandExposure('right', KeyModifiers.IsControlPressed());
+                });
+        },
+        'Expand exposure to the right from the current frame to the first different entry.' +
+        '\n- Hold down Ctrl key to expand to the start of the timeline.'
+    );
+
+    modal.addButton('', exposureGroup, btnHeight, btnHeight,
+        iconPath + 'expand-exposure.png',
+        function() {
+            _exec('Expand exposure',
+                function() {
+                    DrawingTools.expandExposure('both', KeyModifiers.IsControlPressed());
+                });
+        },
+        'Expand exposure to the left and right from the current frame to the first different entry.' +
+        '\n- Hold down Ctrl key to expand to the end.'
     );
 
 
     modal.addButton('', exposureGroup, btnHeight, btnHeight,
         iconPath + 'remove-exposure-outside-range.png',
         function() {
-            _exec( 'Remove exposure outside the selected range',
-                function(){
-                	DrawingTools.removeExposureOutsideRange();
+            _exec('Remove exposure outside the selected range',
+                function() {
+                    DrawingTools.removeExposureOutsideRange();
                 });
         },
         'Remove exposure outside the selected range.'
@@ -86,9 +110,9 @@ function PS_DrawingTools() {
     modal.addButton('', exposureGroup, btnHeight, btnHeight,
         iconPath + 'clear-exposure.png',
         function() {
-            _exec( 'Clear exposure',
-                function(){
-                	DrawingTools.clearExposure();
+            _exec('Clear exposure',
+                function() {
+                    DrawingTools.clearExposure();
                 });
         },
         'Clear exposure.'
@@ -107,8 +131,8 @@ function PS_DrawingTools() {
     modal.addButton('', columnGroup, btnHeight, btnHeight,
         iconPath + 'find-column-by-name.png',
         function() {
-            _exec( 'Select Column by name',
-                DrawingTools.selectColumnByName );
+            _exec('Select Column by name',
+                DrawingTools.selectColumnByName);
         },
         'Select Column by name'
     );
@@ -117,8 +141,8 @@ function PS_DrawingTools() {
     modal.addButton('', columnGroup, btnHeight, btnHeight,
         iconPath + 'remove-unused-drawing-columns.png',
         function() {
-            _exec( 'Remove unused Drawing columns',
-                DrawingTools.removeUnusedDrawingColumns );
+            _exec('Remove unused Drawing columns',
+                DrawingTools.removeUnusedDrawingColumns);
         },
         'Remove unused Drawing columns'
     );
@@ -129,19 +153,59 @@ function PS_DrawingTools() {
 
     // ==========================================================
     // ELEMENTS
-    var elementsGroup = modal.addGroup('Elements:', ui, true, hGroupStyle);
+    var drawingRefGroupTitle = 'Ref Drawing: ';
+    var drawingRefGroup = modal.addGroup(drawingRefGroupTitle + 'N/S', ui, true, hGroupStyle);
+    var drawingRefNode;
 
-    modal.addButton('', elementsGroup, btnHeight, btnHeight,
+    modal.addButton('', drawingRefGroup, btnHeight, btnHeight,
+        iconPath + 'pick-ref-drawing.png',
+        function() {
+            drawingRefNode = _exec(undefined,
+                DrawingTools.getDrawingReference);
+            drawingRefGroup.title = drawingRefGroupTitle + (drawingRefNode || 'N/S');
+            updateUI();
+
+        },
+        'Set Drawing Reference Node'
+    );
+
+    var linkRefColumnButton = modal.addButton('', drawingRefGroup, btnHeight, btnHeight,
+        iconPath + 'link-ref-column.png',
+        function() {
+            _exec(undefined,
+                function() { DrawingTools.linkDrawingColumn(true, drawingRefNode) });
+        },
+        'Link the Drawing Column from the Reference Drawing'
+    );
+
+    var linkRefElementButton = modal.addButton('', drawingRefGroup, btnHeight, btnHeight,
+        iconPath + 'link-ref-element.png',
+        function() {
+            _exec(undefined,
+                function() { DrawingTools.linkDrawingElement(true, drawingRefNode) });
+        },
+        'Link the Drawing Element with the new Timing from the Reference Drawing'
+    );
+
+    //
+    function updateUI() {
+        linkRefColumnButton.enabled = linkRefElementButton.enabled = !!drawingRefNode;
+    }
+
+    // ---
+    modal.addVLine(10, drawingRefGroup);
+
+    modal.addButton('', drawingRefGroup, btnHeight, btnHeight,
         iconPath + 'open-selected-element-folder.png',
         function() {
-            _exec( undefined,
-                DrawingTools.openSelectedElementFolder );
+            _exec(undefined,
+                DrawingTools.openSelectedElementFolder);
         },
         'Open Selected Element Folder'
     );
 
     /*
-    modal.addButton('', elementsGroup, btnHeight, btnHeight,
+    modal.addButton('', drawingRefGroup, btnHeight, btnHeight,
         iconPath + 'change-element-format.png',
         function() {
             _exec( undefined,
@@ -150,9 +214,9 @@ function PS_DrawingTools() {
         'Change Element Format'
     );
     */
-    
+
     //
-    elementsGroup.mainLayout.addStretch();
+    drawingRefGroup.mainLayout.addStretch();
 
 
 
@@ -166,6 +230,8 @@ function PS_DrawingTools() {
     outputText.wordWrap = true;
     DrawingTools.setOutputText(outputText);
 
+    updateUI();
+
     //
     ui.mainLayout.addStretch();
 
@@ -175,20 +241,24 @@ function PS_DrawingTools() {
     ///
     function _exec(_name, _action) {
 
-        MessageLog.trace('>>> ' + _name);
+        // MessageLog.trace('>>> ' + _name);
         DrawingTools.showOutput('...');
 
-        if( _name ) scene.beginUndoRedoAccum(_name);
+        var result;
+
+        if (_name) scene.beginUndoRedoAccum(_name);
 
         try {
 
-            _action();
+            result = _action();
 
         } catch (err) {
             MessageLog.trace('Error: ' + _name + ': ' + err);
         }
 
-        if( _name ) scene.endUndoRedoAccum();
+        if (_name) scene.endUndoRedoAccum();
+
+        return result;
 
     }
 
