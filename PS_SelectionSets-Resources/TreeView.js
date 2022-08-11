@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.210927
+Version: 0.220811
 */
 
 var TreeView = function( parent, resourcesPath ){
@@ -200,7 +200,12 @@ var TreeView = function( parent, resourcesPath ){
       rowItems
     );
 
-    item.setToolTip( itemData.description || ( itemData.isGroup ? itemData.dataNode : '' ) );
+    
+    itemData.updateToolTip = function() {
+      item.setToolTip( itemData.description || ( itemData.isGroup ? itemData.dataNode : itemData.name ) );    
+    }
+    
+    itemData.updateToolTip();
 
     itemData.updateColor = function(){
 
