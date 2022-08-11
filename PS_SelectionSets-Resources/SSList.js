@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.211116
+Version: 0.220811
 */
 
 var _ContextMenu = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/ContextMenu.js"));
@@ -219,6 +219,8 @@ function SSList( scriptVer, parentWidget ){
 
     model.renameItem( currentItemData.id, newName );
     currentItemData.modelItem.setText( newName );
+    
+    treeView.refresh();
 
   }
 

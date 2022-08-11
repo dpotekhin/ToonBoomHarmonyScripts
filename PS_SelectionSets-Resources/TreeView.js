@@ -28,7 +28,7 @@ var TreeView = function( parent, resourcesPath ){
   treeView.setModel(model);
 
   parent.mainLayout.addWidget( treeView, 0, 0 );
-  
+
   // -------------------------------------------------
   /// Events
 
@@ -171,8 +171,7 @@ var TreeView = function( parent, resourcesPath ){
 
     });
 
-    this.treeView.resizeColumnToContents(1);
-    this.treeView.resizeColumnToContents(2);
+    this.refresh();
     // this.treeView.expandAll();
 
   }
@@ -184,6 +183,7 @@ var TreeView = function( parent, resourcesPath ){
     // MessageLog.trace('!!!!'+treeView.toString() );
     // treeView.layoutChanged.emit();
     // treeView.itemChanged.emit();
+    for(var i=0; i<3; i++){ this.treeView.resizeColumnToContents(i); }
   }
 
 
@@ -199,7 +199,6 @@ var TreeView = function( parent, resourcesPath ){
       itemData.id,
       rowItems
     );
-
     
     itemData.updateToolTip = function() {
       item.setToolTip( itemData.description || ( itemData.isGroup ? itemData.dataNode : itemData.name ) );    
