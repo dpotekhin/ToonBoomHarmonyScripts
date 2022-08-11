@@ -33,13 +33,14 @@ function PS_DeformerTools() {
 
     var btnHeight = 30;
     var modalWidth = 320;
+    var modalHeight = 280;
     var iconPath = fileMapper.toNativePath(specialFolders.userScripts + "/PS_DeformerTools-Resources/icons/");
     var hGroupStyle = 'QGroupBox{ position: relative; border: none; padding-top:0; padding-bottom: 0; border-radius: 0;}';
     var forceWindowInstances = true; //KeyModifiers.IsControlPressed();
 
 
     //
-    var modal = new pModal(scriptName + " v" + scriptVer, modalWidth, 260, forceWindowInstances ? false : true);
+    var modal = new pModal(scriptName + " v" + scriptVer, modalWidth, modalHeight, forceWindowInstances ? false : true);
     if (!modal.ui) {
         return;
     }
@@ -125,8 +126,9 @@ function PS_DeformerTools() {
         iconPath + 'x0.png',
         function() {
             var _node = selection.selectedNode(0);
-            if (!DeformerUtils.isDefNode(_node)) return;
+            // if (!DeformerUtils.isDefNode(_node)) return;
             DeformerUtils.setAttrValues(_node, 'offset.x', undefined, getApplyMode(), 0);
+            DeformerUtils.setAttrValues(_node, 'position.x', undefined, DeformerUtils.MODE_CURRENT, 0);
         },
         'Set X to 0.' +
         MODIFIERS_TOOLTIP_TEXT
@@ -136,8 +138,9 @@ function PS_DeformerTools() {
         iconPath + 'y0.png',
         function() {
             var _node = selection.selectedNode(0);
-            if (!DeformerUtils.isDefNode(_node)) return;
+            // if (!DeformerUtils.isDefNode(_node)) return;
             DeformerUtils.setAttrValues(_node, 'offset.y', undefined, getApplyMode(), 0);
+            DeformerUtils.setAttrValues(_node, 'position.y', undefined, DeformerUtils.MODE_CURRENT, 0);
         },
         'Set Y to 0.' +
         MODIFIERS_TOOLTIP_TEXT
@@ -148,11 +151,20 @@ function PS_DeformerTools() {
 
 
 
+
+
+
+
     // ==========================================================
     // MODIFY
-    var cpGroup = modal.addGroup('Modify:', ui, true, hGroupStyle);
 
-    modal.addButton('', cpGroup, btnHeight, btnHeight,
+    var cpGroup = modal.addGroup('Modify:', ui, false, hGroupStyle);
+
+    //
+    var cpGroup1 = modal.addGroup('', cpGroup, true, true);
+
+    //
+    modal.addButton('', cpGroup1, btnHeight, btnHeight,
         iconPath + 'orient-points.png',
         function() {
             DeformerUtils.orientControlPoints(undefined, getApplyMode(), KeyModifiers.IsAlternatePressed());
@@ -162,7 +174,47 @@ function PS_DeformerTools() {
         ENTIRE_CHAIN_MOD_TOOLTIP_TEXT
     );
 
-    modal.addButton('', cpGroup, btnHeight, btnHeight,
+    modal.addButton('', cpGroup1, btnHeight, btnHeight,
+        iconPath + 'orient-points-1.png',
+        function() {
+            DeformerUtils.orientControlPoints(undefined, getApplyMode(), KeyModifiers.IsAlternatePressed(), 1);
+        },
+        'Orient the first control point to the oposite point.' +
+        MODIFIERS_TOOLTIP_TEXT +
+        ENTIRE_CHAIN_MOD_TOOLTIP_TEXT
+    );
+
+    modal.addButton('', cpGroup1, btnHeight, btnHeight,
+        iconPath + 'orient-points-2.png',
+        function() {
+            DeformerUtils.orientControlPoints(undefined, getApplyMode(), KeyModifiers.IsAlternatePressed(), 2);
+        },
+        'Orient the second control point to the oposite point.' +
+        MODIFIERS_TOOLTIP_TEXT +
+        ENTIRE_CHAIN_MOD_TOOLTIP_TEXT
+    );
+
+    //
+    modal.addVLine(btnHeight, cpGroup1);
+
+    //
+    modal.addButton('', cpGroup1, btnHeight, btnHeight,
+        iconPath + 'move-around-left.png',
+        function() {
+            DeformerUtils.moveDeformersAround('left', getApplyMode());
+        },
+        'Move deformers around to the left' +
+        MODIFIERS_TOOLTIP_TEXT
+    );
+
+    //
+    cpGroup1.mainLayout.addStretch();
+
+    //
+    var cpGroup2 = modal.addGroup('', cpGroup, true, true);
+
+    //
+    modal.addButton('', cpGroup2, btnHeight, btnHeight,
         iconPath + 'points-on-thirds.png',
         function() {
             DeformerUtils.distributeControlPoints(undefined, getApplyMode(), KeyModifiers.IsAlternatePressed());
@@ -172,16 +224,32 @@ function PS_DeformerTools() {
         ENTIRE_CHAIN_MOD_TOOLTIP_TEXT
     );
 
-    modal.addButton('', cpGroup, btnHeight, btnHeight,
-        iconPath + 'move-around-left.png',
+    //
+    modal.addButton('', cpGroup2, btnHeight, btnHeight,
+        iconPath + 'points-on-thirds-1.png',
         function() {
-            DeformerUtils.moveDeformersAround('left', getApplyMode());
+            DeformerUtils.distributeControlPoints(undefined, getApplyMode(), KeyModifiers.IsAlternatePressed(), 1);
         },
-        'Move deformers around to the left' +
-        MODIFIERS_TOOLTIP_TEXT
+        'Distribute control points on thirds.' +
+        MODIFIERS_TOOLTIP_TEXT +
+        ENTIRE_CHAIN_MOD_TOOLTIP_TEXT
     );
 
-    modal.addButton('', cpGroup, btnHeight, btnHeight,
+    //
+    modal.addButton('', cpGroup2, btnHeight, btnHeight,
+        iconPath + 'points-on-thirds-2.png',
+        function() {
+            DeformerUtils.distributeControlPoints(undefined, getApplyMode(), KeyModifiers.IsAlternatePressed(), 2);
+        },
+        'Distribute control points on thirds.' +
+        MODIFIERS_TOOLTIP_TEXT +
+        ENTIRE_CHAIN_MOD_TOOLTIP_TEXT
+    );
+
+    //
+    modal.addVLine(btnHeight, cpGroup2);
+
+    modal.addButton('', cpGroup2, btnHeight, btnHeight,
         iconPath + 'move-around-right.png',
         function() {
             DeformerUtils.moveDeformersAround('right', getApplyMode());
@@ -190,17 +258,18 @@ function PS_DeformerTools() {
         MODIFIERS_TOOLTIP_TEXT
     );
 
+    //
+    cpGroup2.mainLayout.addStretch();
 
-    modal.addButton('', cpGroup, btnHeight, btnHeight,
-        iconPath + 'reverse-chain.png',
-        function() {
-            DeformerUtils.reverseChain(getApplyMode());
-        },
-        'Reverse direction of the selected deformer chain.' +
-        MODIFIERS_TOOLTIP_TEXT
-    );
+    //
+    // var cpGroup3 = modal.addGroup('', cpGroup, true, true);
 
-    cpGroup.mainLayout.addStretch();
+
+
+
+
+    // //
+    // cpGroup3.mainLayout.addStretch();
 
 
 
@@ -261,6 +330,16 @@ function PS_DeformerTools() {
         'Remove the selected Curve from the Deformer Chain'
     );
 
+    modal.addButton('', gdGroup, btnHeight, btnHeight,
+        iconPath + 'reverse-chain.png',
+        function() {
+            DeformerUtils.reverseChain(getApplyMode());
+        },
+        'Reverse direction of the selected deformer chain.' +
+        MODIFIERS_TOOLTIP_TEXT
+    );
+
+    //
     gdGroup.mainLayout.addStretch();
 
     //
