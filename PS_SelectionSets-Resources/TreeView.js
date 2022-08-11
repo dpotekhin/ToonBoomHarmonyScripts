@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.210927
+Version: 0.220811
 */
 
 var TreeView = function( parent, resourcesPath ){
@@ -28,7 +28,7 @@ var TreeView = function( parent, resourcesPath ){
   treeView.setModel(model);
 
   parent.mainLayout.addWidget( treeView, 0, 0 );
-  
+
   // -------------------------------------------------
   /// Events
 
@@ -171,8 +171,7 @@ var TreeView = function( parent, resourcesPath ){
 
     });
 
-    this.treeView.resizeColumnToContents(1);
-    this.treeView.resizeColumnToContents(2);
+    this.refresh();
     // this.treeView.expandAll();
 
   }
@@ -184,6 +183,7 @@ var TreeView = function( parent, resourcesPath ){
     // MessageLog.trace('!!!!'+treeView.toString() );
     // treeView.layoutChanged.emit();
     // treeView.itemChanged.emit();
+    for(var i=0; i<3; i++){ this.treeView.resizeColumnToContents(i); }
   }
 
 
@@ -199,8 +199,12 @@ var TreeView = function( parent, resourcesPath ){
       itemData.id,
       rowItems
     );
-
-    item.setToolTip( itemData.description || ( itemData.isGroup ? itemData.dataNode : '' ) );
+    
+    itemData.updateToolTip = function() {
+      item.setToolTip( itemData.description || ( itemData.isGroup ? itemData.dataNode : itemData.name ) );    
+    }
+    
+    itemData.updateToolTip();
 
     itemData.updateColor = function(){
 

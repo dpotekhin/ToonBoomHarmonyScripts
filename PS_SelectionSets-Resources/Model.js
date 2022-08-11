@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.220614
+Version: 0.220811
 */
 
 //
@@ -296,6 +296,7 @@ function Model( scriptVer ){
     }
 
     itemData.name = newName;
+    itemData.updateToolTip();
 
     if( itemData.isGroup ){
 
@@ -307,6 +308,7 @@ function Model( scriptVer ){
       node.rename( itemData.dataNode, dataNodeName );
       
       itemData.dataNode = itemData.dataNode = dataNodeParent+'/'+dataNodeName;
+
     }
 
     this.saveGroupData( itemData );
