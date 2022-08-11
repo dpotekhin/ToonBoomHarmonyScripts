@@ -140,6 +140,7 @@ function orientControlPoints(_nodes, applyMode, useEntireChain, controlSide) {
 
             } else {
 
+                /*
                 var targetNode = getParentNode(_node);
                 if (!targetNode || !(isOffsetNode(_node) || isDefNode(_node))) return;
 
@@ -148,6 +149,10 @@ function orientControlPoints(_nodes, applyMode, useEntireChain, controlSide) {
                     srcNode = (getDeformersChain(_node) || [])[0];
                     if (!srcNode) return;
                 }
+                */
+                var targetNode = getParentDefNode(_node);
+                if (!targetNode) return;
+                var srcNode = _node;
 
                 var targetPos = getDeformerPointPosition(targetNode);
                 var pos = getDeformerPointPosition(srcNode);
@@ -178,7 +183,7 @@ function distributeControlPoints(_nodes, applyMode, useEntireChain, controlSide)
             if (isOffsetNode(_node)) {
 
             } else {
-
+                /*
                 var targetNode = getParentNode(_node);
                 if (!targetNode || !(isOffsetNode(_node) || isDefNode(_node))) return;
 
@@ -187,6 +192,10 @@ function distributeControlPoints(_nodes, applyMode, useEntireChain, controlSide)
                     srcNode = (getDeformersChain(_node) || [])[0];
                     if (!srcNode) return;
                 }
+                */
+                var targetNode = getParentDefNode(_node);
+                if (!targetNode) return;
+                var srcNode = _node;
 
                 var targetPos = getDeformerPointPosition(targetNode);
                 var pos = getDeformerPointPosition(srcNode);
@@ -962,8 +971,32 @@ function getParentNode(_node) {
     return node.srcNode(_node, 0);
 }
 
+function getParentDefNode(_node, deformerChain) {
+
+    if (isOffsetNode(_node) && deformerChain) {
+        var lastNode = deformerChain[deformerChain.length - 1];
+        return node.getTextAttr(lastNode, 1, 'closePath') === 'Y' ? lastNode : null;
+    }
+
+    var parentNode = getParentNode(_node);
+    return isDefNode(parentNode) ? parentNode : null;
+
+}
+
 function getNextNode(_node) {
     return node.dstNode(_node, 0, 0);
+}
+
+function getNextDefNode(_node, deformerChain) {
+
+    if (deformerChain) {
+        var lastNode = deformerChain[deformerChain.length - 1];
+        return node.getTextAttr(lastNode, 1, 'closePath') === 'Y' ? deformerChain[0] : null;
+    }
+
+    var nextNode = getNextNode(_node);
+    return isDefNode(nextNode) ? nextNode : null;
+
 }
 
 //
