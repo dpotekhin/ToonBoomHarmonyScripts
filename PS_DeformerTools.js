@@ -119,18 +119,29 @@ function PS_DeformerTools() {
     );
 
     //
-    // modal.addVLine(btnHeight, alignGroup);
+    modal.addVLine(btnHeight, alignGroup);
 
-    // modal.addButton('', alignGroup, btnHeight, btnHeight,
-    //     iconPath + 'x0.png',
-    //     function() {
-    //         var _node = selection.selectedNode(0);
-    //         if (!DeformerUtils.isDefNode(_node)) return;
-    //         DeformerUtils.applyAttrValue(_node, 'offset.x', 0, getApplyMode());
-    //     },
-    //     'Set X to 0.' +
-    //     MODIFIERS_TOOLTIP_TEXT
-    // );
+    modal.addButton('', alignGroup, btnHeight, btnHeight,
+        iconPath + 'x0.png',
+        function() {
+            var _node = selection.selectedNode(0);
+            if (!DeformerUtils.isDefNode(_node)) return;
+            DeformerUtils.setAttrValues(_node, 'offset.x', undefined, getApplyMode(), 0);
+        },
+        'Set X to 0.' +
+        MODIFIERS_TOOLTIP_TEXT
+    );
+
+    modal.addButton('', alignGroup, btnHeight, btnHeight,
+        iconPath + 'y0.png',
+        function() {
+            var _node = selection.selectedNode(0);
+            if (!DeformerUtils.isDefNode(_node)) return;
+            DeformerUtils.setAttrValues(_node, 'offset.y', undefined, getApplyMode(), 0);
+        },
+        'Set Y to 0.' +
+        MODIFIERS_TOOLTIP_TEXT
+    );
 
     ///
     alignGroup.mainLayout.addStretch();

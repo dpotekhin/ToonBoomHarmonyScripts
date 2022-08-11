@@ -38,6 +38,8 @@ exports = {
 
     isDefNode: isDefNode,
     isOffsetNode: isOffsetNode,
+    setAttrValues: setAttrValues,
+    
     alignVertically: alignVertically,
     alignHorizontally: alignHorizontally,
     orientControlPoints: orientControlPoints,
