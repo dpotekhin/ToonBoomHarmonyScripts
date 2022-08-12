@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version 0.220811
+Version 0.220812
 */
 
 
@@ -414,17 +414,15 @@ function generateDeformer(mode, artIndex, curDrawing, reversePath, dontClosePath
 
 /*
 TODO:
-- add the ability to not change the binding state
 - take into account the inheritance of parent transformations
 */
-
 function moveDeformersAround(direction, applyMode) {
 
     _exec('Move Deformers Around', function() {
 
         var _deformers = getDeformersChain();
         if (!_deformers) return;
-        // MessageLog.trace("moveDeformersAround: "+JSON.stringify(_deformers,true,'  '));
+
         if (!isChainClosed(_deformers)) {
             MessageLog.trace('The Deformer Chain must be closed.');
             return;
@@ -433,48 +431,36 @@ function moveDeformersAround(direction, applyMode) {
         var currentFrame = frame.current();
 
         _deformers = _deformers.map(function(defNode, i) {
-
-            var defData = {
-                node: defNode,
-                attrs: {}
-            };
-
-            Object.keys(restingAttrNames).forEach(function(attrName) {
-
-                if (applyMode === MODE_CURRENT || applyMode === MODE_BOTH) defData.attrs[attrName] = node.getTextAttr(defNode, currentFrame, attrName);
-
-                if (applyMode === MODE_RESTING || applyMode === MODE_BOTH) {
-                    var restingAttr = restingAttrNames[attrName];
-                    defData.attrs[restingAttr] = node.getTextAttr(defNode, currentFrame, restingAttr);
-                }
-
-            });
-
-            return defData;
-
+            return getDeformerAttrs(defNode, applyMode);
         });
 
-        // MessageLog.trace("=> "+JSON.stringify(_deformers,true,'  '));
-        var swapDefNodeI;
+        // MessageLog.trace("moveDeformersAround: " + JSON.stringify(_deformers, true, '  '));
+        
+        var swapDefData;
         _deformers.forEach(function(defNode, i) {
-            /*
-            var swapDefNodeI = direction === 'left' ? i+1 : i-1;
-            if( swapDefNodeI < 0 ) swapDefNodeI = _deformers.length-1;
-            if( swapDefNodeI > _deformers.length ) swapDefNodeI = 0;
-            */
+   
             if (direction === 'left') {
 
-                swapDefNodeI = i === _deformers.length - 1 ? 1 : i + 1;
+                swapDefData = (i === _deformers.length - 1) ? _deformers[1] : _deformers[i + 1];
+
+                if (i === _deformers.length - 2) {
+                    if (swapDefData.attrs["offset.x"] !== undefined) {
+                        swapDefData.attrs["offset.x"] = _deformers[0].attrs["offset.x"];
+                        swapDefData.attrs["offset.y"] = _deformers[0].attrs["offset.y"];
+                    }
+                    if (swapDefData.attrs[restingAttrNames["offset.x"]] !== undefined) {
+                        swapDefData.attrs[restingAttrNames["offset.x"]] = _deformers[0].attrs[restingAttrNames["offset.x"]];
+                        swapDefData.attrs[restingAttrNames["offset.y"]] = _deformers[0].attrs[restingAttrNames["offset.y"]];
+                    }
+                }
 
             } else {
 
-                swapDefNodeI = i <= 1 ? _deformers.length - 2 + i : i - 1;
+                swapDefData = i <= 1 ? _deformers[_deformers.length - 2 + i] : _deformers[i - 1];
 
             }
-            // MessageLog.trace(i+') '+swapDefNodeI+') ');
-            var swapDefNode = _deformers[swapDefNodeI];
             // MessageLog.trace(defNode.node+' > '+swapDefNode.node);
-            setAttrValues(defNode.node, swapDefNode.attrs, currentFrame);
+            setAttrValues(defNode.node, swapDefData.attrs, currentFrame);
         });
 
     });
@@ -497,7 +483,7 @@ TODO:
 - take into account the inheritance of parent transformations
 */
 
-function insertDeformerCurve( curvePos ) {
+function insertDeformerCurve(curvePos) {
 
 
     _exec('Insert a Control point to the Deformer', function() {
@@ -557,7 +543,7 @@ function insertDeformerCurve( curvePos ) {
 
         var newDeformerPath = Drawing.geometry.insertPoints({
             path: deformerPos,
-            params: [ curvePos || 0.5]
+            params: [curvePos || 0.5]
         });
         // MessageLog.trace('newDeformerPath: ' + JSON.stringify(newDeformerPath, true, '  '));
         var newDeformerPoints = newDeformerPath.splice(0, 4);
@@ -1276,19 +1262,53 @@ function getChildNodes(_node) {
 //
 function getAttrValue(_node, attrName, _frame) {
 
-    if (!_frame) _frame = frame.current();
+    if (_frame === undefined) _frame = frame.current();
 
     var attr = node.getAttr(_node, _frame, attrName);
     if (!attr) return null;
 
-    var val = attr.doubleValueAt(_frame);
+    var val;
+
     var columnName = node.linkedColumn(_node, attrName);
-    if (columnName) {
+    if (columnName && func.numberOfPoints(columnName)) {
         val = Number(column.getEntry(columnName, 0, _frame));
+    } else {
+        val = attr.doubleValueAt(_frame);
     }
+
     // MessageLog.trace(_node + ' > ' + attrName + ' > ' + val + ' > ' + typeof val);
     return val;
+
 }
+
+
+//
+function getDeformerAttrs(defNode, applyMode, _frame) {
+
+    if (_frame === undefined) _frame = frame.current();
+
+    var defData = {
+        node: defNode,
+        attrs: {}
+    };
+
+    Object.keys(restingAttrNames).forEach(function(attrName) {
+
+        // if (applyMode === MODE_CURRENT || applyMode === MODE_BOTH) defData.attrs[attrName] = node.getTextAttr(defNode, _frame, attrName);
+        if (applyMode === MODE_CURRENT || applyMode === MODE_BOTH) defData.attrs[attrName] = getAttrValue(defNode, attrName, _frame);
+
+        if (applyMode === MODE_RESTING || applyMode === MODE_BOTH) {
+            var restingAttr = restingAttrNames[attrName];
+            // defData.attrs[restingAttr] = node.getTextAttr(defNode, _frame, restingAttr);
+            defData.attrs[restingAttr] = getAttrValue(defNode, restingAttr, _frame);
+        }
+
+    });
+
+    return defData;
+
+}
+
 
 //
 function getDeformerPointPosition(_node, resting, asStroke, parentPoint, _frame) {

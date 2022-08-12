@@ -407,19 +407,19 @@ function PS_DeformerTools() {
 
 
 // !!!
-function PS_DeformerTools_TEST() {
+// function PS_DeformerTools_TEST() {
 
     // _DeformerUtils.orientControlPoints();
     // _DeformerUtils.generateCircleDeformer();
     // _DeformerUtils.generateRectDeformer();
     // _DeformerUtils.generateArtDeformer(undefined, undefined, true);
     // _DeformerUtils.generateArtDeformer(undefined, undefined);
-    // _DeformerUtils.moveDeformersAround('left');
-    // _DeformerUtils.moveDeformersAround('right');
+    // _DeformerUtils.moveDeformersAround('left',_DeformerUtils.MODE_RESTING);
+    // _DeformerUtils.moveDeformersAround('right', _DeformerUtils.MODE_RESTING);
     // _DeformerUtils.insertDeformerCurve();
     // _DeformerUtils.symmetrizeChain();
     // _DeformerUtils.symmetrizeCurves();
-    _DeformerUtils.reverseChain(getApplyMode());
+    // _DeformerUtils.reverseChain(getApplyMode());
     // _DeformerUtils.removeDeformerCurve();
 
     /*
@@ -434,4 +434,4 @@ function PS_DeformerTools_TEST() {
 
     // MessageLog.trace(nodes+' > '+node.type(nodes));
     */
-}
+// }
