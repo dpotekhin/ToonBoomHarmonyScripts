@@ -169,7 +169,7 @@ function PS_DeformerTools() {
         function() {
             DeformerUtils.orientControlPoints(undefined, getApplyMode(), KeyModifiers.IsAlternatePressed());
         },
-        'Orient control points to oposite points.' +
+        'Orient control points to oposite point of the selected curve.' +
         MODIFIERS_TOOLTIP_TEXT +
         ENTIRE_CHAIN_MOD_TOOLTIP_TEXT
     );
@@ -195,7 +195,9 @@ function PS_DeformerTools() {
     );
 
     //
-    modal.addVLine(btnHeight, cpGroup1);
+    cpGroup1.mainLayout.addStretch();
+    // modal.addVLine(btnHeight, cpGroup1);
+    // cpGroup1.mainLayout.addStretch();
 
     //
     modal.addButton('', cpGroup1, btnHeight, btnHeight,
@@ -207,8 +209,27 @@ function PS_DeformerTools() {
         MODIFIERS_TOOLTIP_TEXT
     );
 
-    //
-    cpGroup1.mainLayout.addStretch();
+    modal.addButton('', cpGroup1, btnHeight, btnHeight,
+        iconPath + 'move-around-right.png',
+        function() {
+            DeformerUtils.moveDeformersAround('right', getApplyMode());
+        },
+        'Move deformers around to the right' +
+        MODIFIERS_TOOLTIP_TEXT
+    );
+
+    modal.addButton('', cpGroup1, btnHeight, btnHeight,
+        iconPath + 'reverse-chain.png',
+        function() {
+            DeformerUtils.reverseChain(getApplyMode());
+        },
+        'Reverse direction of the selected deformer chain.' +
+        MODIFIERS_TOOLTIP_TEXT
+    );
+
+
+
+
 
     //
     var cpGroup2 = modal.addGroup('', cpGroup, true, true);
@@ -219,7 +240,7 @@ function PS_DeformerTools() {
         function() {
             DeformerUtils.distributeControlPoints(undefined, getApplyMode(), KeyModifiers.IsAlternatePressed());
         },
-        'Distribute control points on thirds.' +
+        'Distribute control points by thirds.' +
         MODIFIERS_TOOLTIP_TEXT +
         ENTIRE_CHAIN_MOD_TOOLTIP_TEXT
     );
@@ -230,7 +251,7 @@ function PS_DeformerTools() {
         function() {
             DeformerUtils.distributeControlPoints(undefined, getApplyMode(), KeyModifiers.IsAlternatePressed(), 1);
         },
-        'Distribute control points on thirds.' +
+        'Set the length of the first control point to a third.' +
         MODIFIERS_TOOLTIP_TEXT +
         ENTIRE_CHAIN_MOD_TOOLTIP_TEXT
     );
@@ -241,35 +262,92 @@ function PS_DeformerTools() {
         function() {
             DeformerUtils.distributeControlPoints(undefined, getApplyMode(), KeyModifiers.IsAlternatePressed(), 2);
         },
-        'Distribute control points on thirds.' +
+        'Set the length of the second control point to a third.' +
         MODIFIERS_TOOLTIP_TEXT +
         ENTIRE_CHAIN_MOD_TOOLTIP_TEXT
+    );
+
+
+    //
+    cpGroup2.mainLayout.addStretch();
+    // 
+    // cpGroup2.mainLayout.addStretch();
+
+    //
+    modal.addButton('', cpGroup2, btnHeight, btnHeight,
+        iconPath + 'remove-cp.png',
+        function() {
+            DeformerUtils.removeDeformerCurve();
+        },
+        'Remove the selected Curve from the Deformer Chain'
     );
 
     //
     modal.addVLine(btnHeight, cpGroup2);
 
+
+    //
+    var insertDeformerCurvePosition = 50;
+    var insertDeformerCurvePositionInput = modal.addNumberInput('', cpGroup2, btnHeight, btnHeight, insertDeformerCurvePosition, function(v) {
+        insertDeformerCurvePosition = v;
+    });
+    insertDeformerCurvePositionInput.toolTip = 'Position of the new point on the curve in percents.';
+
+    //
     modal.addButton('', cpGroup2, btnHeight, btnHeight,
-        iconPath + 'move-around-right.png',
+        iconPath + 'insert-cp.png',
         function() {
-            DeformerUtils.moveDeformersAround('right', getApplyMode());
+            insertDeformerCurvePosition = Math.min(95, Math.max(5, insertDeformerCurvePosition));
+            insertDeformerCurvePositionInput.text2 = insertDeformerCurvePosition;
+            DeformerUtils.insertDeformerCurve(insertDeformerCurvePosition / 100);
         },
-        'Move deformers around to the right' +
-        MODIFIERS_TOOLTIP_TEXT
+        'Insert a Curve into the Deformer Chain'
+    );
+
+
+
+
+
+
+    //
+    var cpGroup3 = modal.addGroup('', cpGroup, true, true);
+
+    //
+    modal.addButton('', cpGroup3, btnHeight, btnHeight,
+        iconPath + 'orient-to-next.png',
+        function() {
+            DeformerUtils.orientControlPointsToNext(undefined, getApplyMode(), KeyModifiers.IsAlternatePressed());
+        },
+        'Orient control points to adjacent deformers.' +
+        MODIFIERS_TOOLTIP_TEXT +
+        ENTIRE_CHAIN_MOD_TOOLTIP_TEXT
     );
 
     //
-    cpGroup2.mainLayout.addStretch();
+    modal.addButton('', cpGroup3, btnHeight, btnHeight,
+        iconPath + 'orient-to-next-1.png',
+        function() {
+            DeformerUtils.orientControlPointsToNext(undefined, getApplyMode(), KeyModifiers.IsAlternatePressed(), 1);
+        },
+        'Orient the first control point to the adjacent deformer.' +
+        MODIFIERS_TOOLTIP_TEXT +
+        ENTIRE_CHAIN_MOD_TOOLTIP_TEXT
+    );
 
     //
-    // var cpGroup3 = modal.addGroup('', cpGroup, true, true);
+    modal.addButton('', cpGroup3, btnHeight, btnHeight,
+        iconPath + 'orient-to-next-2.png',
+        function() {
+            DeformerUtils.orientControlPointsToNext(undefined, getApplyMode(), KeyModifiers.IsAlternatePressed(), 2);
+        },
+        'Orient the second control point to the adjacent deformer.' +
+        MODIFIERS_TOOLTIP_TEXT +
+        ENTIRE_CHAIN_MOD_TOOLTIP_TEXT
+    );
 
 
-
-
-
-    // //
-    // cpGroup3.mainLayout.addStretch();
+    //
+    cpGroup3.mainLayout.addStretch();
 
 
 
@@ -314,30 +392,6 @@ function PS_DeformerTools() {
         '\n- Hold down the Alt key to reverse path.'
     );
 
-    modal.addButton('', gdGroup, btnHeight, btnHeight,
-        iconPath + 'insert-cp.png',
-        function() {
-            DeformerUtils.insertDeformerCurve();
-        },
-        'Insert a Curve into the Deformer Chain'
-    );
-
-    modal.addButton('', gdGroup, btnHeight, btnHeight,
-        iconPath + 'remove-cp.png',
-        function() {
-            DeformerUtils.removeDeformerCurve();
-        },
-        'Remove the selected Curve from the Deformer Chain'
-    );
-
-    modal.addButton('', gdGroup, btnHeight, btnHeight,
-        iconPath + 'reverse-chain.png',
-        function() {
-            DeformerUtils.reverseChain(getApplyMode());
-        },
-        'Reverse direction of the selected deformer chain.' +
-        MODIFIERS_TOOLTIP_TEXT
-    );
 
     //
     gdGroup.mainLayout.addStretch();
@@ -353,19 +407,19 @@ function PS_DeformerTools() {
 
 
 // !!!
-function PS_DeformerTools_TEST() {
+// function PS_DeformerTools_TEST() {
 
     // _DeformerUtils.orientControlPoints();
     // _DeformerUtils.generateCircleDeformer();
     // _DeformerUtils.generateRectDeformer();
     // _DeformerUtils.generateArtDeformer(undefined, undefined, true);
     // _DeformerUtils.generateArtDeformer(undefined, undefined);
-    // _DeformerUtils.moveDeformersAround('left');
-    // _DeformerUtils.moveDeformersAround('right');
+    // _DeformerUtils.moveDeformersAround('left',_DeformerUtils.MODE_RESTING);
+    // _DeformerUtils.moveDeformersAround('right', _DeformerUtils.MODE_RESTING);
     // _DeformerUtils.insertDeformerCurve();
     // _DeformerUtils.symmetrizeChain();
     // _DeformerUtils.symmetrizeCurves();
-    _DeformerUtils.reverseChain(getApplyMode());
+    // _DeformerUtils.reverseChain(getApplyMode());
     // _DeformerUtils.removeDeformerCurve();
 
     /*
@@ -380,4 +434,4 @@ function PS_DeformerTools_TEST() {
 
     // MessageLog.trace(nodes+' > '+node.type(nodes));
     */
-}
+// }
