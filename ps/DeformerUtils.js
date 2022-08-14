@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version 0.220812
+Version 0.220814
 */
 
 
@@ -132,7 +132,7 @@ function orientControlPoints(_nodes, applyMode, useEntireChain, controlSide) {
 
     _exec('Orient Control Points', function() {
 
-        // MessageLog.trace('orientControlPoints ' + applyMode + ', ' + useEntireChain + ' > ' + _nodes.join(', '));
+
         var deformersChain = getDeformersChain();
         if (!_nodes) _nodes = useEntireChain ? deformersChain : getSelectedDeformers();
         if (!_nodes) return;
@@ -155,11 +155,11 @@ function orientControlPoints(_nodes, applyMode, useEntireChain, controlSide) {
                 */
                 var targetNode = getParentDefNode(_node, deformersChain);
                 if (!targetNode) return;
-                var srcNode = _node;
 
                 var targetPos = getDeformerPointPosition(targetNode);
-                var pos = getDeformerPointPosition(srcNode);
+                var pos = getDeformerPointPosition(isClosedDefNode(_node) ? deformersChain[0] : _node);
                 var ang = fixOrientation(Math.atan2(pos.y - targetPos.y, pos.x - targetPos.x) / Math.PI * 180);
+                // MessageLog.trace('targetPos:\n'+JSON.stringify(targetPos)+'\n>'+JSON.stringify(pos)+' > '+ang);
 
                 if (!controlSide || controlSide === 1) setAttrValues(_node, 'orientation0', undefined, applyMode, ang);
                 if (!controlSide || controlSide === 2) setAttrValues(_node, 'orientation1', undefined, applyMode, ang);
@@ -215,8 +215,11 @@ function distributeControlPoints(_nodes, applyMode, useEntireChain, controlSide)
 
     _exec('Distribute Control Points', function() {
 
-        if (!_nodes) _nodes = useEntireChain ? getDeformersChain() : getSelectedDeformers();
+        var deformersChain = getDeformersChain();
+        if (!_nodes) _nodes = useEntireChain ? deformersChain : getSelectedDeformers();
         if (!_nodes) return;
+
+        var _isChainClosed = isChainClosed(deformersChain);
 
         _nodes.forEach(function(_node) {
 
@@ -235,10 +238,9 @@ function distributeControlPoints(_nodes, applyMode, useEntireChain, controlSide)
                 */
                 var targetNode = getParentDefNode(_node);
                 if (!targetNode) return;
-                var srcNode = _node;
 
                 var targetPos = getDeformerPointPosition(targetNode);
-                var pos = getDeformerPointPosition(srcNode);
+                var pos = getDeformerPointPosition(isClosedDefNode(_node) ? deformersChain[0] : _node);
                 var dx = pos.x - targetPos.x;
                 var dy = pos.y - targetPos.y;
                 var hypo = Math.sqrt(dx * dx + dy * dy);
@@ -435,10 +437,10 @@ function moveDeformersAround(direction, applyMode) {
         });
 
         // MessageLog.trace("moveDeformersAround: " + JSON.stringify(_deformers, true, '  '));
-        
+
         var swapDefData;
         _deformers.forEach(function(defNode, i) {
-   
+
             if (direction === 'left') {
 
                 swapDefData = (i === _deformers.length - 1) ? _deformers[1] : _deformers[i + 1];
@@ -999,7 +1001,10 @@ function isChainClosed(_nodes) {
     return node.getTextAttr(_nodes[_nodes.length - 1], frame.current(), 'closePath') === 'Y';
 }
 
-
+//
+function isClosedDefNode(_node) {
+    return node.getTextAttr(_node, 1, 'closePath') === 'Y';
+}
 
 //
 function getSelectedDeformers() {
