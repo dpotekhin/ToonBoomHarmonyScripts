@@ -230,19 +230,19 @@ function PS_CopySceneMarkers() {
         type: clipboardDataType,
     }
 
-    if (Timeline.numFrameSel > 1) { // Copy markers in the selected frame range
+    // if (Timeline.numFrameSel > 1) { // Copy markers in the selected frame range
 
         var firstFrame = data.firstFrame = Timeline.firstFrameSel;
         var lastFrame = data.lastFrame = firstFrame + Timeline.numFrameSel;
         data.duration = lastFrame - firstFrame;
         markers = markers.filter(function(markerData) { return markerData.frame >= firstFrame && markerData.frame < lastFrame; });
 
-    } else {
+    // } else {
 
-        data.firstFrame = 1;
-        data.lastFrame = data.duration = frame.numberOf();
+    //     data.firstFrame = 1;
+    //     data.lastFrame = data.duration = frame.numberOf();
 
-    }
+    // }
 
     data.markers = markers;
 
