@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.220731
+Version: 0.220817
 */
 
 function getSign(v) {
@@ -57,19 +57,41 @@ function getPointGlobalPosition(_node, _point, _frame) {
     return pos;
 }
 
-function findParentPeg(_node) {
-    var numSubNodes = node.numberOfSubNodes(_node);
-    var src = node.srcNode(_node, 0);
-    for (var nd = 0; nd < numSubNodes; nd++) {
-        if (src == "")
-            return "";
 
-        else if (node.type(src) == "PEG")
-            return src;
+//
+function findParentPeg(_nodes) {
 
-        src = node.srcNode(src, 0);
-    }
-    return "";
+    return findParentNodeByType(_nodes, 'PEG');
+
+}
+
+//
+function findParentNodeByType(_nodes, nodeType) {
+    if (typeof _nodes === 'string') _nodes = [_nodes];
+    var nodeFound;
+    var parentNodes = [];
+
+    _nodes.forEach(function(_node, ni) {
+
+        var numInput = node.numberOfInputPorts(_node);
+        // MessageLog.trace(ni + ' ]]] ' + _node + ' > ' + numInput);
+        for (var i = 0; i < numInput; i++) {
+            var srcNode = node.srcNode(_nodes, i);
+            var _nodeType = node.type(srcNode);
+            // MessageLog.trace(ni + ' ] ' + i + ' > ' + _nodeType + ' >> ' + srcNode);
+            if (_nodeType === nodeType) {
+                nodeFound = srcNode;
+                return;
+            }
+            if (_nodeType === 'MULTIPORT_IN') parentNodes.push(node.parentNode(_node));
+            else
+                parentNodes.push(srcNode);
+        }
+
+    });
+
+    if (nodeFound) return nodeFound;
+    return parentNodes.length ? findParentPeg(parentNodes) : null;
 }
 
 //
@@ -336,6 +358,7 @@ exports = {
     pixelsToGridY: pixelsToGridY,
     getPointGlobalPosition: getPointGlobalPosition,
     findParentPeg: findParentPeg,
+    findParentNodeByType: findParentNodeByType,
     getFullAttributeList: getFullAttributeList,
     isFunction: isFunction,
     getAnimatableAttrs: getAnimatableAttrs,
