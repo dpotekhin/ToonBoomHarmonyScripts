@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version 0.220814
+Version 0.220817
 */
 
 
@@ -16,14 +16,20 @@ var MODE_CURRENT = 1;
 var MODE_RESTING = 2;
 var MODE_BOTH = 3;
 
-
 var RIGHT = 'Right';
 var LEFT = 'Left';
 var UP = 'Up';
 var DOWN = 'Down';
+var HORIZONTAL = 'HORIZONTAL';
+var VERTICAL = 'VERTICAL';
+
+var RELATIVE_TO_ZERO = 'RELATIVE_TO_ZERO';
+var RELATIVE_TO_PEG = 'RELATIVE_TO_PEG';
+var RELATIVE_TO_SELECTED = 'RELATIVE_TO_SELECTED';
 
 ///
 exports = {
+
     COLORART: COLORART,
     LINEART: LINEART,
 
@@ -35,6 +41,12 @@ exports = {
     LEFT: LEFT,
     UP: UP,
     DOWN: DOWN,
+    HORIZONTAL: HORIZONTAL,
+    VERTICAL: VERTICAL,
+
+    RELATIVE_TO_ZERO: RELATIVE_TO_ZERO,
+    RELATIVE_TO_PEG: RELATIVE_TO_PEG,
+    RELATIVE_TO_SELECTED: RELATIVE_TO_SELECTED,
 
     isDefNode: isDefNode,
     isOffsetNode: isOffsetNode,
@@ -54,9 +66,12 @@ exports = {
     insertDeformerCurve: insertDeformerCurve,
     removeDeformerCurve: removeDeformerCurve,
     generateDeformer: generateDeformer,
-    symmetrizeChain: symmetrizeChain,
-    symmetrizeCurves: symmetrizeCurves,
+
     reverseChain: reverseChain,
+
+    mirrorChain: mirrorChain,
+    // symmetrizeChain: symmetrizeChain,
+    // symmetrizeCurves: symmetrizeCurves,
 }
 
 var restingAttrNames = {
@@ -677,7 +692,7 @@ function reverseChain(applyMode) {
 
     _exec('Reverse Deformer Chain', function() {
 
-        MessageLog.clearLog();
+        // MessageLog.clearLog();
 
         var _nodes = getDeformersChain();
         if (!_nodes.length) {
@@ -723,7 +738,107 @@ function reverseChain(applyMode) {
 
 
 
+/*
+███╗   ███╗██╗██████╗ ██████╗  ██████╗ ██████╗      ██████╗██╗  ██╗ █████╗ ██╗███╗   ██╗
+████╗ ████║██║██╔══██╗██╔══██╗██╔═══██╗██╔══██╗    ██╔════╝██║  ██║██╔══██╗██║████╗  ██║
+██╔████╔██║██║██████╔╝██████╔╝██║   ██║██████╔╝    ██║     ███████║███████║██║██╔██╗ ██║
+██║╚██╔╝██║██║██╔══██╗██╔══██╗██║   ██║██╔══██╗    ██║     ██╔══██║██╔══██║██║██║╚██╗██║
+██║ ╚═╝ ██║██║██║  ██║██║  ██║╚██████╔╝██║  ██║    ╚██████╗██║  ██║██║  ██║██║██║ ╚████║
+╚═╝     ╚═╝╚═╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝     ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝
+*/
 
+//
+function mirrorChain(applyMode, axis, relativeTo) {
+
+    // MessageLog.trace('mirrorChain: ' + applyMode + ', ' + axis + ', ' + relativeTo);
+
+    _exec('Reverse Deformer Chain', function() {
+
+        // MessageLog.clearLog();
+
+        var _nodes = getDeformersChain();
+        if (!_nodes.length) {
+            MessageLog.trace('The Script requires at least one selected deformer.');
+            return;
+        }
+
+        var _isChainClosed = isChainClosed(_nodes);
+        var chainStrokes = getStrokesFromChain(_nodes);
+        // MessageLog.trace('mirrorChain: ' + relativeTo+'\n'+JSON.stringify(chainStrokes, true, '  '));
+
+        // Get Center point
+        var center = { x: 0, y: 0 }; // Default: RELATIVE_TO_ZERO
+
+        switch (relativeTo) {
+
+            case RELATIVE_TO_PEG:
+                var offsetModule = _nodes[0];
+                var parentPeg = getParentPeg(_nodes);
+                // if (!parentPeg) return 'a parent peg not found.'
+                center.x = node.getAttr(parentPeg, 1, 'pivot.x').doubleValue();
+                center.y = node.getAttr(parentPeg, 1, 'pivot.y').doubleValue();
+                break;
+
+            case RELATIVE_TO_SELECTED:
+                var selectedDeformer = getSelectedDeformers()[0];
+                center.x = node.getAttr(selectedDeformer, 1, 'offset.x').doubleValue();
+                center.y = node.getAttr(selectedDeformer, 1, 'offset.y').doubleValue();
+                // MessageLog.trace('selectedDeformer: ' + selectedDeformer+' X:'+center.x+' Y:'+center.y);
+                break;
+
+        }
+
+        //
+        var strokes;
+
+        if (applyMode === MODE_BOTH || applyMode === MODE_RESTING) { // RESTING
+
+            chainStrokes.strokesResting.forEach(function(pointData, i) {
+                if (axis === HORIZONTAL || axis === undefined) pointData.x = center.x - (pointData.x - center.x);
+                if (axis === VERTICAL) pointData.y = center.y - (pointData.y - center.y);
+            });
+
+            strokes = pointsToDeformerCurves(
+                strokePointsToPoints(chainStrokes.strokesResting, undefined, true),
+                undefined, undefined, _isChainClosed, false);
+
+            strokes.forEach(function(defData, defI) {
+                setAttrValues(_nodes[defI], defData.attrs, undefined, applyMode);
+            });
+
+        }
+
+        if (applyMode === MODE_BOTH || applyMode === MODE_CURRENT) { // CURRENT
+
+            chainStrokes.strokes.forEach(function(pointData, i) {
+                if (axis === HORIZONTAL || axis === undefined) pointData.x = center.x - (pointData.x - center.x);
+                if (axis === VERTICAL) pointData.y = center.y - (pointData.y - center.y);
+            });
+
+            strokes = pointsToDeformerCurves(
+                strokePointsToPoints(chainStrokes.strokes, undefined, true),
+                undefined, undefined, _isChainClosed, false);
+
+            strokes.forEach(function(defData, defI) {
+                setAttrValues(_nodes[defI], defData.attrs, undefined, applyMode);
+            });
+
+        }
+
+    });
+
+}
+
+
+function getParentPeg(_deformers) {
+
+    if (!_deformers) return;
+    if (Array.isArray(_deformers) && _deformers.length === 1) _deformers = getDeformersChain(_deformers[0]);
+    if (typeof _deformers === 'string') _deformers = getDeformersChain(_deformers);
+    if (!_deformers || !_deformers.length) return;
+
+    return Utils.findParentPeg(_deformers[0]);
+}
 
 
 /*
