@@ -819,60 +819,60 @@ function symmetrizeCurves(direction, applyMode) {
 
     // _exec('Remove Deformer Curve', function() {
 
-        MessageLog.clearLog();
+    MessageLog.clearLog();
 
-        var _deformers = getSelectedDeformers();
-        if (!_deformers.length) {
-            MessageLog.trace('The Script requires at least one selected deformer.');
-            return;
+    var _deformers = getSelectedDeformers();
+    if (!_deformers.length) {
+        MessageLog.trace('The Script requires at least one selected deformer.');
+        return;
+    }
+    // MessageLog.trace('_deformers'+_deformers.join(','));
+
+    _deformers = _deformers.map(function(_deformer) {
+
+        return {
+            node: _deformer,
+            attrs: getDeformerPointPosition(_deformer)
         }
-        // MessageLog.trace('_deformers'+_deformers.join(','));
+    });
 
-        _deformers = _deformers.map(function(_deformer) {
+    var defFrom = _deformers[0];
+    var defTo = _deformers[1];
+    if (defFrom.attrs.x > 0) {
+        defFrom = _deformers[1];
+        defTo = _deformers[0];
+    }
+    var _defFromParent = getParentNode(defFromParent);
+    var defFromParent = {
+        node: _defFromParent,
+        attrs: getDeformerPointPosition(_defFromParent)
+    };
+    var _defToParent = getParentNode(defToParent);
+    var defToParent = {
+        node: _defToParent,
+        attrs: getDeformerPointPosition(_defToParent)
+    };
+    MessageLog.trace('defFromParent' + JSON.stringify(defFrom, true, '  ') + '\n' + JSON.stringify(defTo, true, '  '));
 
-            return {
-                node: _deformer,
-                attrs: getDeformerPointPosition(_deformer)
-            }
-        });
+    var coefX = -1;
 
-        var defFrom = _deformers[0];
-        var defTo = _deformers[1];
-        if (defFrom.attrs.x > 0) {
-            defFrom = _deformers[1];
-            defTo = _deformers[0];
-        }
-        var _defFromParent = getParentNode(defFromParent);
-        var defFromParent = {
-            node: _defFromParent,
-            attrs: getDeformerPointPosition(_defFromParent)
-        };
-        var _defToParent = getParentNode(defToParent);
-        var defToParent = {
-            node: _defToParent,
-            attrs: getDeformerPointPosition(_defToParent)
-        };
-        MessageLog.trace('defFromParent' + JSON.stringify(defFrom, true, '  ') + '\n' + JSON.stringify(defTo, true, '  '));
+    defToParent.attrs.x = defFrom.attrs.x * coefX;
+    defToParent.attrs.y = defFrom.attrs.y;
 
-        var coefX = -1;
-
-        defToParent.attrs.x = defFrom.attrs.x * coefX;
-        defToParent.attrs.y = defFrom.attrs.y;
-
-        defTo.attrs.x = defFromParent.attrs.x * coefX;
-        defTo.attrs.y = defFromParent.attrs.y;
-        defTo.attrs.length1 = defFrom.attrs.length0;
-        defTo.attrs.orientation1 = (defFrom.attrs.orientation0 + 180) % 360;
-        // defTo.attrs.orientation1 = defFrom.attrs.orientation0;
-        defTo.attrs.length0 = defFrom.attrs.length1;
-        defTo.attrs.orientation0 = (defFrom.attrs.orientation1 + 180) % 360;
-        // defTo.attrs.orientation0 = defFrom.attrs.orientation1;
+    defTo.attrs.x = defFromParent.attrs.x * coefX;
+    defTo.attrs.y = defFromParent.attrs.y;
+    defTo.attrs.length1 = defFrom.attrs.length0;
+    defTo.attrs.orientation1 = (defFrom.attrs.orientation0 + 180) % 360;
+    // defTo.attrs.orientation1 = defFrom.attrs.orientation0;
+    defTo.attrs.length0 = defFrom.attrs.length1;
+    defTo.attrs.orientation0 = (defFrom.attrs.orientation1 + 180) % 360;
+    // defTo.attrs.orientation0 = defFrom.attrs.orientation1;
 
 
-        setAttrValues(defTo.node, defTo.attrs, undefined, false);
-        setAttrValues(defToParent.node, defTo.attrs, undefined, false);
+    setAttrValues(defTo.node, defTo.attrs, undefined, false);
+    setAttrValues(defToParent.node, defTo.attrs, undefined, false);
 
-        MessageLog.trace('_deformers' + JSON.stringify(_deformers, true, '  '));
+    MessageLog.trace('_deformers' + JSON.stringify(_deformers, true, '  '));
 
     // });
 
@@ -885,134 +885,134 @@ function symmetrizeChain(direction, applyMode) {
 
     // _exec('Remove Deformer Curve', function() {
 
-        MessageLog.clearLog();
+    MessageLog.clearLog();
 
-        var _deformers = getSelectedDeformers();
-        if (!_deformers.length) {
-            MessageLog.trace('The Script requires at least one selected deformer.');
-            return;
-        }
+    var _deformers = getSelectedDeformers();
+    if (!_deformers.length) {
+        MessageLog.trace('The Script requires at least one selected deformer.');
+        return;
+    }
 
-        var _nodes = getDeformersChain(undefined, true);
-        // MessageLog.trace('symmetrizeChain: ' + JSON.stringify(_nodes, true, '  '));
+    var _nodes = getDeformersChain(undefined, true);
+    // MessageLog.trace('symmetrizeChain: ' + JSON.stringify(_nodes, true, '  '));
 
-        var fromCurves = [];
-        var toCurves = [];
-        var _isChainClosed = isChainClosed(_nodes.map(function(nodeData) { return nodeData.node }));
-        MessageLog.trace('symmetrizeChain: ' + _isChainClosed);
+    var fromCurves = [];
+    var toCurves = [];
+    var _isChainClosed = isChainClosed(_nodes.map(function(nodeData) { return nodeData.node }));
+    MessageLog.trace('symmetrizeChain: ' + _isChainClosed);
 
-        var halfCount = (_nodes.length - 1) / 2;
-        var startIndex = 0;
-        var currentIndex = 0;
+    var halfCount = (_nodes.length - 1) / 2;
+    var startIndex = 0;
+    var currentIndex = 0;
 
-        for (var i = startIndex; i < _nodes.length; i++) {
+    for (var i = startIndex; i < _nodes.length; i++) {
 
-            var nodeData = _nodes[currentIndex];
+        var nodeData = _nodes[currentIndex];
 
-            if (nodeData.isOffset) {
+        if (nodeData.isOffset) {
 
 
-            } else {
+        } else {
 
-                var targetNodeData = _nodes[startIndex - currentIndex];
-
-            }
-
-            currentIndex++;
-            if (currentIndex >= _nodes.length) currentIndex = 0;
+            var targetNodeData = _nodes[startIndex - currentIndex];
 
         }
 
-        /*
-                _nodes.forEach(function(nodeData, i) {
+        currentIndex++;
+        if (currentIndex >= _nodes.length) currentIndex = 0;
 
-                    // Check side by restiong position
-                    var posResting0 = nodeData.pointsResting[0];
-                    var posResting1 = nodeData.pointsResting[nodeData.pointsResting.length - 1];
+    }
 
-                    // Flip X
-                    // nodeData.points[0].x = -nodeData.points[0].x; // !!!
-                    // nodeData.points[1].x = -nodeData.points[1].x; // !!!
+    /*
+            _nodes.forEach(function(nodeData, i) {
+
+                // Check side by restiong position
+                var posResting0 = nodeData.pointsResting[0];
+                var posResting1 = nodeData.pointsResting[nodeData.pointsResting.length - 1];
+
+                // Flip X
+                // nodeData.points[0].x = -nodeData.points[0].x; // !!!
+                // nodeData.points[1].x = -nodeData.points[1].x; // !!!
 
 
-                    // //
-                    if (i === 0) return;
+                // //
+                if (i === 0) return;
 
-                    // Flip X
-                    // nodeData.points[2].x = -nodeData.points[2].x;// !!!
-                    // nodeData.points[3].x = -nodeData.points[3].x;// !!!
+                // Flip X
+                // nodeData.points[2].x = -nodeData.points[2].x;// !!!
+                // nodeData.points[3].x = -nodeData.points[3].x;// !!!
 
-                    if (Utils.getSign(posResting0.x) !== Utils.getSign(posResting1.x)) { // One curve cross the Axis
+                if (Utils.getSign(posResting0.x) !== Utils.getSign(posResting1.x)) { // One curve cross the Axis
 
-                        if (posResting0.x < 0) {
-                            _copyPointsValues(nodeData.points, [0, 1], nodeData.points, [3, 2], -1, 1);
-                        } else {
-                            _copyPointsValues(nodeData.points, [3, 2], nodeData.points, [0, 1], -1, 1);
-                        }
-
-                        return;
-
+                    if (posResting0.x < 0) {
+                        _copyPointsValues(nodeData.points, [0, 1], nodeData.points, [3, 2], -1, 1);
+                    } else {
+                        _copyPointsValues(nodeData.points, [3, 2], nodeData.points, [0, 1], -1, 1);
                     }
 
-                    // From left to Right
-                    if (posResting1.x <= 0) fromCurves.push(nodeData);
-                    else toCurves.push(nodeData);
+                    return;
 
-                });
+                }
 
-                fromCurves.sort(function(a, b) { return a.index === b.index ? 0 : (a.index > b.index ? 1 : -1) });
-                toCurves.sort(function(a, b) { return a.index === b.index ? 0 : (a.index < b.index ? 1 : -1) });
-                // MessageLog.trace('fromCurves: ' + fromCurves.length + '\n' + JSON.stringify(fromCurves, true, '  '));
-                // MessageLog.trace('toCurves: ' + toCurves.length + '\n' + JSON.stringify(toCurves, true, '  '));
+                // From left to Right
+                if (posResting1.x <= 0) fromCurves.push(nodeData);
+                else toCurves.push(nodeData);
 
-                fromCurves.forEach(function(nodeData, i) {
+            });
 
-                    var toNodeData = toCurves[i];
-                    MessageLog.trace(i + ')) @@@@@: ' + nodeData.node + '\n' + JSON.stringify(nodeData.points, true, '  '));
-                    // MessageLog.trace(i + ')) @1: ' + JSON.stringify(toNodeData.points, true, '  '));
-                    MessageLog.trace('-->>: ' + nodeData.node + ' -> ' + toNodeData.node);
-                    // _copyPointsValues(nodeData.points, [0, 1, 2, 3], toNodeData.points, [3, 2, 1, 0], -1, 1);
-                    // toNodeData.points[2].x -= toNodeData.points[0].x;//nodeData.points[2].x;
-                    // toNodeData.points[2].y = 1;//nodeData.points[2].x;
-                    // toNodeData.points[1].x -= toNodeData.points[3].x; //nodeData.points[2].x;
-                    // toNodeData.points[1].y = 1;//nodeData.points[2].x;
-                    // MessageLog.trace(i + ')) @2: ' + JSON.stringify(toNodeData.points, true, '  '));
+            fromCurves.sort(function(a, b) { return a.index === b.index ? 0 : (a.index > b.index ? 1 : -1) });
+            toCurves.sort(function(a, b) { return a.index === b.index ? 0 : (a.index < b.index ? 1 : -1) });
+            // MessageLog.trace('fromCurves: ' + fromCurves.length + '\n' + JSON.stringify(fromCurves, true, '  '));
+            // MessageLog.trace('toCurves: ' + toCurves.length + '\n' + JSON.stringify(toCurves, true, '  '));
 
-                });
+            fromCurves.forEach(function(nodeData, i) {
 
-        */
-        // APPLY STROKES TO DEFORMERS
-        var strokePoints = [];
-        _nodes.forEach(function(nodeData, i) { i === 0 ? strokePoints.push(nodeData.points[1]) : strokePoints = strokePoints.concat(nodeData.points.splice(1, 3)); });
-        // MessageLog.trace('======>\n' + JSON.stringify(strokePoints, true, '  '));
+                var toNodeData = toCurves[i];
+                MessageLog.trace(i + ')) @@@@@: ' + nodeData.node + '\n' + JSON.stringify(nodeData.points, true, '  '));
+                // MessageLog.trace(i + ')) @1: ' + JSON.stringify(toNodeData.points, true, '  '));
+                MessageLog.trace('-->>: ' + nodeData.node + ' -> ' + toNodeData.node);
+                // _copyPointsValues(nodeData.points, [0, 1, 2, 3], toNodeData.points, [3, 2, 1, 0], -1, 1);
+                // toNodeData.points[2].x -= toNodeData.points[0].x;//nodeData.points[2].x;
+                // toNodeData.points[2].y = 1;//nodeData.points[2].x;
+                // toNodeData.points[1].x -= toNodeData.points[3].x; //nodeData.points[2].x;
+                // toNodeData.points[1].y = 1;//nodeData.points[2].x;
+                // MessageLog.trace(i + ')) @2: ' + JSON.stringify(toNodeData.points, true, '  '));
 
-        // ------------
-        // var elementId = node.getElementId('Top/TEMP');
-        // // _nodes.forEach(function(nodeData, i) { i === 0 ? strokePoints.push(nodeData.points[1]) : strokePoints = strokePoints.concat(nodeData.points.splice(1, 3)); });
+            });
 
-        // DrawingTools.createLayers({
-        //     label: "unused",
-        //     // drawing: { node: _node, frame: frame.current() },
-        //     drawing: { elementId: elementId, exposure: 'Default' },
-        //     art: 0,
-        //     layers: [{
-        //         contours: [{
-        //             polygon: false,
-        //             path: strokePoints
-        //         }]
-        //     }]
-        // });
-        // -----------------------
+    */
+    // APPLY STROKES TO DEFORMERS
+    var strokePoints = [];
+    _nodes.forEach(function(nodeData, i) { i === 0 ? strokePoints.push(nodeData.points[1]) : strokePoints = strokePoints.concat(nodeData.points.splice(1, 3)); });
+    // MessageLog.trace('======>\n' + JSON.stringify(strokePoints, true, '  '));
 
-        var deformerData = pointsToDeformerCurves(
-            strokePointsToPoints(strokePoints, undefined, false),
-            undefined, undefined, !_isChainClosed, false);
+    // ------------
+    // var elementId = node.getElementId('Top/TEMP');
+    // // _nodes.forEach(function(nodeData, i) { i === 0 ? strokePoints.push(nodeData.points[1]) : strokePoints = strokePoints.concat(nodeData.points.splice(1, 3)); });
 
-        MessageLog.trace('----->\n' + JSON.stringify(deformerData, true, '  '));
+    // DrawingTools.createLayers({
+    //     label: "unused",
+    //     // drawing: { node: _node, frame: frame.current() },
+    //     drawing: { elementId: elementId, exposure: 'Default' },
+    //     art: 0,
+    //     layers: [{
+    //         contours: [{
+    //             polygon: false,
+    //             path: strokePoints
+    //         }]
+    //     }]
+    // });
+    // -----------------------
 
-        deformerData.forEach(function(_deformerData, i) {
-            setAttrValues(_nodes[i].node, _deformerData.attrs, undefined, false);
-        });
+    var deformerData = pointsToDeformerCurves(
+        strokePointsToPoints(strokePoints, undefined, false),
+        undefined, undefined, !_isChainClosed, false);
+
+    MessageLog.trace('----->\n' + JSON.stringify(deformerData, true, '  '));
+
+    deformerData.forEach(function(_deformerData, i) {
+        setAttrValues(_nodes[i].node, _deformerData.attrs, undefined, false);
+    });
 
     // });
 
@@ -1053,7 +1053,12 @@ function isClosedDefNode(_node) {
 
 //
 function getSelectedDeformers() {
-    var _nodes = selection.selectedNodes().filter(function(_node) {
+    var selectedNodes = selection.selectedNodes();
+    var firstNode = selectedNodes[0];
+    if (node.type(firstNode) === 'GROUP') {
+        selectedNodes = node.subNodes(firstNode).filter(function(_node) { return isOffsetNode(_node); })
+    }
+    var _nodes = selectedNodes.filter(function(_node) {
         return isDefNode(_node) || isOffsetNode(_node);
     });
     // MessageLog.trace(_nodes.join('\n'));
