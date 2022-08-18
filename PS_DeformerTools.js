@@ -481,7 +481,9 @@ function PS_DeformerTools() {
     modal.addButton('', cpGroup3, btnHeight, btnHeight,
         iconPath + 'mirror-vertically.png',
         function() {
-            DeformerUtils.mirrorChain(getApplyMode(), DeformerUtils.VERTICAL, getCenterMode());
+            _exec('Mirror Deformer Chain', function() {
+                DeformerUtils.mirrorChain(getApplyMode(), DeformerUtils.VERTICAL, getCenterMode());
+            });
         },
         'Mirror the selected deformer vertically.'
     );
