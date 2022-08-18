@@ -58,6 +58,40 @@ function getPointGlobalPosition(_node, _point, _frame) {
 }
 
 
+
+//
+function _cleanupNumbers(v) {
+    if (v.x !== undefined) {
+        v.x = _cleanupNumbers(v.x);
+        v.y = _cleanupNumbers(v.y);
+        if (v.z !== undefined) v.z = _cleanupNumbers(v.z);
+        return v;
+    }
+    if (v > 0.999 && v < 1) v = 1;
+    if (v < -0.999 && v > -1) v = -1;
+    return v;
+}
+
+function getNodeTransform(_node, usePivot, _frame, force3d) {
+    if (_frame === undefined) _frame = frame.current();
+    var pivot = usePivot ? node.getPivot(_node, _frame) : new Point3d();
+    var mtrx = node.getMatrix(_node, _frame);
+    return extractTransfromFromMatrix(mtrx, pivot, force3d);
+}
+
+function extractTransfromFromMatrix(mtrx, pivot, force3d) {
+    if (!pivot) pivot = new Point3d();
+    return {
+        pivot: _cleanupNumbers(pivot),
+        position: _cleanupNumbers(scene.fromOGL(mtrx.extractPosition(pivot, force3d))),
+        rotation: mtrx.extractRotation(pivot, force3d),
+        scale: _cleanupNumbers(mtrx.extractScale(pivot, force3d)),
+        skew: _cleanupNumbers(mtrx.extractSkew(pivot, force3d)),
+        matrix: mtrx
+    };
+}
+
+
 //
 function findParentPeg(_nodes) {
 
@@ -73,7 +107,7 @@ function findParentNodeByType(_nodes, nodeType) {
 
     _nodes.forEach(function(_node, ni) {
         var numInput = node.numberOfInputPorts(_node);
-        if(!numInput) return;
+        if (!numInput) return;
 
         // MessageLog.trace(ni + ' ]]] ' + _node + ' > ' + numInput);
         for (var i = 0; i < numInput; i++) {
@@ -353,11 +387,15 @@ exports = {
     gridWidth: gridWidth,
     getTimestamp: getTimestamp,
     getZeroLeadingString: getZeroLeadingString,
+
     gridToPixelsX: gridToPixelsX,
     gridToPixelsY: gridToPixelsY,
     pixelsToGridX: pixelsToGridX,
     pixelsToGridY: pixelsToGridY,
     getPointGlobalPosition: getPointGlobalPosition,
+    getNodeTransform: getNodeTransform,
+    extractTransfromFromMatrix: extractTransfromFromMatrix,
+
     findParentPeg: findParentPeg,
     findParentNodeByType: findParentNodeByType,
     getFullAttributeList: getFullAttributeList,
@@ -372,6 +410,7 @@ exports = {
     getUnusedColumnName: getUnusedColumnName,
     getNumber: getNumber,
     deepClone: deepClone,
+
 };
 
 
