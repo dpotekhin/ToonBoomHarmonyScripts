@@ -72,8 +72,9 @@ function findParentNodeByType(_nodes, nodeType) {
     var parentNodes = [];
 
     _nodes.forEach(function(_node, ni) {
-
         var numInput = node.numberOfInputPorts(_node);
+        if(!numInput) return;
+
         // MessageLog.trace(ni + ' ]]] ' + _node + ' > ' + numInput);
         for (var i = 0; i < numInput; i++) {
             var srcNode = node.srcNode(_nodes, i);
