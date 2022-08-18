@@ -206,7 +206,8 @@ function getAllChildNodes(nodes, typeFilter, eachNodeCb, includeGroups) {
         // MessageLog.trace( _node, node.type(_node) );
 
         var nodeType = node.type(_node);
-
+        if(!nodeType) return;
+        
         if (nodeType === 'GROUP') {
             if (includeGroups && _nodes.indexOf(_node) === -1) {
                 _nodes.push(_node);

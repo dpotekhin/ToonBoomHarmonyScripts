@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version 0.220731
+Version 0.220818
 */
 
 
@@ -12,25 +12,53 @@ var NodeUtils = require(fileMapper.toNativePath(specialFolders.userScripts+"/PS_
 var COLORART = 1;
 var LINEART = 2;
 
+var MODE_CURRENT = 1;
+var MODE_RESTING = 2;
+var MODE_BOTH = 3;
+
 var RIGHT = 'Right';
 var LEFT = 'Left';
 var UP = 'Up';
 var DOWN = 'Down';
+var HORIZONTAL = 'HORIZONTAL';
+var VERTICAL = 'VERTICAL';
+
+var RELATIVE_TO_ZERO = 'RELATIVE_TO_ZERO';
+var RELATIVE_TO_PEG = 'RELATIVE_TO_PEG';
+var RELATIVE_TO_SELECTED = 'RELATIVE_TO_SELECTED';
 
 ///
 exports = {
-    RESTING: 1,
-    CURRENT: 2,
+
     COLORART: COLORART,
     LINEART: LINEART,
+
+    MODE_CURRENT: MODE_CURRENT,
+    MODE_RESTING: MODE_RESTING,
+    MODE_BOTH: MODE_BOTH,
+
     RIGHT: RIGHT,
     LEFT: LEFT,
     UP: UP,
     DOWN: DOWN,
+    HORIZONTAL: HORIZONTAL,
+    VERTICAL: VERTICAL,
+
+    RELATIVE_TO_ZERO: RELATIVE_TO_ZERO,
+    RELATIVE_TO_PEG: RELATIVE_TO_PEG,
+    RELATIVE_TO_SELECTED: RELATIVE_TO_SELECTED,
+
+    isDefNode: isDefNode,
+    isOffsetNode: isOffsetNode,
+    setAttrValues: setAttrValues,
+
     alignVertically: alignVertically,
     alignHorizontally: alignHorizontally,
+
     orientControlPoints: orientControlPoints,
+    orientControlPointsToNext: orientControlPointsToNext,
     distributeControlPoints: distributeControlPoints,
+
     generateCircleDeformer: generateCircleDeformer,
     generateRectDeformer: generateRectDeformer,
     generateArtDeformer: generateArtDeformer,
@@ -38,21 +66,27 @@ exports = {
     insertDeformerCurve: insertDeformerCurve,
     removeDeformerCurve: removeDeformerCurve,
     generateDeformer: generateDeformer,
-    symmetrizeChain: symmetrizeChain,
-    symmetrizeCurves: symmetrizeCurves,
+
     reverseChain: reverseChain,
+
+    mirrorChain: mirrorChain,
+    // symmetrizeChain: symmetrizeChain,
+    // symmetrizeCurves: symmetrizeCurves,
 }
 
 var restingAttrNames = {
     "offset.x": "restingOffset.x",
     "offset.y": "restingOffset.y",
-    Length0: "restLength0",
-    Length1: "restLength1",
+    length0: "restlength0",
+    length1: "restLength1",
     orientation0: "restingOrientation0",
     orientation1: "restingOrientation1",
 };
 
-
+var validDeformerAttrNames = {
+    x: 'offset.x',
+    y: 'offset.y',
+}
 
 
 /*
@@ -64,33 +98,25 @@ var restingAttrNames = {
 */
 
 //
-function alignVertically(side, applyToResting) {
+function alignVertically(side, applyMode) {
 
-    _exec('Align Deformer Points Vertically', function() {
+    var _nodes = getSelectedDeformers();
+    if (!_nodes) return;
 
-        var _nodes = getSelectedDeformers();
-        if (!_nodes) return;
-
-        var center = getCenter(_nodes, side, 'offset.X');
-        if (applyToResting) applyAttrValue(_nodes, 'restingOffset.X', center);
-        applyAttrValue(_nodes, 'offset.X', center);
-
-    });
+    var center = getCenter(_nodes, side, 'offset.x');
+    // if (applyMode) applyAttrValue(_nodes, 'restingOffset.x', center);
+    setAttrValues(_nodes, 'offset.x', undefined, applyMode, center);
 }
 
 //
-function alignHorizontally(side, applyToResting) {
+function alignHorizontally(side, applyMode) {
 
-    _exec('Align Deformer Points Horizontally', function() {
+    var _nodes = getSelectedDeformers();
+    if (!_nodes) return;
 
-        var _nodes = getSelectedDeformers();
-        if (!_nodes) return;
-
-        var center = getCenter(_nodes, side, 'offset.Y');
-        if (applyToResting) applyAttrValue(_nodes, 'restingOffset.Y', center);
-        applyAttrValue(_nodes, 'offset.Y', center);
-
-    });
+    var center = getCenter(_nodes, side, 'offset.y');
+    // if (applyMode) applyAttrValue(_nodes, 'restingOffset.y', center);
+    setAttrValues(_nodes, 'offset.y', undefined, applyMode, center);
 
 }
 
@@ -109,53 +135,40 @@ function alignHorizontally(side, applyToResting) {
 */
 
 //
-function orientControlPoints(_nodes, applyToResting, useEntireChain) {
+function orientControlPoints(_nodes, applyMode, useEntireChain, controlSide) {
 
-    _exec('Orient Control Points', function() {
+    var deformersChain = getDeformersChain();
+    if (!_nodes) _nodes = useEntireChain ? deformersChain : getSelectedDeformers();
+    if (!_nodes) return;
 
-        // MessageLog.trace('orientControlPoints ' + applyToResting + ', ' + useEntireChain + ' > ' + _nodes.join(', '));
+    _nodes.forEach(function(_node) {
 
-        if (!_nodes) _nodes = useEntireChain ? getDeformersChain() : getSelectedDeformers();
-        if (!_nodes) return;
+        if (isOffsetNode(_node)) {
 
-        _nodes.forEach(function(_node) {
+        } else {
 
-            if (isOffsetNode(_node)) {
+            /*
+            var targetNode = getParentNode(_node);
+            if (!targetNode || !(isOffsetNode(_node) || isDefNode(_node))) return;
 
-            } else {
-
-                var targetNode = getParentNode(_node);
-                if (!targetNode || !(isOffsetNode(_node) || isDefNode(_node))) return;
-                // if node is the last of a closed deformer
-                // MessageLog.trace('>-> ' + node.getTextAttr(_node, 1, 'closePath'));
-
-                var srcNode = _node;
-                if (node.getTextAttr(_node, 1, 'closePath') === 'Y') {
-                    srcNode = (getDeformersChain(_node) || [])[0];
-                    if (!srcNode) return;
-                }
-
-                var targetPos = getDeformerPointPosition(targetNode);
-                var pos = getDeformerPointPosition(srcNode);
-                var ang = Math.atan2(pos.y - targetPos.y, pos.x - targetPos.x) / Math.PI * 180;
-
-                if (applyToResting) {
-                    applyAttrValue(_node, 'restingOrientation0', ang);
-                    applyAttrValue(_node, 'restingOrientation1', ang);
-                }
-
-                applyAttrValue(_node, 'orientation0', ang);
-                applyAttrValue(_node, 'orientation1', ang);
-
-                // MessageLog.trace('-> SF: '+_node+'('+pos.x+','+pos.y+')' );
-                // MessageLog.trace('-> PR: '+targetNode+' ('+targetPos.x+','+targetPos.y+')' );
-                // MessageLog.trace('->: '+(pos.y - targetPos.y)+' > '+ (pos.x - targetPos.x) +' >> '+Math.atan2( pos.y - targetPos.y, pos.x - targetPos.x ));
-                // MessageLog.trace(ang);
-                // MessageLog.trace('--> '+node.getAllAttrKeywords(_node).join('\n') );
-
+            var srcNode = _node;
+            if (node.getTextAttr(_node, 1, 'closePath') === 'Y') {
+                srcNode = (getDeformersChain(_node) || [])[0];
+                if (!srcNode) return;
             }
+            */
+            var targetNode = getParentDefNode(_node, deformersChain);
+            if (!targetNode) return;
 
-        });
+            var targetPos = getDeformerPointPosition(targetNode);
+            var pos = getDeformerPointPosition(isClosedDefNode(_node) ? deformersChain[0] : _node);
+            var ang = fixOrientation(Math.atan2(pos.y - targetPos.y, pos.x - targetPos.x) / Math.PI * 180);
+            // MessageLog.trace('targetPos:\n'+JSON.stringify(targetPos)+'\n>'+JSON.stringify(pos)+' > '+ang);
+
+            if (!controlSide || controlSide === 1) setAttrValues(_node, 'orientation0', undefined, applyMode, ang);
+            if (!controlSide || controlSide === 2) setAttrValues(_node, 'orientation1', undefined, applyMode, ang);
+
+        }
 
     });
 
@@ -163,50 +176,85 @@ function orientControlPoints(_nodes, applyToResting, useEntireChain) {
 
 
 //
-function distributeControlPoints(_nodes, applyToResting, useEntireChain) {
+function orientControlPointsToNext(_nodes, applyMode, useEntireChain, controlSide) {
 
-    _exec('Distribute Control Points', function() {
+    // MessageLog.trace('orientControlPoints ' + applyMode + ', ' + useEntireChain + ' > ' + _nodes.join(', '));
+    var deformersChain = getDeformersChain();
+    if (!_nodes) _nodes = useEntireChain ? deformersChain : getSelectedDeformers();
+    if (!_nodes) return;
 
-        if (!_nodes) _nodes = useEntireChain ? getDeformersChain() : getSelectedDeformers();
-        if (!_nodes) return;
+    _nodes.forEach(function(_node) {
 
-        _nodes.forEach(function(_node) {
+        if (isOffsetNode(_node)) {
 
-            if (isOffsetNode(_node)) {
+        } else {
 
-            } else {
-
-                var targetNode = getParentNode(_node);
-                if (!targetNode || !(isOffsetNode(_node) || isDefNode(_node))) return;
-
-                var srcNode = _node;
-                if (node.getTextAttr(_node, 1, 'closePath') === 'Y') {
-                    srcNode = (getDeformersChain(_node) || [])[0];
-                    if (!srcNode) return;
-                }
-
-                var targetPos = getDeformerPointPosition(targetNode);
-                var pos = getDeformerPointPosition(srcNode);
-                var dx = pos.x - targetPos.x;
-                var dy = pos.y - targetPos.y;
-                var hypo = Math.sqrt(dx * dx + dy * dy);
-                var length = hypo / 3;
-
-                if (applyToResting) {
-                    applyAttrValue(_node, 'restLength0', length);
-                    applyAttrValue(_node, 'restLength1', length);
-                }
-
-                applyAttrValue(_node, 'length0', length);
-                applyAttrValue(_node, 'length1', length);
-
-                // MessageLog.trace('-> SF: '+_node+'('+pos.x+','+pos.y+')' );
-                // MessageLog.trace('-> PR: '+targetNode+' ('+targetPos.x+','+targetPos.y+')' );
-                // MessageLog.trace('-> length: '+length+' ( '+hypo );
-
+            var prevNode = getParentDefNode(_node, deformersChain);
+            if (prevNode && (!controlSide || controlSide === 1)) {
+                var prevVal = isOffsetNode(prevNode) ? getAttrValue(deformersChain[deformersChain.length - 1], 'orientation1') : getAttrValue(prevNode, 'orientation1');
+                setAttrValues(_node, 'orientation0', undefined, applyMode, prevVal);
             }
 
-        });
+            var nextNode = getNextDefNode(_node, deformersChain);
+            if (nextNode && (!controlSide || controlSide === 2)) {
+                var nextVal = isOffsetNode(nextNode) ? getAttrValue(deformersChain[1], 'orientation0') : getAttrValue(nextNode, 'orientation0');
+                setAttrValues(_node, 'orientation1', undefined, applyMode, nextVal);
+            }
+
+        }
+
+    });
+
+}
+
+
+//
+function distributeControlPoints(_nodes, applyMode, useEntireChain, controlSide) {
+
+    var deformersChain = getDeformersChain();
+    if (!_nodes) _nodes = useEntireChain ? deformersChain : getSelectedDeformers();
+    if (!_nodes) return;
+
+    var _isChainClosed = isChainClosed(deformersChain);
+
+    _nodes.forEach(function(_node) {
+
+        if (isOffsetNode(_node)) {
+
+        } else {
+            /*
+            var targetNode = getParentNode(_node);
+            if (!targetNode || !(isOffsetNode(_node) || isDefNode(_node))) return;
+
+            var srcNode = _node;
+            if (node.getTextAttr(_node, 1, 'closePath') === 'Y') {
+                srcNode = (getDeformersChain(_node) || [])[0];
+                if (!srcNode) return;
+            }
+            */
+            var targetNode = getParentDefNode(_node);
+            if (!targetNode) return;
+
+            var targetPos = getDeformerPointPosition(targetNode);
+            var pos = getDeformerPointPosition(isClosedDefNode(_node) ? deformersChain[0] : _node);
+            var dx = pos.x - targetPos.x;
+            var dy = pos.y - targetPos.y;
+            var hypo = Math.sqrt(dx * dx + dy * dy);
+            var length = hypo / 3;
+
+            // if (applyMode) {
+            //     applyAttrValue(_node, 'restlength0', length);
+            //     applyAttrValue(_node, 'restLength1', length);
+            // }
+
+            if (!controlSide || controlSide === 1) setAttrValues(_node, 'length0', undefined, applyMode, length);
+            if (!controlSide || controlSide === 2) setAttrValues(_node, 'length1', undefined, applyMode, length);
+
+            // MessageLog.trace('-> SF: '+_node+'('+pos.x+','+pos.y+')' );
+            // MessageLog.trace('-> PR: '+targetNode+' ('+targetPos.x+','+targetPos.y+')' );
+            // MessageLog.trace('-> length: '+length+' ( '+hypo );
+
+        }
 
     });
 
@@ -231,23 +279,17 @@ function distributeControlPoints(_nodes, applyToResting, useEntireChain) {
  */
 //
 function generateCircleDeformer(artIndex, curDrawing, reversePath) {
-    _exec('Generate Circle Deformer', function() {
-        generateDeformer('circle', artIndex, curDrawing, reversePath);
-    });
+    generateDeformer('circle', artIndex, curDrawing, reversePath);
 }
 
 //
 function generateRectDeformer(artIndex, curDrawing, reversePath) {
-    _exec('Generate Rectangle Deformer', function() {
-        generateDeformer('rectangle', artIndex, curDrawing, reversePath);
-    });
+    generateDeformer('rectangle', artIndex, curDrawing, reversePath);
 }
 
 //
 function generateArtDeformer(artIndex, curDrawing, reversePath, dontClosePath) {
-    _exec('Generate Deformer on Art layer', function() {
-        generateDeformer('art', artIndex, curDrawing, reversePath, dontClosePath);
-    });
+    generateDeformer('art', artIndex, curDrawing, reversePath, dontClosePath);
 }
 
 ///
@@ -362,62 +404,51 @@ function generateDeformer(mode, artIndex, curDrawing, reversePath, dontClosePath
 
 /*
 TODO:
-- add the ability to not change the binding state
 - take into account the inheritance of parent transformations
 */
+function moveDeformersAround(direction, applyMode) {
 
-function moveDeformersAround(direction, applyToResting) {
+    var _deformers = getDeformersChain();
+    if (!_deformers) return;
 
-    _exec('Move Deformers Around', function() {
+    if (!isChainClosed(_deformers)) {
+        MessageLog.trace('The Deformer Chain must be closed.');
+        return;
+    }
 
-        var _deformers = getDeformersChain();
-        if (!_deformers) return;
-        // MessageLog.trace("moveDeformersAround: "+JSON.stringify(_deformers,true,'  '));
+    var currentFrame = frame.current();
 
-        var currentFrame = frame.current();
+    _deformers = _deformers.map(function(defNode, i) {
+        return getDeformerAttrs(defNode, applyMode);
+    });
 
-        _deformers = _deformers.map(function(defNode, i) {
+    // MessageLog.trace("moveDeformersAround: " + JSON.stringify(_deformers, true, '  '));
 
-            var defData = {
-                node: defNode,
-                attrs: {}
-            };
+    var swapDefData;
+    _deformers.forEach(function(defNode, i) {
 
-            Object.keys(restingAttrNames).forEach(function(attrName) {
-                defData.attrs[attrName] = node.getTextAttr(defNode, currentFrame, attrName);
-                if (applyToResting) {
-                    var restingAttr = restingAttrNames[attrName];
-                    defData.attrs[restingAttr] = node.getTextAttr(defNode, currentFrame, restingAttr);
+        if (direction === 'left') {
+
+            swapDefData = (i === _deformers.length - 1) ? _deformers[1] : _deformers[i + 1];
+
+            if (i === _deformers.length - 2) {
+                if (swapDefData.attrs["offset.x"] !== undefined) {
+                    swapDefData.attrs["offset.x"] = _deformers[0].attrs["offset.x"];
+                    swapDefData.attrs["offset.y"] = _deformers[0].attrs["offset.y"];
                 }
-            });
-
-            return defData;
-
-        });
-
-        // MessageLog.trace("=> "+JSON.stringify(_deformers,true,'  '));
-        var swapDefNodeI;
-        _deformers.forEach(function(defNode, i) {
-            /*
-            var swapDefNodeI = direction === 'left' ? i+1 : i-1;
-            if( swapDefNodeI < 0 ) swapDefNodeI = _deformers.length-1;
-            if( swapDefNodeI > _deformers.length ) swapDefNodeI = 0;
-            */
-            if (direction === 'left') {
-
-                swapDefNodeI = i === _deformers.length - 1 ? 1 : i + 1;
-
-            } else {
-
-                swapDefNodeI = i <= 1 ? _deformers.length - 2 + i : i - 1;
-
+                if (swapDefData.attrs[restingAttrNames["offset.x"]] !== undefined) {
+                    swapDefData.attrs[restingAttrNames["offset.x"]] = _deformers[0].attrs[restingAttrNames["offset.x"]];
+                    swapDefData.attrs[restingAttrNames["offset.y"]] = _deformers[0].attrs[restingAttrNames["offset.y"]];
+                }
             }
-            // MessageLog.trace(i+') '+swapDefNodeI+') ');
-            var swapDefNode = _deformers[swapDefNodeI];
-            // MessageLog.trace(defNode.node+' > '+swapDefNode.node);
-            setAttrValues(defNode.node, swapDefNode.attrs, currentFrame);
-        });
 
+        } else {
+
+            swapDefData = i <= 1 ? _deformers[_deformers.length - 2 + i] : _deformers[i - 1];
+
+        }
+        // MessageLog.trace(defNode.node+' > '+swapDefNode.node);
+        setAttrValues(defNode.node, swapDefData.attrs, currentFrame);
     });
 
 }
@@ -438,64 +469,88 @@ TODO:
 - take into account the inheritance of parent transformations
 */
 
-function insertDeformerCurve() {
+function insertDeformerCurve(curvePos) {
 
+    var _deformers = getSelectedDeformers();
+    if (!_deformers.length) {
+        MessageLog.trace('The Script requires at least one selected deformer.');
+        return;
+    }
 
-    _exec('Insert a Control point to the Deformer', function() {
+    // MessageLog.trace( JSON.stringify(_deformers,true,'  '));
 
-        var _deformers = getSelectedDeformers();
-        if (!_deformers.length) {
-            MessageLog.trace('The Script requires at least one selected deformer.');
+    _deformers.forEach(function(deformerNode, i) {
+
+        if (isOffsetNode(deformerNode)) {
+            MessageLog.trace('Unable to insert a Curve point in the Offset Module.');
             return;
         }
 
-        // MessageLog.trace( JSON.stringify(_deformers,true,'  '));
+        var parentNode = getParentNode(deformerNode);
 
-        _deformers.forEach(function(deformerNode, i) {
+        var defData = [
+            _getDeformerPos(deformerNode, parentNode, MODE_RESTING),
+            _getDeformerPos(deformerNode, parentNode, MODE_CURRENT),
+        ];
 
-            if (isOffsetNode(deformerNode)) {
-                MessageLog.trace('Unable to insert a Curve point in the Offset Module.');
-                return;
-            }
+        var newDeformerData = defData[0].newDeformerData;
+        // MessageLog.trace('!!! '+JSON.stringify(newDeformerData,true,'  '));
 
-            var parentNode = getParentNode(deformerNode);
-            var parentPos = getDeformerPointPosition(parentNode, true, true);
-            var deformerPos = getDeformerPointPosition(deformerNode, true, true, parentPos[1]);
-            MessageLog.trace('insertDeformerCurve: ' + i + ':\ndeformerNode: ' + deformerNode + '\nparentNode: ' + parentNode);
-            MessageLog.trace(i + ') ' + JSON.stringify(deformerPos, true, '  ') + ' > ' + JSON.stringify(parentPos, true, '  '));
+        generateDeformersNodes(
+            node.parentNode(deformerNode),
+            node.coordX(deformerNode) + 15,
+            node.coordY(deformerNode) - (node.coordY(deformerNode) - node.coordY(parentNode) + node.height(deformerNode)) / 2, newDeformerData
+        );
 
-            var newDeformerPath = Drawing.geometry.insertPoints({
-                path: deformerPos,
-                params: [0.5]
-            });
-            MessageLog.trace('newDeformerPath: ' + JSON.stringify(newDeformerPath, true, '  '));
-            var newDeformerPoints = newDeformerPath.splice(0, 4);
-            var newDeformerData = pointsToDeformerCurves(
-                strokePointsToPoints(
-                    newDeformerPoints,
-                    undefined, false),
-                deformerNode, parentNode, true, true);
-
-            // MessageLog.trace('NEW PATH:' + JSON.stringify(newDeformerPath, true, '  ') + '\n---\n' + JSON.stringify(newDeformerData, true, '  '));
-
-            generateDeformersNodes(
-                node.parentNode(deformerNode),
-                node.coordX(deformerNode) + 15,
-                node.coordY(deformerNode) - (node.coordY(deformerNode) - node.coordY(parentNode) + node.height(deformerNode)) / 2, newDeformerData
-            );
-
-            // Update params of the old deformer
-            newDeformerPath.unshift(newDeformerPoints[newDeformerPoints.length - 1]);
-            var oldDeformerData = pointsToDeformerCurves(
-                strokePointsToPoints(
-                    newDeformerPath,
-                    undefined, false),
-                undefined, undefined, true, true);
-            setAttrValues(deformerNode, oldDeformerData[0].attrs, undefined, true);
-
+        // Update params of the old deformer
+        defData.forEach(function(_defData, i) {
+            // MessageLog.trace(i + ') ' + newDeformerData[0].node+' > '+JSON.stringify(_defData.oldDeformerData[0].attrs, true, '  '));
+            setAttrValues(deformerNode, _defData.oldDeformerData[0].attrs, _defData.frame, _defData.mode);
+            if (i !== 0) setAttrValues(newDeformerData[0].node, _defData.newDeformerData[0].attrs, _defData.frame, _defData.mode);
         });
 
     });
+
+
+    //
+    function _getDeformerPos(deformerNode, parentNode, mode, _frame) {
+
+        var restingData = mode === MODE_RESTING;
+        var parentPos = getDeformerPointPosition(parentNode, restingData, true);
+        var deformerPos = getDeformerPointPosition(deformerNode, restingData, true, parentPos[1]);
+        // MessageLog.trace('insertDeformerCurve: ' + i + ':\ndeformerNode: ' + deformerNode + '\nparentNode: ' + parentNode);
+        // MessageLog.trace(i + ') ' + JSON.stringify(deformerPos, true, '  ') + ' > ' + JSON.stringify(parentPos, true, '  '));
+        // MessageLog.trace('??? '+mode+' >> '+restingData);
+
+        var newDeformerPath = Drawing.geometry.insertPoints({
+            path: deformerPos,
+            params: [curvePos || 0.5]
+        });
+        // MessageLog.trace('newDeformerPath: ' + JSON.stringify(newDeformerPath, true, '  '));
+        var newDeformerPoints = newDeformerPath.splice(0, 4);
+        var newDeformerData = pointsToDeformerCurves(
+            strokePointsToPoints(
+                newDeformerPoints,
+                undefined, false),
+            deformerNode, parentNode, true, true);
+        // MessageLog.trace('NEW PATH:' + JSON.stringify(newDeformerPath, true, '  ') + '\n---\n' + JSON.stringify(newDeformerData, true, '  '));
+
+        newDeformerPath.unshift(newDeformerPoints[newDeformerPoints.length - 1]);
+        var oldDeformerData = pointsToDeformerCurves(
+            strokePointsToPoints(
+                newDeformerPath,
+                undefined, false),
+            undefined, undefined, true, true);
+
+        return {
+            mode: mode,
+            frame: _frame,
+            newDeformerPath: newDeformerPath,
+            newDeformerPoints: newDeformerPoints,
+            newDeformerData: newDeformerData,
+            oldDeformerData: oldDeformerData,
+        }
+    }
 
 }
 
@@ -517,68 +572,65 @@ function insertDeformerCurve() {
 //
 function removeDeformerCurve() {
 
+    var _deformers = getSelectedDeformers();
+    if (!_deformers.length) {
+        MessageLog.trace('The Script requires at least one selected deformer.');
+        return;
+    }
 
-    _exec('Remove Deformer Curve', function() {
+    _deformers.forEach(function(deformerNode, i) {
 
-        var _deformers = getSelectedDeformers();
-        if (!_deformers.length) {
-            MessageLog.trace('The Script requires at least one selected deformer.');
-            return;
-        }
+        if (isOffsetNode(deformerNode)) {
 
-        _deformers.forEach(function(deformerNode, i) {
+            var _nodes = getDeformersChain();
 
-            if (isOffsetNode(deformerNode)) {
+            if (!isChainClosed(_nodes)) {
 
-                var _nodes = getDeformersChain();
-
-                if (!isChainClosed(_nodes)) {
-
-                    node.deleteNode(deformerNode, true, true);
-                    return;
-                }
-
-                MessageLog.trace('Unable to remove the Offset Module in Deformation Chain.');
-
+                node.deleteNode(deformerNode, true, true);
                 return;
             }
 
-            var parentNode = getParentNode(deformerNode);
-            var parentPos = getDeformerPointPosition(parentNode, true, true);
-            var deformerPos = getDeformerPointPosition(deformerNode, true, true, parentPos[1]);
-            var nextNode = getNextNode(deformerNode);
-            var nextPos = getDeformerPointPosition(nextNode, true, true, deformerPos[3]);
-            // MessageLog.trace('removeDeformerCurve: ' + i + ':\ndeformerNode: ' + deformerNode + '\nnextNode: ' + nextNode);
+            MessageLog.trace('Unable to remove the Offset Module in Deformation Chain.');
 
-            nextPos.shift();
-            var solidCurvePath = deformerPos.concat(nextPos);
-            // MessageLog.trace('SOLID CURVE: ' + JSON.stringify(solidCurvePath, true, '  '));
+            return;
+        }
 
-            var path = Drawing.geometry.discretize({
-                precision: 30,
-                path: solidCurvePath
-            });
-            // MessageLog.trace('POINTS: ' + JSON.stringify(path, true, '  '));
+        var parentNode = getParentNode(deformerNode);
+        var parentPos = getDeformerPointPosition(parentNode, true, true);
+        var deformerPos = getDeformerPointPosition(deformerNode, true, true, parentPos[1]);
+        var nextNode = getNextNode(deformerNode);
+        var nextPos = getDeformerPointPosition(nextNode, true, true, deformerPos[3]);
+        // MessageLog.trace('removeDeformerCurve: ' + i + ':\ndeformerNode: ' + deformerNode + '\nnextNode: ' + nextNode);
 
-            var bezierPath = Drawing.geometry.fit({
-                oneBezier: true,
-                path: path
-            });
-            // MessageLog.trace('BEZIER: ' + JSON.stringify(bezierPath, true, '  '));
+        nextPos.shift();
+        var solidCurvePath = deformerPos.concat(nextPos);
+        // MessageLog.trace('SOLID CURVE: ' + JSON.stringify(solidCurvePath, true, '  '));
 
-            node.deleteNode(deformerNode, true, true);
-
-            // Update params of the next deformer
-            var deformerData = pointsToDeformerCurves(
-                strokePointsToPoints(
-                    bezierPath,
-                    undefined, false),
-                undefined, undefined, true, true);
-            setAttrValues(nextNode, deformerData[0].attrs, undefined, true);
-
-            // MessageLog.trace(i + ') ' + JSON.stringify(deformerPos, true, '  ') + ' > ' + JSON.stringify(parentPos, true, '  '));
+        var path = Drawing.geometry.discretize({
+            precision: 30,
+            path: solidCurvePath
         });
-    })
+        // MessageLog.trace('POINTS: ' + JSON.stringify(path, true, '  '));
+
+        var bezierPath = Drawing.geometry.fit({
+            oneBezier: true,
+            path: path
+        });
+        // MessageLog.trace('BEZIER: ' + JSON.stringify(bezierPath, true, '  '));
+
+        // Update params of the next deformer
+        var deformerData = pointsToDeformerCurves(
+            strokePointsToPoints(
+                bezierPath,
+                undefined, false),
+            undefined, undefined, true, true);
+        setAttrValues(nextNode, deformerData[0].attrs, undefined, MODE_RESTING);
+
+        node.deleteNode(deformerNode, true, true);
+
+        // MessageLog.trace(i + ') ' + JSON.stringify(deformerPos, true, '  ') + ' > ' + JSON.stringify(parentPos, true, '  '));
+    });
+
 }
 
 
@@ -595,38 +647,149 @@ function removeDeformerCurve() {
 ╚═╝     ╚══════╝╚═╝╚═╝          ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝
 */
 
-function reverseChain(applyToResting) {
+function reverseChain(applyMode) {
 
-    _exec('Reverse Deformer Chain', function() {
+    // MessageLog.clearLog();
 
-        MessageLog.clearLog();
+    var _nodes = getDeformersChain();
+    if (!_nodes.length) {
+        MessageLog.trace('The Script requires at least one selected deformer.');
+        return;
+    }
 
-        var _nodes = getDeformersChain();
-        if (!_nodes.length) {
-            MessageLog.trace('The Script requires at least one selected deformer.');
-            return;
-        }
+    var _isChainClosed = isChainClosed(_nodes);
+    var chainStrokes = getStrokesFromChain(_nodes);
+    var strokes;
+    MessageLog.trace(JSON.stringify(strokes, true, '  '));
 
-        var _isChainClosed = isChainClosed(_nodes);
-        var strokes = getStrokesFromChain(_nodes);
-        // MessageLog.trace(JSON.stringify(strokes, true, '  '));
+    // strokePoints, destNode, srcNode, dontClosePath, skipOffsetModule
+    if (applyMode === MODE_BOTH || applyMode === MODE_RESTING) {
 
-        // strokePoints, destNode, srcNode, dontClosePath, skipOffsetModule
         strokes = pointsToDeformerCurves(
-            strokePointsToPoints(applyToResting ? strokes.strokesResting : strokes.strokes, undefined, true),
+            strokePointsToPoints(chainStrokes.strokesResting, undefined, true),
             undefined, undefined, _isChainClosed, false);
 
         strokes.forEach(function(defData, defI) {
-            setAttrValues(_nodes[defI], defData.attrs, undefined, applyToResting);
+            setAttrValues(_nodes[defI], defData.attrs, undefined, applyMode);
         });
 
-    });
+    }
+
+    if (applyMode === MODE_BOTH || applyMode === MODE_CURRENT) {
+
+        strokes = pointsToDeformerCurves(
+            strokePointsToPoints(chainStrokes.strokes, undefined, true),
+            undefined, undefined, _isChainClosed, false);
+
+        strokes.forEach(function(defData, defI) {
+            setAttrValues(_nodes[defI], defData.attrs, undefined, applyMode);
+        });
+
+    }
 
 }
 
 
 
+/*
+███╗   ███╗██╗██████╗ ██████╗  ██████╗ ██████╗      ██████╗██╗  ██╗ █████╗ ██╗███╗   ██╗
+████╗ ████║██║██╔══██╗██╔══██╗██╔═══██╗██╔══██╗    ██╔════╝██║  ██║██╔══██╗██║████╗  ██║
+██╔████╔██║██║██████╔╝██████╔╝██║   ██║██████╔╝    ██║     ███████║███████║██║██╔██╗ ██║
+██║╚██╔╝██║██║██╔══██╗██╔══██╗██║   ██║██╔══██╗    ██║     ██╔══██║██╔══██║██║██║╚██╗██║
+██║ ╚═╝ ██║██║██║  ██║██║  ██║╚██████╔╝██║  ██║    ╚██████╗██║  ██║██║  ██║██║██║ ╚████║
+╚═╝     ╚═╝╚═╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝     ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝
+*/
 
+//
+function mirrorChain(applyMode, axis, relativeTo, _nodes) {
+
+    // MessageLog.trace('mirrorChain: ' + applyMode + ', ' + axis + ', ' + relativeTo);
+    // MessageLog.clearLog();
+
+    _nodes = getDeformersChain(_nodes);
+    // MessageLog.trace('mirrorChain'+JSON.stringify(_nodes,true,'  '));
+    if (!_nodes || !_nodes.length) {
+        MessageLog.trace('The Script requires at least one selected deformer.');
+        return;
+    }
+
+    var _isChainClosed = isChainClosed(_nodes);
+    var chainStrokes = getStrokesFromChain(_nodes);
+    // MessageLog.trace('###'+JSON.stringify(strokes,true,'  '));
+    // MessageLog.trace('mirrorChain: ' + relativeTo+'\n'+JSON.stringify(chainStrokes, true, '  '));
+
+    // Get Center point
+    var center = { x: 0, y: 0 }; // Default: RELATIVE_TO_ZERO
+
+    switch (relativeTo) {
+
+        case RELATIVE_TO_PEG:
+            var offsetModule = _nodes[0];
+            var parentPeg = getParentPeg(_nodes);
+            // if (!parentPeg) return 'a parent peg not found.'
+            center.x = node.getAttr(parentPeg, 1, 'pivot.x').doubleValue();
+            center.y = node.getAttr(parentPeg, 1, 'pivot.y').doubleValue();
+            break;
+
+        case RELATIVE_TO_SELECTED:
+            var selectedDeformer = getSelectedDeformers()[0];
+            center.x = node.getAttr(selectedDeformer, 1, 'offset.x').doubleValue();
+            center.y = node.getAttr(selectedDeformer, 1, 'offset.y').doubleValue();
+            // MessageLog.trace('selectedDeformer: ' + selectedDeformer+' X:'+center.x+' Y:'+center.y);
+            break;
+
+    }
+
+    //
+    var strokes;
+
+    if (applyMode === MODE_BOTH || applyMode === MODE_RESTING) { // RESTING
+
+        chainStrokes.strokesResting.forEach(function(pointData, i) {
+            if (axis === HORIZONTAL || axis === undefined) pointData.x = center.x - (pointData.x - center.x);
+            if (axis === VERTICAL) pointData.y = center.y - (pointData.y - center.y);
+        });
+
+        strokes = pointsToDeformerCurves(
+            strokePointsToPoints(chainStrokes.strokesResting, undefined, true),
+            undefined, undefined, _isChainClosed, false);
+
+        strokes.forEach(function(defData, defI) {
+            setAttrValues(_nodes[defI], defData.attrs, undefined, applyMode);
+        });
+
+    }
+
+    if (applyMode === MODE_BOTH || applyMode === MODE_CURRENT) { // CURRENT
+
+        chainStrokes.strokes.forEach(function(pointData, i) {
+            if (axis === HORIZONTAL || axis === undefined) pointData.x = center.x - (pointData.x - center.x);
+            if (axis === VERTICAL) pointData.y = center.y - (pointData.y - center.y);
+        });
+
+        strokes = pointsToDeformerCurves(
+            strokePointsToPoints(chainStrokes.strokes, undefined, true),
+            undefined, undefined, _isChainClosed, false);
+        // MessageLog.trace('@@@' + JSON.stringify(strokes, true, '  '));
+
+        strokes.forEach(function(defData, defI) {
+            setAttrValues(_nodes[defI], defData.attrs, undefined, applyMode);
+        });
+
+    }
+
+}
+
+
+function getParentPeg(_deformers) {
+
+    if (!_deformers) return;
+    if (Array.isArray(_deformers) && _deformers.length === 1) _deformers = getDeformersChain(_deformers[0]);
+    if (typeof _deformers === 'string') _deformers = getDeformersChain(_deformers);
+    if (!_deformers || !_deformers.length) return;
+
+    return Utils.findParentPeg(_deformers[0]);
+}
 
 
 /*
@@ -652,9 +815,9 @@ function _copyPointsValues(points1, indecies1, points2, indecies2, signX, signY)
 
 
 ///
-function symmetrizeCurves(direction, applyToResting) {
+function symmetrizeCurves(direction, applyMode) {
 
-    _exec('Remove Deformer Curve', function() {
+    // _exec('Remove Deformer Curve', function() {
 
         MessageLog.clearLog();
 
@@ -711,16 +874,16 @@ function symmetrizeCurves(direction, applyToResting) {
 
         MessageLog.trace('_deformers' + JSON.stringify(_deformers, true, '  '));
 
-    });
+    // });
 
 }
 
 
 
 ///
-function symmetrizeChain(direction, applyToResting) {
+function symmetrizeChain(direction, applyMode) {
 
-    _exec('Remove Deformer Curve', function() {
+    // _exec('Remove Deformer Curve', function() {
 
         MessageLog.clearLog();
 
@@ -851,7 +1014,7 @@ function symmetrizeChain(direction, applyToResting) {
             setAttrValues(_nodes[i].node, _deformerData.attrs, undefined, false);
         });
 
-    });
+    // });
 
 }
 
@@ -878,33 +1041,15 @@ function symmetrizeChain(direction, applyToResting) {
 // UTILS
 
 //
-function _exec(_name, _action) {
-
-    // MessageLog.trace('>>> '+_name);
-
-    scene.beginUndoRedoAccum(_name);
-
-    try {
-
-        _action();
-
-    } catch (err) {
-        MessageLog.trace('Error: ' + _name + ': ' + err);
-    }
-
-    scene.endUndoRedoAccum();
-
-}
-
-
-
-//
 function isChainClosed(_nodes) {
     if (!_nodes) return null;
     return node.getTextAttr(_nodes[_nodes.length - 1], frame.current(), 'closePath') === 'Y';
 }
 
-
+//
+function isClosedDefNode(_node) {
+    return node.getTextAttr(_node, 1, 'closePath') === 'Y';
+}
 
 //
 function getSelectedDeformers() {
@@ -933,8 +1078,32 @@ function getParentNode(_node) {
     return node.srcNode(_node, 0);
 }
 
+function getParentDefNode(_node, deformerChain) {
+
+    if (isOffsetNode(_node) && deformerChain) {
+        var lastNode = deformerChain[deformerChain.length - 1];
+        return node.getTextAttr(lastNode, 1, 'closePath') === 'Y' ? lastNode : null;
+    }
+
+    var parentNode = getParentNode(_node);
+    return isDefNode(parentNode) ? parentNode : null;
+
+}
+
 function getNextNode(_node) {
     return node.dstNode(_node, 0, 0);
+}
+
+function getNextDefNode(_node, deformerChain) {
+
+    var nextNode = getNextNode(_node);
+
+    if (!isDefNode(nextNode) && deformerChain) {
+        return node.getTextAttr(_node, 1, 'closePath') === 'Y' ? deformerChain[0] : null;
+    }
+
+    return isDefNode(nextNode) ? nextNode : null;
+
 }
 
 //
@@ -988,6 +1157,14 @@ function getCurveNodes(_node, curveList, _frame) {
 
 
 //
+function fixOrientation(orientation) {
+    orientation %= 360;
+    if (orientation > 180) orientation -= 360;
+    else if (orientation < -180) orientation += 360;
+    return orientation;
+}
+
+//
 function getCurveData(_node, _frame) {
 
     var data = {
@@ -1031,7 +1208,7 @@ function getControlData(x0, y0, controls, i, x1, y1) {
     var dy = y1 - y0;
     return {
         length: Math.sqrt(dx * dx + dy * dy) * lengthCoef,
-        orientation: Math.atan2(dy, dx) / Math.PI * 180 + (i === 1 ? 180 : 0),
+        orientation: fixOrientation(Math.atan2(dy, dx) / Math.PI * 180 + (i === 1 ? 180 : 0)),
     };
 
 }
@@ -1078,9 +1255,9 @@ function pointsToDeformerCurves(strokePoints, destNode, srcNode, dontClosePath, 
                 localReferential: false,
                 "offset.x": pointData.x1,
                 "offset.y": pointData.y1,
-                Length0: control0.length,
+                length0: control0.length,
                 orientation0: control0.orientation,
-                Length1: control1.length,
+                length1: control1.length,
                 orientation1: control1.orientation,
             }
         };
@@ -1094,7 +1271,7 @@ function pointsToDeformerCurves(strokePoints, destNode, srcNode, dontClosePath, 
             _pointData.dest = destNode;
 
             if (pointData.x1 === strokePoints[0].x0 && pointData.y1 === strokePoints[0].y0) {
-                _pointData.attrs.closePath = dontClosePath;
+                _pointData.attrs.closePath = dontClosePath || true;
             }
         }
 
@@ -1133,31 +1310,66 @@ function getChildNodes(_node) {
 
 
 //
-function getAttrValue(_node, attrName) {
+function getAttrValue(_node, attrName, _frame) {
 
-    var attr = node.getAttr(_node, currentFrame, attrName);
+    if (_frame === undefined) _frame = frame.current();
+
+    var attr = node.getAttr(_node, _frame, attrName);
     if (!attr) return null;
 
-    var currentFrame = frame.current();
-    var val = attr.doubleValueAt(currentFrame);
+    var val;
+
     var columnName = node.linkedColumn(_node, attrName);
-    if (columnName) {
-        val = Number(column.getEntry(columnName, 0, currentFrame));
+    if (columnName && func.numberOfPoints(columnName)) {
+        val = Number(column.getEntry(columnName, 0, _frame));
+    } else {
+        val = attr.doubleValueAt(_frame);
     }
+
     // MessageLog.trace(_node + ' > ' + attrName + ' > ' + val + ' > ' + typeof val);
     return val;
+
 }
 
+
 //
-function getDeformerPointPosition(_node, resting, asStroke, parentPoint) {
+function getDeformerAttrs(defNode, applyMode, _frame) {
+
+    if (_frame === undefined) _frame = frame.current();
+
+    var defData = {
+        node: defNode,
+        attrs: {}
+    };
+
+    Object.keys(restingAttrNames).forEach(function(attrName) {
+
+        // if (applyMode === MODE_CURRENT || applyMode === MODE_BOTH) defData.attrs[attrName] = node.getTextAttr(defNode, _frame, attrName);
+        if (applyMode === MODE_CURRENT || applyMode === MODE_BOTH) defData.attrs[attrName] = getAttrValue(defNode, attrName, _frame);
+
+        if (applyMode === MODE_RESTING || applyMode === MODE_BOTH) {
+            var restingAttr = restingAttrNames[attrName];
+            // defData.attrs[restingAttr] = node.getTextAttr(defNode, _frame, restingAttr);
+            defData.attrs[restingAttr] = getAttrValue(defNode, restingAttr, _frame);
+        }
+
+    });
+
+    return defData;
+
+}
+
+
+//
+function getDeformerPointPosition(_node, resting, asStroke, parentPoint, _frame, positionFix) {
 
     var point = {
-        x: getAttrValue(_node, resting ? restingAttrNames['offset.x'] : 'offset.x'),
-        y: getAttrValue(_node, resting ? restingAttrNames['offset.y'] : 'offset.y'),
-        length0: getAttrValue(_node, resting ? restingAttrNames['Length0'] : 'Length0'),
-        orientation0: getAttrValue(_node, resting ? restingAttrNames['orientation0'] : 'orientation0'),
-        length1: getAttrValue(_node, resting ? restingAttrNames['Length1'] : 'Length1'),
-        orientation1: getAttrValue(_node, resting ? restingAttrNames['orientation1'] : 'orientation1')
+        x: positionFix ? positionFix.x : getAttrValue(_node, resting ? restingAttrNames['offset.x'] : 'offset.x', _frame),
+        y: positionFix ? positionFix.y : getAttrValue(_node, resting ? restingAttrNames['offset.y'] : 'offset.y', _frame),
+        length0: getAttrValue(_node, resting ? restingAttrNames['length0'] : 'length0', _frame),
+        orientation0: getAttrValue(_node, resting ? restingAttrNames['orientation0'] : 'orientation0', _frame),
+        length1: getAttrValue(_node, resting ? restingAttrNames['length1'] : 'length1', _frame),
+        orientation1: getAttrValue(_node, resting ? restingAttrNames['orientation1'] : 'orientation1', _frame)
     };
 
     // MessageLog.trace('getDeformerPointPosition: ' + JSON.stringify(point, true, '  '));
@@ -1195,46 +1407,65 @@ function getDeformerPointPosition(_node, resting, asStroke, parentPoint) {
 
 
 //
-function applyAttrValue(_nodes, attrName, value) {
-
-    var currentFrame = frame.current();
-    if (typeof _nodes === 'string') _nodes = [_nodes];
-
-    _nodes.forEach(function(_node) {
-
-        var attr = node.getAttr(_node, currentFrame, attrName);
-        if (!attr) return;
-        // MessageLog.trace('=>'+ _node+', '+attrName+', '+value );
-        var columnName = node.linkedColumn(_node, attrName);
-        if (columnName) {
-            val = column.setEntry(columnName, 0, currentFrame, value);
-        } else attr.setValueAt(value, currentFrame);
-
-    });
-}
-
-var validDeformerAttrNames = {
-    x: 'offset.x',
-    y: 'offset.y',
-}
-
 function getValidDeformerAttrName(attrName) {
     return validDeformerAttrNames[attrName] || attrName;
 }
 
+
 //
-function setAttrValues(_node, attrs, _frame, applyToResting) {
+function _setAttrValue(_node, attrName, value, _frame) {
     if (_frame === undefined) _frame = frame.current();
-    Object.keys(attrs).forEach(function(attrName) {
-        attrName = getValidDeformerAttrName(attrName);
-        node.setTextAttr(_node, attrName, _frame, attrs[attrName]);
-        // MessageLog.trace( '-> '+_node+' >> '+attrName+' >> '+_frame+' >> '+attrs[attrName] );
-        if (applyToResting) {
+    var attr = node.getAttr(_node, _frame, attrName);
+    if (!attr) return;
+    // MessageLog.trace('=>'+ _node+', '+attrName+', '+value );
+    var columnName = node.linkedColumn(_node, attrName);
+    if (columnName) {
+        val = column.setEntry(columnName, 0, _frame, value);
+    } else attr.setValueAt(value, _frame);
+}
+
+
+//
+function setAttrValues(_nodes, attrs, _frame, applyMode, value) {
+
+    // MessageLog.trace('setAttrValues:\n' + JSON.stringify(_nodes, true, '  ') +'\n'+JSON.stringify(attrs, true, '  ') + '\n -> ' + _frame + ', ' + applyMode + ', ' + value);
+    if (!applyMode) applyMode = MODE_CURRENT;
+    if (_frame === undefined) _frame = frame.current();
+    if (typeof _nodes === 'string') _nodes = [_nodes];
+
+    _nodes.forEach(function(_node) {
+
+        if (typeof attrs === 'string') {
+            _set(_node, attrs, value);
+            return;
+        }
+
+        Object.keys(attrs).forEach(function(attrName) {
+
+            // MessageLog.trace('+> ' + _node + ' >> ' + attrName+' => '+attrs[attrName]);
+            attrName = getValidDeformerAttrName(attrName);
+            _set(_node, attrName, attrs[attrName]);
+
+        });
+
+    });
+
+    function _set(_node, attrName, _value) {
+
+        if (applyMode === MODE_BOTH || applyMode === MODE_CURRENT)
+            // node.setTextAttr(_node, attrName, _frame, _value);
+            _setAttrValue(_node, attrName, _value, _frame);
+
+        // MessageLog.trace( '-> '+_node+' >> '+attrName+' >> '+_frame+' >> '+_value );
+        if (applyMode === MODE_BOTH || applyMode === MODE_RESTING) {
             var restingAttrName = restingAttrNames[attrName];
             if (restingAttrName)
-                node.setTextAttr(_node, restingAttrName, _frame, attrs[attrName]);
+                // node.setTextAttr(_node, restingAttrName, _frame, _value);
+                _setAttrValue(_node, restingAttrName, _value, _frame);
         }
-    });
+
+    }
+
 }
 
 
@@ -1276,6 +1507,8 @@ function getCenter(_nodes, side, attrName) {
 
 //
 function getDeformersChain(_nodes, withPoints) {
+
+    // MessageLog.trace('getDeformersChain: ' + _nodes);
 
     if (!_nodes) _nodes = getSelectedDeformers();
     if (typeof _nodes === 'string') _nodes = [_nodes];
@@ -1328,20 +1561,39 @@ function getDeformersChain(_nodes, withPoints) {
 }
 
 function getPointsOfDeformerChain(_nodes) {
+
     if (!_nodes || !_nodes.length) return;
+
+    var _isChainClosed = isChainClosed(_nodes);
     var prevNodeData;
-    return _nodes.map(function(_node, i) {
+    var __nodes = [];
+
+    _nodes.forEach(function(_node, i) {
+
         var parentPointIndex = i < 2 ? 1 : 3;
+        // MessageLog.trace('%% ' + i + ' > ' + parentPointIndex);
+
         var nodeData = {
             node: _node,
             isOffset: isOffsetNode(_node),
             index: i,
-            points: getDeformerPointPosition(_node, false, true, prevNodeData ? prevNodeData.points[parentPointIndex] : undefined),
-            pointsResting: getDeformerPointPosition(_node, true, true, prevNodeData ? prevNodeData.pointsResting[parentPointIndex] : undefined)
+            points: getDeformerPointPosition(_node, false, true,
+                prevNodeData ? prevNodeData.points[parentPointIndex] : undefined,
+                undefined,
+                _isChainClosed && i === _nodes.length - 1 ? __nodes[0].points[0] : undefined
+            ),
+            pointsResting: getDeformerPointPosition(_node, true, true,
+                prevNodeData ? prevNodeData.pointsResting[parentPointIndex] : undefined,
+                undefined,
+                _isChainClosed && i === _nodes.length - 1 ? __nodes[0].pointsResting[0] : undefined
+            )
         }
         prevNodeData = nodeData;
-        return nodeData;
+        __nodes[i] = nodeData;
     });
+
+    // MessageLog.trace('!@!@! ' + JSON.stringify(_nodes, true, '  '));
+    return __nodes;
 }
 
 //
@@ -1404,7 +1656,7 @@ function generateDeformersNodes(parentNode, nodeViewX, nodeViewY, deformers) {
             deformerData.dest
         );
 
-        setAttrValues(deformerData.node, deformerData.attrs, currentFrame, true);
+        setAttrValues(deformerData.node, deformerData.attrs, currentFrame, MODE_BOTH);
         /*Object.keys(deformerData.attrs).forEach(function(attrName) {
             node.setTextAttr(deformerData.node, attrName, currentFrame, deformerData.attrs[attrName]);
             var restingAttrName = restingAttrNames[attrName];

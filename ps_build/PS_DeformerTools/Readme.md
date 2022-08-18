@@ -1,5 +1,5 @@
 ## PS_SelectionSets
-v0.220809
+v0.220818
 
 ### Description
 A set of tools for working with deformers.
