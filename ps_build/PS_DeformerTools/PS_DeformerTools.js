@@ -2,7 +2,7 @@
 Author: Dima Potekhin (skinion.onn@gmail.com)
 
 [Name: PS_SelectionSets :]
-[Version: 0.220817 :]
+[Version: 0.220818 :]
 
 [Description:
 A set of tools for working with deformers.
@@ -25,7 +25,7 @@ function PS_DeformerTools() {
 
     //
     var scriptName = 'Deformer Tools';
-    var scriptVer = '0.220817';
+    var scriptVer = '0.220818';
     //
 
     // var SETTINGS_NAME = 'PS_DEFORMER_TOOLS_SETTINGS';
@@ -52,6 +52,24 @@ function PS_DeformerTools() {
 
     var ENTIRE_CHAIN_MOD_TOOLTIP_TEXT = '\n- Hold down the Alt key to use entire chain of deformation.';
 
+    //
+    function _exec(_name, _action) {
+
+        MessageLog.trace('>>> ' + _name);
+
+        scene.beginUndoRedoAccum(_name);
+
+        try {
+
+            _action();
+
+        } catch (err) {
+            MessageLog.trace('Error: ' + _name + ': ' + err);
+        }
+
+        scene.endUndoRedoAccum();
+
+    }
 
     // APPLY MODE
     function getApplyMode() {
@@ -169,7 +187,7 @@ function PS_DeformerTools() {
     modal.addButton('', alignGroup, btnHeight, btnHeight,
         iconPath + 'align-left.png',
         function() {
-            DeformerUtils.alignVertically(-1, getApplyMode());
+            _exec('Align Deformer Points Vertically', function() { DeformerUtils.alignVertically(-1, getApplyMode()); });
         },
         'Align points to the left.'
     );
@@ -177,7 +195,7 @@ function PS_DeformerTools() {
     modal.addButton('', alignGroup, btnHeight, btnHeight,
         iconPath + 'align-h-center.png',
         function() {
-            DeformerUtils.alignVertically(0, getApplyMode());
+            _exec('Align Deformer Points Vertically', function() { DeformerUtils.alignVertically(0, getApplyMode()); });
         },
         'Align points to the horizontal center.'
     );
@@ -185,7 +203,7 @@ function PS_DeformerTools() {
     modal.addButton('', alignGroup, btnHeight, btnHeight,
         iconPath + 'align-right.png',
         function() {
-            DeformerUtils.alignVertically(1, getApplyMode());
+            _exec('Align Deformer Points Vertically', function() { DeformerUtils.alignVertically(1, getApplyMode()); });
         },
         'Align points to the right.'
     );
@@ -197,7 +215,7 @@ function PS_DeformerTools() {
     modal.addButton('', alignGroup, btnHeight, btnHeight,
         iconPath + 'align-top.png',
         function() {
-            DeformerUtils.alignHorizontally(1, getApplyMode());
+            _exec('Align Deformer Points Horizontally', function() { DeformerUtils.alignHorizontally(1, getApplyMode()); });
         },
         'Align points to the top.'
     );
@@ -205,7 +223,7 @@ function PS_DeformerTools() {
     modal.addButton('', alignGroup, btnHeight, btnHeight,
         iconPath + 'align-v-center.png',
         function() {
-            DeformerUtils.alignHorizontally(0, getApplyMode());
+            _exec('Align Deformer Points Horizontally', function() { DeformerUtils.alignHorizontally(0, getApplyMode()); });
         },
         'Align points to the center.'
     );
@@ -213,7 +231,7 @@ function PS_DeformerTools() {
     modal.addButton('', alignGroup, btnHeight, btnHeight,
         iconPath + 'align-bottom.png',
         function() {
-            DeformerUtils.alignHorizontally(-1, getApplyMode());
+            _exec('Align Deformer Points Horizontally', function() { DeformerUtils.alignHorizontally(-1, getApplyMode()); });
         },
         'Align points to the bottom.'
     );
@@ -224,10 +242,12 @@ function PS_DeformerTools() {
     modal.addButton('', alignGroup, btnHeight, btnHeight,
         iconPath + 'x0.png',
         function() {
-            var _node = selection.selectedNode(0);
-            // if (!DeformerUtils.isDefNode(_node)) return;
-            DeformerUtils.setAttrValues(_node, 'offset.x', undefined, getApplyMode(), 0);
-            DeformerUtils.setAttrValues(_node, 'position.x', undefined, DeformerUtils.MODE_CURRENT, 0);
+            _exec('Set X to 0', function() {
+                var _node = selection.selectedNode(0);
+                // if (!DeformerUtils.isDefNode(_node)) return;
+                DeformerUtils.setAttrValues(_node, 'offset.x', undefined, getApplyMode(), 0);
+                DeformerUtils.setAttrValues(_node, 'position.x', undefined, DeformerUtils.MODE_CURRENT, 0);
+            });
         },
         'Set X to 0.'
     );
@@ -235,10 +255,12 @@ function PS_DeformerTools() {
     modal.addButton('', alignGroup, btnHeight, btnHeight,
         iconPath + 'y0.png',
         function() {
-            var _node = selection.selectedNode(0);
-            // if (!DeformerUtils.isDefNode(_node)) return;
-            DeformerUtils.setAttrValues(_node, 'offset.y', undefined, getApplyMode(), 0);
-            DeformerUtils.setAttrValues(_node, 'position.y', undefined, DeformerUtils.MODE_CURRENT, 0);
+            _exec('Set Y to 0', function() {
+                var _node = selection.selectedNode(0);
+                // if (!DeformerUtils.isDefNode(_node)) return;
+                DeformerUtils.setAttrValues(_node, 'offset.y', undefined, getApplyMode(), 0);
+                DeformerUtils.setAttrValues(_node, 'position.y', undefined, DeformerUtils.MODE_CURRENT, 0);
+            });
         },
         'Set Y to 0.'
     );
@@ -264,7 +286,7 @@ function PS_DeformerTools() {
     modal.addButton('', cpGroup1, btnHeight, btnHeight,
         iconPath + 'orient-points.png',
         function() {
-            DeformerUtils.orientControlPoints(undefined, getApplyMode(), KeyModifiers.IsAlternatePressed());
+            _exec('Orient Control Points', function() { DeformerUtils.orientControlPoints(undefined, getApplyMode(), KeyModifiers.IsAlternatePressed()); });
         },
         'Orient control points to oposite point of the selected curve.' +
         ENTIRE_CHAIN_MOD_TOOLTIP_TEXT
@@ -273,7 +295,7 @@ function PS_DeformerTools() {
     modal.addButton('', cpGroup1, btnHeight, btnHeight,
         iconPath + 'orient-points-1.png',
         function() {
-            DeformerUtils.orientControlPoints(undefined, getApplyMode(), KeyModifiers.IsAlternatePressed(), 1);
+            _exec('Orient Control Points', function() { DeformerUtils.orientControlPoints(undefined, getApplyMode(), KeyModifiers.IsAlternatePressed(), 1); });
         },
         'Orient the first control point to the oposite point.' +
         ENTIRE_CHAIN_MOD_TOOLTIP_TEXT
@@ -282,7 +304,7 @@ function PS_DeformerTools() {
     modal.addButton('', cpGroup1, btnHeight, btnHeight,
         iconPath + 'orient-points-2.png',
         function() {
-            DeformerUtils.orientControlPoints(undefined, getApplyMode(), KeyModifiers.IsAlternatePressed(), 2);
+            _exec('Orient Control Points', function() { DeformerUtils.orientControlPoints(undefined, getApplyMode(), KeyModifiers.IsAlternatePressed(), 2); });
         },
         'Orient the second control point to the oposite point.' +
         ENTIRE_CHAIN_MOD_TOOLTIP_TEXT
@@ -297,7 +319,9 @@ function PS_DeformerTools() {
     modal.addButton('', cpGroup1, btnHeight, btnHeight,
         iconPath + 'move-around-left.png',
         function() {
-            DeformerUtils.moveDeformersAround('left', getApplyMode());
+            _exec('Move Deformers Around', function() {
+                DeformerUtils.moveDeformersAround('left', getApplyMode());
+            });
         },
         'Move deformers around to the left'
     );
@@ -305,7 +329,9 @@ function PS_DeformerTools() {
     modal.addButton('', cpGroup1, btnHeight, btnHeight,
         iconPath + 'move-around-right.png',
         function() {
-            DeformerUtils.moveDeformersAround('right', getApplyMode());
+            _exec('Move Deformers Around', function() {
+                DeformerUtils.moveDeformersAround('right', getApplyMode());
+            });
         },
         'Move deformers around to the right'
     );
@@ -313,7 +339,9 @@ function PS_DeformerTools() {
     modal.addButton('', cpGroup1, btnHeight, btnHeight,
         iconPath + 'reverse-chain.png',
         function() {
-            DeformerUtils.reverseChain(getApplyMode());
+            _exec('Reverse Deformer Chain', function() {
+                DeformerUtils.reverseChain(getApplyMode());
+            });
         },
         'Reverse direction of the selected deformer chain.'
     );
@@ -329,7 +357,7 @@ function PS_DeformerTools() {
     modal.addButton('', cpGroup2, btnHeight, btnHeight,
         iconPath + 'points-on-thirds.png',
         function() {
-            DeformerUtils.distributeControlPoints(undefined, getApplyMode(), KeyModifiers.IsAlternatePressed());
+            _exec('Distribute Control Points', function() { DeformerUtils.distributeControlPoints(undefined, getApplyMode(), KeyModifiers.IsAlternatePressed()); });
         },
         'Distribute control points by thirds.' +
         ENTIRE_CHAIN_MOD_TOOLTIP_TEXT
@@ -339,7 +367,7 @@ function PS_DeformerTools() {
     modal.addButton('', cpGroup2, btnHeight, btnHeight,
         iconPath + 'points-on-thirds-1.png',
         function() {
-            DeformerUtils.distributeControlPoints(undefined, getApplyMode(), KeyModifiers.IsAlternatePressed(), 1);
+            _exec('Distribute Control Points', function() { DeformerUtils.distributeControlPoints(undefined, getApplyMode(), KeyModifiers.IsAlternatePressed(), 1); });
         },
         'Set the length of the first control point to a third.' +
         ENTIRE_CHAIN_MOD_TOOLTIP_TEXT
@@ -349,7 +377,7 @@ function PS_DeformerTools() {
     modal.addButton('', cpGroup2, btnHeight, btnHeight,
         iconPath + 'points-on-thirds-2.png',
         function() {
-            DeformerUtils.distributeControlPoints(undefined, getApplyMode(), KeyModifiers.IsAlternatePressed(), 2);
+            _exec('Distribute Control Points', function() { DeformerUtils.distributeControlPoints(undefined, getApplyMode(), KeyModifiers.IsAlternatePressed(), 2); });
         },
         'Set the length of the second control point to a third.' +
         ENTIRE_CHAIN_MOD_TOOLTIP_TEXT
@@ -365,7 +393,9 @@ function PS_DeformerTools() {
     modal.addButton('', cpGroup2, btnHeight, btnHeight,
         iconPath + 'remove-cp.png',
         function() {
-            DeformerUtils.removeDeformerCurve();
+            _exec('Remove Deformer Curve', function() {
+                DeformerUtils.removeDeformerCurve();
+            });
         },
         'Remove the selected Curve from the Deformer Chain'
     );
@@ -385,9 +415,11 @@ function PS_DeformerTools() {
     modal.addButton('', cpGroup2, btnHeight, btnHeight,
         iconPath + 'insert-cp.png',
         function() {
-            insertDeformerCurvePosition = Math.min(95, Math.max(5, insertDeformerCurvePosition));
-            insertDeformerCurvePositionInput.text2 = insertDeformerCurvePosition;
-            DeformerUtils.insertDeformerCurve(insertDeformerCurvePosition / 100);
+            _exec('Insert a Control point to the Deformer', function() {
+                insertDeformerCurvePosition = Math.min(95, Math.max(5, insertDeformerCurvePosition));
+                insertDeformerCurvePositionInput.text2 = insertDeformerCurvePosition;
+                DeformerUtils.insertDeformerCurve(insertDeformerCurvePosition / 100);
+            });
         },
         'Insert a Curve into the Deformer Chain'
     );
@@ -404,7 +436,7 @@ function PS_DeformerTools() {
     modal.addButton('', cpGroup3, btnHeight, btnHeight,
         iconPath + 'orient-to-next.png',
         function() {
-            DeformerUtils.orientControlPointsToNext(undefined, getApplyMode(), KeyModifiers.IsAlternatePressed());
+            _exec('Orient Control Points', function() { DeformerUtils.orientControlPointsToNext(undefined, getApplyMode(), KeyModifiers.IsAlternatePressed()); });
         },
         'Orient control points to adjacent deformers.' +
         ENTIRE_CHAIN_MOD_TOOLTIP_TEXT
@@ -414,7 +446,7 @@ function PS_DeformerTools() {
     modal.addButton('', cpGroup3, btnHeight, btnHeight,
         iconPath + 'orient-to-next-1.png',
         function() {
-            DeformerUtils.orientControlPointsToNext(undefined, getApplyMode(), KeyModifiers.IsAlternatePressed(), 1);
+            _exec('Orient Control Points', function() { DeformerUtils.orientControlPointsToNext(undefined, getApplyMode(), KeyModifiers.IsAlternatePressed(), 1); });
         },
         'Orient the first control point to the adjacent deformer.' +
         ENTIRE_CHAIN_MOD_TOOLTIP_TEXT
@@ -424,7 +456,7 @@ function PS_DeformerTools() {
     modal.addButton('', cpGroup3, btnHeight, btnHeight,
         iconPath + 'orient-to-next-2.png',
         function() {
-            DeformerUtils.orientControlPointsToNext(undefined, getApplyMode(), KeyModifiers.IsAlternatePressed(), 2);
+            _exec('Orient Control Points', function() { DeformerUtils.orientControlPointsToNext(undefined, getApplyMode(), KeyModifiers.IsAlternatePressed(), 2); });
         },
         'Orient the second control point to the adjacent deformer.' +
         ENTIRE_CHAIN_MOD_TOOLTIP_TEXT
@@ -438,7 +470,9 @@ function PS_DeformerTools() {
     modal.addButton('', cpGroup3, btnHeight, btnHeight,
         iconPath + 'mirror-horizontally.png',
         function() {
-            DeformerUtils.mirrorChain(getApplyMode(), DeformerUtils.HORIZONTAL, getCenterMode());
+            _exec('Mirror Deformer Chain', function() {
+                DeformerUtils.mirrorChain(getApplyMode(), DeformerUtils.HORIZONTAL, getCenterMode());
+            });
         },
         'Mirror the selected deformer horizontally.'
     );
@@ -460,9 +494,11 @@ function PS_DeformerTools() {
     modal.addButton('', gdGroup, btnHeight, btnHeight,
         iconPath + 'generate-circle.png',
         function() {
-            var artIndex = KeyModifiers.IsControlPressed() ? DeformerUtils.COLORART : undefined;
-            var reversePath = KeyModifiers.IsAlternatePressed();
-            DeformerUtils.generateCircleDeformer(artIndex, undefined, reversePath);
+            _exec('Generate Circle Deformer', function() {
+                var artIndex = KeyModifiers.IsControlPressed() ? DeformerUtils.COLORART : undefined;
+                var reversePath = KeyModifiers.IsAlternatePressed();
+                DeformerUtils.generateCircleDeformer(artIndex, undefined, reversePath);
+            });
         },
         'Generate Circle Deformer.' +
         '\n- Hold down the Control key to use Color Art as a source.' +
@@ -472,9 +508,11 @@ function PS_DeformerTools() {
     modal.addButton('', gdGroup, btnHeight, btnHeight,
         iconPath + 'generate-rectangle.png',
         function() {
-            var artIndex = KeyModifiers.IsControlPressed() ? DeformerUtils.COLORART : undefined;
-            var reversePath = KeyModifiers.IsAlternatePressed();
-            DeformerUtils.generateRectDeformer(artIndex, undefined, reversePath);
+            _exec('Generate Rectangle Deformer', function() {
+                var artIndex = KeyModifiers.IsControlPressed() ? DeformerUtils.COLORART : undefined;
+                var reversePath = KeyModifiers.IsAlternatePressed();
+                DeformerUtils.generateRectDeformer(artIndex, undefined, reversePath);
+            });
         },
         'Generate Rectangle Deformer from Line Art.' +
         '\n- Hold down the Control key to use Color Art as a source.' +
@@ -484,9 +522,11 @@ function PS_DeformerTools() {
     modal.addButton('', gdGroup, btnHeight, btnHeight,
         iconPath + 'generate-on-art.png',
         function() {
-            var artIndex = KeyModifiers.IsControlPressed() ? DeformerUtils.COLORART : undefined;
-            var reversePath = KeyModifiers.IsAlternatePressed();
-            DeformerUtils.generateArtDeformer(artIndex, undefined, reversePath);
+            _exec('Generate Deformer on Art layer', function() {
+                var artIndex = KeyModifiers.IsControlPressed() ? DeformerUtils.COLORART : undefined;
+                var reversePath = KeyModifiers.IsAlternatePressed();
+                DeformerUtils.generateArtDeformer(artIndex, undefined, reversePath);
+            });
         },
         'Generate Deformer on Art.' +
         '\n- Hold down the Control key to use Color Art as a source.' +
@@ -507,7 +547,6 @@ function PS_DeformerTools() {
 }
 
 
-
 // !!!
 function PS_DeformerTools_TEST() {
 
@@ -516,8 +555,8 @@ function PS_DeformerTools_TEST() {
     direction = _DeformerUtils.RIGHT;
 
     var axis;
-    // axis = _DeformerUtils.HORIZONTAL;
-    axis = _DeformerUtils.VERTICAL;
+    axis = _DeformerUtils.HORIZONTAL;
+    // axis = _DeformerUtils.VERTICAL;
 
     // _DeformerUtils.orientControlPoints();
     // _DeformerUtils.generateCircleDeformer();
@@ -532,9 +571,9 @@ function PS_DeformerTools_TEST() {
     // _DeformerUtils.reverseChain(getApplyMode());
     // _DeformerUtils.removeDeformerCurve();
 
-    // _DeformerUtils.mirrorChain(_DeformerUtils.MODE_CURRENT, axis, _DeformerUtils.RELATIVE_TO_ZERO); // Relative to 0
+    _DeformerUtils.mirrorChain(_DeformerUtils.MODE_CURRENT, axis, _DeformerUtils.RELATIVE_TO_ZERO); // Relative to 0
     // _DeformerUtils.mirrorChain(_DeformerUtils.MODE_CURRENT, axis, _DeformerUtils.RELATIVE_TO_PEG); // Relative to Peg
-    _DeformerUtils.mirrorChain(_DeformerUtils.MODE_CURRENT, axis, _DeformerUtils.RELATIVE_TO_SELECTED); // Relative to the selected Deformer
+    // _DeformerUtils.mirrorChain(_DeformerUtils.MODE_CURRENT, axis, _DeformerUtils.RELATIVE_TO_SELECTED); // Relative to the selected Deformer
 
     /*
         // !!!
