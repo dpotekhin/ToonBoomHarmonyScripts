@@ -226,6 +226,14 @@
                     "scriptFile": "PS_SceneStats.js",
                     "scriptFunction": "PS_SceneStats",
                     "icon": "~/PS_SceneStats.png"
+                },
+
+                {
+                    "name": "PS Export Template",
+                    "type": "script",
+                    "scriptFile": "PS_ExportTemplate.js",
+                    "scriptFunction": "PS_ExportTemplate",
+                    "icon": "~/PS_ExportTemplate.png"
                 }
 
             ]
