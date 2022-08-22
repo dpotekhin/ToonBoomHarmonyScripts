@@ -2,27 +2,17 @@
 Author: Dima Potekhin (skinion.onn@gmail.com)
 
 [Name: PS_Markers :]
-[Version: 0.220814 :]
+[Version: 0.220816 :]
 
 [Description:
 A tiny helper for working with scene markers.
 - create | delete a marker on the current frame
-- move markers to the left or right
-- remove all markers
-- copy | paste markers between scenes
+- copy / paste markers within the selected frame range
+- remove markers within the selected frame range
 :]
 
 [Usage:
 Just click on the script button.
-
-Options:
-- LMB: Toggle adds / removes a Scene marker at the current frame.
-- LMB + Ctrl: to move all Scene Markers to the Right of the current frame or select a range of frames to remove markers within it).
-- LMB + Shift: to move all Scene Markers to the Left of the current frame or select a range of frames to remove markers within it).
-- LMB + Alt: to remove all Scene Markers (select a range of frames to remove markers within it).
-- LMB + Alt + Ctrl: to remove all Scene Markers to the Right of the current frame.
-- LMB + Alt + Shift: to remove all Scene Markers to the Left of the current frame.
-- LMB + Ctrl + Alt + Shift: show the dropdown menu.
 :]
 */
 
@@ -39,39 +29,23 @@ function PS_Markers(_mode) {
 
     var currentFrame = frame.current();
 
-    var RIGHT = 1;
-    var LEFT = 2;
-    var REMOVE = 4;
+    if (KeyModifiers.IsShiftPressed()) {
+        PS_CopySceneMarkers();
+        return;
+    }
 
-    var RIGHT_KEY = 'Ctrl';
-    var LEFT_KEY = 'Shift';
-    var REMOVE_KEY = 'Alt';
+    if (KeyModifiers.IsControlPressed()) {
+        PS_PasteSceneMarkers(true);
+        return;
+    }
 
-    // 
-    var modeActions = { 0: actionToggleMarker };
+    if (KeyModifiers.IsAlternatePressed()) {
+        actionToggleMarker();
+        return;
+    }
 
-    modeActions[RIGHT] = function() { actionMove('Right') }; // mode: 1
-    modeActions[LEFT] = function() { actionMove('Left') }; // mode: 2
-
-    modeActions[REMOVE] = actionRemove; // mode: 4
-    modeActions[REMOVE + RIGHT] = function() { actionRemove('Right') }; // mode: 5
-    modeActions[REMOVE + LEFT] = function() { actionRemove('Left') }; // mode: 6
-
-    modeActions[REMOVE + RIGHT + LEFT] = actionShowContextMenu; // mode: 
-
-    var directions = {
-        Right: 1,
-        Left: -1,
-    };
-
-    (modeActions[
-        _mode !== undefined ? _mode :
-        Number(KeyModifiers.IsControlPressed() * RIGHT) +
-        Number(KeyModifiers.IsShiftPressed() * LEFT) +
-        Number(KeyModifiers.IsAlternatePressed() * REMOVE)
-    ] || modeActions[0])();
-
-
+    actionShowContextMenu();
+    
     ///
 
     // Toggle Marekers
@@ -101,18 +75,18 @@ function PS_Markers(_mode) {
 
     }
 
-    // Move
-    function actionMove(dir) {
+    // // Move
+    // function actionMove(dir) {
 
-        processMarkers('Move Markers', dir, function(markerData) {
+    //     processMarkers('Move Markers', dir, function(markerData) {
 
-            TimelineMarker.deleteMarker(markerData);
-            markerData.frame += directions[dir];
-            TimelineMarker.createMarker(markerData);
+    //         TimelineMarker.deleteMarker(markerData);
+    //         markerData.frame += directions[dir];
+    //         TimelineMarker.createMarker(markerData);
 
-        });
+    //     });
 
-    }
+    // }
 
 
     // Remove
@@ -146,8 +120,8 @@ function PS_Markers(_mode) {
 
                 } else { // Otherwise check the direction
 
-                    if (dir === 'Right' && markerData.frame < currentFrame) return;
-                    if (dir === 'Left' && markerData.frame > currentFrame) return;
+                    if (dir === 'Right' && markerData.frame <= currentFrame) return;
+                    if (dir === 'Left' && markerData.frame >= currentFrame) return;
 
                 }
 
@@ -167,21 +141,22 @@ function PS_Markers(_mode) {
     function actionShowContextMenu() {
 
         showContextMenu([
-            ['Toggle marker', modeActions[0]],
-            ['Move Markers to the Left\tLMB+' + LEFT_KEY, modeActions[LEFT]],
-            ['Move Markers to the Right\tLMB+' + RIGHT_KEY, modeActions[RIGHT]],
-            ['Remove Markers\tLMB+' + REMOVE_KEY, modeActions[REMOVE]],
-            ['Remove Markers to the Left\tLMB+' + REMOVE_KEY + '+' + LEFT_KEY, modeActions[REMOVE + LEFT]],
-            ['Remove Markers to the Right\tLMB+' + REMOVE_KEY + '+' + RIGHT_KEY, modeActions[REMOVE + RIGHT]],
+            ['Toggle marker\tLMB+Alt', actionToggleMarker],
+            '-',
+            ['Copy Markers\tLMB+Shift', PS_CopySceneMarkers],
             ['Cut Markers', PS_CutSceneMarkers],
-            ['Copy Markers', PS_CopySceneMarkers],
-            ['Paste Markers from the Selected Frame', function() { PS_PasteSceneMarkers(true); }],
+            ['Paste Markers to the Selected Frame\tLMB+Control', function() { PS_PasteSceneMarkers(true); }],
             ['Paste Markers in place', PS_PasteSceneMarkers],
+            // '-',
+            // ['Move Markers to the Left', function() { actionMove('Left') }],
+            // ['Move Markers to the Right', function() { actionMove('Right') }],
+            '-',
+            ['Remove Markers', actionRemove],
+            ['Remove Markers to the Left', function() { actionRemove('Left') }],
+            ['Remove Markers to the Right', function() { actionRemove('Right') }],
         ]);
 
     }
-
-
 
 
 
@@ -195,6 +170,12 @@ function PS_Markers(_mode) {
         var menu = new QMenu(getParentWidget());
 
         menuData.forEach(function(itemData) {
+
+            if (itemData === '-') {
+                menu.addSeparator();
+                return;
+            }
+
             var menuItem = menu.addAction(itemData[0]);
             menuItem.itemName = itemData[0];
         })
@@ -249,19 +230,19 @@ function PS_CopySceneMarkers() {
         type: clipboardDataType,
     }
 
-    if (Timeline.numFrameSel > 1) { // Copy markers in the selected frame range
+    // if (Timeline.numFrameSel > 1) { // Copy markers in the selected frame range
 
         var firstFrame = data.firstFrame = Timeline.firstFrameSel;
         var lastFrame = data.lastFrame = firstFrame + Timeline.numFrameSel;
         data.duration = lastFrame - firstFrame;
         markers = markers.filter(function(markerData) { return markerData.frame >= firstFrame && markerData.frame < lastFrame; });
 
-    } else {
+    // } else {
 
-        data.firstFrame = 1;
-        data.lastFrame = data.duration = frame.numberOf();
+    //     data.firstFrame = 1;
+    //     data.lastFrame = data.duration = frame.numberOf();
 
-    }
+    // }
 
     data.markers = markers;
 
@@ -314,7 +295,7 @@ function PS_RemoveMarkers(firstFrame, lastFrame) {
     scene.beginUndoRedoAccum('Remove Scene Markers');
 
     var _markers = TimelineMarker.getAllMarkers();
-    
+
     _markers.forEach(function(markerData, i) {
         if (markerData.frame < firstFrame || markerData.frame >= lastFrame) return; // remove markers inside a copied range only
         TimelineMarker.deleteMarker(markerData);

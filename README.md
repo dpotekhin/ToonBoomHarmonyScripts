@@ -45,9 +45,8 @@ This script applies the size and color from the selected stroke to the Pencil to
 ## [PS_Markers](ps_build/PS_Markers)
 A tiny helper for working with scene markers.
 - create | delete a marker on the current frame
-- move markers to the left or right
-- remove all markers
-- copy | paste markers between scenes
+- copy / paste markers within the selected frame range
+- remove markers within the selected frame range
 
 
 ## [PS_PaletteTools](ps_build/PS_PaletteTools)
