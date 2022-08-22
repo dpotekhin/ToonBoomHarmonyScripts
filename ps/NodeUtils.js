@@ -374,7 +374,7 @@ exports = {
     getAllChildNodes: getAllChildNodes,
     getLayerByDrawing: getLayerByDrawing,
     unlinkAllInputs: unlinkAllInputs,
+    unlinkAllOutputs: unlinkAllOutputs,
     getLinkedAttributeNames: getLinkedAttributeNames,
     clearKeys: clearKeys,
-    unlinkAllOutputs: unlinkAllOutputs,
 }
