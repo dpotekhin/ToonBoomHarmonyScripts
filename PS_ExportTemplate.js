@@ -1,6 +1,12 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
 Version: 0.220822
+
+This script saves a template from the selected nodes and:
+- Clears frame markers and color of nodes
+- Removes nodes and backdrops (and their content) whose name starts with two underlines. Сonnections going through them are preserved
+- Removes nodes and their links if their names starts with three ubderlines.
+- Removes all key frames after the current playhead position.
 */
 
 //
@@ -57,7 +63,6 @@ function PS_ExportTemplate() {
                     else if (nodeName.match(removeNodeNameTemplate)) removeNode(_node);
 
                 }
-
 
                 // remove layer colors
                 // MessageLog.trace('>' + node.getColor(_node).a + '<');
