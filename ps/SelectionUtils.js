@@ -2,111 +2,111 @@
 Author: Dima Potekhin (skinion.onn@gmail.com)
 Version: 0.220706
 */
-var Utils = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/Utils.js"));
+var Utils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/Utils.js"));
 
 //
-function eachNode( nodes, callback, useGroups, nodeTypeFilter ){
-	
-	// MessageLog.trace('eachNode: '+nodes +'; '+ callback +'; '+ useGroups +'; '+ nodeTypeFilter);
+function eachNode(nodes, callback, useGroups, nodeTypeFilter, groupCB) {
 
-	if( !nodes ) return;
-	if( nodeTypeFilter && typeof nodeTypeFilter == 'string' ) nodeTypeFilter = [nodeTypeFilter];
-	if( typeof nodes == 'string' ) nodes = [nodes];
+    // MessageLog.trace('eachNode: '+nodes +'; '+ callback +'; '+ useGroups +'; '+ nodeTypeFilter);
 
-	nodes.forEach(function(_node){
-		
-		// MessageLog.trace('forEach: '+_node+'; '+nodeTypeFilter +'; '+ node.isGroup(_node) +'; '+ useGroups  );
+    if (!nodes) return;
+    if (nodeTypeFilter && typeof nodeTypeFilter == 'string') nodeTypeFilter = [nodeTypeFilter];
+    if (typeof nodes == 'string') nodes = [nodes];
 
-		if( nodeTypeFilter ){ //
+    nodes.forEach(function(_node) {
 
-			if( !(node.isGroup(_node) && useGroups) ){ // If we search through the groups and this Node is a GROUP
+        // MessageLog.trace('forEach: '+_node+'; '+nodeTypeFilter +'; '+ node.isGroup(_node) +'; '+ useGroups  );
 
-				var type = node.type(_node);
-				// MessageLog.trace('filter: '+_node+'; '+type  );
-				if( nodeTypeFilter.indexOf(type) == -1 ) return;
-			}
+        if (nodeTypeFilter) { //
 
-		}
+            if (!(node.isGroup(_node) && useGroups)) { // If we search through the groups and this Node is a GROUP
 
-		if(callback) {
-			var name = node.getName(_node);
-			callback( _node, name );
-		}
+                var type = node.type(_node);
+                // MessageLog.trace('filter: '+_node+'; '+type  );
+                if (nodeTypeFilter.indexOf(type) == -1) return;
+            }
 
-		if( useGroups ){
-			
-			var childNodes = node.subNodes(_node);
-			eachNode( childNodes, callback, useGroups, nodeTypeFilter );
+        }
 
-		}
-	});
+        if (callback) {
+            var name = node.getName(_node);
+            callback(_node, name);
+        }
+
+        if (node.isGroup(_node) && useGroups) {
+            if (groupCB) groupCB(_node);
+            var childNodes = node.subNodes(_node);
+            eachNode(childNodes, callback, useGroups, nodeTypeFilter);
+
+        }
+    });
 
 }
 
 
 //
-function eachSelectedNode( callback, useGroups, nodeTypeFilter ){
-	var nodes = selection.selectedNodes();
-	if( !nodes || !nodes.length ) return false;
-	// MessageLog.trace('eachSelectedNode: '+nodes);
-	eachNode( nodes, callback, useGroups, nodeTypeFilter );
-	return true;
+function eachSelectedNode(callback, useGroups, nodeTypeFilter, groupCB) {
+    var nodes = selection.selectedNodes();
+    if (!nodes || !nodes.length) return false;
+    // MessageLog.trace('eachSelectedNode: '+nodes);
+    eachNode(nodes, callback, useGroups, nodeTypeFilter, groupCB);
+    return true;
 }
 
 
 //
-function filterNodesByType( nodes, typeList, useGroups ){
-	if( nodes === true ){
-		nodes = selection.selectedNodes();
-	}
-	// MessageLog.trace("filterNodesByType "+nodes+' ; '+typeList );
-	if( !nodes || !nodes.length ) return false;
-	if( !typeList ) return nodes;
-	var filtered = [];
-	eachNode( nodes, function(_node){ filtered.push(_node); }, useGroups, typeList );
-	return filtered;
+function filterNodesByType(nodes, typeList, useGroups) {
+    if (nodes === true) {
+        nodes = selection.selectedNodes();
+    }
+    // MessageLog.trace("filterNodesByType "+nodes+' ; '+typeList );
+    if (!nodes || !nodes.length) return false;
+    if (!typeList) return nodes;
+    var filtered = [];
+    eachNode(nodes, function(_node) { filtered.push(_node); }, useGroups, typeList);
+    return filtered;
 }
 
 //
-function hasSelectedNodes(){
-	return selection.numberOfNodesSelected();
+function hasSelectedNodes() {
+    return selection.numberOfNodesSelected();
 }
 
 //
-function selectNodes( _nodes ){
-	selection.clearSelection();
-	if( typeof _nodes === 'string' ) selection.addNodeToSelection(_nodes);
-	else selection.addNodesToSelection(_nodes);
+function selectNodes(_nodes) {
+    selection.clearSelection();
+    if (typeof _nodes === 'string') selection.addNodeToSelection(_nodes);
+    else selection.addNodesToSelection(_nodes);
 }
 
 
 //
-function getSelectedLayers( onlyFirstAndLast ){
-    
+function getSelectedLayers(onlyFirstAndLast) {
+
     var selectedLayers = {};
     var numSelLayers = Timeline.numLayerSel;
     var layerName;
-    
-    for ( var i = 0; i < numSelLayers; i++ ){
 
-        if ( Timeline.selIsNode( i ) ){
-            
+    for (var i = 0; i < numSelLayers; i++) {
+
+        if (Timeline.selIsNode(i)) {
+
             layerName = Timeline.selToNode(i);
-            if( !selectedLayers[layerName] ) selectedLayers[layerName] = {
+            if (!selectedLayers[layerName]) selectedLayers[layerName] = {
                 name: node.getName(layerName),
                 node: layerName,
                 index: i,
                 layerType: 'node',
             };
 
-        }else if ( Timeline.selIsColumn( i ) ){
-            
+        } else if (Timeline.selIsColumn(i)) {
+
             layerName = Timeline.selToColumn(i);
-            if( !selectedLayers[layerName] ) selectedLayers[layerName] = {
+            if (!selectedLayers[layerName]) selectedLayers[layerName] = {
                 name: layerName,
                 index: i,
                 layerType: 'column',
-                columnType:  column.type(layerName),
+                columnType: column.type(layerName),
                 column: layerName
             };
         }
@@ -116,11 +116,11 @@ function getSelectedLayers( onlyFirstAndLast ){
     var layerKeys = Object.keys(selectedLayers);
     var result = [];
 
-    if( !layerKeys.length ) return result;
+    if (!layerKeys.length) return result;
 
-    layerKeys.forEach(function( layerName, i ){
-        if( onlyFirstAndLast && !( i === 0 || i === layerKeys.length-1 ) ) return;
-        result.push( selectedLayers[layerName] );
+    layerKeys.forEach(function(layerName, i) {
+        if (onlyFirstAndLast && !(i === 0 || i === layerKeys.length - 1)) return;
+        result.push(selectedLayers[layerName]);
     });
 
     return result;
@@ -129,46 +129,46 @@ function getSelectedLayers( onlyFirstAndLast ){
 
 
 //
-function eachAnimatedAttributeOfSelectedLayers( _action ){
+function eachAnimatedAttributeOfSelectedLayers(_action) {
 
-  var selectedlayers = getSelectedLayers();
-  // MessageLog.trace('selectedlayers: '+JSON.stringify(selectedlayers,true,' '));
+    var selectedlayers = getSelectedLayers();
+    // MessageLog.trace('selectedlayers: '+JSON.stringify(selectedlayers,true,' '));
 
-  selectedlayers.forEach(function( _layer, i ){
-    
-    var _node = _layer.node;
-    var attributes = Utils.getLinkedAttributeNames( _node );
-    // MessageLog.trace(i+') '+_node+': '+JSON.stringify(attributes,true,' '));
-    
-    attributes.forEach(function( _attrName ){
-      	_action( _node, _attrName );
+    selectedlayers.forEach(function(_layer, i) {
+
+        var _node = _layer.node;
+        var attributes = Utils.getLinkedAttributeNames(_node);
+        // MessageLog.trace(i+') '+_node+': '+JSON.stringify(attributes,true,' '));
+
+        attributes.forEach(function(_attrName) {
+            _action(_node, _attrName);
+        });
+
     });
-
-  });
 
 }
 
 //
-function focusOnSelectedNode( nodesToSelect ){
-	
-	if( nodesToSelect ) selectNodes(nodesToSelect);
+function focusOnSelectedNode(nodesToSelect) {
 
-	Action.perform("onActionFocusOnSelectionNV()", "Node View");
-	Action.perform("onActionResetView()", "Node View");
-	Action.perform("onActionZoomIn()", "Node View");
-	Action.perform("onActionZoomIn()", "Node View");
-	Action.perform("onActionFocusOnSelectionNV()", "Node View");
+    if (nodesToSelect) selectNodes(nodesToSelect);
+
+    Action.perform("onActionFocusOnSelectionNV()", "Node View");
+    Action.perform("onActionResetView()", "Node View");
+    Action.perform("onActionZoomIn()", "Node View");
+    Action.perform("onActionZoomIn()", "Node View");
+    Action.perform("onActionFocusOnSelectionNV()", "Node View");
 
 }
 
 ///
 exports = {
-	eachNode: eachNode,
-	eachSelectedNode: eachSelectedNode,
-	filterNodesByType: filterNodesByType,
-	hasSelectedNodes: hasSelectedNodes,
-	selectNodes: selectNodes,
-	getSelectedLayers: getSelectedLayers,
-	eachAnimatedAttributeOfSelectedLayers: eachAnimatedAttributeOfSelectedLayers,
-	focusOnSelectedNode: focusOnSelectedNode
+    eachNode: eachNode,
+    eachSelectedNode: eachSelectedNode,
+    filterNodesByType: filterNodesByType,
+    hasSelectedNodes: hasSelectedNodes,
+    selectNodes: selectNodes,
+    getSelectedLayers: getSelectedLayers,
+    eachAnimatedAttributeOfSelectedLayers: eachAnimatedAttributeOfSelectedLayers,
+    focusOnSelectedNode: focusOnSelectedNode
 }
