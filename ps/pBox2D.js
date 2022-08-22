@@ -1,6 +1,6 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.5
+Version: 0.220822
 */
 
 function pBox2D( x0, y0, x1, y1 ){
@@ -36,7 +36,7 @@ function pBox2D( x0, y0, x1, y1 ){
           y: this.y0 + this.height / 2
         };
       }
-    }
+    },
 
   });
 
@@ -194,6 +194,10 @@ pBox2D.prototype.addPoint = function( x, y ){
   this.x1 = Math.max( this.x1, x );
   this.y1 = Math.max( this.y1, y );
 
+};
+
+pBox2D.prototype.containsPoint = function( x, y ){
+  return x >= this.x0 && x <= this.x1 && y >= this.y0 && y <= this.y1;
 };
 
 ///
