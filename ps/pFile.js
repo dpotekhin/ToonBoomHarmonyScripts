@@ -87,7 +87,7 @@ pFile.save = function( path, data ){
     file.open( FileAccess.WriteOnly ); // write only
     file.write( data );
     file.close();
-    
+    return true;
     // MessageLog.trace('Saved.');
   }
   catch(err){

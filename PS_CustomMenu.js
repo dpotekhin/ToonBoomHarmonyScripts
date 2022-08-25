@@ -2,7 +2,7 @@
 Author: Dima Potekhin (skinion.onn@gmail.com)
 
 [Name: PS_CustomMenu :]
-[Version: 0.211010 :]
+[Version: 0.220825 :]
 
 [Description:
 
@@ -12,14 +12,14 @@ Author: Dima Potekhin (skinion.onn@gmail.com)
 
 :]
 */
+var NAMESPACE = 'PS';
 
-
-var ContextMenu = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/ContextMenu.js"));
-var pModal = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/pModal.js"));
-var pFile = require(fileMapper.toNativePath(specialFolders.userScripts+"/ps/pFile.js"));
+var ContextMenu = require(fileMapper.toNativePath(specialFolders.userScripts+"/"+NAMESPACE+"/ContextMenu.js"));
+var pModal = require(fileMapper.toNativePath(specialFolders.userScripts+"/"+NAMESPACE+"/pModal.js"));
+var pFile = require(fileMapper.toNativePath(specialFolders.userScripts+"/"+NAMESPACE+"/pFile.js"));
 
 //
-var recourcesPath = specialFolders.userScripts+'/PS_CustomMenu-Resources';
+var recourcesPath = specialFolders.userScripts+'/'+NAMESPACE+'_CustomMenu-Resources';
 var separatorCount = 0;
 
 //
@@ -99,7 +99,7 @@ var _sf = {
         if( menuItem.icon ){
             var iconPath = menuItem.icon
               .replace(/^~\//,fileMapper.toNativePath(specialFolders.userScripts+'/script-icons/'))
-              .replace(/^@\//,fileMapper.toNativePath(specialFolders.userScripts+'/PS_CustomMenu-Resources/icons/'))
+              .replace(/^@\//,fileMapper.toNativePath(specialFolders.userScripts+'/'+NAMESPACE+'_CustomMenu-Resources/icons/'))
               .replace(/^\//,fileMapper.toNativePath(specialFolders.userScripts))
             ;
             // MessageLog.trace('iconPath: '+menuItem.icon+' >> '+iconPath);
