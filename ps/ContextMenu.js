@@ -1,9 +1,9 @@
 /*
 Author: Dima Potekhin (skinion.onn@gmail.com)
-Version: 0.220630
+Version: 0.220825
 */
 
-var Utils = require(fileMapper.toNativePath(specialFolders.userScripts + "/ps/Utils.js"));
+var Utils = require(fileMapper.toNativePath(specialFolders.userScripts + "/PS/Utils.js"));
 
 //
 function showContextMenu( menuData, event, parentWidget ) {
@@ -45,6 +45,21 @@ function addMenuAction(menu, itemName) {
     var menuItem = menu.addAction(itemName);
     menuItem.itemName = itemName;
     return menuItem;
+
+}
+
+
+//
+function addMenu(menu, itemName){
+
+    var iconSeparatorIndex = itemName.indexOf('$');
+    if (iconSeparatorIndex !== -1) {
+        var iconPath = itemName.substr(iconSeparatorIndex + 1, itemName.length);
+        itemName = itemName.substr(0, iconSeparatorIndex);
+        return menu.addMenu(new QIcon(iconPath), itemName);
+    }
+
+    return menu.addMenu(itemName);
 
 }
 
@@ -113,7 +128,7 @@ function createSubmenu(menu, submenuData, submenuFlatList) {
 
             } else { // Add a submenu
 
-                var submenu = menu.addMenu(submenuItemName);
+                var submenu = addMenu(menu,submenuItemName);
                 createSubmenu(submenu, submenuItemData, submenuFlatList);
 
             }

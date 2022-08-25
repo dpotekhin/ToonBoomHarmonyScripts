@@ -12,6 +12,7 @@ Author: Dima Potekhin (skinion.onn@gmail.com)
 
 :]
 */
+
 var NAMESPACE = 'PS';
 
 var ContextMenu = require(fileMapper.toNativePath(specialFolders.userScripts+"/"+NAMESPACE+"/ContextMenu.js"));
@@ -28,7 +29,7 @@ function PS_CustomMenu(){
   var data = pFile.loadJSON( recourcesPath+'/data.json' );
   if( !data ) return;
 
-  // MessageLog.trace('PS_CustomMenu: @1:'+JSON.stringify(data,true,'  ') );
+
 
   var menuData = {};
 
@@ -40,7 +41,7 @@ function PS_CustomMenu(){
 
   }catch(err){MessageLog.trace('err: '+err)}
 
-  // MessageLog.trace('PS_CustomMenu: @2:'+JSON.stringify(menuData,true,'  ') );
+
 
   // return;
   /*
@@ -72,7 +73,9 @@ var _sf = {
       //
       case 'group':
         
-        var groupData = menuData[menuItem.name] = {};
+        var menuItemName = menuItem.name;
+        if( menuItem.icon ) menuItemName += '$'+_sf.getIconPath(menuItem.icon);
+        var groupData = menuData[menuItemName] = {};
         
         // MessageLog.trace('---> add Group Item: '+menuItem.name);
 
@@ -96,15 +99,7 @@ var _sf = {
 
         var menuItemName = menuItem.name;
 
-        if( menuItem.icon ){
-            var iconPath = menuItem.icon
-              .replace(/^~\//,fileMapper.toNativePath(specialFolders.userScripts+'/script-icons/'))
-              .replace(/^@\//,fileMapper.toNativePath(specialFolders.userScripts+'/'+NAMESPACE+'_CustomMenu-Resources/icons/'))
-              .replace(/^\//,fileMapper.toNativePath(specialFolders.userScripts))
-            ;
-            // MessageLog.trace('iconPath: '+menuItem.icon+' >> '+iconPath);
-            menuItemName += '$'+iconPath;
-        }
+        if( menuItem.icon ) menuItemName += '$'+_sf.getIconPath(menuItem.icon);  
 
         menuData['!'+menuItemName] = function(){
 
@@ -199,6 +194,14 @@ var _sf = {
 
     return functionNames;
 
+  },
+
+  getIconPath: function(iconPath){
+    return iconPath
+              .replace(/^~\//,fileMapper.toNativePath(specialFolders.userScripts+'/script-icons/'))
+              .replace(/^@\//,fileMapper.toNativePath(specialFolders.userScripts+'/'+NAMESPACE+'_CustomMenu-Resources/icons/'))
+              .replace(/^\//,fileMapper.toNativePath(specialFolders.userScripts))
+            ;
   }
 
 };
