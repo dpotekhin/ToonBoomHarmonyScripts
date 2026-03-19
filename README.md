@@ -1,3 +1,27 @@
+# ⚠️ Important Notice
+
+Most of the scripts listed below are outdated.  
+The latest and actively maintained versions, as well as additional scripts not included in this list, can be found [here](https://data.souzmult.ru/s/SyFtdtxjBj4B7fg)
+
+For simplified installation and update workflows, it is recommended to use the **SMF_ScriptUpdater** manager.
+
+## Installation of  **SMF_ScriptUpdater**
+
+1. Copy the contents of the `SMF_ScriptUpdaterInstaller.js` script from the following link:  
+   [Open script source](https://data.souzmult.ru/s/SyFtdtxjBj4B7fg)
+
+2. Paste and execute the script in the **Script Editor** window.
+
+3. Wait for the **SMF_ScriptUpdater** window to appear (this will occur after the script has been downloaded and installed into the user scripts directory).
+
+4. Install the required scripts or close the updater window if no action is needed.
+
+5. Add the **SMF_ScriptUpdater** script to the toolbar via the **Customize** menu.  
+   This enables quick access for subsequent operations such as installation, update, and removal of TBH scripts provided by SMF.
+
+## [Video Installation Guide](https://t.me/smf_tbh_scripts/72)
+
+
 # Toon Boom Harmony Scripts
 
 ## [PS_3DPathToSeparate](ps_build/PS_3DPathToSeparate)
