@@ -19,7 +19,7 @@ For simplified installation and update workflows, it is recommended to use the *
 5. Add the **SMF_ScriptUpdater** script to the toolbar via the **Customize** menu.  
    This enables quick access for subsequent operations such as installation, update, and removal of TBH scripts provided by SMF.
 
-## [Video Installation Guide](https://t.me/smf_tbh_scripts/72)
+[Video Installation Guide](https://t.me/smf_tbh_scripts/72)
 
 
 # Toon Boom Harmony Scripts
