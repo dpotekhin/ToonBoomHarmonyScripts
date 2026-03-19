@@ -7,8 +7,7 @@ For simplified installation and update workflows, it is recommended to use the *
 
 ## Installation of  **SMF_ScriptUpdater**
 
-1. Copy the contents of the `SMF_ScriptUpdaterInstaller.js` script from the following link:  
-   [Open script source](https://data.souzmult.ru/s/SyFtdtxjBj4B7fg)
+1. Copy the contents of the `SMF_ScriptUpdaterInstaller.js` script from the following [link](https://data.souzmult.ru/s/SyFtdtxjBj4B7fg)
 
 2. Paste and execute the script in the **Script Editor** window.
 
